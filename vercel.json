@@ -2,14 +2,21 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "rewrites": [
-    { "source": "/", "destination": "/home.html" }
+    { "source": "/", "destination": "/home.html" },
+    { "source": "/(.*)", "destination": "/home.html" }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "Cache-Control", "value": "no-cache" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
       ]
     }
-  ]
+  ],
+  "static": {
+    "public": "."
+  }
 }
