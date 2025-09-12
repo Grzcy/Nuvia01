@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Nuvia - Home</title>
-    <link rel="canonical" href="https://nuvia.app/Home.html">
+    <link rel="canonical" href="https://nuvia.app/home.html">
     <link rel="manifest" href="/manifest.webmanifest">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -4397,7 +4397,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             <!-- Removed Header Navigation (Home, Profile) -->
             <div class="user-profile-header">
                 <!-- Admin Icon Link (visible only to admin) -->
-                <a href="/Admin.html" id="adminIconLink" aria-label="Admin Dashboard" style="display: none;">
+                <a href="/admin.html" id="adminIconLink" aria-label="Admin Dashboard" style="display: none;">
                     <i class="fas fa-user-cog"></i>
                 </a>
                 <!-- Notification Icon with Badge -->
@@ -4427,7 +4427,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 </button>
                 
                 <!-- Profile Link with Picture and Name -->
-                <a href="./Profile.html" id="profileLink" aria-label="View Profile">
+                <a href="./profile.html" id="profileLink" aria-label="View Profile">
                     <img id="headerProfilePic" src="" alt="Profile Picture" loading="lazy" decoding="async">
                     <i id="headerAvatarIcon" class="fas fa-user-circle" role="img" aria-label="User Avatar"></i>
                     <span id="headerDisplayName">Loading...</span>
@@ -4551,7 +4551,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                         <div class="about-actions" style="margin-top:12px;">
                             <a href="/bible.html" class="about-cta">Open Bible</a>
                             <a href="/quran.html" class="about-cta about-cta-outline">Open Quran</a>
-                            <a href="/Guide.html" id="technicalNotesLink" class="about-cta about-cta-muted">Read the Technical Notes</a>
+                            <a href="/guide.html" id="technicalNotesLink" class="about-cta about-cta-muted">Read the Technical Notes</a>
                         </div>
                     </div>
                 </div>
@@ -5000,27 +5000,27 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
-            <a href="/Explore.html" class="sidebar-nav-item">
+            <a href="/explore.html" class="sidebar-nav-item">
                 <i class="fas fa-hashtag"></i>
                 <span>Explore</span>
             </a>
-            <a href="/Profile.html" class="sidebar-nav-item">
+            <a href="/profile.html" class="sidebar-nav-item">
                 <i class="fas fa-user"></i>
                 <span>Profile</span>
             </a>
-            <a href="/Chat.html" class="sidebar-nav-item" id="chatLink">
+            <a href="/chat.html" class="sidebar-nav-item" id="chatLink">
                 <i class="fas fa-comment-dots"></i>
                 <span>Chat</span>
             </a>
-            <a href="/Find_Friends.html" class="sidebar-nav-item" id="findFriendsLink">
+            <a href="/find_friends.html" class="sidebar-nav-item" id="findFriendsLink">
                 <i class="fas fa-users"></i>
                 <span>Users</span>
             </a>
-            <a href="/Friends.html" class="sidebar-nav-item" id="friendsLink">
+            <a href="/friends.html" class="sidebar-nav-item" id="friendsLink">
                 <i class="fas fa-user-friends"></i>
                 <span>Friends</span>
             </a>
-            <a href="/Groups.html" class="sidebar-nav-item" id="groupsLink">
+            <a href="/groups.html" class="sidebar-nav-item" id="groupsLink">
                 <i class="fas fa-layer-group"></i> <!-- New Groups icon -->
                 <span>Groups</span>
             </a>
@@ -5032,11 +5032,11 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 <i class="fas fa-palette"></i>
                 <span>Appearance</span>
             </a>
-            <a href="/Settings.html" class="sidebar-nav-item">
+            <a href="/settings.html" class="sidebar-nav-item">
                 <i class="fas fa-cog"></i>
                 <span>Settings</span>
             </a>
-            <a href="/About_Us.html" class="sidebar-nav-item">
+            <a href="/about_us.html" class="sidebar-nav-item">
                 <i class="fas fa-globe"></i>
                 <span>About Us</span>
             </a>
@@ -5045,12 +5045,12 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 <span>Solution Center</span>
             </a>
             <!-- NEW: Guide Link - moved inside sidebar-links -->
-            <a href="/Guide.html" class="sidebar-nav-item">
+            <a href="/guide.html" class="sidebar-nav-item">
                 <i class="fas fa-book"></i>
                 <span>Guide</span>
                 </a>
             <!-- NEW: Guide Link - moved inside sidebar-links -->
-            <a href="/Community_guidelines.html" class="sidebar-nav-item">
+            <a href="/community_guidelines.html" class="sidebar-nav-item">
                 <i class="fas fa-exclamation-triangle"></i>
                 <span>Community Guidelines</span>
             </a>
@@ -8110,7 +8110,7 @@ async function checkAndStartDailyBonusTimer() {
             }
 
             // Guide link - also controlled by global enable state.
-            const guideLink = document.querySelector('.sidebar-nav-item[href="/Guide.html"]');
+            const guideLink = document.querySelector('.sidebar-nav-item[href="/guide.html"]');
             if (guideLink) {
                 guideLink.style.pointerEvents = finalEnableState ? 'auto' : 'none';
                 guideLink.style.opacity = finalEnableState ? '1' : '0.5';

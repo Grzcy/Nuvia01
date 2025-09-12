@@ -233,20 +233,20 @@
 
     onAuthStateChanged(auth, async (user)=>{
       if(user){
-        if(user.uid !== ADMIN_UID){ showMessageBox('Unauthorized. Redirecting...', 'error', 2000, true); setTimeout(()=>{ window.location.href='/home.html'; }, 1800); return; }
+        if(user.uid !== ADMIN_UID){ showMessageBox('Unauthorized. Redirecting...', 'error', 2000, true); setTimeout(()=>{ window.location.href="/home.html"; }, 1800); return; }
         await fetchAndDisplayHeaderProfile(user);
         listenNotifications(user.uid);
         buildLink();
       }else{
         showMessageBox('Please log in. Redirecting...', 'error', 2000, true);
         setTimeout(()=>{
-          if (initialAuthToken) { signInWithCustomToken(auth, initialAuthToken).catch(()=> window.location.href='/login.html'); }
-          else { signInAnonymously(auth).catch(()=> window.location.href='/login.html'); }
+          if (initialAuthToken) { signInWithCustomToken(auth, initialAuthToken).catch(()=> window.location.href="/login.html"); }
+          else { signInAnonymously(auth).catch(()=> window.location.href="/login.html"); }
         }, 1200);
       }
     });
 
-    logoutBtn.addEventListener('click', async ()=>{ try{ await signOut(auth); window.location.href='/login.html'; } catch(e){ console.error(e); } });
+    logoutBtn.addEventListener('click', async ()=>{ try{ await signOut(auth); window.location.href="/login.html"; } catch(e){ console.error(e); } });
   </script>
 </body>
 </html>
