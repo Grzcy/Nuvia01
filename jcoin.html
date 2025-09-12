@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Last updated: 2025-08-21T18:19:29Z -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JCHAT - JCoin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root { --white:#fff; --text-light:rgba(255,255,255,0.7); --border:rgba(255,255,255,0.08); }
+        * { box-sizing: border-box; }
+        body { margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color: var(--white); background: #0f1427; }
+        header.header { background: linear-gradient(135deg, rgba(10, 10, 20, .85), rgba(10, 10, 20, .75)); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+        .header-content { max-width: 1200px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; }
+        .logo { display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:-0.02em; text-decoration: none; color: var(--white); }
+        main { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+        .card { background: rgba(255,255,255,0.06); border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow: 0 4px 15px rgba(0,0,0,0.25); }
+        h1 { margin: 0 0 8px; font-family: Poppins, Inter, sans-serif; }
+        p.subtitle { color: var(--text-light); margin: 0 0 16px; }
+        ul { margin:0; padding-left: 1.2rem; }
+        li { margin: 6px 0; color: var(--text-light); }
+    </style>
+<style id="header-overflow-fix">/*header-overflow-fix*/header .header-content-wrapper{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap}header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0;justify-content:flex-end}#profileLink{display:inline-flex;align-items:center;column-gap:8px;row-gap:2px;flex-wrap:wrap;max-width:100%;min-width:0}#profileLink #headerDisplayName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;flex:0 1 auto}#headerProfilePic,#headerAvatarIcon{flex:0 0 auto}@media (max-width:600px){header .header-content-wrapper{gap:8px}#profileLink{column-gap:6px}}</style></head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="/Home.html" class="logo">
+                <img src="assets/security.png" alt="JCHAT Security" style="height:24px;width:auto" onerror="this.style.display='none'">
+                <span>Nuvia</span>
+            </a>
+            <nav>
+                <a href="/Wallet.html" style="color:var(--white);text-decoration:none">Wallet</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="card">
+            <h1>About JCoin</h1>
+            <p class="subtitle">JCoin is JCHAT's in-app currency used for themes, premium features, and tips.</p>
+            <ul>
+                <li>Earn by engaging with the community</li>
+                <li>Buy securely via the Shop</li>
+                <li>Spend on themes and premium perks</li>
+                <li>Transfer to friends in your Wallet</li>
+            </ul>
+        </section>
+    </main>
+
+    
+    <script src="assets/js/lazy-images.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Last updated: 2025-08-21T18:19:29Z -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JCHAT - Premium Themes Marketplace</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --pink: #ff2e92;
+            --blue: #00d5ff;
+            --glass-black: rgba(10, 10, 10, .75);
+            --glass-blue: rgba(0, 213, 255, .15);
+            --radius: 20px;
+            --transition: .3s ease;
+            --white: #fff;
+            --text-light: rgba(255, 255, 255, .7);
+            --background-main: rgba(10, 10, 10, .75);
+            --background-gradient-1: #00d5ff;
+            --background-gradient-2: #ff2e92;
+            --card-background: linear-gradient(145deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01));
+            --header-background: linear-gradient(135deg, rgba(10, 10, 20, .85), rgba(10, 10, 20, .75));
+            --border-light: rgba(255, 255, 255, .05);
+            --input-background: rgba(255, 255, 255, 0.05);
+            --button-background: linear-gradient(90deg, var(--blue), var(--pink));
+            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+            
+            /* Theme specific colors */
+            --theme-gold: #ffd700;
+            --theme-silver: #c0c0c0;
+            --theme-bronze: #cd7f32;
+            --theme-platinum: #e5e4e2;
+            --success-green: #4CAF50;
+            --warning-orange: #ff9800;
+            --premium-purple: #9c27b0;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            padding-bottom: 20px;
+            background-color: var(--background-main);
+            background-image: radial-gradient(circle at top left, var(--background-gradient-1), transparent 100px),
+                              radial-gradient(circle at bottom right, var(--background-gradient-2), transparent 150px);
+            color: var(--white);
+        }
+
+        /* Header security logo sizing */
+        .logo img { display:inline-block; vertical-align:middle; }
+
+        .header {
+            width: 100%;
+            background: var(--header-background);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, var(--blue), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+        }
+
+        .nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav a {
+            color: var(--white);
+            text-decoration: none;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .nav a:hover {
+            color: var(--blue);
+        }
+
+        .user-balance {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid var(--border-light);
+        }
+
+        .user-balance i {
+            color: var(--theme-gold);
+        }
+
+        .main-content {
+            max-width: 1200px;
+            width: 100%;
+            padding: 2rem;
+        }
+
+        .hero-section {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .hero-section h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, var(--blue), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .jcoin-balance-display {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid var(--theme-gold);
+            border-radius: var(--radius);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .jcoin-balance {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.1rem;
+            color: var(--white);
+        }
+
+        .jcoin-balance i {
+            font-size: 1.5rem;
+        }
+
+        .buy-jcoins-btn {
+            background: linear-gradient(45deg, var(--theme-gold), var(--pink));
+            color: var(--white);
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius);
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .buy-jcoins-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .filters-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: var(--input-background);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius);
+            padding: 0.5rem 1rem;
+            min-width: 300px;
+        }
+
+        .search-box input {
+            background: none;
+            border: none;
+            color: var(--white);
+            outline: none;
+            width: 100%;
+            margin-left: 0.5rem;
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-light);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            background: var(--input-background);
+            border: 1px solid var(--border-light);
+            border-radius: 20px;
+            color: var(--white);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .filter-btn.active {
+            background: var(--button-background);
+            border-color: transparent;
+        }
+
+        .filter-btn:hover {
+            background: var(--button-background);
+            border-color: transparent;
+        }
+
+        .themes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .theme-card {
+            background: var(--card-background);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .theme-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .theme-preview {
+            height: 200px;
+            background: linear-gradient(45deg, var(--background-gradient-1), var(--background-gradient-2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-preview.preview-dark {
+            background: linear-gradient(45deg, #1a1a2e, #16213e);
+        }
+
+        .theme-preview.preview-light {
+            background: linear-gradient(45deg, #f0f2f5, #e0e2e5);
+        }
+
+        .theme-preview.preview-sunset {
+            background: linear-gradient(45deg, #ff7e5f, #feb47b);
+        }
+
+        .theme-preview.preview-ocean {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+        }
+
+        .theme-preview.preview-forest {
+            background: linear-gradient(45deg, #11998e, #38ef7d);
+        }
+
+        .theme-preview.preview-neon {
+            background: linear-gradient(45deg, #ff2e92, #00d5ff);
+        }
+
+        .theme-preview.preview-royal {
+            background: linear-gradient(45deg, #9c27b0, #673ab7);
+        }
+
+        .theme-preview.preview-cosmic {
+            background: linear-gradient(45deg, #0c0c0c, #1a1a2e);
+        }
+
+        .theme-preview.preview-aurora {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+        }
+
+        .theme-preview-text {
+            color: var(--white);
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .theme-preview.preview-light .theme-preview-text {
+            color: #333;
+        }
+
+        .theme-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--premium-purple);
+            color: var(--white);
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .theme-info {
+            padding: 1.5rem;
+        }
+
+        .theme-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .theme-description {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .theme-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1.5rem 0;
+        }
+
+        .theme-features li {
+            padding: 0.25rem 0;
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .theme-features li i {
+            color: var(--success-green);
+            margin-right: 0.5rem;
+            width: 16px;
+        }
+
+        .theme-price {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .price-amount {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--theme-gold);
+        }
+
+        .price-currency {
+            font-size: 1rem;
+            color: var(--text-light);
+        }
+
+        .theme-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .preview-btn {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: var(--input-background);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius);
+            color: var(--white);
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-btn:hover {
+            background: var(--border-light);
+        }
+
+        .buy-btn {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            background: var(--button-background);
+            border: none;
+            border-radius: var(--radius);
+            color: var(--white);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            box-shadow: var(--button-shadow);
+        }
+
+        .buy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .buy-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .owned-badge {
+            background: var(--success-green);
+            color: var(--white);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .message-box {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius);
+            color: var(--white);
+            font-weight: 500;
+            z-index: 10000;
+            display: none;
+            max-width: 300px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .message-box.show {
+            display: block;
+        }
+
+        .message-box.success {
+            background: var(--success-green);
+        }
+
+        .message-box.error {
+            background: #f44336;
+        }
+
+        .message-box.info {
+            background: var(--blue);
+        }
+
+        .message-box.warning {
+            background: var(--warning-orange);
+        }
+
+        @media (max-width: 768px) {
+            .themes-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero-section h1 {
+                font-size: 2rem;
+            }
+            
+            .main-content {
+                padding: 1rem;
+            }
+            
+            .filters-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                min-width: auto;
+            }
+        }
+    </style>
+<style id="header-overflow-fix">/*header-overflow-fix*/header .header-content-wrapper{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap}header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0;justify-content:flex-end}#profileLink{display:inline-flex;align-items:center;column-gap:8px;row-gap:2px;flex-wrap:wrap;max-width:100%;min-width:0}#profileLink #headerDisplayName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;flex:0 1 auto}#headerProfilePic,#headerAvatarIcon{flex:0 0 auto}@media (max-width:600px){header .header-content-wrapper{gap:8px}#profileLink{column-gap:6px}}</style></head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="/home.html" class="logo" style="display:flex;align-items:center;gap:10px">
+                <img src="assets/security.png" alt="JCHAT Security" style="height:24px;width:auto" onerror="this.style.display='none'">
+                <span>Nuvia</span>
+            </a>
+            <nav class="nav">
+                <ul>
+                    <li><a href="/home.html">Home</a></li>
+                    <li><a href="/premium_subscriptions.html">Premium</a></li>
+                    <li><a href="/wallet.html">Wallet</a></li>
+                    <li><a href="/jcoin_shop.html">Buy JCoins</a></li>
+                </ul>
+            </nav>
+            <div class="user-balance">
+                <i class="fas fa-coins"></i>
+                <span id="userBalance">Loading...</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="hero-section">
+            <h1>Premium Themes Marketplace</h1>
+            <p>Transform your JCHAT experience with exclusive, professionally designed themes</p>
+            
+            <!-- JCoin Balance Display -->
+            <div class="jcoin-balance-display">
+                <div class="jcoin-balance">
+                    <i class="fas fa-coins" style="color: var(--theme-gold);"></i>
+                    <span>Your Balance: <strong id="heroUserBalance">0</strong> JCoins</span>
+                </div>
+                <a href="/premium_subscriptions.html" class="buy-jcoins-btn">
+                    <i class="fas fa-plus"></i> Get More JCoins
+                </a>
+            </div>
+        </div>
+
+        <div class="filters-section">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search themes...">
+            </div>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="dark">Dark</button>
+                <button class="filter-btn" data-filter="light">Light</button>
+                <button class="filter-btn" data-filter="gradient">Gradient</button>
+                <button class="filter-btn" data-filter="premium">Premium</button>
+            </div>
+        </div>
+
+        <div class="themes-grid" id="themesGrid">
+            <!-- Theme cards will be dynamically loaded here -->
+        </div>
+    </main>
+
+    <div id="messageBox" class="message-box"></div>
+
+    <script>
+        // Theme data
+        const themes = [
+            {
+                id: 'dark-elegance',
+                name: 'Dark Elegance',
+                description: 'A sophisticated dark theme with elegant gradients and smooth transitions',
+                price: 150,
+                category: 'dark',
+                features: ['Premium dark mode', 'Custom gradients', 'Smooth animations', 'Professional look'],
+                previewClass: 'preview-dark',
+                isPremium: true
+            },
+            {
+                id: 'light-minimal',
+                name: 'Light Minimal',
+                description: 'Clean and minimal light theme perfect for productivity and focus',
+                price: 100,
+                category: 'light',
+                features: ['Clean design', 'High contrast', 'Minimal distractions', 'Professional appearance'],
+                previewClass: 'preview-light',
+                isPremium: false
+            },
+            {
+                id: 'sunset-vibes',
+                name: 'Sunset Vibes',
+                description: 'Warm and inviting theme inspired by beautiful sunset colors',
+                price: 200,
+                category: 'gradient',
+                features: ['Warm color palette', 'Gradient backgrounds', 'Cozy atmosphere', 'Unique design'],
+                previewClass: 'preview-sunset',
+                isPremium: true
+            },
+            {
+                id: 'ocean-depths',
+                name: 'Ocean Depths',
+                description: 'Deep blue theme reminiscent of the mysterious ocean depths',
+                price: 175,
+                category: 'gradient',
+                features: ['Deep blue tones', 'Ocean-inspired', 'Calming effect', 'Premium gradients'],
+                previewClass: 'preview-ocean',
+                isPremium: true
+            },
+            {
+                id: 'forest-nature',
+                name: 'Forest Nature',
+                description: 'Natural green theme inspired by lush forests and nature',
+                price: 125,
+                category: 'gradient',
+                features: ['Natural colors', 'Eco-friendly design', 'Calming greens', 'Nature inspired'],
+                previewClass: 'preview-forest',
+                isPremium: false
+            },
+            {
+                id: 'neon-futuristic',
+                name: 'Neon Futuristic',
+                description: 'Bold neon theme with futuristic aesthetics and vibrant colors',
+                price: 250,
+                category: 'premium',
+                features: ['Neon effects', 'Futuristic design', 'Vibrant colors', 'Premium animations'],
+                previewClass: 'preview-neon',
+                isPremium: true
+            },
+            {
+                id: 'royal-purple',
+                name: 'Royal Purple',
+                description: 'Luxurious purple theme with regal aesthetics and premium feel',
+                price: 300,
+                category: 'premium',
+                features: ['Luxury design', 'Royal aesthetics', 'Premium gradients', 'Exclusive look'],
+                previewClass: 'preview-royal',
+                isPremium: true
+            },
+            {
+                id: 'cosmic-space',
+                name: 'Cosmic Space',
+                description: 'Space-inspired theme with cosmic elements and deep space aesthetics',
+                price: 225,
+                category: 'premium',
+                features: ['Space theme', 'Cosmic elements', 'Deep aesthetics', 'Premium design'],
+                previewClass: 'preview-cosmic',
+                isPremium: true
+            },
+            {
+                id: 'aurora-borealis',
+                name: 'Aurora Borealis',
+                description: 'Magical theme inspired by the beautiful northern lights',
+                price: 275,
+                category: 'premium',
+                features: ['Magical effects', 'Northern lights', 'Premium animations', 'Unique design'],
+                previewClass: 'preview-aurora',
+                isPremium: true
+            }
+        ];
+
+        let currentUser = null;
+        let userBalance = 0;
+        let ownedThemes = [];
+        let currentFilter = 'all';
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkUserAuth();
+            loadUserData();
+            renderThemes();
+            setupEventListeners();
+        });
+
+        // Check user authentication
+        function checkUserAuth() {
+            const user = localStorage.getItem('jchat_user');
+            if (user) {
+                currentUser = JSON.parse(user);
+            } else {
+                window.location.href = '/login.html';
+            }
+        }
+
+        // Load user data
+        function loadUserData() {
+            // This would fetch from your database
+            // For now, we'll simulate it
+            userBalance = 500; // Simulated balance
+            ownedThemes = ['light-minimal', 'forest-nature']; // Simulated owned themes
+            
+            updateUserBalance();
+        }
+
+        // Update user balance display
+        function updateUserBalance() {
+            const balanceElement = document.getElementById('userBalance');
+            const heroBalanceElement = document.getElementById('heroUserBalance');
+            
+            if (balanceElement) {
+                balanceElement.textContent = `${userBalance} JCoins`;
+            }
+            
+            if (heroBalanceElement) {
+                heroBalanceElement.textContent = userBalance;
+            }
+        }
+
+        // Render themes
+        function renderThemes() {
+            const grid = document.getElementById('themesGrid');
+            const filteredThemes = filterThemes(themes, currentFilter);
+            
+            grid.innerHTML = filteredThemes.map(theme => createThemeCard(theme)).join('');
+        }
+
+        // Filter themes
+        function filterThemes(themes, filter) {
+            if (filter === 'all') return themes;
+            if (filter === 'premium') return themes.filter(theme => theme.isPremium);
+            return themes.filter(theme => theme.category === filter);
+        }
+
+        // Create theme card HTML
+        function createThemeCard(theme) {
+            const isOwned = ownedThemes.includes(theme.id);
+            const canAfford = userBalance >= theme.price;
+            
+            return `
+                <div class="theme-card" data-theme-id="${theme.id}">
+                    <div class="theme-preview ${theme.previewClass}">
+                        <div class="theme-preview-text">${theme.name}</div>
+                        ${theme.isPremium ? '<div class="theme-badge">Premium</div>' : ''}
+                    </div>
+                    <div class="theme-info">
+                        <div class="theme-name">${theme.name}</div>
+                        <div class="theme-description">${theme.description}</div>
+                        <ul class="theme-features">
+                            ${theme.features.map(feature => `<li><i class="fas fa-check"></i>${feature}</li>`).join('')}
+                        </ul>
+                        <div class="theme-price">
+                            <div>
+                                <span class="price-amount">${theme.price}</span>
+                                <span class="price-currency"> JCoins</span>
+                            </div>
+                        </div>
+                        ${isOwned ? 
+                            '<div class="owned-badge">Already Owned</div>' :
+                            `<div class="theme-actions">
+                                <button class="preview-btn" onclick="previewTheme('${theme.id}')">
+                                    <i class="fas fa-eye"></i> Preview
+                                </button>
+                                <button class="buy-btn" onclick="buyTheme('${theme.id}')" ${!canAfford ? 'disabled' : ''}>
+                                    <i class="fas fa-shopping-cart"></i> ${canAfford ? 'Buy Now' : 'Insufficient JCoins'}
+                                </button>
+                            </div>`
+                        }
+                    </div>
+                </div>
+            `;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Search functionality
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                filterThemesBySearch(searchTerm);
+            });
+
+            // Filter buttons
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    filterButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentFilter = this.dataset.filter;
+                    renderThemes();
+                });
+            });
+        }
+
+        // Filter themes by search
+        function filterThemesBySearch(searchTerm) {
+            const filteredThemes = themes.filter(theme => 
+                theme.name.toLowerCase().includes(searchTerm) ||
+                theme.description.toLowerCase().includes(searchTerm) ||
+                theme.features.some(feature => feature.toLowerCase().includes(searchTerm))
+            );
+            
+            const grid = document.getElementById('themesGrid');
+            grid.innerHTML = filteredThemes.map(theme => createThemeCard(theme)).join('');
+        }
+
+        // Preview theme
+        function previewTheme(themeId) {
+            const theme = themes.find(t => t.id === themeId);
+            if (!theme) return;
+            
+            // In a real implementation, this would apply the theme temporarily
+            showMessage(`Previewing ${theme.name} theme...`, 'info');
+            
+            // Simulate theme preview
+            document.body.className = `theme-preview-${theme.id}`;
+            setTimeout(() => {
+                document.body.className = '';
+            }, 3000);
+        }
+
+        // Confirmation modal utilities
+        function showConfirmationModal(title, message, confirmText = 'Proceed', cancelText = 'Cancel') {
+            return new Promise((resolve) => {
+                let modal = document.getElementById('confirmationModal');
+                if (!modal) {
+                    modal = document.createElement('div');
+                    modal.id = 'confirmationModal';
+                    modal.className = 'modal-overlay';
+                    modal.innerHTML = `
+                        <div class=\"modal-content\">
+                            <h3 id=\"confirmationTitle\">Confirm Action</h3>
+                            <p id=\"confirmationMessage\">Are you sure?</p>
+                            <div class=\"button-group\">
+                                <button id=\"confirmCancelButton\" class=\"modal-button cancel-button\" aria-label=\"Cancel\">Cancel</button>
+                                <button id=\"confirmProceedButton\" class=\"modal-button confirm-button\" aria-label=\"Proceed\">Proceed</button>
+                            </div>
+                        </div>`;
+                    document.body.appendChild(modal);
+                }
+                const titleEl = modal.querySelector('#confirmationTitle');
+                const msgEl = modal.querySelector('#confirmationMessage');
+                const cancelBtn = modal.querySelector('#confirmCancelButton');
+                const proceedBtn = modal.querySelector('#confirmProceedButton');
+                if (titleEl) titleEl.textContent = title || 'Confirm Action';
+                if (msgEl) msgEl.textContent = message || 'Are you sure?';
+                if (cancelBtn) cancelBtn.textContent = cancelText;
+                if (proceedBtn) proceedBtn.textContent = confirmText;
+                modal.style.display = 'flex';
+                const onCancel = () => { cleanup(); resolve(false); };
+                const onProceed = () => { cleanup(); resolve(true); };
+                function cleanup() {
+                    modal.style.display = 'none';
+                    cancelBtn.removeEventListener('click', onCancel);
+                    proceedBtn.removeEventListener('click', onProceed);
+                    modal.removeEventListener('click', onOutside);
+                }
+                function onOutside(e) { if (e.target === modal) onCancel(); }
+                cancelBtn.addEventListener('click', onCancel);
+                proceedBtn.addEventListener('click', onProceed);
+                modal.addEventListener('click', onOutside);
+            });
+        }
+
+        // Basic modal styles (scoped)
+        const confirmationStyles = document.createElement('style');
+        confirmationStyles.textContent = `
+            #confirmationModal.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 2000; }
+            #confirmationModal .modal-content { background: var(--header-background); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 1.5rem; max-width: 420px; width: calc(100% - 32px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+            #confirmationModal h3 { margin: 0 0 .5rem; font-family: 'Poppins', sans-serif; }
+            #confirmationModal p { margin: 0 0 1rem; color: var(--text-light); }
+            #confirmationModal .button-group { display: flex; gap: .75rem; justify-content: center; }
+            #confirmationModal .modal-button { padding: .6rem 1rem; border-radius: 10px; border: 1px solid var(--border-light); cursor: pointer; background: var(--card-background); color: var(--white); }
+            #confirmationModal .confirm-button { background: var(--button-background); box-shadow: var(--button-shadow); border: none; }
+        `;
+        document.head.appendChild(confirmationStyles);
+
+        // Buy theme
+        async function buyTheme(themeId) {
+            const theme = themes.find(t => t.id === themeId);
+            if (!theme) return;
+            
+            if (userBalance < theme.price) {
+                showMessage('Insufficient JCoins to purchase this theme', 'error');
+                return;
+            }
+            
+            const ok = await showConfirmationModal('Purchase Theme', `Purchase "${theme.name}" for ${theme.price} JCoins?`, 'Purchase', 'Cancel');
+            if (ok) processThemePurchase(theme);
+        }
+
+        // Process theme purchase
+        function processThemePurchase(theme) {
+            showMessage('Processing purchase...', 'info');
+            
+            // Simulate purchase processing
+            setTimeout(() => {
+                // Deduct JCoins
+                userBalance -= theme.price;
+                updateUserBalance();
+                
+                // Add to owned themes
+                ownedThemes.push(theme.id);
+                
+                // Show success message
+                showMessage(`Successfully purchased "${theme.name}"!`, 'success');
+                
+                // Re-render themes to update UI
+                renderThemes();
+                
+                // In real implementation, save to database
+                saveThemePurchase(theme);
+            }, 1000);
+        }
+
+        // Save theme purchase to database
+        function saveThemePurchase(theme) {
+            // This would integrate with your existing database
+            console.log(`Theme purchase saved: ${theme.name} for user ${currentUser?.uid}`);
+        }
+
+        // Show message
+        function showMessage(message, type = 'info') {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = message;
+            messageBox.className = `message-box show ${type}`;
+            
+            setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, 5000);
+        }
+    </script>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+        import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+        import { getFirestore, collection, doc, setDoc, getDoc, serverTimestamp, addDoc, onSnapshot, query, where, orderBy, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+            authDomain: "jchat-1.firebaseapp.com",
+            databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+            projectId: "jchat-1",
+            storageBucket: "jchat-1.firebasestorage.app",
+            messagingSenderId: "328479683167",
+            appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
+            measurementId: "G-S6Z9GG0R9P"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = 'default-app-id';
+
+        // Global variables
+        let currentUser = null;
+        let userBalance = 0;
+        let ownedThemes = [];
+        let currentFilter = 'all';
+        let themes = [];
+        let isProcessing = false;
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkUserAuth();
+            setupEventListeners();
+        });
+
+        // Check user authentication
+        function checkUserAuth() {
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    currentUser = user;
+                    await loadUserData();
+                    await loadThemes();
+                    renderThemes();
+                    startRealTimeListeners();
+                } else {
+                    // Redirect to login if not authenticated
+                    window.location.href = '/Login.html';
+                }
+            });
+        }
+
+        // Load user data - integrated with Home.html profile system
+        async function loadUserData() {
+            try {
+                // Check user's private profile for JCoins and owned themes (Home.html structure)
+                const userProfileRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}/profiles/user_profile`);
+                const userProfileDoc = await getDoc(userProfileRef);
+                
+                if (userProfileDoc.exists()) {
+                    const profileData = userProfileDoc.data();
+                    userBalance = profileData.jCoins || 0;
+                    ownedThemes = profileData.ownedThemes || [];
+                } else {
+                    // Create user profile if it doesn't exist (Home.html structure)
+                    await setDoc(userProfileRef, {
+                        username: currentUser.displayName || `User_${currentUser.uid.substring(0, 8)}`,
+                        email: currentUser.email || "",
+                        profilePicId: currentUser.photoURL || null,
+                        bio: "",
+                        location: "",
+                        friendsCount: 0,
+                        followersCount: 0,
+                        followingCount: 0,
+                        createdAt: serverTimestamp(),
+                        updatedAt: serverTimestamp(),
+                        inspirationType: "motivational",
+                        visibility: {
+                            displayName: true, profilePic: true, bio: false, location: false,
+                            emailPublic: false, allowFriendRequests: true, allowMessages: true,
+                        },
+                        totalPosts: 0,
+                        jCoins: 100, // Starting balance for premium themes
+                        gas: 0,
+                        level: 1,
+                        currentXp: 0,
+                        xpToNextLevel: 100,
+                        lastLoginBonusClaimed: null,
+                        inCall: false,
+                        ownedThemes: []
+                    });
+                    userBalance = 100;
+                    ownedThemes = [];
+                }
+                updateUserBalance();
+            } catch (error) {
+                console.error('Error loading user data:', error);
+                showMessage('Error loading user data', 'error');
+            }
+        }
+
+        // Load themes from Firestore
+        async function loadThemes() {
+            try {
+                const themesQuery = query(collection(db, `artifacts/${appId}/public/data/premium_themes`));
+                const themesSnapshot = await getDocs(themesQuery);
+                
+                if (themesSnapshot.empty) {
+                    // Create default themes if collection is empty
+                    const defaultThemes = [
+                        {
+                            id: 'theme1',
+                            name: 'Diamond Glass',
+                            description: 'Premium glass morphism with diamond-like effects',
+                            price: 1500,
+                            category: 'premium',
+                            image: 'https://via.placeholder.com/300x200/00d5ff/ffffff?text=Diamond+Glass',
+                            features: ['Glass morphism', 'Diamond effects', 'Premium animations']
+                        },
+                        {
+                            id: 'theme2',
+                            name: 'Sunset Luxe',
+                            description: 'Luxurious sunset gradients with warm tones',
+                            price: 1800,
+                            category: 'premium',
+                            image: 'https://via.placeholder.com/300x200/ff7e5f/ffffff?text=Sunset+Luxe',
+                            features: ['Sunset gradients', 'Warm tones', 'Luxury feel']
+                        },
+                        {
+                            id: 'theme3',
+                            name: 'Aqua Marine Royale',
+                            description: 'Deep ocean waves with premium animations',
+                            price: 2200,
+                            category: 'premium',
+                            image: 'https://via.placeholder.com/300x200/006994/ffffff?text=Aqua+Marine',
+                            features: ['Ocean waves', 'Premium animations', 'Deep blue']
+                        },
+                        {
+                            id: 'theme4',
+                            name: 'Enchanted Forest Elite',
+                            description: 'Magical forest with mystical particle effects',
+                            price: 2500,
+                            category: 'premium',
+                            image: 'https://via.placeholder.com/300x200/2d5016/ffffff?text=Enchanted+Forest',
+                            features: ['Mystical effects', 'Forest theme', 'Particle animations']
+                        },
+                        {
+                            id: 'theme5',
+                            name: 'Cosmic Nebula Premier',
+                            description: 'Premium space experience with stellar animations',
+                            price: 3000,
+                            category: 'premium',
+                            image: 'https://via.placeholder.com/300x200/1a0033/ffffff?text=Cosmic+Nebula',
+                            features: ['Space theme', 'Stellar animations', 'Premium experience']
+                        },
+                        {
+                            id: 'theme6',
+                            name: 'Synthwave Signature',
+                            description: 'Authentic 80s synthwave with neon effects',
+                            price: 2000,
+                            category: 'premium',
+                            image: 'https://via.placeholder.com/300x200/ff006e/ffffff?text=Synthwave',
+                            features: ['80s synthwave', 'Neon effects', 'Retro feel']
+                        },
+                        {
+                            id: 'theme7',
+                            name: 'Cyber Matrix Royale',
+                            description: 'Premium cyberpunk with matrix animations',
+                            price: 2400,
+                            category: 'premium',
+                            image: 'https://via.placeholder.com/300x200/00ff41/ffffff?text=Cyber+Matrix',
+                            features: ['Cyberpunk', 'Matrix effects', 'Premium animations']
+                        },
+                        {
+                            id: 'theme8',
+                            name: 'Regal Gold Edition',
+                            description: 'Luxury gold theme with premium shimmer effects',
+                            price: 3500,
+                            category: 'premium',
+                            image: 'https://via.placeholder.com/300x200/d4af37/ffffff?text=Regal+Gold',
+                            features: ['Gold theme', 'Shimmer effects', 'Luxury design']
+                        }
+                    ];
+
+                    for (const theme of defaultThemes) {
+                        await addDoc(collection(db, `artifacts/${appId}/public/data/premium_themes`), {
+                            ...theme,
+                            createdAt: serverTimestamp(),
+                            updatedAt: serverTimestamp()
+                        });
+                    }
+                    
+                    themes = defaultThemes;
+                } else {
+                    themes = [];
+                    themesSnapshot.forEach((doc) => {
+                        themes.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading themes:', error);
+                showMessage('Error loading themes', 'error');
+            }
+        }
+
+        // Start real-time listeners
+        function startRealTimeListeners() {
+            // Listen for theme updates
+            const themesQuery = query(collection(db, `artifacts/${appId}/public/data/premium_themes`));
+            onSnapshot(themesQuery, (querySnapshot) => {
+                themes = [];
+                querySnapshot.forEach((doc) => {
+                    themes.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                renderThemes();
+            });
+
+            // Listen for user data updates
+            const userDocRef = doc(db, `artifacts/${appId}/public/data/users/${currentUser.uid}`);
+            onSnapshot(userDocRef, (docSnapshot) => {
+                if (docSnapshot.exists()) {
+                    const userData = docSnapshot.data();
+                    userBalance = userData.jcoins || 0;
+                    ownedThemes = userData.ownedThemes || [];
+                    updateUserBalance();
+                    renderThemes(); // Re-render to update button states
+                }
+            });
+        }
+
+        // Update user balance display
+        function updateUserBalance() {
+            const balanceElement = document.getElementById('userBalance');
+            if (balanceElement) {
+                balanceElement.textContent = userBalance;
+            }
+        }
+
+        // Render themes
+        function renderThemes() {
+            const themesContainer = document.getElementById('themesContainer');
+            if (!themesContainer) return;
+
+            let filteredThemes = themes;
+            if (currentFilter !== 'all') {
+                filteredThemes = themes.filter(theme => theme.category === currentFilter);
+            }
+
+            if (filteredThemes.length === 0) {
+                themesContainer.innerHTML = '<p class="no-themes">No themes found for this category.</p>';
+                return;
+            }
+
+            themesContainer.innerHTML = filteredThemes.map(theme => `
+                <div class="theme-card" data-theme-id="${theme.id}">
+                    <div class="theme-image">
+                        <img src="${theme.image}" alt="${theme.name}" loading="lazy">
+                        <div class="theme-overlay">
+                            <button onclick="previewTheme('${theme.id}')" class="preview-btn">
+                                <i class="fas fa-eye"></i> Preview
+                            </button>
+                        </div>
+                    </div>
+                    <div class="theme-info">
+                        <h3>${theme.name}</h3>
+                        <p>${theme.description}</p>
+                        <div class="theme-features">
+                            ${theme.features.map(feature => `<span class="feature-tag">${feature}</span>`).join('')}
+                        </div>
+                        <div class="theme-price">
+                            <span class="price">${theme.price} JCoins</span>
+                            ${ownedThemes.includes(theme.id) ? 
+                                '<button class="owned-btn" disabled>Already Owned</button>' :
+                                `<button onclick="buyTheme('${theme.id}', ${theme.price})" class="buy-btn" ${userBalance < theme.price ? 'disabled' : ''}>
+                                    ${userBalance < theme.price ? 'Insufficient JCoins' : 'Buy Now'}
+                                </button>`
+                            }
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Process theme purchase - integrated with Home.html profile system
+        async function processThemePurchase(themeId, price) {
+            if (isProcessing) return;
+            isProcessing = true;
+
+            try {
+                // Update user's profile with new JCoin balance and owned themes (Home.html structure)
+                const userProfileRef = doc(db, `artifacts/${appId}/users/${currentUser.uid}/profiles/user_profile`);
+                await setDoc(userProfileRef, {
+                    jCoins: userBalance - price,
+                    ownedThemes: [...ownedThemes, themeId],
+                    updatedAt: serverTimestamp()
+                }, { merge: true });
+
+                // Update local variables
+                userBalance -= price;
+                ownedThemes.push(themeId);
+                updateUserBalance();
+
+                // Add activity log
+                await addDoc(collection(db, `artifacts/${appId}/public/data/premium_activity`), {
+                    userId: currentUser.uid,
+                    username: currentUser.displayName || currentUser.email,
+                    activityType: 'theme_purchase',
+                    title: `Purchased theme: ${themes.find(t => t.id === themeId)?.name || 'Unknown'}`,
+                    description: `User purchased a premium theme`,
+                    amount: price,
+                    themeId: themeId,
+                    timestamp: serverTimestamp()
+                });
+
+                showMessage('Theme purchased successfully!', 'success');
+                
+                // Re-render themes to show updated ownership status
+                renderThemes();
+                
+            } catch (error) {
+                console.error('Error purchasing theme:', error);
+                showMessage('Error purchasing theme. Please try again.', 'error');
+            } finally {
+                isProcessing = false;
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Filter buttons
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    currentFilter = this.dataset.filter;
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    renderThemes();
+                });
+            });
+        }
+
+        // Make functions globally available
+        window.previewTheme = function(themeId) {
+            const theme = themes.find(t => t.id === themeId);
+            if (theme) {
+                alert(`Preview: ${theme.name}\n\n${theme.description}\n\nFeatures:\n${theme.features.join('\n')}`);
+            }
+        };
+
+        window.buyTheme = async function(themeId, price) {
+            if (userBalance < price) {
+                showMessage('Insufficient JCoins. Please top up your balance.', 'error');
+                return;
+            }
+            
+            const ok = await showConfirmationModal('Purchase Theme', `Are you sure you want to purchase this theme for ${price} JCoins?`, 'Purchase', 'Cancel');
+            if (ok) processThemePurchase(themeId, price);
+        };
+
+        // Logout
+        function handleLogout() {
+            signOut(auth).then(() => {
+                window.location.href = '/Login.html';
+            }).catch((error) => {
+                console.error('Error signing out:', error);
+                showMessage('Error signing out', 'error');
+            });
+        }
+    </script>
+    
+</body>
+</html>

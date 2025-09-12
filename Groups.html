@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Nuvia - Groups</title>
+  <link rel="canonical" href="https://nuvia.app/Groups.html" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="theme-color" content="#1a1a2e" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://firebaseio.com" crossorigin />
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" onload="this.rel='stylesheet'" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /></noscript>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" defer crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="auth/access-guard.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box}
+    :root{
+      --pink:#ff2e92;--blue:#00d5ff;--glass-black:rgba(10,10,10,.75);--glass-blue:rgba(0,213,255,.15);--radius:20px;--transition:.3s ease;
+      --white:#fff;--text-light:rgba(255,255,255,.7);--background-main:rgba(10,10,10,.75);
+      --background-gradient-1:#00d5ff;--background-gradient-2:#ff2e92;--card-background:linear-gradient(145deg,rgba(255,255,255,.03),rgba(255,255,255,.01));
+      --header-background:linear-gradient(135deg,rgba(10,10,10,.85),rgba(10,10,10,.75));--border-light:rgba(255,255,255,.05);
+      --input-background:rgba(255,255,255,.05);--button-background:linear-gradient(90deg,var(--blue),var(--pink));--button-shadow:0 4px 15px var(--blue),0 4px 15px var(--pink);
+      --background-color-primary:#1a1a2e;--background-color-secondary:#0f0f1f;--header-background-color:#2a2a4a;--footer-background-color:#2a2a4a;--content-background-color:#20203a;--card-background-color:#2a2a4a;--text-color-primary:#e0e0e0;--text-color-secondary:#b0b0d0;--status-online:#4CAF50;--status-offline:#6c757d;--status-away:#FFC107;--delete-button-color:#dc3545;--warning-color:#ffc107;--accent-color:#00d5ff;--accent-color-dark:#00aaff;--border-color:#3a3a5a;--theme-gold:#ffd700
+    }
+    body{min-height:100vh;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background-color:var(--background-main);background-image:radial-gradient(circle at top left,var(--background-gradient-1),transparent 100px),radial-gradient(circle at bottom right,var(--background-gradient-2),transparent 150px);color:var(--white)}
+    header{position:sticky;top:0;left:0;right:0;z-index:20;background:var(--header-background);border-bottom:1px solid var(--border-light);backdrop-filter:saturate(140%) blur(6px)}
+    .header-bar{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:10px 16px}
+    .brand-link{display:flex;align-items:center;gap:10px;color:inherit;text-decoration:none}
+    .brand-logo{height:24px;width:auto}
+    .brand-name{font-family:Poppins,sans-serif;font-weight:800;letter-spacing:-.03em;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+    .header-actions{display:flex;align-items:center;gap:12px}
+    .icon-button{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border-light);background:transparent;color:var(--white);cursor:pointer;transition:transform .2s ease,background-color .2s ease}
+    .icon-button:hover{transform:scale(1.05);background-color:rgba(255,255,255,.06)}
+    .profile-link{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--white);padding:4px 8px;border-radius:12px}
+    .profile-avatar{width:28px;height:28px;border-radius:50%;object-fit:cover;border:2px solid var(--accent-color);display:none}
+    .profile-avatar-icon{font-size:28px;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+    .profile-name{font-weight:600;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+    main{max-width:1100px;margin:0 auto;padding:18px}
+    .tabs-bar{display:flex;align-items:center;gap:8px;background:var(--card-background);border:1px solid var(--glass-blue);backdrop-filter:blur(10px) saturate(180%);padding:6px;border-radius:999px;width:fit-content}
+    .tab-btn{border:0;cursor:pointer;background:transparent;color:var(--text-light);padding:8px 14px;border-radius:999px;font-weight:700;letter-spacing:.02em}
+    .tab-btn.active{background:rgba(0,213,255,.15);color:var(--white)}
+    .page-toolbar{margin:16px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .search-input{flex:1 1 260px;min-width:220px;padding:10px 12px;border-radius:12px;border:1px solid var(--border-light);background:var(--input-background);color:var(--white);outline:none}
+    .filter-chip{padding:8px 12px;border-radius:999px;border:1px solid var(--border-light);background:rgba(255,255,255,.05);color:var(--text-light);cursor:pointer}
+    .filter-chip.active{border-color:var(--blue);background:rgba(0,213,255,.12);color:var(--white)}
+    .views{display:block}
+    .view{display:none}
+    .view.active{display:block}
+    .groups-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+    @media (max-width:1024px){.groups-grid{grid-template-columns:repeat(3,1fr)}}
+    @media (max-width:720px){.groups-grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:460px){.groups-grid{grid-template-columns:1fr}}
+    .group-card{position:relative;display:flex;flex-direction:column;border-radius:16px;overflow:hidden;background:var(--card-background);border:1px solid var(--border-light)}
+    .group-cover{width:100%;aspect-ratio:16/9;object-fit:cover;background:linear-gradient(135deg,rgba(0,213,255,.15),rgba(255,46,146,.15))}
+    .group-body{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+    .group-title{font-family:Poppins,sans-serif;font-weight:700;margin:0}
+    .group-meta{display:flex;align-items:center;gap:10px;color:var(--text-light);font-size:.9rem}
+    .group-tags{display:flex;gap:6px;flex-wrap:wrap}
+    .tag{font-size:.75rem;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--border-light);color:var(--text-light)}
+    .card-actions{display:flex;gap:8px;margin-top:6px}
+    .btn{border:0;border-radius:10px;cursor:pointer;font-weight:700;color:var(--white)}
+    .btn-primary{background:var(--button-background);box-shadow:var(--button-shadow);padding:8px 12px}
+    .btn-secondary{background:rgba(255,255,255,.06);border:1px solid var(--border-light);color:var(--text-light);padding:8px 12px}
+    .empty-state{padding:24px;border-radius:16px;border:1px dashed var(--border-light);color:var(--text-light);text-align:center}
+    .list{display:flex;flex-direction:column;gap:10px}
+    .list-item{display:flex;gap:12px;align-items:center;padding:10px;border-radius:12px;background:var(--card-background);border:1px solid var(--border-light)}
+    .list-cover{width:56px;height:56px;object-fit:cover;border-radius:10px}
+    .list-title{font-weight:700;margin:0}
+    .list-sub{color:var(--text-light);font-size:.9rem}
+    .form-card{padding:16px;border-radius:16px;background:var(--card-background);border:1px solid var(--glass-blue);display:flex;flex-direction:column;gap:12px;max-width:720px}
+    .form-row{display:flex;gap:10px;flex-wrap:wrap}
+    .input{flex:1 1 260px;min-width:220px;padding:10px 12px;border-radius:12px;border:1px solid var(--border-light);background:var(--input-background);color:var(--white);outline:none}
+    .textarea{min-height:100px;resize:vertical}
+    .helper{color:var(--text-light);font-size:.85rem}
+    #messageBox{position:fixed;left:50%;top:20px;transform:translateX(-50%);z-index:9999;display:none;gap:10px;align-items:center;padding:10px 14px;border-radius:12px;background:rgba(0,0,0,.8);border:1px solid var(--border-light)}
+    #messageBox.show{display:flex}
+    #messageBox.success{background:linear-gradient(135deg,var(--blue),var(--pink))}
+
+    /* --- Sidebar Navigation (consistent with Home) --- */
+    #sidebarNav{position:fixed;top:0;left:0;height:100%;width:clamp(220px,60vw,340px);background:var(--header-background);border-right:1px solid var(--border-light);box-shadow:6px 0 24px rgba(0,0,0,.35);transform:translateX(-100%);transition:transform .32s cubic-bezier(.22,.61,.36,1);z-index:90;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-gutter:stable both-edges}
+    #sidebarNav.sidebar-visible{transform:translateX(0)}
+    #sidebarNav .sidebar-header{position:sticky;top:0;background:var(--header-background);display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border-light);z-index:1}
+    .sidebar-title{font-family:Poppins,sans-serif;font-weight:800;letter-spacing:-.02em;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+    #sidebarCloseBtn{background:transparent;border:0;color:var(--white);width:32px;height:32px;border-radius:8px;cursor:pointer}
+    #sidebarCloseBtn:hover{background-color:rgba(255,255,255,.1)}
+    .sidebar-links{display:flex;flex-direction:column;padding:8px}
+    .sidebar-nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;text-decoration:none;color:var(--white);transition:background-color .2s ease}
+    .sidebar-nav-item:hover{background-color:rgba(255,255,255,.08)}
+    .sidebar-nav-item.active{background-color:rgba(0,213,255,.15)}
+    .sidebar-nav-item i{font-size:1.2rem;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+    .sidebar-nav-item span{background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+    .sidebar-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);backdrop-filter:blur(4px);opacity:0;visibility:hidden;transition:opacity .25s ease;z-index:85}
+    .sidebar-backdrop.show{opacity:1;visibility:visible}
+    #sidebarToggleFab{width:32px;height:32px;border-radius:50%;border:0;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(45deg,var(--blue),var(--pink));color:var(--white);cursor:pointer;transition:transform .2s ease;box-shadow:0 4px 15px rgba(0,213,255,.3),0 4px 15px rgba(255,46,146,.3)}
+    #sidebarToggleFab:hover{transform:scale(1.1)}
+    #sidebarToggleFab:active{transform:scale(.95)}
+    @media (max-width:720px){#sidebarNav{width:clamp(220px,60vw,340px)}}
+    #sidebarNav::-webkit-scrollbar{width:8px}
+    #sidebarNav::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--blue),var(--pink));border-radius:6px}
+    #sidebarNav::-webkit-scrollbar-track{background:transparent}
+  </style>
+  <style id="discover-compact-cards">
+    /* Compact appearance for Discover grid cards (smaller visuals) */
+    #discoverGrid.groups-grid{gap:10px;grid-template-columns:repeat(5,1fr)}
+    #discoverGrid .group-card{border-radius:12px}
+    #discoverGrid .group-cover{aspect-ratio:4/3}
+    #discoverGrid .group-body{padding:8px 10px;gap:6px}
+    #discoverGrid .group-title{font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #discoverGrid .group-meta{gap:6px;font-size:.8rem}
+    #discoverGrid .tag{font-size:.65rem;padding:3px 6px}
+    #discoverGrid .card-actions{gap:6px;margin-top:4px}
+    #discoverGrid .btn-primary,#discoverGrid .btn-secondary{padding:6px 8px;font-size:.85rem;border-radius:8px}
+    @media (max-width:1024px){#discoverGrid.groups-grid{grid-template-columns:repeat(3,1fr)}}
+    @media (max-width:720px){#discoverGrid.groups-grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:460px){#discoverGrid.groups-grid{grid-template-columns:1fr}}
+  </style>
+  <style id="group-admin-modal-styles">
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:95}
+    .modal-overlay.show{display:flex}
+    .modal-panel{width:min(720px,92vw);max-height:86vh;overflow:auto;border-radius:16px;background:var(--card-background);border:1px solid var(--glass-blue);padding:16px}
+    .modal-title{margin:0 0 8px 0;font-family:Poppins,sans-serif;font-weight:800;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+    .modal-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+    .danger-btn{background:var(--delete-button-color);color:#fff}
+    .link-btn{background:rgba(255,255,255,.06);border:1px solid var(--border-light);color:var(--text-light)}
+  </style>
+  <style id="home-header-compat">
+    header{background:var(--header-background);border-bottom:1px solid var(--border-light);padding:10px 0;box-shadow:0 4px 15px rgba(0,0,0,.2);position:fixed;top:0;left:0;width:100%;height:55px;z-index:10;display:flex;justify-content:center}
+    .header-content-wrapper{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:1200px;padding:0 30px}
+    .logo{font-family:Poppins,sans-serif;font-size:1.8rem;font-weight:800;background-clip:text;color:transparent;background-image:linear-gradient(90deg,var(--blue),var(--pink));letter-spacing:-.03em;text-decoration:none}
+    main{padding-top:55px}
+    body{background-color:#1a1a2e;background-image:none !important}
+  </style>
+  <style id="neon-enhancements">
+    .is-hidden{display:none}
+    .header-brand-row{display:flex;align-items:center;gap:10px}
+    .brand-name{text-shadow:0 0 6px var(--blue),0 0 12px var(--pink)}
+    .tabs-bar{box-shadow:0 0 8px rgba(0,213,255,.18),0 0 14px rgba(255,46,146,.12)}
+    .tab-btn.active{box-shadow:0 0 8px rgba(0,213,255,.25),0 0 12px rgba(255,46,146,.2)}
+    .icon-button{box-shadow:0 0 6px rgba(0,213,255,.18),0 0 10px rgba(255,46,146,.12)}
+    .icon-button:hover{box-shadow:0 0 10px rgba(0,213,255,.3),0 0 16px rgba(255,46,146,.22)}
+    .group-card{box-shadow:0 0 0 rgba(0,0,0,0)}
+    .group-card:hover{box-shadow:0 0 12px rgba(0,213,255,.22),0 0 22px rgba(255,46,146,.18)}
+    .group-title{text-shadow:0 0 6px rgba(0,213,255,.25),0 0 10px rgba(255,46,146,.18)}
+    .btn-primary{box-shadow:var(--button-shadow),0 0 8px rgba(0,213,255,.35),0 0 14px rgba(255,46,146,.25)}
+    .btn-primary:hover{box-shadow:var(--button-shadow),0 0 12px rgba(0,213,255,.5),0 0 20px rgba(255,46,146,.35)}
+    .btn-secondary:hover{box-shadow:0 0 10px rgba(255,46,146,.25),0 0 16px rgba(0,213,255,.2)}
+    .sidebar-title{text-shadow:0 0 6px var(--blue),0 0 10px var(--pink)}
+  </style>
+<style id="remove-notification-icon">.notification-icon-wrapper{display:none !important}</style>
+  <style id="confirm-dialog-styles">
+    .confirm-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:1001;opacity:0;visibility:hidden;transition:opacity .3s ease}
+    .confirm-modal-overlay.active{opacity:1;visibility:visible}
+    .confirm-modal-content{background:var(--card-background);padding:24px;border-radius:16px;border:1px solid var(--glass-blue);box-shadow:0 10px 30px rgba(0,0,0,.5);max-width:420px;width:92%;text-align:center}
+    .confirm-modal-title{margin:0 0 10px 0;font-family:Poppins,sans-serif;font-weight:800;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+    .confirm-modal-message{color:var(--text-light)}
+    .confirm-modal-actions{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+    .confirm-btn{background:var(--button-background);color:#fff;border:0;border-radius:10px;padding:10px 16px;cursor:pointer;box-shadow:var(--button-shadow)}
+    .cancel-btn{background:var(--input-background);color:var(--text-light);border:1px solid var(--border-light);border-radius:10px;padding:10px 16px;cursor:pointer}
+  </style>
+</head>
+<body class="theme-dark-mode">
+  <header>
+    <div class="header-content-wrapper">
+      <button id="sidebarToggleFab" aria-label="Toggle Navigation"><i class="fas fa-bars"></i></button>
+      <a href="/Home.html" class="logo"><span>Nuvia</span></a>
+      <div class="user-profile-header">
+        <div class="notification-icon-wrapper">
+          <a href="/notifications.html" id="notificationToggle" aria-label="Notifications">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" id="notificationCount">0</span>
+          </a>
+          <div id="notificationDropdown" class="notification-dropdown" style="display: none;">
+            <div class="notification-header"><h3>Recent Notifications</h3><a href="/notifications.html" class="view-all-link">View All</a></div>
+            <div id="notificationList" class="notification-list"><div class="notification-loading"><i class="fas fa-spinner fa-spin"></i><p>Loading notifications...</p></div></div>
+          </div>
+        </div>
+        <button id="premiumRequestBtn" class="premium-request-btn" aria-label="Request Premium Access" style="display:none;"><i class="fas fa-crown"></i><span>Get Premium</span></button>
+      </div>
+    </div>
+  </header>
+
+  <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+  <aside id="sidebarNav" class="sidebar-hidden" role="navigation" aria-label="Main Navigation">
+    <div class="sidebar-header">
+      <span class="sidebar-title">Nuvia Menu</span>
+      <button id="sidebarCloseBtn" aria-label="Close Menu"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="sidebar-links">
+      <a href="/Home.html" class="sidebar-nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+      <a href="/Explore.html" class="sidebar-nav-item"><i class="fas fa-hashtag"></i><span>Explore</span></a>
+      <a href="/Profile.html" class="sidebar-nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+      <a href="/Chat.html" class="sidebar-nav-item" id="chatLink"><i class="fas fa-comment-dots"></i><span>Chat</span></a>
+      <a href="/Find_Friends.html" class="sidebar-nav-item" id="findFriendsLink"><i class="fas fa-users"></i><span>Users</span></a>
+      <a href="/Friends.html" class="sidebar-nav-item" id="friendsLink"><i class="fas fa-user-friends"></i><span>Friends</span></a>
+      <a href="/Groups.html" class="sidebar-nav-item active" id="groupsLink"><i class="fas fa-layer-group"></i><span>Groups</span></a>
+      <a href="/leaderboard.html" class="sidebar-nav-item" id="leaderboardLink"><i class="fas fa-trophy"></i><span>Leaderboard</span></a>
+      <a href="#" id="sidebarThemeLink" class="sidebar-nav-item"><i class="fas fa-palette"></i><span>Appearance</span></a>
+      <a href="/Settings.html" class="sidebar-nav-item"><i class="fas fa-cog"></i><span>Settings</span></a>
+      <a href="/About_Us.html" class="sidebar-nav-item"><i class="fas fa-globe"></i><span>About Us</span></a>
+      <a href="/solution_center.html" class="sidebar-nav-item"><i class="fas fa-question-circle"></i><span>Solution Center</span></a>
+      <a href="/Guide.html" class="sidebar-nav-item"><i class="fas fa-book"></i><span>Guide</span></a>
+      <a href="/Community_guidelines.html" class="sidebar-nav-item"><i class="fas fa-exclamation-triangle"></i><span>Community Guidelines</span></a>
+      <a href="#" id="sidebarLogoutLink" class="sidebar-nav-item"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+    </div>
+  </aside>
+
+  <main>
+    <nav class="tabs-bar" role="tablist" aria-label="Groups tabs">
+      <button id="tabDiscover" class="tab-btn active" role="tab" aria-selected="true">Discover</button>
+      <button id="tabMy" class="tab-btn" role="tab" aria-selected="false">My Groups</button>
+      <button id="tabCreate" class="tab-btn" role="tab" aria-selected="false">Create</button>
+    </nav>
+
+    <div class="page-toolbar">
+      <input id="groupSearchInput" class="search-input" type="search" placeholder="Search groups" aria-label="Search groups" />
+      <button class="filter-chip" data-filter="trending"><i class="fas fa-fire"></i>&nbsp;Trending</button>
+      <button class="filter-chip" data-filter="new"><i class="fas fa-sparkles"></i>&nbsp;New</button>
+      <button class="filter-chip" data-filter="popular"><i class="fas fa-users"></i>&nbsp;Popular</button>
+    </div>
+
+    <section id="viewDiscover" class="view active" aria-labelledby="tabDiscover">
+      <div id="discoverGrid" class="groups-grid"></div>
+      <div id="discoverEmpty" class="empty-state is-hidden">No groups found.</div>
+    </section>
+
+    <section id="viewMy" class="view" aria-labelledby="tabMy">
+      <div id="myGroupsList" class="list"></div>
+      <div id="myEmpty" class="empty-state is-hidden">You haven't joined any groups yet.</div>
+    </section>
+
+    <section id="viewCreate" class="view" aria-labelledby="tabCreate">
+      <form id="createGroupForm" class="form-card">
+        <div class="form-row">
+          <input id="groupNameInput" class="input" type="text" placeholder="Group name" maxlength="60" required />
+          <select id="groupVisibility" class="input" aria-label="Visibility">
+            <option value="public">Public</option>
+            <option value="private">Private</option>
+          </select>
+        </div>
+        <textarea id="groupDescInput" class="input textarea" placeholder="Description" maxlength="500"></textarea>
+        <div class="form-row">
+          <input id="groupTagsInput" class="input" type="text" placeholder="Tags (comma separated)" />
+          <input id="groupCoverFile" class="input" type="file" accept="image/*" />
+        </div>
+        <div class="helper">Cover image is optional. We recommend square or 16:9 images.</div>
+        <div class="form-row">
+          <button id="submitCreateBtn" type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Create Group</button>
+        </div>
+      </form>
+    </section>
+
+    <div id="manageGroupModal" class="modal-overlay" aria-hidden="true">
+      <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="manageGroupTitle">
+        <h3 id="manageGroupTitle" class="modal-title">Manage Group</h3>
+        <form id="manageGroupForm" class="form-card" style="border:none;padding:0;background:transparent">
+          <div class="form-row">
+            <input id="mgNameInput" class="input" type="text" placeholder="Group name" maxlength="60" required />
+            <select id="mgVisibility" class="input" aria-label="Visibility">
+              <option value="public">Public</option>
+              <option value="private">Private</option>
+            </select>
+          </div>
+          <textarea id="mgDescInput" class="input textarea" placeholder="Description" maxlength="500"></textarea>
+          <div class="form-row">
+            <input id="mgTagsInput" class="input" type="text" placeholder="Tags (comma separated)" />
+            <input id="mgCoverFile" class="input" type="file" accept="image/*" />
+          </div>
+          <div class="form-row">
+            <select id="mgJoinPolicy" class="input" aria-label="Join policy">
+              <option value="open">Open join</option>
+              <option value="approval">Request approval</option>
+              <option value="invite">Invite link only</option>
+            </select>
+            <input id="mgPinnedInput" class="input" type="text" placeholder="Pinned announcement (optional)" maxlength="150" />
+          </div>
+          <textarea id="mgRulesInput" class="input textarea" placeholder="Group rules (optional)" maxlength="1000"></textarea>
+          <div class="modal-actions">
+            <button id="mgSaveBtn" type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+            <button id="mgCancelBtn" type="button" class="btn btn-secondary"><i class="fas fa-times"></i> Cancel</button>
+            <button id="mgInviteBtn" type="button" class="btn link-btn"><i class="fas fa-link"></i> Copy Invite Link</button>
+            <button id="mgResetInviteBtn" type="button" class="btn link-btn"><i class="fas fa-arrows-rotate"></i> Reset Invite</button>
+            <button id="mgDisableInviteBtn" type="button" class="btn link-btn"><i class="fas fa-ban"></i> Disable Invite</button>
+            <a id="mgSettingsLink" class="btn link-btn" href="#" target="_self"><i class="fas fa-cog"></i> Full Settings</a>
+            <button id="mgDeleteBtn" type="button" class="btn danger-btn"><i class="fas fa-trash"></i> Delete Group</button>
+          </div>
+          <div class="form-card" style="margin-top:12px">
+            <div class="form-row" style="align-items:center;justify-content:space-between">
+              <h4 style="margin:0">Members</h4>
+              <div class="helper">Search, export, manage roles</div>
+            </div>
+            <div class="form-row">
+              <input id="mgMemberSearch" class="input" type="search" placeholder="Search members by username or UID" />
+              <button id="mgExportBtn" type="button" class="btn btn-secondary"><i class="fas fa-file-export"></i> Export CSV</button>
+            </div>
+            <div id="mgMembersList" class="list"></div>
+          </div>
+          <div class="form-card" style="margin-top:12px">
+            <div class="form-row" style="align-items:center;justify-content:space-between">
+              <h4 style="margin:0">Join Requests</h4>
+              <div class="helper">Approve or deny pending requests</div>
+            </div>
+            <div id="mgRequestsList" class="list"></div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <div id="messageBox" role="status" aria-live="polite"><i class="fas fa-circle-info"></i><span id="messageText"></span></div>
+
+  <div id="confirmDialogOverlay" class="confirm-modal-overlay" aria-hidden="true">
+    <div class="confirm-modal-content" role="dialog" aria-modal="true" aria-labelledby="confirmDialogTitle">
+      <h3 id="confirmDialogTitle" class="confirm-modal-title">Confirm</h3>
+      <div id="confirmDialogMessage" class="confirm-modal-message">Are you sure?</div>
+      <div class="confirm-modal-actions">
+        <button id="confirmDialogYes" class="confirm-btn">Yes</button>
+        <button id="confirmDialogNo" class="cancel-btn">No</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
+    import { getFirestore, collection, doc, getDocs, getDoc, query, orderBy, limit, where, runTransaction, serverTimestamp, setDoc, increment, updateDoc, deleteDoc, deleteField, arrayRemove } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+    import { registerSession } from './assets/js/session-manager.js';
+    import { getCloudinaryImageUrl } from './assets/js/avatar-utils.js';
+
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+      apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+      authDomain: "jchat-1.firebaseapp.com",
+      databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+      projectId: "jchat-1",
+      storageBucket: "jchat-1.firebasestorage.app",
+      messagingSenderId: "328479683167",
+      appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
+      measurementId: "G-S6Z9GG0R9P"
+    };
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+    // Admin UID used across app to reveal admin-only links in the UI
+    const ADMIN_UID = 'cc96gdhCRPO72NFZtleRCujHvIq2';
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const headerProfilePic = document.getElementById('headerProfilePic');
+    const headerAvatarIcon = document.getElementById('headerAvatarIcon');
+    const headerDisplayName = document.getElementById('headerDisplayName');
+    const adminIconLink = document.getElementById('adminIconLink');
+
+    const tabs = {
+      discover: document.getElementById('tabDiscover'),
+      my: document.getElementById('tabMy'),
+      create: document.getElementById('tabCreate')
+    };
+    const views = {
+      discover: document.getElementById('viewDiscover'),
+      my: document.getElementById('viewMy'),
+      create: document.getElementById('viewCreate')
+    };
+
+    const discoverGrid = document.getElementById('discoverGrid');
+    const discoverEmpty = document.getElementById('discoverEmpty');
+    const myGroupsList = document.getElementById('myGroupsList');
+    const myEmpty = document.getElementById('myEmpty');
+    const searchInput = document.getElementById('groupSearchInput');
+    const createForm = document.getElementById('createGroupForm');
+    const groupNameInput = document.getElementById('groupNameInput');
+    const groupDescInput = document.getElementById('groupDescInput');
+    const groupTagsInput = document.getElementById('groupTagsInput');
+    const groupCoverFile = document.getElementById('groupCoverFile');
+    const groupVisibility = document.getElementById('groupVisibility');
+    const messageBox = document.getElementById('messageBox');
+    const messageText = document.getElementById('messageText');
+
+    const cloudinaryConfig = { cloudName: 'dxld01rcp', uploadPreset: 'Storage_preset' };
+
+    let currentUser = null;
+    let discoverLoadCounter = 0;
+    let myGroupsMap = new Map();
+
+    // Manage modal refs
+    const manageModal = document.getElementById('manageGroupModal');
+    const manageForm = document.getElementById('manageGroupForm');
+    const mgNameInput = document.getElementById('mgNameInput');
+    const mgDescInput = document.getElementById('mgDescInput');
+    const mgTagsInput = document.getElementById('mgTagsInput');
+    const mgCoverFile = document.getElementById('mgCoverFile');
+    const mgVisibility = document.getElementById('mgVisibility');
+    const mgSaveBtn = document.getElementById('mgSaveBtn');
+    const mgCancelBtn = document.getElementById('mgCancelBtn');
+    const mgDeleteBtn = document.getElementById('mgDeleteBtn');
+    const mgInviteBtn = document.getElementById('mgInviteBtn');
+    const mgSettingsLink = document.getElementById('mgSettingsLink');
+    const mgMembersList = document.getElementById('mgMembersList');
+    const mgRequestsList = document.getElementById('mgRequestsList');
+    const mgMemberSearch = document.getElementById('mgMemberSearch');
+    const mgExportBtn = document.getElementById('mgExportBtn');
+    const mgJoinPolicy = document.getElementById('mgJoinPolicy');
+    const mgPinnedInput = document.getElementById('mgPinnedInput');
+    const mgRulesInput = document.getElementById('mgRulesInput');
+    const mgResetInviteBtn = document.getElementById('mgResetInviteBtn');
+    const mgDisableInviteBtn = document.getElementById('mgDisableInviteBtn');
+    let managingGroupId = null;
+
+    function showMessage(msg, type = 'info', timeout = 2500) {
+      messageText.textContent = msg;
+      messageBox.className = '';
+      messageBox.classList.add('show');
+      messageBox.classList.add(type);
+      if (timeout) setTimeout(()=>{ messageBox.classList.remove('show'); }, timeout);
+    }
+
+    function slugify(str){ return (str||'').toString().toLowerCase().trim().replace(/[^a-z0-9\s-]/g,'').replace(/[\s_-]+/g,'-').replace(/^-+|-+$/g,''); }
+
+    function showConfirmModal(message, confirmLabel = 'Yes', cancelLabel = 'No'){
+      return new Promise((resolve)=>{
+        const overlay = document.getElementById('confirmDialogOverlay');
+        const msgEl = document.getElementById('confirmDialogMessage');
+        const yesBtn = document.getElementById('confirmDialogYes');
+        const noBtn = document.getElementById('confirmDialogNo');
+        if(!overlay || !msgEl || !yesBtn || !noBtn){ resolve(false); return; }
+        msgEl.textContent = message;
+        yesBtn.textContent = confirmLabel;
+        noBtn.textContent = cancelLabel;
+        overlay.classList.add('active');
+        overlay.setAttribute('aria-hidden','false');
+        const cleanup = ()=>{ overlay.classList.remove('active'); overlay.setAttribute('aria-hidden','true'); yesBtn.removeEventListener('click',onYes); noBtn.removeEventListener('click',onNo); overlay.removeEventListener('click',onBackdrop); };
+        const onYes = ()=>{ cleanup(); resolve(true); };
+        const onNo = ()=>{ cleanup(); resolve(false); };
+        const onBackdrop = (e)=>{ if(e.target===overlay){ onNo(); } };
+        yesBtn.addEventListener('click', onYes);
+        noBtn.addEventListener('click', onNo);
+        overlay.addEventListener('click', onBackdrop);
+      });
+    }
+
+    function setActive(tab){
+      Object.values(tabs).forEach(b=>b.classList.remove('active'));
+      Object.values(views).forEach(v=>v.classList.remove('active'));
+      if(tab==='discover'){ tabs.discover.classList.add('active'); views.discover.classList.add('active'); }
+      if(tab==='my'){ tabs.my.classList.add('active'); views.my.classList.add('active'); }
+      if(tab==='create'){ tabs.create.classList.add('active'); views.create.classList.add('active'); }
+    }
+
+    tabs.discover.addEventListener('click',()=>setActive('discover'));
+    tabs.my.addEventListener('click',()=>setActive('my'));
+    tabs.create.addEventListener('click',()=>setActive('create'));
+
+    function renderGroupCard(g){
+      const el = document.createElement('div');
+      el.className = 'group-card';
+      const cover = g.groupPicId ? getCloudinaryImageUrl(g.groupPicId,'w_800,h_450,c_fill,g_auto') : '';
+      const policy = g.joinPolicy || 'open';
+      const joinLabel = policy==='approval' ? 'Request' : 'Join';
+      el.innerHTML = `
+        <img class="group-cover${cover?'':' is-hidden'}" ${cover?`src="${cover}"`:''} alt="${(g.name||'Group')}">
+        <div class="group-body">
+          <h3 class="group-title">${g.name||'Untitled Group'}</h3>
+          <div class="group-meta"><span><i class="fas fa-users"></i> ${g.memberCount||0}</span><span><i class="fas fa-lock${g.visibility==='private'?'-lock':''}"></i> ${g.visibility||'public'}</span></div>
+          <div class="group-tags">${(g.tags||[]).slice(0,3).map(t=>`<span class="tag">#${t}</span>`).join('')}</div>
+          <div class="card-actions">
+            <button class="btn btn-primary" data-action="join">${joinLabel}</button>
+            <button class="btn btn-secondary" data-action="open">Open</button>
+          </div>
+        </div>`;
+      el.querySelector('[data-action="join"]').addEventListener('click', ()=> joinGroup(g.id));
+      el.querySelector('[data-action="open"]').addEventListener('click', ()=> openGroup(g.id));
+      return el;
+    }
+
+    async function openGroup(groupId){
+      window.location.href = `/group_chat.html?groupId=${encodeURIComponent(groupId)}`;
+    }
+
+    function getQueryParam(k){ const u = new URL(window.location.href); return u.searchParams.get(k); }
+
+    async function joinGroup(groupId){
+      if(!currentUser){ showMessage('Please log in to join groups','warning'); return; }
+      const groupRef = doc(db, 'artifacts', appId, 'public', 'data', 'groups', groupId);
+      try{
+        await runTransaction(db, async (tx)=>{
+          const snap = await tx.get(groupRef);
+          if(!snap.exists()) throw new Error('Group not found');
+          const data = snap.data();
+          const policy = data.joinPolicy || 'open';
+          const members = new Set([...(data.members||[])]);
+          if(members.has(currentUser.uid)) return;
+          if(policy==='approval'){
+            const pending = new Set([...(data.pendingRequests||[])]);
+            if(pending.has(currentUser.uid)) throw new Error('Request already pending');
+            pending.add(currentUser.uid);
+            tx.update(groupRef, { pendingRequests: Array.from(pending), updatedAt: serverTimestamp() });
+            return 'requested';
+          }
+          if(policy==='invite'){
+            if(data.inviteEnabled===false) throw new Error('Invite disabled');
+            const token = getQueryParam('inviteToken');
+            if(!token || token !== data.inviteToken) throw new Error('Invite required');
+          }
+          members.add(currentUser.uid);
+          tx.update(groupRef, { members: Array.from(members), memberCount: increment(1), updatedAt: serverTimestamp() });
+          return 'joined';
+        }).then((res)=>{
+          if(res==='requested') showMessage('Request sent for approval','success');
+          else showMessage('Joined group','success');
+        });
+        await loadMyGroups();
+      }catch(e){ console.error(e); showMessage(`Failed to join: ${e.message}`,'error'); }
+    }
+
+    function renderMyGroupItem(g){
+      const el = document.createElement('div');
+      el.className = 'list-item';
+      const cover = g.groupPicId ? getCloudinaryImageUrl(g.groupPicId,'w_120,h_120,c_fill,g_auto') : '';
+      const isAdmin = currentUser && g.admin === currentUser.uid;
+      el.innerHTML = `
+        <img class="list-cover${cover?'':' is-hidden'}" ${cover?`src="${cover}"`:''} alt="${g.name||'Group'}">
+        <div style="flex:1 1 auto;min-width:0">
+          <p class="list-title">${g.name||'Untitled Group'}</p>
+          <p class="list-sub">${g.memberCount||0} members • ${g.visibility||'public'}</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-secondary" data-action="open">Open</button>
+          ${isAdmin?`<button class="btn btn-primary" data-action="manage"><i class="fas fa-tools"></i> Manage</button>`:''}
+          ${isAdmin?`<a class="btn btn-secondary" data-action="settings" href="/group_settings.html?groupId=${encodeURIComponent(g.id)}"><i class=\"fas fa-cog\"></i> Settings</a>`:''}
+          ${isAdmin?`<button class="btn btn-secondary" data-action="invite"><i class=\"fas fa-link\"></i> Invite</button>`:`<button class="btn btn-secondary" data-action="leave"><i class=\"fas fa-right-from-bracket\"></i> Leave</button>`}
+        </div>`;
+      el.querySelector('[data-action="open"]').addEventListener('click', ()=> openGroup(g.id));
+      if(isAdmin){
+        el.querySelector('[data-action="manage"]').addEventListener('click', ()=> openManageModal(g.id));
+        el.querySelector('[data-action="invite"]').addEventListener('click', ()=> copyInviteLink(g.id));
+      } else {
+        el.querySelector('[data-action="leave"]').addEventListener('click', ()=> leaveGroup(g.id));
+      }
+      return el;
+    }
+
+    function applyHeaderProfile(user){
+      if(!headerDisplayName || !headerProfilePic || !headerAvatarIcon) return;
+      if(!user){ headerDisplayName.textContent = 'Guest'; headerProfilePic.style.display='none'; headerAvatarIcon.style.display='block'; return; }
+      headerDisplayName.textContent = user.displayName || 'User';
+      if(user.photoURL){ headerProfilePic.src = user.photoURL; headerProfilePic.style.display='block'; headerAvatarIcon.style.display='none'; } else { headerProfilePic.style.display='none'; headerAvatarIcon.style.display='block'; }
+    }
+
+    async function uploadCoverIfNeeded(){
+      const f = groupCoverFile.files && groupCoverFile.files[0];
+      if(!f) return null;
+      const fd = new FormData();
+      fd.append('file', f);
+      if(cloudinaryConfig.uploadPreset) fd.append('upload_preset', cloudinaryConfig.uploadPreset);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`, { method:'POST', body: fd });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error?.message || 'Upload failed');
+      return data.public_id || data.secure_url;
+    }
+
+    async function handleCreateGroup(e){
+      e.preventDefault();
+      if(!currentUser){ showMessage('Please log in to create groups','warning'); return; }
+      const name = groupNameInput.value.trim();
+      const description = groupDescInput.value.trim();
+      const visibility = groupVisibility.value || 'public';
+      if(!name){ showMessage('Enter group name','warning'); return; }
+      let picId = null;
+      try{ picId = await uploadCoverIfNeeded(); } catch(err){ console.error(err); showMessage('Cover upload failed','error'); return; }
+
+      const groupsCol = collection(db, 'artifacts', appId, 'public', 'data', 'groups');
+      const id = `${slugify(name)}-${Date.now().toString(36)}`;
+      const groupDoc = doc(groupsCol, id);
+      const tags = (groupTagsInput.value||'').split(',').map(s=>s.trim()).filter(Boolean).slice(0,5);
+      const payload = {
+        name, description: description || null, visibility, tags, groupPicId: picId || null,
+        admin: currentUser.uid, members: [currentUser.uid], memberCount: 1,
+        createdAt: serverTimestamp(), updatedAt: serverTimestamp()
+      };
+      try{
+        await setDoc(groupDoc, payload);
+        showMessage('Group created','success');
+        setActive('my');
+        createForm.reset();
+        await loadMyGroups();
+      }catch(e2){ console.error(e2); showMessage(`Failed to create: ${e2.message}`,'error'); }
+    }
+
+    async function loadDiscoverGroups(qStr=''){
+      const requestId = ++discoverLoadCounter;
+      const search = (qStr||'').toLowerCase().trim();
+      const col = collection(db, 'artifacts', appId, 'public', 'data', 'groups');
+      const qTop = query(col, orderBy('memberCount','desc'), limit(40));
+      const snap = await getDocs(qTop);
+      if (requestId !== discoverLoadCounter) return;
+      const items = snap.docs.map(d=>({id:d.id, ...d.data()}));
+      const seen = new Set();
+      const filtered = (search ? items.filter(g => (g.name||'').toLowerCase().includes(search)) : items).filter(g=>{
+        if(seen.has(g.id)) return false;
+        seen.add(g.id);
+        return true;
+      });
+      discoverGrid.innerHTML = '';
+      discoverEmpty.style.display = 'none';
+      if(filtered.length===0){ discoverEmpty.style.display='block'; return; }
+      filtered.forEach(g => discoverGrid.appendChild(renderGroupCard(g)));
+    }
+
+    async function loadMyGroups(){
+      if(!currentUser){ myGroupsList.innerHTML=''; myEmpty.style.display='block'; return; }
+      myGroupsList.innerHTML=''; myEmpty.style.display='none';
+      const col = collection(db, 'artifacts', appId, 'public', 'data', 'groups');
+      let snap = null;
+      try{
+        const qMine = query(col, where('members','array-contains', currentUser.uid), orderBy('name'));
+        snap = await getDocs(qMine);
+      }catch(e){
+        // Fallback without orderBy if index is missing or query fails
+        try{ const qAlt = query(col, where('members','array-contains', currentUser.uid)); snap = await getDocs(qAlt); }
+        catch(_){ snap = null; }
+      }
+      const items = snap? snap.docs.map(d=>({id:d.id, ...d.data()})) : [];
+      myGroupsMap = new Map(items.map(g=>[g.id,g]));
+      if(items.length===0){ myEmpty.style.display='block'; return; }
+      items.forEach(g => myGroupsList.appendChild(renderMyGroupItem(g)));
+    }
+
+    searchInput.addEventListener('input', (e)=>{
+      const val = (e.target.value||'').toLowerCase().trim();
+      loadDiscoverGroups(val);
+    });
+
+    createForm.addEventListener('submit', handleCreateGroup);
+
+    function toggleManageModal(show){ if(!manageModal) return; if(show){ manageModal.classList.add('show'); manageModal.setAttribute('aria-hidden','false'); } else { manageModal.classList.remove('show'); manageModal.setAttribute('aria-hidden','true'); manageForm.reset(); managingGroupId=null; } }
+
+    function openManageModal(groupId){
+      if(!currentUser){ showMessage('Please log in','warning'); return; }
+      const g = myGroupsMap.get(groupId);
+      if(!g){ showMessage('Group not found','error'); return; }
+      if(g.admin !== currentUser.uid){ showMessage('Only the creator can manage this group here','warning'); return; }
+      managingGroupId = groupId;
+      mgNameInput.value = g.name || '';
+      mgDescInput.value = g.description || '';
+      mgVisibility.value = g.visibility || 'public';
+      mgTagsInput.value = (g.tags||[]).join(', ');
+      mgJoinPolicy.value = g.joinPolicy || 'open';
+      mgPinnedInput.value = g.pinnedAnnouncement || '';
+      mgRulesInput.value = g.rulesText || '';
+      mgSettingsLink.href = `/group_settings.html?groupId=${encodeURIComponent(groupId)}`;
+      renderManageMembers(g);
+      renderJoinRequests(g);
+      toggleManageModal(true);
+    }
+
+    async function copyInviteLink(groupId){
+      try{
+        const snap = await getDoc(doc(db,'artifacts',appId,'public','data','groups',groupId));
+        if(!snap.exists()) throw new Error('Group not found');
+        const g = snap.data();
+        let base = `${location.origin}/Groups.html?groupId=${encodeURIComponent(groupId)}`;
+        if((g.joinPolicy||'open')==='invite'){
+          if(g.inviteEnabled===false){ showMessage('Invite is disabled','warning'); return; }
+          const token = g.inviteToken || Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
+          if(!g.inviteToken){ await updateDoc(doc(db,'artifacts',appId,'public','data','groups',groupId), { inviteToken: token, inviteEnabled: true, updatedAt: serverTimestamp() }); }
+          base += `&inviteToken=${encodeURIComponent(token)}`;
+        }
+        await navigator.clipboard.writeText(base);
+        showMessage('Invite link copied','success');
+      }catch(err){
+        const url = `${location.origin}/Groups.html?groupId=${encodeURIComponent(groupId)}`;
+        const ta=document.createElement('textarea'); ta.value=url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        showMessage('Invite link copied','success');
+      }
+    }
+
+    mgCancelBtn?.addEventListener('click', ()=> toggleManageModal(false));
+    manageModal?.addEventListener('click', (e)=>{ if(e.target===manageModal) toggleManageModal(false); });
+    mgInviteBtn?.addEventListener('click', ()=>{ if(managingGroupId) copyInviteLink(managingGroupId); });
+
+    mgResetInviteBtn?.addEventListener('click', async ()=>{
+      try{
+        if(!managingGroupId) return;
+        const token = Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-4);
+        await updateDoc(doc(db,'artifacts',appId,'public','data','groups',managingGroupId), { inviteToken: token, inviteEnabled: true, updatedAt: serverTimestamp() });
+        const g = myGroupsMap.get(managingGroupId) || {};
+        g.inviteToken = token; g.inviteEnabled = true; myGroupsMap.set(managingGroupId, g);
+        showMessage('Invite link reset','success');
+      }catch(err){ console.error(err); showMessage(`Failed: ${err.message}`,'error'); }
+    });
+
+    mgDisableInviteBtn?.addEventListener('click', async ()=>{
+      try{
+        if(!managingGroupId) return;
+        await updateDoc(doc(db,'artifacts',appId,'public','data','groups',managingGroupId), { inviteEnabled: false, updatedAt: serverTimestamp() });
+        const g = myGroupsMap.get(managingGroupId) || {};
+        g.inviteEnabled = false; myGroupsMap.set(managingGroupId, g);
+        showMessage('Invite disabled','success');
+      }catch(err){ console.error(err); showMessage(`Failed: ${err.message}`,'error'); }
+    });
+
+    async function fetchUserProfile(uid){
+      try{
+        const snap = await getDoc(doc(db,'artifacts',appId,'public','data','users',uid));
+        if(!snap.exists()) return { uid, username: uid.slice(0,6), profilePicId: null };
+        const d = snap.data();
+        return { uid, username: d.username || (d.displayName||uid.slice(0,6)), profilePicId: d.profilePicId || d.avatarId || null };
+      }catch(_){ return { uid, username: uid.slice(0,6), profilePicId: null }; }
+    }
+
+    async function renderManageMembers(group){
+      if(!mgMembersList) return;
+      mgMembersList.innerHTML = '';
+      const members = Array.from(new Set(group.members||[]));
+      const profiles = await Promise.all(members.map(uid=>fetchUserProfile(uid)));
+      const roles = {
+        owner: group.admin,
+        coAdmins: new Set(group.coAdmins||[]),
+        moderators: new Set(group.moderators||[]),
+        banned: new Set(group.banned||[]),
+        mutes: group.mutes || {}
+      };
+      const q = (mgMemberSearch?.value||'').toLowerCase().trim();
+      profiles.filter(p=>!q || p.username?.toLowerCase().includes(q) || p.uid.toLowerCase().includes(q)).forEach(p=>{
+        const row = document.createElement('div');
+        row.className = 'list-item';
+        const avatar = p.profilePicId ? getCloudinaryImageUrl(p.profilePicId,'w_56,h_56,c_fill,g_auto') : '';
+        const isOwner = roles.owner === p.uid;
+        const isCoAdmin = roles.coAdmins.has(p.uid);
+        const isMod = roles.moderators.has(p.uid);
+        const isBanned = roles.banned.has(p.uid);
+        const muteUntil = roles.mutes?.[p.uid] || 0;
+        const now = Date.now();
+        const isMuted = muteUntil && muteUntil > now;
+        const roleLabel = isOwner? 'Owner' : isCoAdmin? 'Co-Admin' : isMod? 'Moderator' : 'Member';
+        row.innerHTML = `
+          <img class="list-cover${avatar?'':' is-hidden'}" ${avatar?`src="${avatar}"`:''} alt="${p.username}">
+          <div style="flex:1 1 auto;min-width:0">
+            <p class="list-title">${p.username} • ${roleLabel}${isBanned?' • Banned':''}${isMuted?` • Muted until ${new Date(muteUntil).toLocaleString()}`:''}</p>
+            <p class="list-sub">${p.uid}</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            ${!isOwner?`<button class="btn btn-secondary" data-action="remove" data-uid="${p.uid}"><i class=\"fas fa-user-minus\"></i> Remove</button>`:''}
+            ${!isOwner && !isCoAdmin?`<button class="btn btn-secondary" data-action="make-coadmin" data-uid="${p.uid}"><i class=\"fas fa-user-shield\"></i> Co-Admin</button>`:''}
+            ${!isOwner && !isMod?`<button class="btn btn-secondary" data-action="make-mod" data-uid="${p.uid}"><i class=\"fas fa-user-cog\"></i> Moderator</button>`:''}
+            ${!isOwner && (isCoAdmin||isMod)?`<button class="btn btn-secondary" data-action="revoke-role" data-uid="${p.uid}"><i class=\"fas fa-user-slash\"></i> Revoke</button>`:''}
+            ${!isOwner && !isBanned?`<button class="btn btn-secondary" data-action="ban" data-uid="${p.uid}"><i class=\"fas fa-ban\"></i> Ban</button>`:''}
+            ${isBanned?`<button class="btn btn-secondary" data-action="unban" data-uid="${p.uid}"><i class=\"fas fa-undo\"></i> Unban</button>`:''}
+            ${!isOwner && !isBanned && !isMuted?`<button class="btn btn-secondary" data-action="mute1h" data-uid="${p.uid}"><i class=\"fas fa-volume-mute\"></i> Mute 1h</button>`:''}
+            ${isMuted?`<button class="btn btn-secondary" data-action="unmute" data-uid="${p.uid}"><i class=\"fas fa-volume-up\"></i> Unmute</button>`:''}
+            ${!isOwner?`<button class="btn btn-primary" data-action="make-admin" data-uid="${p.uid}"><i class=\"fas fa-crown\"></i> Transfer Owner</button>`:''}
+          </div>`;
+        mgMembersList.appendChild(row);
+      });
+      const reRender = ()=>{ const updated = myGroupsMap.get(group.id); if(updated) renderManageMembers(updated); };
+      mgMembersList.querySelectorAll('[data-action="remove"]').forEach(btn=>btn.addEventListener('click', ()=> removeMemberFromGroup(group.id, btn.getAttribute('data-uid'))));
+      mgMembersList.querySelectorAll('[data-action="make-admin"]').forEach(btn=>btn.addEventListener('click', ()=> transferGroupOwnership(group.id, btn.getAttribute('data-uid'))));
+      mgMembersList.querySelectorAll('[data-action="make-coadmin"]').forEach(btn=>btn.addEventListener('click', ()=> setRole(group.id, btn.getAttribute('data-uid'), 'coadmin', true).then(reRender)));
+      mgMembersList.querySelectorAll('[data-action="make-mod"]').forEach(btn=>btn.addEventListener('click', ()=> setRole(group.id, btn.getAttribute('data-uid'), 'moderator', true).then(reRender)));
+      mgMembersList.querySelectorAll('[data-action="revoke-role"]').forEach(btn=>btn.addEventListener('click', ()=> setRole(group.id, btn.getAttribute('data-uid'), 'revoke', true).then(reRender)));
+      mgMembersList.querySelectorAll('[data-action="ban"]').forEach(btn=>btn.addEventListener('click', ()=> setBan(group.id, btn.getAttribute('data-uid'), true).then(reRender)));
+      mgMembersList.querySelectorAll('[data-action="unban"]').forEach(btn=>btn.addEventListener('click', ()=> setBan(group.id, btn.getAttribute('data-uid'), false).then(reRender)));
+      mgMembersList.querySelectorAll('[data-action="mute1h"]').forEach(btn=>btn.addEventListener('click', ()=> setMute(group.id, btn.getAttribute('data-uid'), Date.now()+3600*1000).then(reRender)));
+      mgMembersList.querySelectorAll('[data-action="unmute"]').forEach(btn=>btn.addEventListener('click', ()=> setMute(group.id, btn.getAttribute('data-uid'), 0).then(reRender)));
+    }
+
+    async function removeMemberFromGroup(groupId, uid){
+      try{
+        const g = myGroupsMap.get(groupId);
+        if(!g || g.admin !== currentUser.uid){ showMessage('Unauthorized','error'); return; }
+        if(uid === g.admin){ showMessage('Cannot remove owner','warning'); return; }
+        await runTransaction(db, async(tx)=>{
+          const ref = doc(db,'artifacts',appId,'public','data','groups',groupId);
+          const snap = await tx.get(ref);
+          if(!snap.exists()) throw new Error('Group not found');
+          const data = snap.data();
+          const members = new Set([...(data.members||[])]);
+          if(!members.has(uid)) return;
+          members.delete(uid);
+          const banned = new Set([...(data.banned||[])]); banned.delete(uid);
+          const mutes = Object.assign({}, data.mutes||{}); delete mutes[uid];
+          tx.update(ref, { members: Array.from(members), banned: Array.from(banned), mutes, memberCount: increment(-1), updatedAt: serverTimestamp() });
+        });
+        showMessage('Member removed','success');
+        await loadMyGroups();
+        const updated = myGroupsMap.get(groupId);
+        if(updated){ renderManageMembers(updated); }
+      }catch(err){ console.error(err); showMessage(`Failed: ${err.message}`,'error'); }
+    }
+
+    async function transferGroupOwnership(groupId, newAdminUid){
+      try{
+        const g = myGroupsMap.get(groupId);
+        if(!g || g.admin !== currentUser.uid){ showMessage('Unauthorized','error'); return; }
+        if(newAdminUid === g.admin){ return; }
+        const ok = await showConfirmModal('Transfer group ownership? You will remain a member.', 'Transfer', 'Cancel');
+        if(!ok) return;
+        await runTransaction(db, async(tx)=>{
+          const ref = doc(db,'artifacts',appId,'public','data','groups',groupId);
+          const snap = await tx.get(ref);
+          if(!snap.exists()) throw new Error('Group not found');
+          const data = snap.data();
+          const members = new Set([...(data.members||[])]);
+          if(!members.has(newAdminUid)) throw new Error('User is not a member');
+          const coAdmins = new Set([...(data.coAdmins||[])]);
+          coAdmins.add(data.admin);
+          tx.update(ref, { admin: newAdminUid, coAdmins: Array.from(coAdmins), updatedAt: serverTimestamp() });
+        });
+        showMessage('Ownership transferred','success');
+        await loadMyGroups();
+        const updated = myGroupsMap.get(groupId);
+        if(updated){ renderManageMembers(updated); }
+      }catch(err){ console.error(err); showMessage(`Failed: ${err.message}`,'error'); }
+    }
+
+    async function leaveGroup(groupId){
+      try{
+        const g = myGroupsMap.get(groupId);
+        if(!g){ showMessage('Group not found','error'); return; }
+        if(g.admin === currentUser.uid){ showMessage('Transfer ownership before leaving','warning'); return; }
+        const ok = await showConfirmModal('Leave this group?', 'Leave', 'Stay');
+        if(!ok) return;
+        await runTransaction(db, async(tx)=>{
+          const ref = doc(db,'artifacts',appId,'public','data','groups',groupId);
+          const snap = await tx.get(ref);
+          if(!snap.exists()) throw new Error('Group not found');
+          const data = snap.data();
+          const members = new Set([...(data.members||[])]);
+          if(!members.has(currentUser.uid)) return;
+          members.delete(currentUser.uid);
+          const coAdmins = new Set([...(data.coAdmins||[])]); coAdmins.delete(currentUser.uid);
+          const moderators = new Set([...(data.moderators||[])]); moderators.delete(currentUser.uid);
+          const banned = new Set([...(data.banned||[])]); banned.delete(currentUser.uid);
+          const mutes = Object.assign({}, data.mutes||{}); delete mutes[currentUser.uid];
+          tx.update(ref, { members: Array.from(members), coAdmins: Array.from(coAdmins), moderators: Array.from(moderators), banned: Array.from(banned), mutes, memberCount: increment(-1), updatedAt: serverTimestamp() });
+        });
+        showMessage('Left group','success');
+        await loadMyGroups();
+      }catch(err){ console.error(err); showMessage(`Failed: ${err.message}`,'error'); }
+    }
+
+    async function uploadManageCoverIfNeeded(){
+      const f = mgCoverFile.files && mgCoverFile.files[0];
+      if(!f) return null;
+      const fd = new FormData();
+      fd.append('file', f);
+      if(cloudinaryConfig.uploadPreset) fd.append('upload_preset', cloudinaryConfig.uploadPreset);
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`, { method:'POST', body: fd });
+      const data = await res.json();
+      if(!res.ok) throw new Error(data.error?.message || 'Upload failed');
+      return data.public_id || data.secure_url;
+    }
+
+    manageForm?.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      if(!currentUser || !managingGroupId){ showMessage('No group selected','warning'); return; }
+      const g = myGroupsMap.get(managingGroupId);
+      if(!g || g.admin !== currentUser.uid){ showMessage('Unauthorized','error'); return; }
+      const name = mgNameInput.value.trim();
+      const description = mgDescInput.value.trim();
+      const visibility = mgVisibility.value || 'public';
+      const joinPolicy = mgJoinPolicy.value || 'open';
+      const pinnedAnnouncement = mgPinnedInput.value.trim() || null;
+      const rulesText = mgRulesInput.value.trim() || null;
+      const tags = (mgTagsInput.value||'').split(',').map(s=>s.trim()).filter(Boolean).slice(0,5);
+      if(!name){ showMessage('Enter group name','warning'); return; }
+      let picId = null;
+      try{ picId = await uploadManageCoverIfNeeded(); }catch(err){ console.error(err); showMessage('Cover upload failed','error'); return; }
+      const updates = { name, description: description||null, visibility, joinPolicy, pinnedAnnouncement, rulesText, tags, updatedAt: serverTimestamp() };
+      if(picId) updates.groupPicId = picId;
+      const ref = doc(db,'artifacts',appId,'public','data','groups',managingGroupId);
+      try{
+        await updateDoc(ref, updates);
+        showMessage('Group updated','success');
+        toggleManageModal(false);
+        await loadMyGroups();
+        await loadDiscoverGroups(searchInput.value||'');
+      }catch(err){ console.error(err); showMessage(`Failed to update: ${err.message}`,'error'); }
+    });
+
+    mgDeleteBtn?.addEventListener('click', async ()=>{
+      if(!currentUser || !managingGroupId){ return; }
+      const g = myGroupsMap.get(managingGroupId);
+      if(!g || g.admin !== currentUser.uid){ showMessage('Unauthorized','error'); return; }
+      const ok = await showConfirmModal(`Delete group "${g.name||'this group'}"? This cannot be undone.`, 'Delete', 'Cancel');
+      if(!ok) return;
+      try{
+        await deleteDoc(doc(db,'artifacts',appId,'public','data','groups', managingGroupId));
+        showMessage('Group deleted','success');
+        toggleManageModal(false);
+        await loadMyGroups();
+        await loadDiscoverGroups(searchInput.value||'');
+      }catch(err){ console.error(err); showMessage(`Failed to delete: ${err.message}`,'error'); }
+    });
+
+    mgMemberSearch?.addEventListener('input', ()=>{ const g = myGroupsMap.get(managingGroupId||''); if(g) renderManageMembers(g); });
+
+    mgExportBtn?.addEventListener('click', ()=>{
+      if(!managingGroupId) return;
+      const g = myGroupsMap.get(managingGroupId);
+      if(!g) return;
+      const rows = [['uid','role']];
+      (g.members||[]).forEach(uid=>{
+        let role = 'member';
+        if(uid===g.admin) role='owner'; else if((g.coAdmins||[]).includes(uid)) role='coadmin'; else if((g.moderators||[]).includes(uid)) role='moderator';
+        rows.push([uid, role]);
+      });
+      const csv = rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], {type:'text/csv'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`group-${managingGroupId}-members.csv`; a.click(); URL.revokeObjectURL(a.href);
+    });
+
+    async function setRole(groupId, uid, role, value){
+      if(!currentUser) throw new Error('Not signed in');
+      const g = myGroupsMap.get(groupId);
+      if(!g || g.admin !== currentUser.uid) throw new Error('Unauthorized');
+      const ref = doc(db,'artifacts',appId,'public','data','groups',groupId);
+      await runTransaction(db, async(tx)=>{
+        const snap = await tx.get(ref);
+        if(!snap.exists()) throw new Error('Group not found');
+        const data = snap.data();
+        const members = new Set([...(data.members||[])]);
+        if(!members.has(uid)) throw new Error('User is not a member');
+        let coAdmins = new Set([...(data.coAdmins||[])]);
+        let moderators = new Set([...(data.moderators||[])]);
+        if(role==='coadmin'){ coAdmins.add(uid); }
+        if(role==='moderator'){ moderators.add(uid); }
+        if(role==='revoke'){ coAdmins.delete(uid); moderators.delete(uid); }
+        tx.update(ref, { coAdmins: Array.from(coAdmins), moderators: Array.from(moderators), updatedAt: serverTimestamp() });
+      });
+      await loadMyGroups();
+    }
+
+    async function setBan(groupId, uid, ban){
+      const g = myGroupsMap.get(groupId);
+      if(!g || g.admin !== currentUser.uid) { showMessage('Unauthorized','error'); return; }
+      await runTransaction(db, async(tx)=>{
+        const ref = doc(db,'artifacts',appId,'public','data','groups',groupId);
+        const snap = await tx.get(ref);
+        if(!snap.exists()) throw new Error('Group not found');
+        const data = snap.data();
+        let banned = new Set([...(data.banned||[])]);
+        const members = new Set([...(data.members||[])]);
+        if(ban){ banned.add(uid); members.delete(uid); }
+        else { banned.delete(uid); }
+        tx.update(ref, { banned: Array.from(banned), members: Array.from(members), memberCount: members.size, updatedAt: serverTimestamp() });
+      });
+      showMessage(ban?'User banned':'User unbanned', 'success');
+      await loadMyGroups();
+    }
+
+    async function setMute(groupId, uid, until){
+      const g = myGroupsMap.get(groupId);
+      if(!g || g.admin !== currentUser.uid){ showMessage('Unauthorized','error'); return; }
+      const ref = doc(db,'artifacts',appId,'public','data','groups',groupId);
+      if(until>0) await updateDoc(ref, { [`mutes.${uid}`]: until, updatedAt: serverTimestamp() });
+      else await updateDoc(ref, { [`mutes.${uid}`]: deleteField(), updatedAt: serverTimestamp() });
+      showMessage(until>0?'User muted':'User unmuted', 'success');
+      await loadMyGroups();
+    }
+
+    function renderJoinRequests(group){
+      if(!mgRequestsList) return;
+      mgRequestsList.innerHTML = '';
+      const reqs = Array.from(new Set(group.pendingRequests||[]));
+      if(reqs.length===0){ mgRequestsList.innerHTML = '<div class="empty-state">No pending requests</div>'; return; }
+      Promise.all(reqs.map(uid=>fetchUserProfile(uid))).then(list=>{
+        list.forEach(p=>{
+          const row = document.createElement('div');
+          row.className = 'list-item';
+          const avatar = p.profilePicId ? getCloudinaryImageUrl(p.profilePicId,'w_56,h_56,c_fill,g_auto') : '';
+          row.innerHTML = `
+            <img class="list-cover${avatar?'':' is-hidden'}" ${avatar?`src="${avatar}"`:''} alt="${p.username}">
+            <div style="flex:1 1 auto;min-width:0">
+              <p class="list-title">${p.username}</p>
+              <p class="list-sub">${p.uid}</p>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-primary" data-action="approve" data-uid="${p.uid}"><i class="fas fa-check"></i> Approve</button>
+              <button class="btn btn-secondary" data-action="deny" data-uid="${p.uid}"><i class="fas fa-xmark"></i> Deny</button>
+            </div>`;
+          mgRequestsList.appendChild(row);
+        });
+        mgRequestsList.querySelectorAll('[data-action="approve"]').forEach(btn=>btn.addEventListener('click', ()=> approveRequest(group.id, btn.getAttribute('data-uid'))));
+        mgRequestsList.querySelectorAll('[data-action="deny"]').forEach(btn=>btn.addEventListener('click', ()=> denyRequest(group.id, btn.getAttribute('data-uid'))));
+      });
+    }
+
+    async function approveRequest(groupId, uid){
+      try{
+        await runTransaction(db, async(tx)=>{
+          const ref = doc(db,'artifacts',appId,'public','data','groups',groupId);
+          const snap = await tx.get(ref);
+          if(!snap.exists()) throw new Error('Group not found');
+          const data = snap.data();
+          const pending = new Set([...(data.pendingRequests||[])]);
+          if(!pending.has(uid)) return;
+          pending.delete(uid);
+          const members = new Set([...(data.members||[])]); members.add(uid);
+          tx.update(ref, { pendingRequests: Array.from(pending), members: Array.from(members), memberCount: increment(1), updatedAt: serverTimestamp() });
+        });
+        showMessage('Request approved','success');
+        await loadMyGroups();
+        const updated = myGroupsMap.get(groupId); if(updated) renderJoinRequests(updated);
+      }catch(err){ console.error(err); showMessage(`Failed: ${err.message}`,'error'); }
+    }
+
+    async function denyRequest(groupId, uid){
+      try{
+        await runTransaction(db, async(tx)=>{
+          const ref = doc(db,'artifacts',appId,'public','data','groups',groupId);
+          const snap = await tx.get(ref);
+          if(!snap.exists()) throw new Error('Group not found');
+          const data = snap.data();
+          const pending = new Set([...(data.pendingRequests||[])]);
+          if(!pending.has(uid)) return;
+          pending.delete(uid);
+          tx.update(ref, { pendingRequests: Array.from(pending), updatedAt: serverTimestamp() });
+        });
+        showMessage('Request denied','success');
+        await loadMyGroups();
+        const updated = myGroupsMap.get(groupId); if(updated) renderJoinRequests(updated);
+      }catch(err){ console.error(err); showMessage(`Failed: ${err.message}`,'error'); }
+    }
+
+    // Auto-join via invite link
+    async function tryAutoJoinFromLink(){
+      const gid = getQueryParam('groupId');
+      const tok = getQueryParam('inviteToken');
+      if(!gid || !tok) return;
+      if(!currentUser) return;
+      try{
+        await joinGroup(gid);
+        setTimeout(()=> openGroup(gid), 400);
+      }catch(_){ /* ignore */ }
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      try {
+        if(!user){ await signInAnonymously(auth); return; }
+        currentUser = user;
+        try { localStorage.setItem('nuvia_auth_user', JSON.stringify({ uid: user.uid, email: user.email || null, displayName: user.displayName || null, ts: Date.now() })); localStorage.setItem('nuvia_auth_status','authenticated'); } catch(_) {}
+        applyHeaderProfile(user);
+        if (adminIconLink) adminIconLink.style.display = (user.uid === ADMIN_UID) ? 'block' : 'none';
+        registerSession(auth, db, appId).catch(()=>{});
+        await loadDiscoverGroups();
+        await loadMyGroups();
+        await tryAutoJoinFromLink();
+      } catch (e) { console.error(e); }
+    });
+
+    loadDiscoverGroups().catch(()=>{});
+
+    // --- Sidebar logic (aligned with Home) ---
+    const sidebarNav = document.getElementById('sidebarNav');
+    const sidebarToggleFab = document.getElementById('sidebarToggleFab');
+    const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+
+    function openSidebar(){
+      document.body.classList.add('sidebar-open');
+      sidebarNav.classList.add('sidebar-visible');
+      sidebarNav.classList.remove('sidebar-hidden');
+      if (sidebarBackdrop) sidebarBackdrop.classList.add('show');
+    }
+    function closeSidebar(){
+      document.body.classList.remove('sidebar-open');
+      sidebarNav.classList.remove('sidebar-visible');
+      sidebarNav.classList.add('sidebar-hidden');
+      if (sidebarBackdrop) sidebarBackdrop.classList.remove('show');
+    }
+    function toggleSidebar(){
+      if (sidebarNav.classList.contains('sidebar-visible')) closeSidebar(); else openSidebar();
+    }
+
+    if (sidebarToggleFab) sidebarToggleFab.addEventListener('click', (e)=>{ e.preventDefault(); toggleSidebar(); });
+    if (sidebarCloseBtn) sidebarCloseBtn.addEventListener('click', (e)=>{ e.preventDefault(); closeSidebar(); });
+    if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', closeSidebar);
+    document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeSidebar(); });
+
+    // Mark active link
+    const currentPath = (window.location.pathname || '').toLowerCase();
+    document.querySelectorAll('.sidebar-nav-item').forEach(a=>{
+      const href = (a.getAttribute('href')||'').toLowerCase();
+      if (href && currentPath.endsWith(href)) a.classList.add('active');
+    });
+  </script>
+    <script src="assets/js/lazy-images.js" defer></script>
+</body>
+</html>

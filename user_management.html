@@ -1,0 +1,1938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Last updated: 2025-08-21T18:19:29Z -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JCHAT - Admin Management</title>
+
+    <!-- Google Fonts: Poppins for headings, Inter for body text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        /* Universal box-sizing for consistent layout */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        /* Global CSS Variables for easy theme switching (reusing from Chat.html) */
+        :root {
+            --pink: #ff2e92;
+            --blue: #00d5ff;
+            --radius: 20px;
+            --transition: .3s ease;
+
+            /* Default Dark Mode variables */
+            --white: #fff;
+            --text-light: rgba(255, 255, 255, .7);
+            --background-main: rgba(10, 10, 10, .75);
+            --background-gradient-1: #00d5ff;
+            --background-gradient-2: #ff2e92;
+            --card-background: linear-gradient(145deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01));
+            --header-background: linear-gradient(135deg, rgba(10, 10, 10, .85), rgba(10, 10, 10, .75));
+            --border-light: rgba(255, 255, 255, .05);
+            --input-background: rgba(255, 255, 255, 0.05);
+            --button-background: linear-gradient(90deg, var(--blue), var(--pink));
+            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+
+            /* New variables for consistent theming */
+            --background-color-primary: #1a1a2e;
+            --background-color-secondary: #0f0f1f;
+            --header-background-color: #2a2a4a;
+            --footer-background-color: #2a2a4a;
+            --content-background-color: #20203a;
+            --card-background-color: #2a2a4a;
+            --text-color-primary: #e0e0e0;
+            --text-color-secondary: #b0b0d0;
+            --notification-badge-color: #ff2e92;
+            --status-online: #4CAF50;
+            --status-offline: #6c757d;
+            --status-away: #FFC107;
+            --delete-button-color: #dc3545;
+            --warning-color: #ffc107;
+            --accent-color: #00d5ff; /* A bright cyan */
+            --accent-color-dark: #00aaff;
+            --border-color: #3a3a5a;
+        }
+
+        /* Theme Definitions (Light, Dark, Glass, Sunset) */
+        body.theme-light-mode {
+            --background-main: #f0f2f5;
+            --background-gradient-1: #e0e2e5;
+            --background-gradient-2: #d0d2d5;
+            --white: #333;
+            --text-light: #666;
+            --card-background: rgba(255, 255, 255, 0.95);
+            --header-background: rgba(255, 255, 255, 0.98);
+            --border-light: rgba(0, 0, 0, 0.1);
+            --input-background: rgba(0, 0, 0, 0.05);
+            --button-background: linear-gradient(90deg, #6dd5ed, #2193b0);
+            --button-shadow: 0 4px 15px rgba(109, 213, 237, 0.4), 0 4px 15px rgba(33, 147, 176, 0.4);
+            --background-color-primary: #f0f2f5;
+            --background-color-secondary: #e0e2e5;
+            --header-background-color: #ffffff;
+            --footer-background-color: #ffffff;
+            --content-background-color: #f7f9fb;
+            --card-background-color: #ffffff;
+            --text-color-primary: #333333;
+            --text-color-secondary: #666666;
+            --text-color-light: #999999;
+            --accent-color: #007bff;
+            --accent-color-dark: #0056b3;
+            --border-color: #e0e0e0;
+            --input-background-color: #f0f0f0;
+            --button-background: #e9ecef;
+            --button-hover-background: #dee2e6;
+            --active-item-background: rgba(0, 123, 255, 0.1);
+            --notification-badge-color: #dc3545;
+            --status-online: #28a745;
+            --status-offline: #6c757d;
+            --status-away: #ffc107;
+            --delete-button-color: #dc3545;
+            --warning-color: #ffc107;
+        }
+
+        body.theme-dark-mode {
+            --background-main: #1a1a2e;
+            --background-gradient-1: #16213e;
+            --background-gradient-2: #0f3460;
+            --white: #e0e0e0;
+            --text-light: #a0a0a0;
+            --card-background: rgba(25, 25, 40, 0.7);
+            --header-background: linear-gradient(135deg, rgba(10, 10, 20, .85), rgba(10, 10, 20, .75));
+            --border-light: rgba(255, 255, 255, 0.08);
+            --input-background: rgba(255, 255, 255, 0.08);
+            --button-background: linear-gradient(90deg, #e94560, #ba2f49);
+            --button-shadow: 0 4px 15px rgba(233, 69, 96, 0.4), 0 44px 15px rgba(186, 47, 73, 0.4);
+            --background-color-primary: #121212;
+            --background-color-secondary: #1e1e1e;
+            --header-background-color: #2c2c2c;
+            --footer-background-color: #2c2c2c;
+            --content-background-color: #242424;
+            --card-background-color: #2c2c2c;
+            --text-color-primary: #ffffff;
+            --text-color-secondary: #bbbbbb;
+            --accent-color: #bb86fc;
+            --accent-color-dark: #9a67ea;
+            --border-color: #444444;
+            --input-background-color: #383838;
+            --button-background: #383838;
+            --button-hover-background: #505050;
+            --active-item-background: rgba(187, 134, 252, 0.2);
+            --notification-badge-color: #cf6679;
+            --delete-button-color: #f44336;
+            --warning-color: #ffeb3b;
+        }
+
+        body.theme-glass-mode {
+            --background-main: rgba(10, 10, 10, 0.75);
+            background-image: url('https://source.unsplash.com/random/1920x1080?abstract,blur') !important;
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            backdrop-filter: blur(10px);
+            --card-background: rgba(25, 25, 40, 0.7);
+            --white: #e0e0e0;
+            --text-light: rgba(255, 255, 255, 0.7);
+            --input-background: rgba(255, 255, 255, 0.05);
+            --border-light: rgba(255, 255, 255, 0.1);
+            --button-background: linear-gradient(90deg, var(--pink), var(--blue));
+            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5);
+            --background-color-primary: rgba(10, 10, 10, 0.75);
+            --background-color-secondary: rgba(10, 10, 10, 0.6);
+            --header-background-color: rgba(10, 10, 10, 0.85);
+            --footer-background-color: rgba(10, 10, 10, 0.85);
+            --content-background-color: rgba(10, 10, 10, 0.75);
+            --card-background-color: rgba(25, 25, 40, 0.7);
+            --text-color-primary: #e0e0e0;
+            --text-color-secondary: #b0b0d0;
+            --accent-color: #00d5ff;
+            --accent-color-dark: #00aaff;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --input-background-color: rgba(255, 255, 255, 0.05);
+            --button-background: rgba(0, 213, 255, 0.15);
+            --button-hover-background: rgba(0, 213, 255, 0.25);
+            --active-item-background: rgba(0, 213, 255, 0.1);
+        }
+
+        body.theme-sunset-mode {
+            background: linear-gradient(to top, #ff7e5f, #feb47b) !important;
+            --background-main: linear-gradient(to top, #ff7e5f, #feb47b);
+            --card-background: rgba(255, 255, 255, 0.15);
+            --white: #fff;
+            --text-light: rgba(255, 255, 255, 0.8);
+            --input-background: rgba(255, 255, 255, 0.1);
+            --border-light: rgba(255, 255, 255, 0.3);
+            --button-background: linear-gradient(90deg, #fd746c, #ff9068);
+            --button-shadow: 0 4px 15px rgba(253, 116, 108, 0.4), 0 44px 15px rgba(255, 144, 104, 0.4);
+            --background-color-primary: #ff7e5f;
+            --background-color-secondary: #feb47b;
+            --header-background-color: rgba(255, 126, 95, 0.9);
+            --footer-background-color: rgba(255, 126, 95, 0.9);
+            --content-background-color: rgba(255, 126, 95, 0.85);
+            --card-background-color: rgba(255, 255, 255, 0.15);
+            --text-color-primary: #fff;
+            --text-color-secondary: rgba(255, 255, 255, 0.8);
+            --accent-color: #ffd700;
+            --accent-color-dark: #ccaa00;
+            --border-color: rgba(255, 255, 255, 0.3);
+            --input-background-color: rgba(255, 255, 255, 0.1);
+            --button-background: rgba(255, 255, 255, 0.2);
+            --button-hover-background: rgba(255, 255, 255, 0.3);
+            --active-item-background: rgba(255, 215, 0, 0.1);
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: auto; /* Allow scrolling for content beyond viewport */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Align to top for scrollable content */
+            padding: 20px; /* Add padding for overall content */
+            background-color: var(--background-main);
+            background-image: radial-gradient(circle at top left, var(--background-gradient-1), transparent 100px),
+                              radial-gradient(circle at bottom right, var(--background-gradient-2), transparent 150px);
+            color: var(--white);
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        .container {
+            background: var(--card-background);
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 1200px; /* Increased max-width for two-column layout */
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            border: 1px solid var(--border-light);
+            backdrop-filter: blur(5px);
+            margin-top: 20px; /* Add margin to top */
+            margin-bottom: 20px; /* Add margin to bottom */
+        }
+
+        .main-content-grid {
+            display: grid;
+            grid-template-columns: 1fr; /* Single column by default for mobile */
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) { /* Two columns for tablets and desktops */
+            .main-content-grid {
+                grid-template-columns: 1fr 2fr; /* Left column narrower, right wider */
+            }
+        }
+
+        h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            text-align: center;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            letter-spacing: -0.03em;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-top: 0; /* Adjusted for card padding */
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: 5px;
+        }
+
+        .card {
+            background: var(--input-background); /* Lighter background for cards */
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-color-primary);
+            font-size: 0.95rem;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"] {
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--card-background-color); /* Use card background for inputs */
+            color: var(--text-color-primary);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group input[type="number"]:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(0, 213, 255, 0.2);
+        }
+
+        .button-group {
+            display: flex;
+            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+            gap: 10px; /* Reduced gap for more compact layout */
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.3s ease;
+            color: var(--white);
+            background: linear-gradient(90deg, var(--blue), var(--pink));
+            box-shadow: 0 4px 15px rgba(0, 213, 255, 0.3);
+            flex-shrink: 0; /* Prevent shrinking */
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 213, 255, 0.4), 0 6px 20px rgba(255, 46, 146, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: var(--card-background-color); /* Use card background for secondary buttons */
+            color: var(--text-light);
+            border: 1px solid var(--border-light);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-danger {
+            background: var(--delete-button-color);
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+        .btn-danger:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+        }
+
+        .user-info-display {
+            /* This is now a section within a card, so some styles are inherited/adjusted */
+            padding: 15px; /* Added internal padding */
+            border-radius: 10px; /* Smaller radius for inner element */
+            background: var(--background-color-secondary); /* Slightly different background for visual separation */
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .user-info-display .user-avatar-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .user-info-display .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent-color);
+            flex-shrink: 0;
+        }
+
+        .user-info-display .user-avatar-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            border: 3px solid var(--accent-color);
+            flex-shrink: 0;
+        }
+
+        .user-info-display .user-main-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-info-display h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--text-color-primary);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .user-info-display p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-color-secondary);
+        }
+
+        .user-info-display p strong {
+            color: var(--text-color-primary);
+            font-weight: 700;
+        }
+
+        .user-info-display .status-banned {
+            color: var(--delete-button-color);
+            font-weight: 700;
+        }
+        .user-info-display .status-active {
+            color: var(--status-online);
+            font-weight: 700;
+        }
+
+
+        .user-info-display.hidden {
+            display: none;
+        }
+
+        /* User List Specific Styles */
+        #userListContainer {
+            max-height: 400px; /* Fixed height for scrollable list */
+            overflow-y: auto;
+            /* Removed border, background, padding as it's now inside a .card */
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        #userListContainer::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #userListContainer::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        #userListContainer::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, var(--blue), var(--pink));
+            border-radius: 10px;
+        }
+
+        #userListContainer::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, var(--pink), var(--blue));
+        }
+
+        .user-list-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+            border: 1px solid transparent; /* For consistent spacing */
+        }
+
+        .user-list-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .user-list-item.selected {
+            background: var(--active-item-background);
+            border-color: var(--accent-color);
+        }
+
+        .user-list-item .avatar-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--pink);
+            flex-shrink: 0;
+        }
+        .user-list-item .avatar-small-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--pink);
+            border: 2px solid var(--pink);
+            flex-shrink: 0;
+        }
+
+        .user-list-item .user-details {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .user-list-item .user-details strong {
+            font-size: 1rem;
+            color: var(--white);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-list-item .user-details span {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .no-users-message {
+            text-align: center;
+            color: var(--text-light);
+            padding: 20px;
+            font-size: 0.9rem;
+        }
+
+        /* Friends List Specific Styles */
+        #friendsListContainer {
+            max-height: 200px; /* Fixed height for scrollable list */
+            overflow-y: auto;
+            /* Removed border, background, padding as it's now inside a .card */
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        #friendsListContainer::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #friendsListContainer::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        #friendsListContainer::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, var(--blue), var(--pink));
+            border-radius: 10px;
+        }
+
+        #friendsListContainer::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, var(--pink), var(--blue));
+        }
+
+        .friend-list-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-light);
+        }
+
+        .friend-list-item .friend-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--blue);
+            flex-shrink: 0;
+        }
+        .friend-list-item .friend-avatar-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--blue);
+            border: 2px solid var(--blue);
+            flex-shrink: 0;
+        }
+
+        .friend-list-item .friend-details {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .friend-list-item .friend-details strong {
+            font-size: 0.9rem;
+            color: var(--text-color-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .friend-list-item .friend-details span {
+            font-size: 0.75rem;
+            color: var(--text-color-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .remove-friend-btn {
+            background: var(--delete-button-color);
+            color: var(--white);
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            flex-shrink: 0;
+        }
+        .remove-friend-btn:hover {
+            background: #c82333;
+        }
+        .no-friends-message {
+            text-align: center;
+            color: var(--text-light);
+            padding: 10px;
+            font-size: 0.85rem;
+        }
+
+
+        /* Custom Message Box Styles (reused from Chat.html) */
+        #messageBox {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--card-background-color);
+            color: var(--text-color-primary);
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            min-width: 280px;
+            max-width: 90%;
+            text-align: center;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        #messageBox.show {
+            opacity: 1;
+            display: flex;
+        }
+        #messageBox.success {
+            background-image: linear-gradient(45deg, var(--pink), var(--blue));
+            color: var(--white);
+            border: none;
+            box-shadow: 0 8px 30px rgba(0, 213, 255, 0.5), 0 8px 30px rgba(255, 46, 146, 0.5);
+        }
+        #messageBox.error { border-left: 5px solid var(--delete-button-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+        #messageBox.info { border-left: 5px solid var(--accent-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+        #messageBox.warning { border-left: 5px solid var(--warning-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+
+        #messageBox i {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+        #messageBox.success i { color: var(--white); }
+        #messageBox.error i { color: var(--delete-button-color); }
+        #messageBox.info i { color: var(--accent-color); }
+        #messageBox.warning i { color: var(--warning-color); }
+
+        #messageBox span {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        @keyframes pulse-bg {
+            0% { background-color: var(--accent-color); }
+            50% { background-color: rgba(0, 213, 255, 0.7); }
+            100% { background-color: var(--accent-color); }
+        }
+        #messageBox.loading-pulse { animation: pulse-bg 1.5s infinite ease-in-out; }
+
+        /* Custom Confirmation Modal (reused from Chat.html) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: var(--card-background);
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .modal-content h3 {
+            color: var(--white);
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        .modal-buttons button {
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .modal-buttons button.confirm-btn {
+            background: linear-gradient(90deg, var(--pink), var(--blue));
+            color: var(--white);
+            box-shadow: 0 4px 10px rgba(0, 213, 255, 0.3);
+        }
+        .modal-buttons button.confirm-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 213, 255, 0.4);
+        }
+        .modal-buttons button.cancel-btn {
+            background: var(--input-background);
+            color: var(--text-light);
+            border: 1px solid var(--border-light);
+        }
+        .modal-buttons button.cancel-btn:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Admin Access Denied Overlay */
+        #accessDeniedOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            color: var(--white);
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            padding: 20px;
+            display: none; /* Hidden by default */
+        }
+        #accessDeniedOverlay i {
+            font-size: 4rem;
+            color: var(--delete-button-color);
+            margin-bottom: 20px;
+        }
+        #accessDeniedOverlay h2 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+        #accessDeniedOverlay p {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-bottom: 30px;
+        }
+        #accessDeniedOverlay .btn-back {
+            background: linear-gradient(90deg, var(--pink), var(--blue));
+            color: var(--white);
+            padding: 12px 30px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        #accessDeniedOverlay .btn-back:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--blue), 0 6px 20px var(--pink);
+        }
+    </style>
+<style id="header-overflow-fix">/*header-overflow-fix*/header .header-content-wrapper{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap}header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0;justify-content:flex-end}#profileLink{display:inline-flex;align-items:center;column-gap:8px;row-gap:2px;flex-wrap:wrap;max-width:100%;min-width:0}#profileLink #headerDisplayName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;flex:0 1 auto}#headerProfilePic,#headerAvatarIcon{flex:0 0 auto}@media (max-width:600px){header .header-content-wrapper{gap:8px}#profileLink{column-gap:6px}}</style></head>
+<body class="theme-dark-mode">
+    <div class="container">
+        <h1>Admin User Management</h1>
+
+        <div class="main-content-grid">
+            <!-- Left Column: User List and Filter -->
+            <div class="left-column">
+                <div class="card">
+                    <h2 class="section-title">All JCHAT Users</h2>
+                    <div class="form-group">
+                        <label for="searchQueryInput">Filter Users:</label>
+                        <input type="text" id="searchQueryInput" placeholder="Filter by ID or Username...">
+                    </div>
+                    <div id="userListContainer">
+                        <p class="no-users-message" id="loadingUsersMessage">Loading users...</p>
+                        <!-- User list items will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Selected User Details and Actions -->
+            <div class="right-column">
+                <div class="card" id="selectedUserDetailsCard">
+                    <h2 class="section-title">Selected User Details</h2>
+                    <div id="userInfoDisplay" class="user-info-display hidden">
+                        <div class="user-avatar-section">
+                            <img src="" alt="User Avatar" class="user-avatar" id="displayUserAvatar" style="display: none;">
+                            <i class="fas fa-user-circle user-avatar-icon" id="displayUserAvatarIcon"></i>
+                            <div class="user-main-details">
+                                <h3 id="displayUsername"></h3>
+                                <p>ID: <strong id="displayUserId"></strong> <button class="btn-copy-id" id="copyUserIdBtn"><i class="fas fa-copy"></i></button></p>
+                                <p>Email: <strong id="displayEmail"></strong></p>
+                            </div>
+                        </div>
+                        <p>Created: <strong id="displayCreatedAt"></strong></p>
+                        <p>Last Online: <strong id="displayLastOnline"></strong></p>
+                        <p>Current Level: <strong id="displayLevel"></strong></p>
+                        <p>Current XP: <strong id="displayXp"></strong></p>
+                        <p>XP to Next Level: <strong id="displayXpToNextLevel"></strong></p>
+                        <p>JCoins: <strong id="displayJCoins"></strong></p>
+                        <p>Banned Status: <strong id="displayBannedStatus"></strong></p>
+                    </div>
+                    <p class="no-users-message" id="noUserSelectedMessage">Select a user from the list to view their details.</p>
+                </div>
+
+                <div class="card" id="friendsListCard">
+                    <h2 class="section-title">Friends List</h2>
+                    <div id="friendsListContainer">
+                        <p class="no-friends-message" id="noFriendsMessage">Select a user to view their friends.</p>
+                        <!-- Friends list items will be populated here -->
+                    </div>
+                </div>
+
+                <div class="card" id="updateUserCard">
+                    <h2 class="section-title">Update Selected User</h2>
+                    <div class="form-group">
+                        <label for="newLevelInput">Set New Level:</label>
+                        <input type="number" id="newLevelInput" placeholder="Enter new level (optional)" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="xpAmountInput">Add/Subtract XP:</label>
+                        <input type="number" id="xpAmountInput" placeholder="Enter XP amount (e.g., 100 or -50)" >
+                    </div>
+                    <div class="form-group">
+                        <label for="jcoinsAmountInput">Add/Subtract JCoins:</label>
+                        <input type="number" id="jcoinsAmountInput" placeholder="Enter JCoins amount (e.g., 50 or -20)" >
+                    </div>
+                    <div class="button-group">
+                        <button id="updateUserBtn" class="btn" disabled>Update User Data</button>
+                    </div>
+                </div>
+
+                <div class="card" id="accountActionsCard">
+                    <h2 class="section-title">Account Actions</h2>
+                    <div class="button-group">
+                        <button id="toggleBanBtn" class="btn btn-secondary" disabled>Toggle Ban Status</button>
+                        <button id="resetLevelXpBtn" class="btn btn-secondary" disabled>Reset Level & XP</button>
+                        <button id="deleteUserBtn" class="btn btn-danger" disabled>Delete User</button>
+                        <button id="grantProBtn" class="btn" disabled>Grant Pro</button>
+                        <button id="revokeProBtn" class="btn" disabled>Revoke Pro</button>
+                        <button id="grantAdFreeBtn" class="btn" disabled>Grant Ad‑Free</button>
+                        <button id="revokeAdFreeBtn" class="btn" disabled>Revoke Ad‑Free</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-group" style="margin-top: 30px;">
+            <a href="/chat.html" class="btn btn-secondary">Back to Chat</a>
+        </div>
+    </div>
+
+    <!-- Custom Message Box -->
+    <div id="messageBox"></div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="customConfirmModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="confirmModalMessage"></h3>
+            <div class="modal-buttons">
+                <button id="confirmYesBtn" class="confirm-btn">Yes</button>
+                <button id="confirmNoBtn" class="cancel-btn">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Access Denied Overlay -->
+    <div id="accessDeniedOverlay">
+        <i class="fas fa-exclamation-triangle"></i>
+        <h2>Access Denied</h2>
+        <p>You do not have administrative privileges to view this page.</p>
+        <a href="/chat.html" class="btn-back">Go to Chat</a>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc, runTransaction, collection, query, where, getDocs, deleteDoc, arrayRemove, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // --- Firebase & Canvas Environment Configuration ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+            authDomain: "jchat-1.firebaseapp.com",
+            databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+            projectId: "jchat-1",
+            storageBucket: "jchat-1.firebasestorage.app",
+            messagingSenderId: "328479683167",
+            appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
+            measurementId: "G-S6Z9GG0R9P"
+        };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? initialAuthToken : null;
+
+        // Cloudinary Configuration (for profile pictures)
+        const cloudinaryConfig = {
+            cloudName: "dxld01rcp", // Your Cloudinary Cloud Name
+            uploadPreset: "Storage_preset" // Your Cloudinary Upload Preset
+        };
+
+        // Initialize Firebase services
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- DOM Elements ---
+        const searchQueryInput = document.getElementById('searchQueryInput');
+        const userListContainer = document.getElementById('userListContainer');
+        const loadingUsersMessage = document.getElementById('loadingUsersMessage');
+        const noUserSelectedMessage = document.getElementById('noUserSelectedMessage');
+
+
+        const userInfoDisplay = document.getElementById('userInfoDisplay');
+        const displayUserAvatar = document.getElementById('displayUserAvatar');
+        const displayUserAvatarIcon = document.getElementById('displayUserAvatarIcon');
+        const displayUsername = document.getElementById('displayUsername');
+        const displayUserId = document.getElementById('displayUserId');
+        const copyUserIdBtn = document.getElementById('copyUserIdBtn');
+        const displayEmail = document.getElementById('displayEmail');
+        const displayCreatedAt = document.getElementById('displayCreatedAt');
+        const displayLastOnline = document.getElementById('displayLastOnline');
+        const displayLevel = document.getElementById('displayLevel');
+        const displayXp = document.getElementById('displayXp');
+        const displayXpToNextLevel = document.getElementById('displayXpToNextLevel');
+        const displayJCoins = document.getElementById('displayJCoins');
+        const displayBannedStatus = document.getElementById('displayBannedStatus');
+
+        const friendsListContainer = document.getElementById('friendsListContainer');
+        const noFriendsMessage = document.getElementById('noFriendsMessage');
+
+        const newLevelInput = document.getElementById('newLevelInput');
+        const xpAmountInput = document.getElementById('xpAmountInput');
+        const jcoinsAmountInput = document.getElementById('jcoinsAmountInput');
+        const updateUserBtn = document.getElementById('updateUserBtn');
+        const toggleBanBtn = document.getElementById('toggleBanBtn');
+        const resetLevelXpBtn = document.getElementById('resetLevelXpBtn');
+        const deleteUserBtn = document.getElementById('deleteUserBtn');
+        const grantProBtn = document.getElementById('grantProBtn');
+        const revokeProBtn = document.getElementById('revokeProBtn');
+        const grantAdFreeBtn = document.getElementById('grantAdFreeBtn');
+        const revokeAdFreeBtn = document.getElementById('revokeAdFreeBtn');
+        const messageBox = document.getElementById('messageBox');
+        const accessDeniedOverlay = document.getElementById('accessDeniedOverlay');
+
+        // Custom Confirmation Modal elements
+        const customConfirmModal = document.getElementById('customConfirmModal');
+        const confirmModalMessage = document.getElementById('confirmModalMessage');
+        const confirmYesBtn = document.getElementById('confirmYesBtn');
+        const confirmNoBtn = document.getElementById('confirmNoBtn');
+
+        // --- Global State ---
+        let currentUser = null;
+        let isAuthReady = false;
+        let allUsersData = []; // Stores all fetched user data (combined public/private)
+        let displayedUsers = []; // Stores users currently displayed in the list (after filtering)
+        let selectedUserUid = null; // The UID of the user currently selected in the details panel
+        let selectedUserData = null; // The full data of the user currently selected
+
+        // --- Constants ---
+        // Admin's User ID - IMPORTANT: For a production app, real admin checks should be done via backend and Firestore Security Rules.
+        const ADMIN_UID = 'cc96gdhCRPO72NFZtleRCujHvIq2';
+
+        // XP progression constants (example values, adjust as needed)
+        const BASE_XP_FOR_LEVEL = 100;
+        const XP_GROWTH_FACTOR = 1.2; // XP needed for next level increases by this factor
+
+        /**
+         * Calculates XP required for a given level.
+         * @param {number} level - The target level.
+         * @returns {number} The total XP required to reach that level.
+         */
+        function calculateXpForLevel(level) {
+            if (level <= 1) return 0;
+            let totalXp = 0;
+            for (let i = 1; i < level; i++) {
+                totalXp += Math.floor(BASE_XP_FOR_LEVEL * Math.pow(XP_GROWTH_FACTOR, i - 1));
+            }
+            return totalXp;
+        }
+
+        /**
+         * Calculates the XP needed to reach the next level from current XP and level.
+         * @param {number} currentLevel - The user's current level.
+         * @param {number} currentXp - The user's current XP.
+         * @returns {number} XP needed for next level.
+         */
+        function getXpToNextLevel(currentLevel, currentXp) {
+            const xpForCurrentLevelStart = calculateXpForLevel(currentLevel);
+            const xpForNextLevelStart = calculateXpForLevel(currentLevel + 1);
+            const xpForThisLevel = xpForNextLevelStart - xpForCurrentLevelStart;
+            const xpProgressInCurrentLevel = currentXp - xpForCurrentLevelStart;
+            return Math.max(0, xpForThisLevel - xpProgressInCurrentLevel);
+        }
+
+        /**
+         * Displays a temporary message box with a given message and type.
+         * @param {string} message - The message to display.
+         * @param {string} type - The type of message ('success', 'error', 'info', 'loading', 'warning').
+         * @param {boolean} [isPersistent=false] - If true, message stays until explicitly cleared or replaced.
+         * @param {number} [durationMs=3000] - Duration in milliseconds for the message to display if not persistent.
+         */
+        function showMessageBox(message, type, isPersistent = false, durationMs = 3000) {
+            if (messageBox.timeoutId) {
+                clearTimeout(messageBox.timeoutId);
+            }
+
+            messageBox.innerHTML = `<i id="messageBoxIcon"></i><span id="messageBoxText"></span>`;
+            const messageBoxIcon = document.getElementById('messageBoxIcon');
+            const messageBoxText = document.getElementById('messageBoxText');
+
+            messageBoxText.textContent = message;
+            messageBox.className = 'message-box show ' + type; // Add type class for styling
+
+            // Set icon based on type
+            if (messageBoxIcon) {
+                if (type === 'success') {
+                    messageBoxIcon.classList.add('fas', 'fa-check-circle');
+                } else if (type === 'error') {
+                    messageBoxIcon.classList.add('fas', 'fa-times-circle');
+                } else if (type === 'info') {
+                    messageBoxIcon.classList.add('fas', 'fa-info-circle');
+                } else if (type === 'warning') {
+                    messageBoxIcon.classList.add('fas', 'fa-exclamation-triangle');
+                } else if (type === 'loading') {
+                    messageBoxIcon.classList.add('fas', 'fa-spinner', 'fa-spin');
+                } else {
+                    messageBoxIcon.className = '';
+                }
+            }
+
+            if (type === 'loading') {
+                messageBox.classList.add('loading-pulse');
+            } else {
+                messageBox.classList.remove('loading-pulse');
+            }
+
+            messageBox.style.display = 'flex';
+            messageBox.style.opacity = '1';
+
+            if (!isPersistent) {
+                messageBox.timeoutId = setTimeout(() => {
+                    messageBox.style.opacity = '0';
+                    messageBox.addEventListener('transitionend', function handler() {
+                        messageBox.style.display = 'none';
+                        messageBox.removeEventListener('transitionend', handler);
+                        messageBox.classList.remove('loading-pulse');
+                    }, { once: true });
+                }, durationMs);
+            }
+        }
+
+        /**
+         * Displays a custom confirmation modal.
+         * @param {string} message - The message to display in the modal.
+         * @returns {Promise<boolean>} Resolves with true if 'Yes' is clicked, false if 'No'.
+         */
+        function showCustomConfirm(message) {
+            return new Promise((resolve) => {
+                if (!customConfirmModal || !confirmModalMessage || !confirmYesBtn || !confirmNoBtn) {
+                    console.error("JCHAT_ERROR: Custom confirmation modal elements not found.");
+                    resolve(false);
+                    return;
+                }
+
+                confirmModalMessage.textContent = message;
+                customConfirmModal.classList.add('active');
+
+                const handleYes = () => {
+                    customConfirmModal.classList.remove('active');
+                    confirmYesBtn.removeEventListener('click', handleYes);
+                    confirmNoBtn.removeEventListener('click', handleNo);
+                    resolve(true);
+                };
+
+                const handleNo = () => {
+                    customConfirmModal.classList.remove('active');
+                    confirmYesBtn.removeEventListener('click', handleYes);
+                    confirmNoBtn.removeEventListener('click', handleNo);
+                    resolve(false);
+                };
+
+                confirmYesBtn.addEventListener('click', handleYes);
+                confirmNoBtn.addEventListener('click', handleNo);
+            });
+        }
+
+        /**
+         * Constructs a Cloudinary URL for an image/video.
+         * @param {string} urlOrPublicId - The full Cloudinary URL or the public ID of the image on Cloudinary.
+         * @param {string} transformations - Optional Cloudinary transformations.
+         * @returns {string|null} The full Cloudinary URL or null if urlOrPublicId is not provided.
+         */
+        function getCloudinaryImageUrl(urlOrPublicId, transformations = "w_auto,f_auto,q_auto") {
+            if (!urlOrPublicId) return null;
+            if (urlOrPublicId.startsWith('http://') || urlOrPublicId.startsWith('https://')) {
+                if (urlOrPublicId.includes('res.cloudinary.com')) {
+                    const parts = urlOrPublicId.split('/upload/');
+                    if (parts.length === 2) {
+                        return `${parts[0]}/upload/${transformations}/${parts[1]}`;
+                    }
+                }
+                return urlOrPublicId;
+            }
+            return `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/${transformations}/${urlOrPublicId}`;
+        }
+
+        /**
+         * Displays the profile picture or a default icon.
+         * @param {HTMLElement} imgElement - The <img> element to update.
+         * @param {string|null} profilePicId - The Cloudinary public ID or URL, or null.
+         * @param {string} usernameInitial - Initial for placeholder.
+         * @param {string} transformations - Cloudinary transformations for the image.
+         * @param {HTMLElement} [iconElement=null] - Optional <i> element to show if no pic.
+         */
+        function displayProfilePicture(imgElement, profilePicId, usernameInitial, transformations, iconElement = null) {
+            if (imgElement) {
+                if (profilePicId) {
+                    const imageUrl = getCloudinaryImageUrl(profilePicId, transformations);
+                    imgElement.src = imageUrl;
+                    imgElement.style.display = 'block';
+                    if (iconElement) iconElement.style.display = 'none';
+                    imgElement.onerror = () => {
+                        console.error(`JCHAT_ERROR: Failed to load profile picture: ${profilePicId}. Using placeholder.`);
+                        imgElement.src = `https://placehold.co/60x60/CCCCCC/000000?text=${usernameInitial}`;
+                        imgElement.style.display = 'block';
+                        if (iconElement) iconElement.style.display = 'none';
+                    };
+                } else {
+                    imgElement.src = '';
+                    imgElement.style.display = 'none';
+                    if (iconElement) iconElement.style.display = 'block';
+                }
+            }
+        }
+
+        /**
+         * Resets the selected user info display and update fields.
+         */
+        function resetSelectedUserInfoDisplay() {
+            userInfoDisplay.classList.add('hidden');
+            noUserSelectedMessage.style.display = 'block'; // Show message
+            displayUserAvatar.src = '';
+            displayUserAvatar.style.display = 'none';
+            displayUserAvatarIcon.style.display = 'block';
+            displayUsername.textContent = '';
+            displayUserId.textContent = '';
+            displayEmail.textContent = '';
+            displayCreatedAt.textContent = '';
+            displayLastOnline.textContent = '';
+            displayLevel.textContent = '';
+            displayXp.textContent = '';
+            displayXpToNextLevel.textContent = '';
+            displayJCoins.textContent = '';
+            displayBannedStatus.textContent = '';
+
+            friendsListContainer.innerHTML = '<p class="no-friends-message" id="noFriendsMessage">Select a user to view their friends.</p>';
+
+            newLevelInput.value = '';
+            xpAmountInput.value = '';
+            jcoinsAmountInput.value = '';
+
+            updateUserBtn.disabled = true;
+            toggleBanBtn.disabled = true;
+            resetLevelXpBtn.disabled = true;
+            deleteUserBtn.disabled = true;
+            grantProBtn.disabled = true;
+            revokeProBtn.disabled = true;
+            grantAdFreeBtn.disabled = true;
+            revokeAdFreeBtn.disabled = true;
+
+            selectedUserUid = null;
+            selectedUserData = null;
+            toggleBanBtn.textContent = 'Toggle Ban Status'; // Reset button text
+            toggleBanBtn.classList.remove('btn-danger'); // Remove danger style
+            toggleBanBtn.classList.add('btn-secondary'); // Add secondary style
+
+            // Remove 'selected' class from all list items
+            document.querySelectorAll('.user-list-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+        }
+
+        /**
+         * Fetches all user profiles (public and private) and stores them.
+         */
+        async function fetchAllUsers() {
+            if (!currentUser || currentUser.uid !== ADMIN_UID) {
+                console.warn("JCHAT_WARN: Not an admin or not authenticated. Cannot fetch all users.");
+                return;
+            }
+
+            loadingUsersMessage.textContent = 'Loading users...';
+            userListContainer.innerHTML = ''; // Clear previous list
+            userListContainer.appendChild(loadingUsersMessage); // Re-add loading message
+            resetSelectedUserInfoDisplay(); // Clear any selected user details
+
+            try {
+                const publicUsersCollectionRef = collection(db, "artifacts", appId, "public", "data", "users");
+                const publicUsersSnapshot = await getDocs(publicUsersCollectionRef);
+
+                const usersDataPromises = publicUsersSnapshot.docs.map(async (publicDoc) => {
+                    const publicData = publicDoc.data();
+                    const userId = publicDoc.id;
+
+                    // Fetch corresponding private profile
+                    const privateProfileDocRef = doc(db, "artifacts", appId, "users", userId, "profiles", "user_profile");
+                    const privateDocSnap = await getDoc(privateProfileDocRef);
+
+                    let combinedData = {
+                        userId: userId,
+                        username: publicData.username || 'Unknown',
+                        profilePicId: publicData.profilePicId || null,
+                        email: privateDocSnap.exists() ? privateDocSnap.data().email || 'N/A' : 'N/A',
+                        createdAt: publicData.createdAt || null,
+                        lastOnline: publicData.lastOnline || null,
+                        level: privateDocSnap.exists() ? privateDocSnap.data().level || 1 : 1,
+                        currentXp: privateDocSnap.exists() ? privateDocSnap.data().currentXp || 0 : 0,
+                        jCoins: privateDocSnap.exists() ? privateDocSnap.data().jCoins !== undefined ? privateDocSnap.data().jCoins : 0 : 0,
+                        isBanned: publicData.isBanned || false,
+                        friends: privateDocSnap.exists() ? privateDocSnap.data().friends || [] : [], // Fetch friends list
+                        // Add any other fields you want to display/manage
+                    };
+                    return combinedData;
+                });
+
+                allUsersData = await Promise.all(usersDataPromises);
+                allUsersData.sort((a, b) => (a.username || '').localeCompare(b.username || '')); // Sort alphabetically by username
+
+                filterAndDisplayUsers(); // Display all users initially
+                showMessageBox("Users loaded.", "success");
+
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error fetching all users:", error);
+                showMessageBox(`Error loading users: ${error.message}`, "error");
+                loadingUsersMessage.textContent = 'Failed to load users.';
+            }
+        }
+
+        /**
+         * Filters the `allUsersData` based on the search input and renders the list.
+         */
+        function filterAndDisplayUsers() {
+            const searchTerm = searchQueryInput.value.toLowerCase().trim();
+            displayedUsers = allUsersData.filter(user =>
+                user.username.toLowerCase().includes(searchTerm) ||
+                user.userId.toLowerCase().includes(searchTerm)
+            );
+
+            renderUserList(displayedUsers);
+        }
+
+        /**
+         * Renders the given array of user data into the user list container.
+         * @param {Array<Object>} usersToRender - An array of user data objects.
+         */
+        function renderUserList(usersToRender) {
+            userListContainer.innerHTML = ''; // Clear current list
+
+            if (usersToRender.length === 0) {
+                userListContainer.innerHTML = '<p class="no-users-message">No users found matching your filter.</p>';
+                return;
+            }
+
+            usersToRender.forEach(userData => {
+                const userListItem = document.createElement('div');
+                userListItem.classList.add('user-list-item');
+                userListItem.dataset.userId = userData.userId;
+
+                const usernameInitial = (userData.username || "U").charAt(0).toUpperCase();
+
+                userListItem.innerHTML = `
+                    <img src="" alt="Avatar" class="avatar-small" id="avatar-small-${userData.userId}" style="display: none;">
+                    <i class="fas fa-user-circle avatar-small-icon" id="avatar-small-icon-${userData.userId}"></i>
+                    <div class="user-details">
+                        <strong>${userData.username}</strong>
+                        <span>ID: ${userData.userId.substring(0, 8)}...</span>
+                    </div>
+                `;
+                userListContainer.appendChild(userListItem);
+
+                // Display avatar
+                const avatarImg = userListItem.querySelector(`#avatar-small-${userData.userId}`);
+                const avatarIcon = userListItem.querySelector(`#avatar-small-icon-${userData.userId}`);
+                displayProfilePicture(avatarImg, userData.profilePicId, usernameInitial, "w_80,h_80,c_fill,g_face,r_max", avatarIcon);
+
+                userListItem.addEventListener('click', () => selectUserFromList(userData.userId));
+            });
+
+            // Re-apply 'selected' class if a user is still selected after filtering/re-rendering
+            if (selectedUserUid) {
+                const selectedItem = userListContainer.querySelector(`.user-list-item[data-user-id="${selectedUserUid}"]`);
+                if (selectedItem) {
+                    selectedItem.classList.add('selected');
+                }
+            }
+        }
+
+        /**
+         * Selects a user from the list and populates the details panel.
+         * @param {string} userId - The UID of the user to select.
+         */
+        async function selectUserFromList(userId) {
+            const user = allUsersData.find(u => u.userId === userId);
+            if (!user) {
+                showMessageBox("Selected user data not found.", "error");
+                resetSelectedUserInfoDisplay();
+                return;
+            }
+
+            selectedUserUid = userId;
+            selectedUserData = user;
+
+            // Hide "no user selected" message and show info display
+            noUserSelectedMessage.style.display = 'none';
+            userInfoDisplay.classList.remove('hidden');
+
+            // Remove 'selected' class from previously selected item
+            document.querySelectorAll('.user-list-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            // Add 'selected' class to the newly selected item
+            const selectedItem = userListContainer.querySelector(`.user-list-item[data-user-id="${userId}"]`);
+            if (selectedItem) {
+                selectedItem.classList.add('selected');
+            }
+
+            const usernameInitial = (selectedUserData.username || "U").charAt(0).toUpperCase();
+            displayProfilePicture(displayUserAvatar, selectedUserData.profilePicId, usernameInitial, "w_120,h_120,c_fill,g_face,r_max", displayUserAvatarIcon);
+
+            displayUsername.textContent = selectedUserData.username || 'N/A';
+            displayUserId.textContent = selectedUserData.userId;
+            displayEmail.textContent = selectedUserData.email || 'N/A';
+            displayCreatedAt.textContent = selectedUserData.createdAt?.toDate ? selectedUserData.createdAt.toDate().toLocaleString() : 'N/A';
+            displayLastOnline.textContent = selectedUserData.lastOnline?.toDate ? selectedUserData.lastOnline.toDate().toLocaleString() : 'N/A';
+            displayLevel.textContent = selectedUserData.level || 1;
+            displayXp.textContent = selectedUserData.currentXp || 0;
+            displayJCoins.textContent = selectedUserData.jCoins !== undefined ? selectedUserData.jCoins : 0;
+            displayBannedStatus.textContent = selectedUserData.isBanned ? 'Yes (Banned)' : 'No (Active)';
+            displayBannedStatus.classList.toggle('status-banned', selectedUserData.isBanned);
+            displayBannedStatus.classList.toggle('status-active', !selectedUserData.isBanned);
+
+            const xpNeeded = getXpToNextLevel(selectedUserData.level || 1, selectedUserData.currentXp || 0);
+            displayXpToNextLevel.textContent = xpNeeded;
+
+            // Update input fields for editing
+            newLevelInput.value = selectedUserData.level || '';
+            xpAmountInput.value = ''; // Clear XP change input
+            jcoinsAmountInput.value = ''; // Clear JCoins change input
+
+            // Update ban button text and style
+            toggleBanBtn.textContent = selectedUserData.isBanned ? 'Unban User' : 'Ban User';
+            toggleBanBtn.classList.toggle('btn-danger', !selectedUserData.isBanned); // Red for Ban, secondary for Unban
+            toggleBanBtn.classList.toggle('btn-secondary', selectedUserData.isBanned);
+
+            updateUserBtn.disabled = false;
+            toggleBanBtn.disabled = false;
+            resetLevelXpBtn.disabled = false;
+            deleteUserBtn.disabled = false;
+            grantProBtn.disabled = false;
+            revokeProBtn.disabled = false;
+            grantAdFreeBtn.disabled = false;
+            revokeAdFreeBtn.disabled = false;
+
+            // Render friends list
+            await renderFriendsList(selectedUserData.friends);
+        }
+
+        /**
+         * Renders the friends list for the selected user.
+         * @param {Array<string>} friendUids - An array of UIDs of the selected user's friends.
+         */
+        async function renderFriendsList(friendUids) {
+            friendsListContainer.innerHTML = ''; // Clear current friends list
+
+            if (!friendUids || friendUids.length === 0) {
+                friendsListContainer.innerHTML = '<p class="no-friends-message" id="noFriendsMessage">This user has no friends.</p>';
+                return;
+            }
+
+            const friendPromises = friendUids.map(async (friendUid) => {
+                const publicProfileDocRef = doc(db, "artifacts", appId, "public", "data", "users", friendUid);
+                const publicDocSnap = await getDoc(publicProfileDocRef);
+                if (publicDocSnap.exists()) {
+                    return { userId: friendUid, ...publicDocSnap.data() };
+                }
+                return null;
+            });
+
+            const friendsData = (await Promise.all(friendPromises)).filter(f => f !== null);
+
+            if (friendsData.length === 0) {
+                friendsListContainer.innerHTML = '<p class="no-friends-message">This user has no friends (or their profiles could not be found).</p>';
+                return;
+            }
+
+            friendsData.forEach(friend => {
+                const friendListItem = document.createElement('div');
+                friendListItem.classList.add('friend-list-item');
+                friendListItem.dataset.friendId = friend.userId;
+
+                const usernameInitial = (friend.username || "U").charAt(0).toUpperCase();
+
+                friendListItem.innerHTML = `
+                    <img src="" alt="Friend Avatar" class="friend-avatar" id="friend-avatar-${friend.userId}" style="display: none;">
+                    <i class="fas fa-user-circle friend-avatar-icon" id="friend-avatar-icon-${friend.userId}"></i>
+                    <div class="friend-details">
+                        <strong>${friend.username || 'Unknown Friend'}</strong>
+                        <span>ID: ${friend.userId.substring(0, 8)}...</span>
+                    </div>
+                    <button class="remove-friend-btn" data-friend-id="${friend.userId}">Remove</button>
+                `;
+                friendsListContainer.appendChild(friendListItem);
+
+                const avatarImg = friendListItem.querySelector(`#friend-avatar-${friend.userId}`);
+                const avatarIcon = friendListItem.querySelector(`#friend-avatar-icon-${friend.userId}`);
+                displayProfilePicture(avatarImg, friend.profilePicId, usernameInitial, "w_70,h_70,c_fill,g_face,r_max", avatarIcon);
+
+                friendListItem.querySelector('.remove-friend-btn').addEventListener('click', (e) => {
+                    const friendToRemoveId = e.target.dataset.friendId;
+                    removeFriend(selectedUserUid, friendToRemoveId, selectedUserData.username || 'this user', friend.username || 'the other user');
+                });
+            });
+        }
+
+        /**
+         * Removes a friendship between two users.
+         * @param {string} user1Id - The ID of the first user (the selected user).
+         * @param {string} user2Id - The ID of the second user (the friend to remove).
+         * @param {string} user1Name - The username of the first user for confirmation message.
+         * @param {string} user2Name - The username of the second user for confirmation message.
+         */
+        async function removeFriend(user1Id, user2Id, user1Name, user2Name) {
+            const confirmMessage = `Are you sure you want to remove ${user2Name} from ${user1Name}'s friend list? This will also remove ${user1Name} from ${user2Name}'s friend list.`;
+            const confirmed = await showCustomConfirm(confirmMessage);
+            if (!confirmed) return;
+
+            showMessageBox(`Removing friendship between ${user1Name} and ${user2Name}...`, "loading", true);
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const user1PrivateProfileRef = doc(db, "artifacts", appId, "users", user1Id, "profiles", "user_profile");
+                    const user2PrivateProfileRef = doc(db, "artifacts", appId, "users", user2Id, "profiles", "user_profile");
+
+                    const user1DocSnap = await transaction.get(user1PrivateProfileRef);
+                    const user2DocSnap = await transaction.get(user2PrivateProfileRef);
+
+                    if (!user1DocSnap.exists()) {
+                        throw new Error(`User 1 profile (${user1Id}) not found.`);
+                    }
+                    if (!user2DocSnap.exists()) {
+                        throw new Error(`User 2 profile (${user2Id}) not found.`);
+                    }
+
+                    transaction.update(user1PrivateProfileRef, {
+                        friends: arrayRemove(user2Id)
+                    });
+
+                    transaction.update(user2PrivateProfileRef, {
+                        friends: arrayRemove(user1Id)
+                    });
+                });
+
+                showMessageBox("Friendship removed successfully!", "success");
+                // Re-fetch all users and re-select the user to update the friends list
+                await fetchAllUsers();
+                if (selectedUserUid) {
+                    selectUserFromList(selectedUserUid);
+                }
+
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error removing friend:", error);
+                showMessageBox(`Failed to remove friend: ${error.message}`, "error");
+            }
+        }
+
+
+        /**
+         * Updates the selected user's level, XP, and JCoins.
+         */
+        async function updateUserProfile() {
+            if (!selectedUserUid || !selectedUserData) {
+                showMessageBox("No user selected for update. Please select a user from the list first.", "warning");
+                return;
+            }
+
+            const newLevelInputVal = newLevelInput.value.trim();
+            const xpAmountInputVal = xpAmountInput.value.trim();
+            const jcoinsAmountInputVal = jcoinsAmountInput.value.trim();
+
+            const newLevel = newLevelInputVal === '' ? null : parseInt(newLevelInputVal);
+            const xpChange = xpAmountInputVal === '' ? null : parseInt(xpAmountInputVal);
+            const jcoinsChange = jcoinsAmountInputVal === '' ? null : parseInt(jcoinsAmountInputVal);
+
+            if (newLevel === null && xpChange === null && jcoinsChange === null) {
+                showMessageBox("Please enter a new level, XP amount, or JCoins amount to update.", "warning");
+                return;
+            }
+
+            if (newLevel !== null && (newLevel < 1 || !Number.isInteger(newLevel))) {
+                showMessageBox("New Level must be a positive integer.", "warning");
+                return;
+            }
+            if (xpChange !== null && !Number.isInteger(xpChange)) {
+                showMessageBox("XP amount must be an integer.", "warning");
+                return;
+            }
+            if (jcoinsChange !== null && !Number.isInteger(jcoinsChange)) {
+                showMessageBox("JCoins amount must be an integer.", "warning");
+                return;
+            }
+
+            showMessageBox("Updating user data...", "loading", true);
+            updateUserBtn.disabled = true;
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const privateProfileDocRef = doc(db, "artifacts", appId, "users", selectedUserUid, "profiles", "user_profile");
+                    const publicProfileDocRef = doc(db, "artifacts", appId, "public", "data", "users", selectedUserUid);
+
+                    const privateDocSnap = await transaction.get(privateProfileDocRef);
+                    if (!privateDocSnap.exists()) {
+                        throw new Error("User private profile does not exist.");
+                    }
+
+                    let updatedLevel = selectedUserData.level || 1;
+                    let updatedXp = selectedUserData.currentXp || 0;
+                    let updatedJCoins = selectedUserData.jCoins !== undefined ? selectedUserData.jCoins : 0;
+
+                    if (newLevel !== null) {
+                        updatedLevel = newLevel;
+                        // When setting a new level, XP for that level starts from 0 relative to that level's start
+                        updatedXp = calculateXpForLevel(newLevel);
+                    }
+                    if (xpChange !== null) {
+                        updatedXp += xpChange;
+                        if (updatedXp < 0) updatedXp = 0; // Prevent negative XP
+                    }
+                    if (jcoinsChange !== null) {
+                        updatedJCoins += jcoinsChange;
+                        if (updatedJCoins < 0) updatedJCoins = 0; // Prevent negative JCoins
+                    }
+
+                    // Update private profile
+                    transaction.update(privateProfileDocRef, {
+                        level: updatedLevel,
+                        currentXp: updatedXp,
+                        jCoins: updatedJCoins,
+                        updatedAt: new Date()
+                    });
+
+                    // Update public profile (sync relevant fields)
+                    transaction.update(publicProfileDocRef, {
+                        level: updatedLevel,
+                        currentXp: updatedXp,
+                        updatedAt: new Date()
+                    });
+                });
+
+                showMessageBox("User data updated successfully!", "success");
+                // Re-fetch all users and re-select the user to display updated values
+                await fetchAllUsers();
+                if (selectedUserUid) {
+                    selectUserFromList(selectedUserUid);
+                }
+                // Clear inputs after successful update
+                newLevelInput.value = '';
+                xpAmountInput.value = '';
+                jcoinsAmountInput.value = '';
+
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error updating user profile:", error);
+                showMessageBox(`Failed to update user: ${error.message}`, "error");
+            } finally {
+                updateUserBtn.disabled = false;
+            }
+        }
+
+        /**
+         * Toggles the banned status of the selected user.
+         */
+        async function toggleBanStatus() {
+            if (!selectedUserUid || !selectedUserData) {
+                showMessageBox("No user selected. Select a user from the list first.", "warning");
+                return;
+            }
+
+            const isCurrentlyBanned = selectedUserData.isBanned || false;
+            const action = isCurrentlyBanned ? "unban" : "ban";
+            const confirmMessage = `Are you sure you want to ${action} ${selectedUserData.username || 'this user'}?`;
+
+            const confirmed = await showCustomConfirm(confirmMessage);
+            if (!confirmed) return;
+
+            showMessageBox(`${action === 'ban' ? 'Banning' : 'Unbanning'} user...`, "loading", true);
+            toggleBanBtn.disabled = true;
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const privateProfileDocRef = doc(db, "artifacts", appId, "users", selectedUserUid, "profiles", "user_profile");
+                    const publicProfileDocRef = doc(db, "artifacts", appId, "public", "data", "users", selectedUserUid);
+
+                    transaction.update(privateProfileDocRef, {
+                        isBanned: !isCurrentlyBanned,
+                        updatedAt: new Date()
+                    });
+                    transaction.update(publicProfileDocRef, {
+                        isBanned: !isCurrentlyBanned,
+                        updatedAt: new Date()
+                    });
+                });
+
+                showMessageBox(`User ${action}ned successfully!`, "success");
+                // Re-fetch all users and re-select the user to update display
+                await fetchAllUsers();
+                if (selectedUserUid) {
+                    selectUserFromList(selectedUserUid);
+                }
+
+            } catch (error) {
+                console.error(`JCHAT_ERROR: Error ${action}ning user:`, error);
+                showMessageBox(`Failed to ${action} user: ${error.message}`, "error");
+            } finally {
+                toggleBanBtn.disabled = false;
+            }
+        }
+
+        /**
+         * Resets the selected user's level and XP to default (Level 1, XP 0).
+         */
+        async function resetLevelAndXp() {
+            if (!selectedUserUid || !selectedUserData) {
+                showMessageBox("No user selected. Select a user from the list first.", "warning");
+                return;
+            }
+
+            const confirmMessage = `Are you sure you want to reset ${selectedUserData.username || 'this user'}'s level and XP to default (Level 1, XP 0)?`;
+            const confirmed = await showCustomConfirm(confirmMessage);
+            if (!confirmed) return;
+
+            showMessageBox("Resetting level and XP...", "loading", true);
+            resetLevelXpBtn.disabled = true;
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const privateProfileDocRef = doc(db, "artifacts", appId, "users", selectedUserUid, "profiles", "user_profile");
+                    const publicProfileDocRef = doc(db, "artifacts", appId, "public", "data", "users", selectedUserUid);
+
+                    transaction.update(privateProfileDocRef, {
+                        level: 1,
+                        currentXp: 0,
+                        updatedAt: new Date()
+                    });
+                    transaction.update(publicProfileDocRef, {
+                        level: 1,
+                        currentXp: 0,
+                        updatedAt: new Date()
+                    });
+                });
+
+                showMessageBox("User level and XP reset successfully!", "success");
+                // Re-fetch all users and re-select the user to update display
+                await fetchAllUsers();
+                if (selectedUserUid) {
+                    selectUserFromList(selectedUserUid);
+                }
+
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error resetting user level/XP:", error);
+                showMessageBox(`Failed to reset level and XP: ${error.message}`, "error");
+            } finally {
+                resetLevelXpBtn.disabled = false;
+            }
+        }
+
+        /**
+         * Deletes the selected user's account and all associated data.
+         * WARNING: This is a destructive operation.
+         */
+        async function deleteUserAccount() {
+            if (!selectedUserUid || !selectedUserData) {
+                showMessageBox("No user selected. Select a user from the list first.", "warning");
+                return;
+            }
+
+            const confirmMessage = `WARNING: Are you absolutely sure you want to PERMANENTLY DELETE ${selectedUserData.username || 'this user'}'s account and ALL associated data? This action cannot be undone.`;
+            const confirmed = await showCustomConfirm(confirmMessage);
+            if (!confirmed) return;
+
+            showMessageBox("Deleting user account...", "loading", true);
+            deleteUserBtn.disabled = true;
+
+            try {
+                // Delete private profile
+                const privateProfileDocRef = doc(db, "artifacts", appId, "users", selectedUserUid, "profiles", "user_profile");
+                await deleteDoc(privateProfileDocRef);
+
+                // Delete public profile
+                const publicProfileDocRef = doc(db, "artifacts", appId, "public", "data", "users", selectedUserUid);
+                await deleteDoc(publicProfileDocRef);
+
+                // Note: Deleting all messages/chats for a user is complex and often requires
+                // a backend function (Cloud Function) due to Firestore's lack of cascading deletes.
+                // For this client-side admin panel, we'll only delete the profile documents.
+                // A real-world app would need to handle chat message deletion more robustly.
+
+                showMessageBox("User account deleted successfully!", "success");
+                resetSelectedUserInfoDisplay(); // Clear display after deletion
+                await fetchAllUsers(); // Refresh the user list
+
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error deleting user account:", error);
+                showMessageBox(`Failed to delete user account: ${error.message}`, "error");
+            } finally {
+                deleteUserBtn.disabled = false;
+            }
+        }
+
+        /**
+         * Copies the selected user's ID to the clipboard.
+         */
+        function copySelectedUserId() {
+            if (selectedUserUid) {
+                try {
+                    const tempInput = document.createElement('textarea');
+                    tempInput.value = selectedUserUid;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                    showMessageBox('User ID copied to clipboard!', 'success', false, 1500);
+                } catch (err) {
+                    console.error('JCHAT_ERROR: Failed to copy user ID:', err);
+                    showMessageBox('Failed to copy User ID.', 'error');
+                }
+            } else {
+                showMessageBox('No user selected to copy ID.', 'warning');
+            }
+        }
+
+        async function updateEntitlement(flag, value) {
+            if (!currentUser || currentUser.uid !== ADMIN_UID || !selectedUserUid) {
+                showMessageBox("Admin only or no user selected.", "error");
+                return;
+            }
+            try {
+                const settingsDocRef = doc(db, "artifacts", appId, "users", selectedUserUid, "profiles", "user_settings");
+                await setDoc(settingsDocRef, { entitlements: { [flag]: value } }, { merge: true });
+                showMessageBox(`${flag === 'pro' ? 'Pro' : 'Ad‑Free'} ${value ? 'granted' : 'revoked'} for user.`, 'success');
+            } catch (e) {
+                console.error('JCHAT_ERROR: updateEntitlement failed:', e);
+                showMessageBox(`Failed to update entitlement: ${e.message}`, 'error');
+            }
+        }
+
+        // --- Authentication State Listener ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                isAuthReady = true;
+                console.log("JCHAT_DEBUG: User authenticated in Admin page:", user.uid);
+
+                if (currentUser.uid === ADMIN_UID) {
+                    accessDeniedOverlay.style.display = 'none';
+                    // Enable inputs and buttons after admin verification
+                    searchQueryInput.disabled = false;
+                    newLevelInput.disabled = false;
+                    xpAmountInput.disabled = false;
+                    jcoinsAmountInput.disabled = false;
+                    // Other buttons are enabled after a user is selected
+                    fetchAllUsers(); // Fetch and display all users
+                } else {
+                    accessDeniedOverlay.style.display = 'flex';
+                    // Disable all inputs if not admin
+                    searchQueryInput.disabled = true;
+                    newLevelInput.disabled = true;
+                    xpAmountInput.disabled = true;
+                    jcoinsAmountInput.disabled = true;
+                    updateUserBtn.disabled = true;
+                    toggleBanBtn.disabled = true;
+                    resetLevelXpBtn.disabled = true;
+                    deleteUserBtn.disabled = true;
+                    grantProBtn.disabled = true;
+                    revokeProBtn.disabled = true;
+                    grantAdFreeBtn.disabled = true;
+                    revokeAdFreeBtn.disabled = true;
+                    userListContainer.innerHTML = '<p class="no-users-message">Access denied. Please log in as an administrator.</p>';
+                }
+            } else {
+                console.log("JCHAT_DEBUG: No user signed in. Attempting anonymous sign-in or redirecting to login page.");
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        console.log("JCHAT_DEBUG: Signed in with custom token.");
+                    } else {
+                        await signInAnonymously(auth);
+                        console.log("JCHAT_DEBUG: Signed in anonymously.");
+                    }
+                } catch (error) {
+                    console.error("JCHAT_ERROR: Error during anonymous sign-in or custom token sign-in:", error);
+                    // If even anonymous sign-in fails, redirect to login
+                    if (!auth.currentUser) {
+                        window.location.href = '/login.html';
+                    }
+                }
+                isAuthReady = false;
+                accessDeniedOverlay.style.display = 'flex';
+                searchQueryInput.disabled = true;
+                newLevelInput.disabled = true;
+                xpAmountInput.disabled = true;
+                jcoinsAmountInput.disabled = true;
+                updateUserBtn.disabled = true;
+                toggleBanBtn.disabled = true;
+                resetLevelXpBtn.disabled = true;
+                deleteUserBtn.disabled = true;
+                grantProBtn.disabled = true;
+                revokeProBtn.disabled = true;
+                grantAdFreeBtn.disabled = true;
+                revokeAdFreeBtn.disabled = true;
+                userListContainer.innerHTML = '<p class="no-users-message">Please log in to view this page.</p>';
+            }
+        });
+
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply saved theme
+            const savedTheme = localStorage.getItem('jchat-theme');
+            const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+            if (savedTheme && themes.includes(savedTheme)) {
+                document.body.classList.remove(...themes);
+                document.body.classList.add(savedTheme);
+            } else {
+                document.body.classList.remove(...themes);
+                document.body.classList.add('theme-dark-mode'); // Default theme
+            }
+
+            searchQueryInput.addEventListener('input', filterAndDisplayUsers); // Now filters the list
+            updateUserBtn.addEventListener('click', updateUserProfile);
+            toggleBanBtn.addEventListener('click', toggleBanStatus);
+            resetLevelXpBtn.addEventListener('click', resetLevelAndXp);
+            deleteUserBtn.addEventListener('click', deleteUserAccount);
+            copyUserIdBtn.addEventListener('click', copySelectedUserId);
+            grantProBtn.addEventListener('click', () => updateEntitlement('pro', true));
+            revokeProBtn.addEventListener('click', () => updateEntitlement('pro', false));
+            grantAdFreeBtn.addEventListener('click', () => updateEntitlement('adFree', true));
+            revokeAdFreeBtn.addEventListener('click', () => updateEntitlement('adFree', false));
+
+
+            // Initially disable inputs and buttons until admin access is confirmed
+            searchQueryInput.disabled = true;
+            newLevelInput.disabled = true;
+            xpAmountInput.disabled = true;
+            jcoinsAmountInput.disabled = true;
+            updateUserBtn.disabled = true;
+            toggleBanBtn.disabled = true;
+            resetLevelXpBtn.disabled = true;
+            deleteUserBtn.disabled = true;
+            grantProBtn.disabled = true;
+            revokeProBtn.disabled = true;
+            grantAdFreeBtn.disabled = true;
+            revokeAdFreeBtn.disabled = true;
+        });
+
+        // Listen for theme changes from other tabs/windows
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'jchat-theme') {
+                const newTheme = event.newValue || 'theme-dark-mode';
+                const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+                if (themes.includes(newTheme)) {
+                    document.body.classList.remove(...themes);
+                    document.body.classList.add(newTheme);
+                }
+            }
+        });
+    </script>
+	
+</body>
+</html>

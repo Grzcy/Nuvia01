@@ -1,0 +1,2196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Last updated: 2025-08-21T18:19:29Z -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JCHAT - Settings</title>
+
+    <!-- Google Fonts: Poppins for headings, Inter for body text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Preconnect to Firebase and Cloudinary domains for faster loading -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://*.firebaseio.com" crossorigin>
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+    <!-- Font Awesome for icons (non-blocking preload) -->
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" onload="this.rel='stylesheet'" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /></noscript>
+    <!-- Tone.js for audio notifications -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" defer crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <style>
+        /* Universal box-sizing for consistent layout */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        /* Global CSS Variables for easy theme switching */
+        :root {
+            --pink: #ff2e92;
+            --blue: #00d5ff;
+            --glass-black: rgba(10, 10, 10, .75);
+            --glass-blue: rgba(0, 213, 255, .15);
+            --radius: 20px;
+            --transition: .3s ease;
+
+            /* These variables will be overridden by theme classes */
+            --white: #fff;
+            --text-light: rgba(255, 255, 255, .7);
+            --background-main: rgba(10, 10, 10, .75);
+            --background-gradient-1: #00d5ff;
+            --background-gradient-2: #ff2e92;
+            --card-background: linear-gradient(145deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01));
+            --header-background: linear-gradient(135deg, rgba(10, 10, 10, .85), rgba(10, 10, 10, .75));
+            --border-light: rgba(255, 255, 255, .05);
+            --input-background: rgba(255, 255, 255, 0.05);
+            --button-background: linear-gradient(90deg, var(--blue), var(--pink));
+            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+
+            /* New variables for consistent theming */
+            --background-color-primary: #1a1a2e;
+            --background-color-secondary: #0f0f1f;
+            --header-background-color: #2a2a4a;
+            --footer-background-color: #2a2a4a;
+            --content-background-color: #20203a;
+            --card-background-color: #2a2a4a;
+            --text-color-primary: #e0e0e0;
+            --text-color-secondary: #b0b0d0;
+            --notification-badge-color: #ff2e92;
+            --status-online: #4CAF50;
+            --status-offline: #6c757d;
+            --status-away: #FFC107;
+            --delete-button-color: #dc3545;
+            --warning-color: #ffc107;
+            --accent-color: #00d5ff; /* A bright cyan */
+            --accent-color-dark: #00aaff;
+            --border-color: #3a3a5a;
+            --user-defined-accent-color: var(--blue); /* New variable for user-defined accent */
+        }
+
+        /* --- Theme Definitions (Light and Dark Mode) --- */
+        /* Light Mode */
+        body.theme-light-mode {
+            --background-main: #f0f2f5; /* Light gray background */
+            --background-gradient-1: #e0e2e5; /* Subtle lighter gradient */
+            --background-gradient-2: #d0d2d5; /* Subtle darker gradient */
+            --white: #333; /* Dark text for readability */
+            --text-light: #666; /* Lighter dark text */
+            --card-background: rgba(255, 255, 255, 0.95); /* Near white cards */
+            --header-background: rgba(255, 255, 255, 0.98); /* Near white header */
+            --border-light: rgba(0, 0, 0, 0.1); /* Light borders */
+            --input-background: rgba(0, 0, 0, 0.05); /* Light input background */
+            --button-background: linear-gradient(90deg, #6dd5ed, #2193b0); /* Blue gradient */
+            --button-shadow: 0 4px 15px rgba(109, 213, 237, 0.4), 0 4px 15px rgba(33, 147, 176, 0.4);
+
+            /* New variables override for light mode */
+            --background-color-primary: #f0f2f5;
+            --background-color-secondary: #e0e2e5;
+            --header-background-color: #ffffff;
+            --footer-background-color: #ffffff;
+            --content-background-color: #f7f9fb;
+            --card-background-color: #ffffff;
+            --text-color-primary: #333333;
+            --text-color-secondary: #666666;
+            --text-color-light: #999999;
+            --accent-color: #007bff;
+            --accent-color-dark: #0056b3;
+            --border-color: #e0e0e0;
+            --input-background: #f0f0f0;
+            --button-background: #e9ecef;
+            --button-hover-background: #dee2e6;
+            --active-item-background: rgba(0, 123, 255, 0.1);
+            --notification-badge-color: #dc3545;
+            --status-online: #28a745;
+            --status-offline: #6c757d;
+            --status-away: #ffc107;
+            --delete-button-color: #dc3545;
+            --warning-color: #ffc107;
+        }
+
+        /* Dark Mode */
+        body.theme-dark-mode {
+            --background-main: #1a1a2e; /* Deep purple-dark blue */
+            --background-gradient-1: #16213e; /* Slightly lighter deep blue */
+            --background-gradient-2: #0f3460; /* Darker blue */
+            --white: #e0e0e0; /* Off-white text */
+            --text-light: #a0a0a0; /* Grayish text */
+            --card-background: rgba(25, 25, 40, 0.7); /* Darker, less transparent cards */
+            --header-background: linear-gradient(135deg, rgba(10, 10, 20, .85), rgba(10, 10, 20, .75)); /* Original dark header */
+            --border-light: rgba(255, 255, 255, 0.08); /* Subtle white borders */
+            --input-background: rgba(255, 255, 255, 0.08); /* Dark input background */
+            --button-background: linear-gradient(90deg, #e94560, #ba2f49); /* Reddish gradient */
+            --button-shadow: 0 4px 15px rgba(233, 69, 96, 0.4), 0 4px 15px rgba(186, 47, 73, 0.4);
+
+            /* New variables override for dark mode */
+            --background-color-primary: #121212;
+            --background-color-secondary: #1e1e1e;
+            --header-background-color: #2c2c2c;
+            --footer-background-color: #2c2c2c;
+            --content-background-color: #242424;
+            --card-background-color: #2c2c2c;
+            --text-color-primary: #ffffff;
+            --text-color-secondary: #bbbbbb;
+            --accent-color: #bb86fc;
+            --accent-color-dark: #9a67ea;
+            --border-color: #444444;
+            --input-background: #383838;
+            --button-background: #383838;
+            --button-hover-background: #505050;
+            --active-item-background: rgba(187, 134, 252, 0.2);
+            --notification-badge-color: #cf6679;
+            --delete-button-color: #f44336;
+            --warning-color: #ffeb3b;
+        }
+
+        /* Glass Mode specific variables */
+        body.theme-glass-mode {
+            --background-main: rgba(10, 10, 10, 0.75);
+            background-image: url('https://source.unsplash.com/random/1920x1080?abstract,blur') !important;
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            backdrop-filter: blur(10px);
+            --card-background: rgba(25, 25, 40, 0.7);
+            --white: #e0e0e0; /* text-color */
+            --text-light: rgba(255, 255, 255, 0.7);
+            --input-background: rgba(255, 255, 255, 0.05);
+            --border-light: rgba(255, 255, 255, 0.1); /* glass-border-color */
+            --button-background: linear-gradient(90deg, var(--pink), var(--blue));
+            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5); /* Inner shadow for glass effect */
+
+            /* New variables override for glass mode */
+            --background-color-primary: rgba(10, 10, 10, 0.75);
+            --background-color-secondary: rgba(10, 10, 10, 0.6);
+            --header-background-color: rgba(10, 10, 10, 0.85);
+            --footer-background-color: rgba(10, 10, 10, 0.85);
+            --content-background-color: rgba(10, 10, 10, 0.75);
+            --card-background-color: rgba(25, 25, 40, 0.7);
+            --text-color-primary: #e0e0e0;
+            --text-color-secondary: #b0b0d0;
+            --accent-color: #00d5ff;
+            --accent-color-dark: #00aaff;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --input-background: rgba(255, 255, 255, 0.05);
+            --button-background: rgba(0, 213, 255, 0.15); /* Glassy button */
+            --button-hover-background: rgba(0, 213, 255, 0.25);
+            --active-item-background: rgba(0, 213, 255, 0.1);
+        }
+
+        /* Sunset Theme */
+        body.theme-sunset-mode {
+            background: linear-gradient(to top, #ff7e5f, #feb47b) !important;
+            --background-main: linear-gradient(to top, #ff7e5f, #feb47b);
+            --card-background: rgba(255, 255, 255, 0.15); /* Slightly transparent white for contrast */
+            --white: #fff; /* White text for readability */
+            --text-light: rgba(255, 255, 255, 0.8);
+            --input-background: rgba(255, 255, 255, 0.1);
+            --border-light: rgba(255, 255, 255, 0.3);
+            --button-background: linear-gradient(90deg, #fd746c, #ff9068); /* Sunset gradient */
+            --button-shadow: 0 4px 15px rgba(253, 116, 108, 0.4), 0 44px 15px rgba(255, 144, 104, 0.4);
+
+            /* New variables override for sunset mode */
+            --background-color-primary: #ff7e5f;
+            --background-color-secondary: #feb47b;
+            --header-background-color: rgba(255, 126, 95, 0.9);
+            --footer-background-color: rgba(255, 126, 95, 0.9);
+            --content-background-color: rgba(255, 126, 95, 0.85);
+            --card-background-color: rgba(255, 255, 255, 0.15);
+            --text-color-primary: #fff;
+            --text-color-secondary: rgba(255, 255, 255, 0.8);
+            --accent-color: #ffd700;
+            --accent-color-dark: #ccaa00;
+            --border-color: rgba(255, 255, 255, 0.3);
+            --input-background: rgba(255, 255, 255, 0.1);
+            --button-background: rgba(255, 255, 255, 0.2);
+            --button-hover-background: rgba(255, 255, 255, 0.3);
+            --active-item-background: rgba(255, 215, 0, 0.1);
+        }
+
+        /* Always show scrollbar to prevent layout shifts */
+        html {
+            overflow-y: scroll;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            padding-bottom: 20px; /* Reduced padding as no bottom nav */
+            background-color: var(--background-main);
+            background-image: radial-gradient(circle at top left, var(--background-gradient-1), transparent 100px),
+                              radial-gradient(circle at bottom right, var(--background-gradient-2), transparent 150px);
+            color: var(--white);
+            transition: background-color 0.5s ease, color 0.5s ease; /* Smooth theme transition */
+        }
+
+        /* Header Styling (from Home.html) - MODIFIED */
+        header {
+            background: var(--header-background);
+            border-bottom: 1px solid var(--border-light);
+            padding: 10px 30px; /* Adjusted padding */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: sticky; /* Changed to sticky for simpler layout */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 55px;
+            z-index: 10;
+            display: flex;
+            justify-content: flex-start; /* Align logo to left */
+            align-items: center;
+        }
+
+        header .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            letter-spacing: -0.03em;
+            text-decoration: none;
+            margin-right: auto; /* Push logo to left, push content to right */
+        }
+
+        /* Main Content Area */
+        main {
+            flex-grow: 1;
+            padding: 40px 0;
+            padding-top: 55px; /* Adjust for fixed header */
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Align content to top */
+            text-align: center;
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 800px; /* Adjust as needed */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        /* Section Card Styles (reused from Profile.html) */
+        .section-card {
+            background: var(--card-background);
+            border: 1px solid var(--glass-blue); /* Consistent border */
+            backdrop-filter: blur(10px) saturate(180%);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, .3);
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px; /* Max width for consistency */
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center content */
+            gap: 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .section-card h1, .section-card h2 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            margin-bottom: 1.5rem;
+        }
+        .section-card h1 { font-size: 2.5rem; }
+        .section-card h2 { font-size: 1.8rem; margin-bottom: 1rem; }
+
+        /* Form Grouping and Styling */
+        .form-group {
+            width: 100%;
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-light);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .form-group .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .form-group .checkbox-group input[type="checkbox"] {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            accent-color: var(--blue); /* Highlight color for checkbox */
+            cursor: pointer;
+        }
+
+        .form-group .checkbox-group label {
+            margin-bottom: 0;
+            color: var(--white);
+            font-weight: 400;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="tel"],
+        .form-group input[type="color"], /* Added for accent color */
+        .form-group input[type="range"], /* Added for volume */
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: 15px;
+            background: var(--input-background);
+            color: var(--white);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            -webkit-appearance: none; /* Remove default arrow for select */
+            -moz-appearance: none;
+            appearance: none;
+        }
+        .form-group select {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e0e0e0'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); /* Custom arrow */
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.2em;
+        }
+
+        /* Specific styles for color input */
+        .form-group input[type="color"] {
+            height: 45px; /* Make it visually appealing */
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        /* Specific styles for range input */
+        .form-group input[type="range"] {
+            padding: 0; /* Remove padding for range input */
+            height: 20px;
+            margin-top: 10px;
+            background: transparent; /* Hide default track */
+        }
+        /* Style for Webkit (Chrome, Safari) */
+        .form-group input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            background: var(--input-background);
+            border-radius: 5px;
+            border: 1px solid var(--border-light);
+        }
+        .form-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            border: 1px solid var(--user-defined-accent-color);
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: var(--user-defined-accent-color);
+            cursor: pointer;
+            margin-top: -7px; /* Center thumb vertically */
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+        /* Style for Mozilla Firefox */
+        .form-group input[type="range"]::-moz-range-track {
+            width: 100%;
+            height: 8px;
+            background: var(--input-background);
+            border-radius: 5px;
+            border: 1px solid var(--border-light);
+        }
+        .form-group input[type="range"]::-moz-range-thumb {
+            border: 1px solid var(--user-defined-accent-color);
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: var(--user-defined-accent-color);
+            cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(0, 213, 255, 0.2);
+        }
+
+        .form-group select option {
+            background-color: var(--background-color-primary);
+            color: var(--text-color-primary);
+        }
+
+        /* Block List Styling */
+        #blockListContainer {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        #blockUserInput {
+            width: calc(100% - 80px); /* Adjust for button width */
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: 15px;
+            background: var(--input-background);
+            color: var(--white);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            margin-right: 10px;
+        }
+
+        #blockUserInput:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(0, 213, 255, 0.2);
+        }
+
+        #addBlockUserButton {
+            background: var(--button-background);
+            color: var(--white);
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 1.2rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: var(--button-shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        #addBlockUserButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--blue), 0 6px 20px var(--pink);
+        }
+
+        #blockedUsersList {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .blocked-user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            color: var(--white);
+            font-size: 0.95rem;
+        }
+
+        .blocked-user-item button {
+            background-color: var(--delete-button-color);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background-color 0.2s ease;
+            display: flex; /* For loader */
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .blocked-user-item button:hover {
+            background-color: #c82333;
+        }
+
+        /* Action Buttons (e.g., Change Password, Delete Account) */
+        .action-button {
+            background: var(--button-background);
+            color: var(--white);
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: var(--button-shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 1rem; /* Space between buttons */
+        }
+        .action-button.danger {
+            background: var(--delete-button-color);
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+        }
+        .action-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--blue), 0 6px 20px var(--pink);
+        }
+        .action-button.danger:hover:not(:disabled) {
+            box-shadow: 0 6px 20px rgba(220, 53, 69, 0.6);
+        }
+        .action-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: var(--text-light);
+            box-shadow: none;
+        }
+
+
+        /* Save Button */
+        #saveSettingsButton {
+            background: var(--button-background);
+            color: var(--white);
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: var(--button-shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 2rem;
+        }
+
+        #saveSettingsButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--blue), 0 6px 20px var(--pink);
+        }
+
+        /* Custom Message Box Styles (from Home.html) */
+        #messageBox {
+            position: fixed;
+            top: 50%; /* Center vertically */
+            left: 50%;
+            transform: translate(-50%, -50%); /* Center both horizontally and vertically */
+            background-color: var(--card-background-color); /* Default background, will be overridden for success */
+            color: var(--text-color-primary); /* Default text color */
+            padding: 20px 30px; /* Increased padding for a more substantial box */
+            border-radius: 15px; /* More rounded corners, slightly squarer */
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4); /* Enhanced shadow */
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            min-width: 280px; /* Ensure a decent minimum width */
+            max-width: 90%;
+            text-align: center;
+            flex-direction: column; /* Stack icon and text vertically */
+            align-items: center;
+            gap: 15px; /* Space between icon and text */
+        }
+        #messageBox.show {
+            opacity: 1;
+            display: flex;
+        }
+        /* Success message box specific styling */
+        #messageBox.success {
+            background-image: linear-gradient(45deg, var(--pink), var(--blue)); /* Pink and blue gradient */
+            color: var(--white); /* White text for contrast on gradient */
+            border: none; /* No border for gradient background */
+            box-shadow: 0 8px 30px rgba(0, 213, 255, 0.5), 0 8px 30px rgba(255, 46, 146, 0.5); /* Glowing shadow */
+        }
+        #messageBox.error { border-left: 5px solid var(--delete-button-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+        #messageBox.info { border-left: 5px solid var(--accent-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+        #messageBox.warning { border-left: 5px solid var(--warning-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+        #messageBox.loading { /* No border-left for loading */ background-color: var(--card-background-color); color: var(--text-color-primary); }
+
+
+        #messageBox i {
+            font-size: 2.5rem; /* Larger icon for prominence */
+            margin-bottom: 5px; /* Space between icon and text */
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+        #messageBox.success i { color: var(--white); } /* White icon for success */
+        #messageBox.error i { color: var(--delete-button-color); }
+        #messageBox.info i { color: var(--accent-color); }
+        #messageBox.warning i { color: var(--warning-color); }
+        #messageBox.loading i { background-image: linear-gradient(90deg, var(--accent-color), var(--pink)); }
+
+
+        #messageBox span {
+            font-size: 1.1rem; /* Slightly larger text */
+            font-weight: 600;
+        }
+
+        @keyframes pulse-bg {
+            0% { background-color: var(--accent-color); }
+            50% { background-color: rgba(0, 213, 255, 0.7); }
+            100% { background-color: var(--accent-color); }
+        }
+        #messageBox.loading-pulse { animation: pulse-bg 1.5s infinite ease-in-out; }
+
+        /* Loader styles for buttons (from Home.html) */
+        .button-loader {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid var(--white);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: none;
+            flex-shrink: 0; /* Prevent loader from shrinking */
+        }
+        .button-loader.active { display: block; }
+        .button-text { display: block; }
+        .loading .button-text { display: none; }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Custom Confirmation Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-content {
+            background: var(--card-background);
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .modal-overlay.active .modal-content { transform: translateY(0); opacity: 1; }
+        .modal-content h3 {
+            color: var(--white);
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        .modal-buttons button {
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .modal-buttons button.confirm-btn {
+            background: linear-gradient(90deg, var(--pink), var(--blue));
+            color: var(--white);
+            box-shadow: 0 4px 10px rgba(0, 213, 255, 0.3);
+        }
+        .modal-buttons button.confirm-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 213, 255, 0.4);
+        }
+        .modal-buttons button.cancel-btn {
+            background: var(--input-background);
+            color: var(--text-light);
+            border: 1px solid var(--border-light);
+        }
+        .modal-buttons button.cancel-btn:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 600px) {
+            header {
+                padding: 10px 20px;
+            }
+            .logo {
+                font-size: 1.6rem;
+            }
+            .section-card {
+                padding: 1.5rem;
+            }
+            .section-card h1 {
+                font-size: 2rem;
+            }
+            .section-card h2 {
+                font-size: 1.5rem;
+            }
+            .form-group label {
+                font-size: 0.85rem;
+            }
+            .form-group .checkbox-group label {
+                font-size: 0.9rem;
+            }
+            .form-group input[type="text"],
+            .form-group input[type="email"],
+            .form-group input[type="tel"],
+            .form-group input[type="color"],
+            .form-group input[type="range"],
+            .form-group select {
+                padding: 0.7rem 0.9rem;
+                font-size: 0.9rem;
+            }
+            #blockUserInput {
+                width: calc(100% - 70px); /* Adjust for smaller button on mobile */
+                padding: 0.7rem 0.9rem;
+                font-size: 0.9rem;
+            }
+            #addBlockUserButton {
+                padding: 0.7rem 1rem;
+                font-size: 0.8rem;
+            }
+            .blocked-user-item {
+                font-size: 0.85rem;
+                padding: 8px 12px;
+            }
+            .blocked-user-item button {
+                font-size: 0.7rem;
+            }
+            #saveSettingsButton, .action-button {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.9rem;
+            }
+            body {
+                padding-bottom: 20px; /* Still some padding at bottom */
+            }
+        }
+    </style>
+<style>
+/* Community Guidelines header/UI overrides for exact match */
+header { background: var(--header-background); border-bottom: 1px solid var(--border-light); padding: 10px 0; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); position: fixed; top: 0; left: 0; width: 100%; height: 55px; z-index: 10; display: flex; justify-content: center; }
+header .header-content-wrapper { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 1200px; padding: 0 30px; }
+.logo.brand-logo { font-family: 'Poppins', sans-serif; font-size: 1.8rem; font-weight: 800; background-clip: text; color: transparent; background-image: linear-gradient(90deg, var(--blue), var(--pink)); letter-spacing: -0.03em; text-decoration: none; }
+.brand-logo { display: flex; align-items: center; gap: 10px; }
+.brand-logo-icon { height: 24px; width: auto; }
+header nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 25px; }
+header nav ul li a { color: var(--white); text-decoration: none; font-weight: 600; font-size: 1.1rem; padding: 5px 0; position: relative; transition: color var(--transition); }
+header nav ul li a::after { content: ''; position: absolute; left: 0; bottom: 0; width: 0; height: 3px; background: var(--blue); border-radius: 2px; transition: width var(--transition); }
+header nav ul li a:hover { color: var(--blue); }
+header nav ul li a:hover::after { width: 100%; }
+.header-right-actions { display: flex; align-items: center; gap: 15px; }
+.header-action-icon { font-size: 1.5rem; color: var(--text-light); cursor: pointer; transition: color 0.2s ease; }
+.header-action-icon:hover { color: var(--white); }
+.notification-icon-wrapper { position: relative; display: flex; align-items: center; }
+.notification-badge { position: absolute; top: -5px; right: -5px; background-color: var(--notification-badge-color); color: var(--white); border-radius: 50%; padding: 3px 7px; font-size: 0.7rem; font-weight: 700; min-width: 20px; text-align: center; box-shadow: 0 0 5px rgba(0, 0, 0, 0.3); display: none; align-items: center; justify-content: center; }
+.user-profile-pic-header { height: 40px; width: 40px; border-radius: 50%; overflow: hidden; position: relative; border: 2px solid var(--accent-color); box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.user-profile-pic-header:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(0, 213, 255, 0.5); }
+.user-profile-pic-header a { display: block; width: 100%; height: 100%; text-decoration: none; cursor: pointer; }
+.user-profile-pic-header img, .user-profile-pic-header i { width: 100%; height: 100%; object-fit: cover; display: none; }
+.user-profile-pic-header i { display: flex; align-items: center; justify-content: center; font-size: 25px; color: var(--text-light); }
+#logoutButton { background: var(--button-background); border: none; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.3s ease; opacity: 0.8; }
+#logoutButton:hover { transform: scale(1.1); box-shadow: var(--button-shadow); opacity: 1; }
+#logoutButton i { color: var(--white); font-size: 0.9rem; }
+main { padding-top: 80px; }
+/* Inline style refactors */
+.section-intro-text { color: var(--text-light); font-size: 0.95rem; margin-bottom: 1.5rem; }
+.block-user-input-row { display: flex; align-items: center; }
+.empty-state-note { color: var(--text-light); text-align: center; }
+.support-intro-text { color: var(--text-light); font-size: 0.9rem; margin-bottom: 15px; }
+.support-line { color: var(--white); font-weight: 600; margin-bottom: 10px; }
+.accent-link { color: var(--blue); text-decoration: none; }
+.accent-link:hover { text-decoration: underline; }
+.redeem-row { display: flex; gap: 10px; align-items: center; }
+.redeem-code-input { flex: 1; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border-light); background: var(--input-background); color: var(--white); }
+#entitlementsDisplay { margin-top: 10px; color: var(--text-light); }
+@media (max-width:600px){ header .header-content-wrapper{ padding:0 20px;} .logo.brand-logo{ font-size:1.6rem;} }
+</style>
+<style>.unstyled-link{ text-decoration:none; color: inherit; }</style>
+<style id="header-overflow-fix">/*header-overflow-fix*/header .header-content-wrapper{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap}header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0;justify-content:flex-end}#profileLink{display:inline-flex;align-items:center;column-gap:8px;row-gap:2px;flex-wrap:wrap;max-width:100%;min-width:0}#profileLink #headerDisplayName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;flex:0 1 auto}#headerProfilePic,#headerAvatarIcon{flex:0 0 auto}@media (max-width:600px){header .header-content-wrapper{gap:8px}#profileLink{column-gap:6px}}</style></head>
+<body class="theme-dark-mode">
+
+    <header>
+        <div class="header-content-wrapper">
+            <a href="/home.html" class="logo brand-logo" aria-label="Nuvia Home">
+                <img src="assets/security.png" alt="Nuvia" class="brand-logo-icon" onerror="this.style.display='none'">
+                <span>Nuvia</span>
+            </a>
+            <nav>
+                <ul></ul>
+            </nav>
+            <div class="header-right-actions">
+                <a href="/report.html" aria-label="Report an Issue" class="unstyled-link">
+                    <i class="fas fa-flag header-action-icon" aria-hidden="true"></i>
+                </a>
+                <div class="notification-icon-wrapper">
+                    <a href="/notifications.html" aria-label="Notifications">
+                        <i class="fas fa-bell header-action-icon"></i>
+                        <span class="notification-badge" id="notificationCount">0</span>
+                    </a>
+                </div>
+                <div class="user-profile-pic-header">
+                    <a href="/profile.html" id="profileLink">
+                        <img id="headerProfilePic" src="" alt="User Profile Picture">
+                        <i id="headerAvatarIcon" class="fas fa-user-circle"></i>
+                    </a>
+                </div>
+                <button id="logoutButton" aria-label="Logout" disabled>
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="content-wrapper">
+            <div class="section-card">
+                <h1>Settings</h1>
+                <p class="section-intro-text">Customize your JCHAT experience and manage your account.</p>
+
+                <h2>Account Management</h2>
+                <div class="form-group">
+                    <label for="usernameInput">Username</label>
+                    <input type="text" id="usernameInput" placeholder="Your display name" aria-label="Username">
+                </div>
+                <div class="form-group">
+                    <label for="emailInput">Email Address</label>
+                    <input type="email" id="emailInput" placeholder="Your email address" aria-label="Email Address">
+                </div>
+                <div class="form-group">
+                    <label for="phoneInput">Phone Number</label>
+                    <input type="tel" id="phoneInput" placeholder="Your phone number (optional)" aria-label="Phone Number">
+                </div>
+                <button id="logoutActionButton" class="action-button" aria-label="Logout">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+
+                <h2>Chat Customization</h2>
+                <div class="form-group">
+                    <label for="accentColorPicker">Accent Color</label>
+                    <input type="color" id="accentColorPicker" value="#00d5ff" aria-label="Accent Color">
+                </div>
+                <div class="form-group">
+                    <label for="customStatusMessage">Custom Status Message</label>
+                    <input type="text" id="customStatusMessage" placeholder="e.g., Away, Busy, Chilling" maxlength="50" aria-label="Custom Status Message">
+                </div>
+                <div class="form-group">
+                    <label for="chatBackground">Chat Background</label>
+                    <select id="chatBackground" aria-label="Chat Background">
+                        <option value="default">Default</option>
+                        <option value="abstract">Abstract Patterns</option>
+                        <option value="nature">Nature Scene</option>
+                        <option value="city">Cityscape</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="bubbleStyle">Message Bubble Style</label>
+                    <select id="bubbleStyle" aria-label="Message Bubble Style">
+                        <option value="rounded">Rounded</option>
+                        <option value="square">Square</option>
+                        <option value="minimal">Minimal</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="fontSize">Chat Font Size</label>
+                    <select id="fontSize" aria-label="Chat Font Size">
+                        <option value="small">Small</option>
+                        <option value="medium">Medium</option>
+                        <option value="large">Large</option>
+                        <option value="xlarge">Extra Large</option>
+                    </select>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="readReceipts">
+                    <label for="readReceipts">Enable Read Receipts</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="typingIndicators">
+                    <label for="typingIndicators">Show Typing Indicators</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="messageReactions">
+                    <label for="messageReactions">Enable Message Reactions</label>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="giphyIntegration">
+                    <label for="giphyIntegration">Enable Giphy Integration</label>
+                </div>
+
+                <h2>Privacy Settings</h2>
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="appearOffline">
+                        <label for="appearOffline">Appear Offline</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="blockUnknownCalls">
+                        <label for="blockUnknownCalls">Block Unknown Call Requests</label>
+                    </div>
+                </div>
+                <h3>Blocked Users</h3>
+                <div class="block-user-input-group block-user-input-row">
+                    <input type="text" id="blockUserInput" placeholder="Enter User ID to Block" aria-label="User ID to block">
+                    <button id="addBlockUserButton" aria-label="Add user to block list">
+                        <span class="button-text">Add</span>
+                        <div class="button-loader"></div>
+                    </button>
+                </div>
+                <ul id="blockedUsersList" role="list">
+                    <li class="empty-state-note">No users blocked.</li>
+                    <!-- Blocked users will be dynamically loaded here -->
+                </ul>
+
+
+                <h2>Notification Settings</h2>
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="enableMessageSounds">
+                        <label for="enableMessageSounds">Play sound for new messages</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="enableCallSounds">
+                        <label for="enableCallSounds">Play sound for incoming calls</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="enableVibrations">
+                        <label for="enableVibrations">Enable vibrations</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="muteAllNotifications">
+                        <label for="muteAllNotifications">Mute All Notifications</label>
+                    </div>
+                    <label for="notificationVolume">Notification Sound Volume</label>
+                    <input type="range" id="notificationVolume" min="0" max="1" step="0.1" value="1" aria-label="Notification Sound Volume">
+                </div>
+
+                <h2>Data & Storage</h2>
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="autoDownloadMedia">
+                        <label for="autoDownloadMedia">Auto-download media in chats</label>
+                    </div>
+                    <button id="viewStorageUsageButton" class="action-button" aria-label="View Storage Usage">
+                        <i class="fas fa-database"></i> View Storage Usage
+                    </button>
+                    <div class="form-group">
+                        <label for="autoDeleteMessages">Auto-delete Messages After</label>
+                        <select id="autoDeleteMessages" aria-label="Auto-delete messages after">
+                            <option value="never">Never</option>
+                            <option value="7days">7 Days</option>
+                            <option value="30days">30 Days</option>
+                            <option value="90days">90 Days</option>
+                            <option value="365days">1 Year</option>
+                        </select>
+                    </div>
+                </div>
+
+                <h2>Advanced Settings</h2>
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="developerMode">
+                        <label for="developerMode">Enable Developer Mode</label>
+                    </div>
+                    <div class="form-group">
+                        <label for="languageSelect">Language</label>
+                        <select id="languageSelect" aria-label="Language Setting">
+                            <option value="en">English</option>
+                            <option value="es">Español</option>
+                            <option value="fr">Français</option>
+                            <option value="de">Deutsch</option>
+                            <option value="zh">中文</option>
+                        </select>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="hapticFeedback">
+                        <label for="hapticFeedback">Enable Haptic Feedback on Tap</label>
+                    </div>
+                </div>
+
+                <h2>Help & Support</h2>
+                <div class="form-group">
+                    <p class="support-intro-text">
+                        For support, please contact us via:
+                    </p>
+                    <p class="support-line">Email: <a href="mailto:jchatguide@gmail.com" class="accent-link">jchatguide@gmail.com</a></p>
+                    <p class="support-line">WhatsApp: <a href="https://wa.me/2349013790707" target="_blank" class="accent-link">+2349013790707</a></p>
+                    <button id="faqButton" class="action-button" aria-label="Frequently Asked Questions">
+                        <i class="fas fa-question-circle"></i> FAQ
+                    </button>
+                    <button id="reportBugButton" class="action-button" aria-label="Report a Bug">
+                        <i class="fas fa-bug"></i> Report a Bug
+                    </button>
+                </div>
+
+                <h2>Account Actions (Requires Web Portal)</h2>
+                <button id="changePasswordButton" class="action-button" aria-label="Change Password">
+                    <i class="fas fa-key"></i> Change Password
+                </button>
+                <button id="deleteAccountButton" class="action-button danger" aria-label="Delete Account">
+                    <i class="fas fa-trash-alt"></i> Delete Account
+                </button>
+
+                <h2>Redeem Code</h2>
+                <div class="form-group redeem-row">
+                    <input id="redeemCodeInput" type="text" placeholder="Enter your code" class="redeem-code-input">
+                    <button id="redeemCodeButton" class="action-button" aria-label="Redeem Code">
+                        <span class="button-text">Redeem</span>
+                        <div class="button-loader"></div>
+                    </button>
+                </div>
+                <div id="entitlementsDisplay"></div>
+
+                <div class="form-actions">
+                    <button id="contactSupportButton" class="action-button" aria-label="Contact Support">
+                        <i class="fas fa-headset"></i> Contact Support
+                    </button>
+                    <button id="changePasswordButton" class="action-button" aria-label="Change Password">
+                        <i class="fas fa-key"></i> Change Password
+                    </button>
+                    <button id="deleteAccountButton" class="action-button danger" aria-label="Delete Account">
+                        <i class="fas fa-trash-alt"></i> Delete Account
+                    </button>
+                </div>
+
+                <button id="saveSettingsButton" aria-label="Save Settings">
+                    <span class="button-text">Save All Settings</span>
+                    <div class="button-loader"></div>
+                </button>
+
+                <section class="settings-section">
+                    <h2>Currency Preference</h2>
+                    <p>Select your preferred currency display. Auto uses your profile country or browser locale.</p>
+                    <div class="input-group">
+                        <label for="currencyPreference">Preferred Currency</label>
+                        <select id="currencyPreference">
+                            <option value="AUTO">Auto</option>
+                            <option value="NGN">NGN (₦)</option>
+                            <option value="USD">USD ($)</option>
+                        </select>
+                    </div>
+                    <button id="saveCurrencyPreference" class="primary-button">Save Preference</button>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Custom Message Box -->
+    <div id="messageBox" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="customConfirmModal" class="modal-overlay" aria-modal="true" role="dialog" aria-labelledby="confirmModalMessage">
+        <div class="modal-content">
+            <h3 id="confirmModalMessage"></h3>
+            <div class="modal-buttons">
+                <button id="confirmYesBtn" class="confirm-btn" aria-label="Confirm Yes">Yes</button>
+                <button id="confirmNoBtn" class="cancel-btn" aria-label="Confirm No">No</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Firebase modules (Updated to v11.6.1)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Firebase & Canvas Environment Configuration ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+            authDomain: "jchat-1.firebaseapp.com",
+            databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+            projectId: "jchat-1",
+            storageBucket: "jchat-1.firebasestorage.app",
+            messagingSenderId: "328479683167",
+            appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
+            measurementId: "G-S6Z9GG0R9P"
+        };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Initialize Firebase services
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- Tone.js Synths for Notification Sounds ---
+        const successSynth = new Tone.Synth().toDestination();
+        const errorSynth = new Tone.Synth().toDestination();
+        const infoSynth = new Tone.Synth().toDestination();
+
+        // Set up basic sounds
+        successSynth.oscillator.type = "sine"; successSynth.envelope.attack = 0.01; successSynth.envelope.decay = 0.2; successSynth.envelope.sustain = 0.0; successSynth.envelope.release = 0.5;
+        errorSynth.oscillator.type = "sawtooth"; errorSynth.envelope.attack = 0.01; errorSynth.envelope.decay = 0.3; errorSynth.envelope.sustain = 0.0; errorSynth.envelope.release = 0.5;
+        infoSynth.oscillator.type = "triangle"; infoSynth.envelope.attack = 0.01; infoSynth.envelope.decay = 0.1; infoSynth.envelope.sustain = 0.0; infoSynth.envelope.release = 0.3;
+
+        // Specific synths for notification sounds
+        const messageSoundSynth = new Tone.Synth().toDestination();
+        messageSoundSynth.oscillator.type = "sine";
+        messageSoundSynth.envelope.attack = 0.01; messageSoundSynth.envelope.decay = 0.1; messageSoundSynth.envelope.sustain = 0.0; messageSoundSynth.envelope.release = 0.2;
+
+        const callSoundSynth = new Tone.Synth().toDestination();
+        callSoundSynth.oscillator.type = "square";
+        callSoundSynth.envelope.attack = 0.01; callSoundSynth.envelope.decay = 0.6; callSoundSynth.envelope.sustain = 0.0; callSoundSynth.envelope.release = 0.8;
+        const callRingingPattern = new Tone.Pattern(function(time, note){
+            callSoundSynth.triggerAttackRelease(note, "8n", time);
+        }, ["C5", "C5", "C5", "C5"]).start(0);
+        callRingingPattern.interval = "1s";
+        callRingingPattern.humanize = true;
+        callRingingPattern.playbackRate = 1;
+        callRingingPattern.loop = true;
+        callRingingPattern.autostart = false;
+
+
+        // --- DOM Elements ---
+        const messageBox = document.getElementById('messageBox');
+
+        // Account Management
+        const usernameInput = document.getElementById('usernameInput');
+        const emailInput = document.getElementById('emailInput');
+        const phoneInput = document.getElementById('phoneInput');
+        const logoutActionButton = document.getElementById('logoutActionButton');
+        const headerProfilePic = document.getElementById('headerProfilePic');
+        const headerAvatarIcon = document.getElementById('headerAvatarIcon');
+        const headerLogoutButton = document.getElementById('logoutButton');
+        const notificationCountElement = document.getElementById('notificationCount');
+        const headerNavLinkProfile = document.getElementById('profileLink');
+
+        // Chat Customization
+        const accentColorPicker = document.getElementById('accentColorPicker');
+        const customStatusMessageInput = document.getElementById('customStatusMessage');
+        const chatBackgroundSelect = document.getElementById('chatBackground');
+        const bubbleStyleSelect = document.getElementById('bubbleStyle');
+        const fontSizeSelect = document.getElementById('fontSize');
+        const readReceiptsCheckbox = document.getElementById('readReceipts');
+        const typingIndicatorsCheckbox = document.getElementById('typingIndicators');
+        const messageReactionsCheckbox = document.getElementById('messageReactions');
+        const giphyIntegrationCheckbox = document.getElementById('giphyIntegration');
+
+
+        // Privacy Settings
+        const appearOfflineCheckbox = document.getElementById('appearOffline');
+        const blockUnknownCallsCheckbox = document.getElementById('blockUnknownCalls');
+
+        // Blocked Users
+        const blockUserInput = document.getElementById('blockUserInput');
+        const addBlockUserButton = document.getElementById('addBlockUserButton');
+        const blockedUsersList = document.getElementById('blockedUsersList');
+
+        // Notification Settings
+        const enableMessageSoundsCheckbox = document.getElementById('enableMessageSounds');
+        const enableCallSoundsCheckbox = document.getElementById('enableCallSounds');
+        const enableVibrationsCheckbox = document.getElementById('enableVibrations');
+        const muteAllNotificationsCheckbox = document.getElementById('muteAllNotifications');
+        const notificationVolumeSlider = document.getElementById('notificationVolume');
+
+        // Data & Storage
+        const autoDownloadMediaCheckbox = document.getElementById('autoDownloadMedia');
+        const viewStorageUsageButton = document.getElementById('viewStorageUsageButton');
+        const autoDeleteMessagesSelect = document.getElementById('autoDeleteMessages');
+
+        // Advanced Settings
+        const developerModeCheckbox = document.getElementById('developerMode');
+        const languageSelect = document.getElementById('languageSelect');
+        const hapticFeedbackCheckbox = document.getElementById('hapticFeedback');
+
+        // Help & Support
+        const faqButton = document.getElementById('faqButton');
+        const contactSupportButton = document.getElementById('contactSupportButton');
+        const reportBugButton = document.getElementById('reportBugButton');
+
+        // Account Actions (Requires Web Portal)
+        const changePasswordButton = document.getElementById('changePasswordButton');
+        const deleteAccountButton = document.getElementById('deleteAccountButton');
+
+        const saveSettingsButton = document.getElementById('saveSettingsButton');
+
+        // Custom Confirmation Modal elements
+        const customConfirmModal = document.getElementById('customConfirmModal');
+        const confirmModalMessage = document.getElementById('confirmModalMessage');
+        const confirmYesBtn = document.getElementById('confirmYesBtn');
+        const confirmNoBtn = document.getElementById('confirmNoBtn');
+
+        // Redeem Code
+        const redeemCodeInput = document.getElementById('redeemCodeInput');
+        const redeemCodeButton = document.getElementById('redeemCodeButton');
+        const entitlementsDisplay = document.getElementById('entitlementsDisplay');
+
+        // --- Global State ---
+        let currentUser = null;
+        let isAuthReady = false;
+        let currentSettings = {}; // To store all fetched settings
+
+        // --- Theme Management Variables ---
+        const THEMES = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+        let currentThemeIndex = 0;
+
+
+        // --- Utility Functions ---
+
+        /**
+         * Plays a notification sound based on type.
+         * Uses Tone.js and respects user's notification settings.
+         * @param {string} type - 'success', 'error', 'info', 'warning', 'loading', 'message', 'call'.
+         */
+        function playNotificationSound(type) {
+            Tone.start(); // Ensure audio context is started
+
+            const messageSoundsEnabled = currentSettings.notificationSettings?.enableMessageSounds ?? true;
+            const callSoundsEnabled = currentSettings.notificationSettings?.enableCallSounds ?? true;
+            const vibrationsEnabled = currentSettings.advancedSettings?.hapticFeedback ?? false; // Use hapticFeedback for general vibrations
+            const muteAllNotifications = currentSettings.notificationSettings?.muteAllNotifications ?? false;
+            const volume = currentSettings.notificationSettings?.notificationVolume ?? 1;
+
+            Tone.Destination.volume.value = Tone.gainToDb(volume); // Apply global volume
+
+            if (muteAllNotifications) return; // If all notifications are muted, do not play any sound or vibrate
+
+            if (vibrationsEnabled && navigator.vibrate) {
+                if (type === 'success') navigator.vibrate(200);
+                else if (type === 'error') navigator.vibrate([100, 50, 100]);
+                else if (type === 'info' || type === 'warning' || type === 'loading') navigator.vibrate(100);
+                else if (type === 'message') navigator.vibrate(50);
+                // No vibration for 'call' as ringing pattern handles it.
+            }
+
+            if (type === 'success') { successSynth.triggerAttackRelease("C5", "8n"); }
+            else if (type === 'error') { errorSynth.triggerAttackRelease("C3", "8n"); }
+            else if (type === 'info' || type === 'warning' || type === 'loading') { infoSynth.triggerAttackRelease("E4", "16n"); }
+            else if (type === 'message' && messageSoundsEnabled) { messageSoundSynth.triggerAttackRelease("G4", "16n"); }
+            else if (type === 'call' && callSoundsEnabled) {
+                // Call sound is handled by callRingingPattern, this just ensures it's started if needed.
+                // The pattern itself will be started/stopped by call management functions.
+            }
+        }
+
+        /**
+         * Starts the ringing sound for incoming calls.
+         */
+        function startRingingSound() {
+            Tone.start();
+            if ((currentSettings.notificationSettings?.enableCallSounds ?? true) && !(currentSettings.notificationSettings?.muteAllNotifications ?? false)) {
+                callRingingPattern.start();
+            }
+        }
+
+        /**
+         * Stops the ringing sound.
+         */
+        function stopRingingSound() {
+            callRingingPattern.stop();
+        }
+
+
+        /**
+         * Displays a temporary message box with a given message and type.
+         * @param {string} message - The message to display.
+         * @param {string} type - The type of message ('success', 'error', 'info', 'loading', 'warning').
+         * @param {boolean} [isPersistent=false] - If true, message stays until explicitly cleared or replaced.
+         * @param {number} [durationMs=3000] - Duration in milliseconds for the message to display if not persistent.
+         */
+        function showMessageBox(message, type, isPersistent = false, durationMs = 3000) {
+            if (messageBox.timeoutId) {
+                clearTimeout(messageBox.timeoutId);
+            }
+
+            messageBox.innerHTML = `<i id="messageBoxIcon"></i><span id="messageBoxText"></span>`;
+            const messageBoxIcon = document.getElementById('messageBoxIcon');
+            const messageBoxText = document.getElementById('messageBoxText');
+
+            messageBoxText.textContent = message;
+            messageBox.className = 'message-box show ' + type;
+
+            if (messageBoxIcon) {
+                messageBoxIcon.className = ''; /* Reset classes */
+                if (type === 'success') { messageBoxIcon.classList.add('fas', 'fa-check-circle'); }
+                else if (type === 'error') { messageBoxIcon.classList.add('fas', 'fa-times-circle'); }
+                else if (type === 'info') { messageBoxIcon.classList.add('fas', 'fa-info-circle'); }
+                else if (type === 'warning') { messageBoxIcon.classList.add('fas', 'fa-exclamation-triangle'); }
+                else if (type === 'loading') { messageBoxIcon.classList.add('fas', 'fa-spinner', 'fa-spin'); }
+            }
+
+            if (type === 'loading') { messageBox.classList.add('loading-pulse'); }
+            else { messageBox.classList.remove('loading-pulse'); }
+
+            messageBox.style.display = 'flex';
+            messageBox.style.opacity = '1';
+
+            playNotificationSound(type); // Play sound based on type
+
+            if (!isPersistent) {
+                messageBox.timeoutId = setTimeout(() => {
+                    messageBox.style.opacity = '0';
+                    messageBox.addEventListener('transitionend', function handler() {
+                        messageBox.style.display = 'none';
+                        messageBox.removeEventListener('transitionend', handler);
+                        messageBox.classList.remove('loading-pulse');
+                    }, { once: true });
+                }, durationMs);
+            }
+        }
+
+        /**
+         * Displays a custom confirmation modal.
+         * @param {string} message - The message to display in the modal.
+         * @returns {Promise<boolean>} Resolves with true if 'Yes' is clicked, false if 'No'.
+         */
+        function showCustomConfirm(message) {
+            return new Promise((resolve) => {
+                if (!customConfirmModal || !confirmModalMessage || !confirmYesBtn || !confirmNoBtn) {
+                    console.error("JCHAT_ERROR: Custom confirmation modal elements not found.");
+                    resolve(false);
+                    return;
+                }
+
+                confirmModalMessage.textContent = message;
+                customConfirmModal.classList.add('active');
+                customConfirmModal.setAttribute('aria-hidden', 'false');
+
+                const handleYes = () => {
+                    customConfirmModal.classList.remove('active');
+                    customConfirmModal.setAttribute('aria-hidden', 'true');
+                    confirmYesBtn.removeEventListener('click', handleYes);
+                    confirmNoBtn.removeEventListener('click', handleNo);
+                    resolve(true);
+                };
+
+                const handleNo = () => {
+                    customConfirmModal.classList.remove('active');
+                    customConfirmModal.setAttribute('aria-hidden', 'true');
+                    confirmYesBtn.removeEventListener('click', handleYes);
+                    confirmNoBtn.removeEventListener('click', handleNo);
+                    resolve(false);
+                };
+
+                confirmYesBtn.addEventListener('click', handleYes);
+                confirmNoBtn.addEventListener('click', handleNo);
+            });
+        }
+
+
+        /**
+         * Toggles loading state for a button.
+         * @param {HTMLElement} buttonElement - The button to toggle.
+         * @param {boolean} isLoading - True to show loading, false to hide.
+         */
+        function toggleButtonLoading(buttonElement, isLoading) {
+            if (!buttonElement) return;
+            const loader = buttonElement.querySelector('.button-loader');
+            const text = buttonElement.querySelector('.button-text');
+
+            if (isLoading) {
+                buttonElement.disabled = true;
+                buttonElement.classList.add('loading');
+                if (loader) loader.classList.add('active');
+                if (text) text.style.display = 'none';
+            } else {
+                buttonElement.disabled = false;
+                buttonElement.classList.remove('loading');
+                if (loader) loader.classList.remove('active');
+                if (text) text.style.display = 'block';
+            }
+        }
+
+        /**
+         * Applies the selected accent color to the CSS variables.
+         * @param {string} color - The hex color string.
+         */
+        function applyAccentColor(color) {
+            document.documentElement.style.setProperty('--user-defined-accent-color', color);
+            // Also update the main accent-color if needed for consistency with gradients etc.
+            document.documentElement.style.setProperty('--accent-color', color);
+        }
+
+        /**
+         * Fetches and populates all settings forms.
+         */
+        async function fetchAllSettings() {
+            if (!currentUser) {
+                showMessageBox("Please log in to view settings.", 'info', true);
+                return;
+            }
+
+            showMessageBox("Loading settings...", 'loading', true);
+            toggleButtonLoading(saveSettingsButton, true);
+            addBlockUserButton.disabled = true;
+            blockUserInput.disabled = true;
+
+            try {
+                const settingsDocRef = doc(db, "artifacts", appId, "users", currentUser.uid, "profiles", "user_settings");
+                const docSnap = await getDoc(settingsDocRef);
+
+                if (docSnap.exists()) {
+                    currentSettings = docSnap.data();
+                    console.log("JCHAT_DEBUG: Fetched settings:", currentSettings);
+                } else {
+                    // Default settings if document doesn't exist
+                    currentSettings = {
+                        accountManagement: {
+                            username: currentUser.displayName || `User_${currentUser.uid.substring(0, 8)}`,
+                            email: currentUser.email || "",
+                            phone: "",
+                        },
+                        chatCustomization: {
+                            accentColor: "#00d5ff",
+                            customStatusMessage: "",
+                            chatBackground: "default",
+                            bubbleStyle: "rounded",
+                            fontSize: "medium",
+                            readReceipts: true,
+                            typingIndicators: true,
+                            messageReactions: true,
+                            giphyIntegration: true,
+                        },
+                        privacySettings: {
+                            appearOffline: false,
+                            blockUnknownCalls: false,
+                            blockList: [],
+                        },
+                        notificationSettings: {
+                            enableMessageSounds: true,
+                            enableCallSounds: true,
+                            enableVibrations: true,
+                            muteAllNotifications: false,
+                            notificationVolume: 1, // 0 to 1
+                        },
+                        dataStorageSettings: {
+                            autoDownloadMedia: false,
+                            autoDeleteMessages: "never",
+                        },
+                        advancedSettings: {
+                            developerMode: false,
+                            language: "en",
+                            hapticFeedback: true,
+                        },
+                        entitlements: {
+                            pro: false,
+                            adFree: false,
+                            themes: []
+                        }
+                    };
+                    // Create the document with default settings
+                    await setDoc(settingsDocRef, currentSettings);
+                    console.log("JCHAT_DEBUG: Created default settings.");
+                }
+
+                // Populate Account Management
+                const accountManagement = currentSettings.accountManagement || {};
+                usernameInput.value = accountManagement.username || "";
+                emailInput.value = accountManagement.email || "";
+                phoneInput.value = accountManagement.phone || "";
+
+                // Populate Chat Customization
+                const chatCustomization = currentSettings.chatCustomization || {};
+                accentColorPicker.value = chatCustomization.accentColor || "#00d5ff";
+                applyAccentColor(accentColorPicker.value); // Apply immediately
+                customStatusMessageInput.value = chatCustomization.customStatusMessage || "";
+                chatBackgroundSelect.value = chatCustomization.chatBackground || "default";
+                bubbleStyleSelect.value = chatCustomization.bubbleStyle || "rounded";
+                fontSizeSelect.value = chatCustomization.fontSize || "medium";
+                readReceiptsCheckbox.checked = chatCustomization.readReceipts ?? true;
+                typingIndicatorsCheckbox.checked = chatCustomization.typingIndicators ?? true;
+                messageReactionsCheckbox.checked = chatCustomization.messageReactions ?? true;
+                giphyIntegrationCheckbox.checked = chatCustomization.giphyIntegration ?? true;
+
+                // Populate Privacy Settings
+                const privacySettings = currentSettings.privacySettings || {};
+                appearOfflineCheckbox.checked = privacySettings.appearOffline ?? false;
+                blockUnknownCallsCheckbox.checked = privacySettings.blockUnknownCalls ?? false;
+                renderBlockedUsersList(privacySettings.blockList || []);
+
+                // Populate Notification Settings
+                const notifications = currentSettings.notificationSettings || {};
+                enableMessageSoundsCheckbox.checked = notifications.enableMessageSounds ?? true;
+                enableCallSoundsCheckbox.checked = notifications.enableCallSounds ?? true;
+                enableVibrationsCheckbox.checked = notifications.enableVibrations ?? true;
+                muteAllNotificationsCheckbox.checked = notifications.muteAllNotifications ?? false;
+                notificationVolumeSlider.value = notifications.notificationVolume ?? 1;
+                Tone.Destination.volume.value = Tone.gainToDb(notificationVolumeSlider.value); // Apply volume immediately
+
+                // Populate Data & Storage Settings
+                const dataStorage = currentSettings.dataStorageSettings || {};
+                autoDownloadMediaCheckbox.checked = dataStorage.autoDownloadMedia ?? false;
+                autoDeleteMessagesSelect.value = dataStorage.autoDeleteMessages || "never";
+
+                // Populate Advanced Settings
+                const advancedSettings = currentSettings.advancedSettings || {};
+                developerModeCheckbox.checked = advancedSettings.developerMode ?? false;
+                languageSelect.value = advancedSettings.language || "en";
+                hapticFeedbackCheckbox.checked = advancedSettings.hapticFeedback ?? true;
+
+                // Entitlements display
+                renderEntitlements();
+
+                showMessageBox("Settings loaded!", 'success');
+
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error fetching settings:", error);
+                showMessageBox(`Error loading settings: ${error.message}`, 'error');
+            } finally {
+                toggleButtonLoading(saveSettingsButton, false);
+                addBlockUserButton.disabled = false;
+                blockUserInput.disabled = false;
+                // Ensure the message box clears if it was persistent loading type
+                if (messageBox.classList.contains('loading-pulse')) {
+                    messageBox.style.opacity = '0';
+                    messageBox.addEventListener('transitionend', function handler() {
+                        messageBox.style.display = 'none';
+                        messageBox.removeEventListener('transitionend', handler);
+                        messageBox.classList.remove('loading-pulse');
+                    }, { once: true });
+                }
+            }
+        }
+
+        /**
+         * Renders the list of blocked users.
+         * @param {Array<string>} blockList - Array of user UIDs that are blocked.
+         */
+        function renderBlockedUsersList(blockList) {
+            blockedUsersList.innerHTML = ''; // Clear existing list
+            if (blockList.length === 0) {
+                blockedUsersList.innerHTML = '<li class="empty-state-note">No users blocked.</li>';
+                return;
+            }
+
+            blockList.forEach(blockedUid => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('blocked-user-item');
+                listItem.innerHTML = `
+                    <span>${blockedUid}</span>
+                    <button data-uid="${blockedUid}" aria-label="Unblock user ${blockedUid}">
+                        <span class="button-text">Unblock</span>
+                        <div class="button-loader"></div>
+                    </button>
+                `;
+                blockedUsersList.appendChild(listItem);
+            });
+
+            // Add event listeners to unblock buttons
+            blockedUsersList.querySelectorAll('button').forEach(button => {
+                button.addEventListener('click', async (event) => {
+                    const uidToUnblock = event.target.dataset.uid;
+                    await removeUserFromBlockList(uidToUnblock, event.target);
+                });
+            });
+        }
+
+        /**
+         * Adds a user to the block list.
+         * @param {string} uidToBlock - The UID of the user to block.
+         */
+        async function addUserToBlockList(uidToBlock) {
+            if (!currentUser) {
+                showMessageBox("Please log in to manage your block list.", 'error');
+                return;
+            }
+            const trimmedUid = uidToBlock.trim();
+            if (!trimmedUid) {
+                showMessageBox("Please enter a User ID to block.", 'warning');
+                return;
+            }
+            if (trimmedUid === currentUser.uid) {
+                showMessageBox("You cannot block yourself.", 'warning');
+                return;
+            }
+            if (currentSettings.privacySettings?.blockList && currentSettings.privacySettings.blockList.includes(trimmedUid)) {
+                showMessageBox("This user is already in your block list.", 'info');
+                return;
+            }
+
+            toggleButtonLoading(addBlockUserButton, true);
+            showMessageBox(`Blocking user ${trimmedUid}...`, 'loading', true);
+
+            try {
+                const settingsDocRef = doc(db, "artifacts", appId, "users", currentUser.uid, "profiles", "user_settings");
+                await updateDoc(settingsDocRef, {
+                    'privacySettings.blockList': arrayUnion(trimmedUid),
+                    lastUpdated: serverTimestamp()
+                });
+                showMessageBox(`User ${trimmedUid} blocked successfully!`, 'success');
+                blockUserInput.value = ''; // Clear input
+                // Re-fetch settings to update UI
+                await fetchAllSettings();
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error adding user to block list:", error);
+                showMessageBox(`Failed to block user: ${error.message}`, 'error');
+            } finally {
+                toggleButtonLoading(addBlockUserButton, false);
+            }
+        }
+
+        /**
+         * Removes a user from the block list.
+         * @param {string} uidToUnblock - The UID of the user to unblock.
+         * @param {HTMLElement} buttonElement - The button that triggered the unblock action.
+         */
+        async function removeUserFromBlockList(uidToUnblock, buttonElement) {
+            if (!currentUser) {
+                showMessageBox("Please log in to manage your block list.", 'error');
+                return;
+            }
+
+            const confirmUnblock = await showCustomConfirm(`Are you sure you want to unblock user ${uidToUnblock}?`);
+            if (!confirmUnblock) {
+                return;
+            }
+
+            toggleButtonLoading(buttonElement, true);
+            showMessageBox(`Unblocking user ${uidToUnblock}...`, 'loading', true);
+
+            try {
+                const settingsDocRef = doc(db, "artifacts", appId, "users", currentUser.uid, "profiles", "user_settings");
+                await updateDoc(settingsDocRef, {
+                    'privacySettings.blockList': arrayRemove(uidToUnblock),
+                    lastUpdated: serverTimestamp()
+                });
+                showMessageBox(`User ${uidToUnblock} unblocked successfully!`, 'success');
+                // Re-fetch settings to update UI
+                await fetchAllSettings();
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error removing user from block list:", error);
+                showMessageBox(`Failed to unblock user: ${error.message}`, 'error');
+            } finally {
+                toggleButtonLoading(buttonElement, false);
+            }
+        }
+
+        /**
+         * Saves all current settings to Firestore.
+         */
+        async function saveAllSettings() {
+            if (!currentUser) {
+                showMessageBox("Please log in to save settings.", 'error');
+                return;
+            }
+
+            toggleButtonLoading(saveSettingsButton, true);
+            showMessageBox("Saving settings...", 'loading', true);
+
+            try {
+                const settingsDocRef = doc(db, "artifacts", appId, "users", currentUser.uid, "profiles", "user_settings");
+                const publicProfileDocRef = doc(db, "artifacts", appId, "public", "data", "users", currentUser.uid);
+
+                const newSettings = {
+                    accountManagement: {
+                        username: usernameInput.value.trim(),
+                        email: emailInput.value.trim(),
+                        phone: phoneInput.value.trim(),
+                    },
+                    chatCustomization: {
+                        accentColor: accentColorPicker.value,
+                        customStatusMessage: customStatusMessageInput.value.trim(),
+                        chatBackground: chatBackgroundSelect.value,
+                        bubbleStyle: bubbleStyleSelect.value,
+                        fontSize: fontSizeSelect.value,
+                        readReceipts: readReceiptsCheckbox.checked,
+                        typingIndicators: typingIndicatorsCheckbox.checked,
+                        messageReactions: messageReactionsCheckbox.checked,
+                        giphyIntegration: giphyIntegrationCheckbox.checked,
+                    },
+                    privacySettings: {
+                        appearOffline: appearOfflineCheckbox.checked,
+                        blockUnknownCalls: blockUnknownCallsCheckbox.checked,
+                        blockList: currentSettings.privacySettings?.blockList || [],
+                    },
+                    notificationSettings: {
+                        enableMessageSounds: enableMessageSoundsCheckbox.checked,
+                        enableCallSounds: enableCallSoundsCheckbox.checked,
+                        enableVibrations: enableVibrationsCheckbox.checked,
+                        muteAllNotifications: muteAllNotificationsCheckbox.checked,
+                        notificationVolume: parseFloat(notificationVolumeSlider.value),
+                    },
+                    dataStorageSettings: {
+                        autoDownloadMedia: autoDownloadMediaCheckbox.checked,
+                        autoDeleteMessages: autoDeleteMessagesSelect.value,
+                    },
+                    advancedSettings: {
+                        developerMode: developerModeCheckbox.checked,
+                        language: languageSelect.value,
+                        hapticFeedback: hapticFeedbackCheckbox.checked,
+                    },
+                    lastUpdated: serverTimestamp()
+                };
+
+                // Update user_settings document in Firestore
+                await setDoc(settingsDocRef, newSettings, { merge: true });
+
+                // Attempt to update Firebase Auth profile (username)
+                let authUpdateNeeded = false;
+                const authUpdateData = {};
+
+                if (currentUser.displayName !== newSettings.accountManagement.username) {
+                    authUpdateData.displayName = newSettings.accountManagement.username;
+                    authUpdateNeeded = true;
+                }
+
+                if (authUpdateNeeded) {
+                    try {
+                        await updateProfile(currentUser, authUpdateData);
+                        console.log("JCHAT_DEBUG: Firebase Auth profile updated.");
+                    } catch (authError) {
+                        console.error("JCHAT_ERROR: Error updating Firebase Auth profile:", authError);
+                        showMessageBox(`Warning: Could not update Firebase Auth profile (${authError.message}).`, 'warning');
+                    }
+                }
+
+                // Update public profile for username (assuming username is public)
+                await updateDoc(publicProfileDocRef, {
+                    username: newSettings.accountManagement.username,
+                    updatedAt: serverTimestamp()
+                });
+
+                // Apply dynamic CSS for accent color
+                applyAccentColor(newSettings.chatCustomization.accentColor);
+
+                // Apply dynamic volume for Tone.js
+                Tone.Destination.volume.value = Tone.gainToDb(newSettings.notificationSettings.notificationVolume);
+
+                // Update the local state
+                currentSettings = { ...currentSettings, ...newSettings };
+
+                showMessageBox("Settings saved successfully!", 'success');
+
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error saving settings:", error);
+                showMessageBox(`Failed to save settings: ${error.message}`, 'error');
+            } finally {
+                toggleButtonLoading(saveSettingsButton, false);
+            }
+        }
+
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply theme on load
+            const savedTheme = localStorage.getItem('jchat-theme');
+            if (savedTheme && THEMES.includes(savedTheme)) {
+                document.body.classList.remove(...THEMES);
+                document.body.classList.add(savedTheme);
+                currentThemeIndex = THEMES.indexOf(savedTheme);
+            } else {
+                document.body.classList.remove(...THEMES);
+                document.body.classList.add('theme-dark-mode'); // Default
+                currentThemeIndex = THEMES.indexOf('theme-dark-mode');
+            }
+        });
+
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'jchat-theme') {
+                const newTheme = event.newValue || 'theme-dark-mode';
+                if (THEMES.includes(newTheme)) {
+                    document.body.classList.remove(...THEMES);
+                    document.body.classList.add(newTheme);
+                    currentThemeIndex = THEMES.indexOf(newTheme);
+                }
+            }
+        });
+
+        // Add a general click listener to elements with `action-button` class for haptic feedback
+        document.body.addEventListener('click', (event) => {
+            if (event.target.classList.contains('action-button') || event.target.closest('.action-button')) {
+                if (currentSettings.advancedSettings?.hapticFeedback && navigator.vibrate) {
+                    navigator.vibrate(20); // Short vibration for button tap
+                }
+            }
+        });
+
+
+        logoutActionButton.addEventListener('click', async () => {
+            if (!isAuthReady) return;
+            try {
+                await signOut(auth);
+                showMessageBox("Logged out successfully! 👋", 'success');
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 1500);
+            } catch (error) {
+                console.error("Error logging out:", error);
+                showMessageBox("Failed to log out. Please try again.", 'error');
+            }
+        });
+
+        saveSettingsButton.addEventListener('click', saveAllSettings);
+
+        addBlockUserButton.addEventListener('click', () => {
+            const uid = blockUserInput.value.trim();
+            addUserToBlockList(uid);
+        });
+
+        blockUserInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                addBlockUserButton.click();
+            }
+        });
+
+        // Help & Support buttons (fully activated)
+        if (faqButton) {
+            faqButton.addEventListener('click', () => {
+                showMessageBox("Opening FAQ page...", "info");
+                window.open('https://example.com/faq', '_blank'); // Placeholder FAQ page
+            });
+        }
+        if (contactSupportButton) {
+            contactSupportButton.addEventListener('click', () => {
+                // Open WhatsApp chat
+                const whatsappNumber = "2349013790707";
+                const message = "Hello JCHAT Support, I need assistance with my account.";
+                window.open(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`, '_blank');
+                showMessageBox("Opening WhatsApp chat with support.", "info");
+            });
+        }
+        if (reportBugButton) {
+            reportBugButton.addEventListener('click', () => {
+                showMessageBox("Opening bug report form...", "info");
+                window.open('mailto:jchatguide@gmail.com?subject=Bug Report - JCHAT App&body=Please describe the bug you encountered:', '_blank');
+            });
+        }
+
+        // Reinstated Account Actions (with clarification)
+        if (changePasswordButton) {
+            changePasswordButton.addEventListener('click', async () => {
+                showMessageBox("To change your password, please visit the JCHAT web portal for a secure process.", "info");
+                // In a real app, this might link to a Firebase password reset page or a custom portal.
+                // window.open('https://jchat.example.com/reset-password', '_blank');
+            });
+        }
+        if (deleteAccountButton) {
+            deleteAccountButton.addEventListener('click', async () => {
+                const confirmed = await showCustomConfirm("Are you sure you want to delete your account? This action is irreversible and will delete all your data. This process must be completed securely via our web portal.");
+                if (confirmed) {
+                    showMessageBox("Account deletion requires a secure process. Please visit the JCHAT web portal to proceed.", "warning");
+                    // In a real app, this would link to a secure deletion page or prompt for re-authentication.
+                    // window.open('https://jchat.example.com/delete-account', '_blank');
+                } else {
+                    showMessageBox("Account deletion cancelled.", "info");
+                }
+            });
+        }
+
+        // New Feature Listeners
+        if (notificationVolumeSlider) {
+            notificationVolumeSlider.addEventListener('input', (event) => {
+                Tone.Destination.volume.value = Tone.gainToDb(parseFloat(event.target.value));
+            });
+        }
+        if (accentColorPicker) {
+            accentColorPicker.addEventListener('input', (event) => {
+                applyAccentColor(event.target.value);
+            });
+        }
+        if (viewStorageUsageButton) {
+            viewStorageUsageButton.addEventListener('click', () => {
+                showMessageBox("Your current storage usage: 150MB / 1GB (simulated).", "info");
+            });
+        }
+
+
+        function getCloudinaryImageUrl(urlOrPublicId, transformations = "w_auto,f_auto,q_auto") {
+            if (!urlOrPublicId) return null;
+            if (urlOrPublicId.startsWith('http://') || urlOrPublicId.startsWith('https://')) return urlOrPublicId;
+            return `https://res.cloudinary.com/dxld01rcp/image/upload/${transformations}/${urlOrPublicId}`;
+        }
+        function displayProfilePicture(imgElement, iconElement, profilePicId, usernameInitial, transformations) {
+            if (!imgElement) return;
+            if (profilePicId) {
+                const imageUrl = getCloudinaryImageUrl(profilePicId, transformations);
+                imgElement.src = imageUrl; imgElement.style.display = 'block'; if (iconElement) iconElement.style.display = 'none';
+                imgElement.onerror = () => {
+                    const bgColor = getComputedStyle(document.body).getPropertyValue('--card-background-color').trim();
+                    const textColor = getComputedStyle(document.body).getPropertyValue('--text-color-primary').trim();
+                    imgElement.src = `https://placehold.co/120x120/${bgColor.replace('#','')}/${textColor.replace('#','')}?text=${usernameInitial}`;
+                    imgElement.style.display = 'block'; if (iconElement) iconElement.style.display = 'none';
+                };
+            } else {
+                imgElement.src = ''; imgElement.style.display = 'none'; if (iconElement) iconElement.style.display = 'block';
+            }
+        }
+        async function fetchAndDisplayHeaderProfile(user) {
+            try {
+                const privateProfileDocRef = doc(db, "artifacts", appId, "users", user.uid, "profiles", "user_profile");
+                const publicProfileDocRef = doc(db, "artifacts", appId, "public", "data", "users", user.uid);
+                const privateDocSnap = await getDoc(privateProfileDocRef);
+                let profileData = privateDocSnap.exists() ? privateDocSnap.data() : null;
+                const publicProfileSummary = {
+                    username: profileData?.username || `User_${user.uid.substring(0,8)}`,
+                    profilePicId: profileData?.profilePicId || user.photoURL || null,
+                    jCoins: profileData?.jCoins || 0,
+                    level: profileData?.level || 1,
+                    userId: user.uid,
+                    email: profileData?.email || ""
+                };
+                await setDoc(publicProfileDocRef, publicProfileSummary, { merge: true });
+                const usernameInitial = (publicProfileSummary.username || "N").charAt(0).toUpperCase();
+                displayProfilePicture(headerProfilePic, headerAvatarIcon, publicProfileSummary.profilePicId, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
+                if (headerNavLinkProfile) headerNavLinkProfile.href = `/profile.html?userId=${user.uid}`;
+                if (headerLogoutButton) headerLogoutButton.disabled = false;
+            } catch (error) {
+                const usernameInitial = (user.displayName || "N").charAt(0).toUpperCase();
+                displayProfilePicture(headerProfilePic, headerAvatarIcon, user.photoURL, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
+                if (headerLogoutButton) headerLogoutButton.disabled = false;
+            }
+        }
+        async function fetchNotificationCount(userId) {
+            try {
+                const notificationsCollectionRef = collection(db, "artifacts", appId, "users", userId, "notifications");
+                const q = query(notificationsCollectionRef, where("read", "==", false));
+                onSnapshot(q, (querySnapshot) => {
+                    const unreadCount = querySnapshot.size;
+                    if (unreadCount > 0) { notificationCountElement.textContent = unreadCount; notificationCountElement.style.display = 'flex'; }
+                    else { notificationCountElement.style.display = 'none'; }
+                }, () => { notificationCountElement.style.display = 'none'; });
+            } catch (_) { /* noop */ }
+        }
+        if (headerLogoutButton) {
+            headerLogoutButton.addEventListener('click', async () => {
+                if (!isAuthReady) return;
+                headerLogoutButton.disabled = true;
+                try { await signOut(auth); showMessageBox("Logged out successfully! 👋", 'success'); setTimeout(()=>{ window.location.href = '/login.html'; }, 1500); }
+                catch (_) { showMessageBox("Failed to log out. Please try again.", 'error'); headerLogoutButton.disabled = false; }
+            });
+        }
+        // --- Authentication State Listener ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                isAuthReady = true;
+                console.log("JCHAT_DEBUG: User authenticated in Settings Page:", user.uid);
+                await fetchAndDisplayHeaderProfile(user);
+                fetchNotificationCount(user.uid);
+                await fetchAllSettings(); // Fetch and populate all settings
+
+                // Enable all form elements
+                usernameInput.disabled = false;
+                emailInput.disabled = false;
+                phoneInput.disabled = false;
+                logoutActionButton.disabled = false;
+                accentColorPicker.disabled = false;
+                customStatusMessageInput.disabled = false;
+                chatBackgroundSelect.disabled = false;
+                bubbleStyleSelect.disabled = false;
+                fontSizeSelect.disabled = false;
+                readReceiptsCheckbox.disabled = false;
+                typingIndicatorsCheckbox.disabled = false;
+                messageReactionsCheckbox.disabled = false;
+                giphyIntegrationCheckbox.disabled = false;
+                appearOfflineCheckbox.disabled = false;
+                blockUnknownCallsCheckbox.disabled = false;
+                blockUserInput.disabled = false;
+                addBlockUserButton.disabled = false;
+                enableMessageSoundsCheckbox.disabled = false;
+                enableCallSoundsCheckbox.disabled = false;
+                enableVibrationsCheckbox.disabled = false;
+                muteAllNotificationsCheckbox.disabled = false;
+                notificationVolumeSlider.disabled = false;
+                autoDownloadMediaCheckbox.disabled = false;
+                viewStorageUsageButton.disabled = false;
+                autoDeleteMessagesSelect.disabled = false;
+                developerModeCheckbox.disabled = false;
+                languageSelect.disabled = false;
+                hapticFeedbackCheckbox.disabled = false;
+                saveSettingsButton.disabled = false;
+                changePasswordButton.disabled = false; // Re-enabled for informative message
+                deleteAccountButton.disabled = false; // Re-enabled for informative message
+                faqButton.disabled = false;
+                contactSupportButton.disabled = false;
+                reportBugButton.disabled = false;
+
+                if (redeemCodeButton) {
+                    redeemCodeButton.addEventListener('click', redeemCode);
+                }
+
+            } else {
+                console.log("JCHAT_DEBUG: No user signed in. Attempting anonymous sign-in or redirecting to login page.");
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        console.log("JCHAT_DEBUG: Signed in with custom token.");
+                    } else {
+                        await signInAnonymously(auth);
+                        console.log("JCHAT_DEBUG: Signed in anonymously.");
+                    }
+                    // onAuthStateChanged will be triggered again with the new user
+                } catch (error) {
+                    console.error("JCHAT_ERROR: Error during anonymous sign-in or custom token sign-in:", error);
+                    if (!auth.currentUser) {
+                        window.location.href = '/login.html';
+                    }
+                }
+                isAuthReady = false;
+                if (headerLogoutButton) headerLogoutButton.disabled = true;
+                if (headerProfilePic) headerProfilePic.style.display = 'none';
+                if (headerAvatarIcon) headerAvatarIcon.style.display = 'block';
+                // Disable all form elements when not logged in
+                usernameInput.disabled = true;
+                emailInput.disabled = true;
+                phoneInput.disabled = true;
+                logoutActionButton.disabled = true;
+                accentColorPicker.disabled = true;
+                customStatusMessageInput.disabled = true;
+                chatBackgroundSelect.disabled = true;
+                bubbleStyleSelect.disabled = true;
+                fontSizeSelect.disabled = true;
+                readReceiptsCheckbox.disabled = true;
+                typingIndicatorsCheckbox.disabled = true;
+                messageReactionsCheckbox.disabled = true;
+                giphyIntegrationCheckbox.disabled = true;
+                appearOfflineCheckbox.disabled = true;
+                blockUnknownCallsCheckbox.disabled = true;
+                blockUserInput.disabled = true;
+                addBlockUserButton.disabled = true;
+                enableMessageSoundsCheckbox.disabled = true;
+                enableCallSoundsCheckbox.disabled = true;
+                enableVibrationsCheckbox.disabled = true;
+                muteAllNotificationsCheckbox.disabled = true;
+                notificationVolumeSlider.disabled = true;
+                autoDownloadMediaCheckbox.disabled = true;
+                viewStorageUsageButton.disabled = true;
+                autoDeleteMessagesSelect.disabled = true;
+                developerModeCheckbox.disabled = true;
+                languageSelect.disabled = true;
+                hapticFeedbackCheckbox.disabled = true;
+                saveSettingsButton.disabled = true;
+                changePasswordButton.disabled = true;
+                deleteAccountButton.disabled = true;
+                blockedUsersList.innerHTML = '<li class="empty-state-note">Log in to view and manage your blocked users.</li>';
+                showMessageBox("Please log in to manage settings.", 'info', true);
+                // Help & Support buttons are still enabled
+                faqButton.disabled = false;
+                contactSupportButton.disabled = false;
+                reportBugButton.disabled = false;
+            }
+        });
+
+        function renderEntitlements() {
+            if (!entitlementsDisplay) return;
+            const ent = currentSettings.entitlements || {};
+            const themes = Array.isArray(ent.themes) ? ent.themes : [];
+            entitlementsDisplay.textContent = `Pro: ${ent.pro ? 'ON' : 'OFF'} | Ad-Free: ${ent.adFree ? 'ON' : 'OFF'} | Themes: ${themes.length ? themes.join(', ') : 'None'}`;
+        }
+
+        async function redeemCode() {
+            if (!currentUser) {
+                showMessageBox('Please log in to redeem a code.', 'error');
+                return;
+            }
+            const raw = (redeemCodeInput?.value || '').trim();
+            if (!raw) {
+                showMessageBox('Enter a valid code.', 'warning');
+                return;
+            }
+            toggleButtonLoading(redeemCodeButton, true);
+            const code = raw.toUpperCase();
+            try {
+                const licenseRef = doc(db, 'licenses', code);
+                const settingsRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profiles', 'user_settings');
+                await runTransaction(db, async (tx) => {
+                    const licSnap = await tx.get(licenseRef);
+                    if (!licSnap.exists()) {
+                        throw new Error('Code not found.');
+                    }
+                    const lic = licSnap.data();
+                    if (lic.claimed) {
+                        throw new Error('This code has already been claimed.');
+                    }
+                    const setSnap = await tx.get(settingsRef);
+                    const existing = setSnap.exists() ? (setSnap.data().entitlements || {}) : {};
+                    const next = { ...existing };
+                    // Map license to entitlements
+                    const type = (lic.type || '').toLowerCase();
+                    if (type === 'pro') next.pro = true;
+                    else if (type === 'adfree' || type === 'ad_free') next.adFree = true;
+                    else if (type === 'theme_pack') {
+                        const themes = Array.isArray(lic.themes) ? lic.themes : (lic.theme ? [lic.theme] : []);
+                        const currentThemes = Array.isArray(existing.themes) ? existing.themes : [];
+                        next.themes = Array.from(new Set([ ...currentThemes, ...themes ]));
+                    } else {
+                        // Generic flag
+                        next.pro = true;
+                    }
+                    tx.update(licenseRef, { claimed: true, claimedBy: currentUser.uid, claimedAt: serverTimestamp() });
+                    if (setSnap.exists()) {
+                        tx.update(settingsRef, { entitlements: next });
+                    } else {
+                        tx.set(settingsRef, { entitlements: next }, { merge: true });
+                    }
+                });
+                // Update local state and UI
+                currentSettings.entitlements = currentSettings.entitlements || {};
+                const ent = currentSettings.entitlements;
+                const licDoc = await getDoc(doc(db, 'licenses', code));
+                const type = (licDoc.data()?.type || '').toLowerCase();
+                if (type === 'pro') ent.pro = true;
+                else if (type === 'adfree' || type === 'ad_free') ent.adFree = true;
+                else if (type === 'theme_pack') {
+                    const themes = Array.isArray(licDoc.data()?.themes) ? licDoc.data().themes : (licDoc.data()?.theme ? [licDoc.data().theme] : []);
+                    const currentThemes = Array.isArray(ent.themes) ? ent.themes : [];
+                    ent.themes = Array.from(new Set([ ...currentThemes, ...themes ]));
+                } else { ent.pro = true; }
+                renderEntitlements();
+                redeemCodeInput.value = '';
+                successSynth.triggerAttackRelease('C5', '8n');
+                showMessageBox('Code redeemed! Your perks are unlocked.', 'success');
+            } catch (e) {
+                console.error('JCHAT_ERROR: Redeem failed:', e);
+                errorSynth.triggerAttackRelease('A3', '8n');
+                showMessageBox(e.message || 'Redeem failed. Try again.', 'error');
+            } finally {
+                toggleButtonLoading(redeemCodeButton, false);
+            }
+        }
+
+        const currencyPreference = document.getElementById('currencyPreference');
+        const saveCurrencyPreference = document.getElementById('saveCurrencyPreference');
+
+        // Initialize preference on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const pref = localStorage.getItem('jchat-currency-preference') || 'AUTO';
+            currencyPreference.value = ['AUTO','NGN','USD'].includes(pref) ? pref : 'AUTO';
+        });
+
+        saveCurrencyPreference.addEventListener('click', () => {
+            const val = currencyPreference.value;
+            localStorage.setItem('jchat-currency-preference', val);
+            alert('Currency preference saved. It will apply on supported pages.');
+        });
+    </script>
+	
+    <script src="assets/js/lazy-images.js" defer></script>
+</body>
+</html>

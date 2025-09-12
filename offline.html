@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JCHAT - Offline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    :root {
+      --pink: #ff2e92; --blue: #00d5ff; --white: #fff; --text-light: rgba(255,255,255,.8);
+      --glass-black: rgba(10,10,10,.85); --border-light: rgba(255,255,255,.12); --radius: 20px;
+    }
+    body {
+      margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      font-family: 'Inter', sans-serif; color: var(--white);
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
+      background-size: 400% 400%; animation: drift 25s ease-in-out infinite;
+    }
+    @keyframes drift { 0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+    .offline-card {
+      width: min(560px, 92vw); padding: 28px; border-radius: var(--radius);
+      background: linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border: 1px solid var(--border-light); backdrop-filter: blur(14px);
+      box-shadow: 0 12px 40px rgba(0,0,0,.35);
+      text-align: center;
+    }
+    .brand { font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 1.6rem; margin-bottom: 6px;
+      background: linear-gradient(90deg, var(--blue), var(--pink)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .title { font-size: 1.25rem; font-weight: 600; margin: 6px 0 10px; }
+    .desc { color: var(--text-light); margin: 0 0 18px; }
+    .actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .btn { cursor: pointer; border: 0; padding: 10px 14px; border-radius: 12px; color: var(--white); font-weight: 600; transition: transform .15s ease, box-shadow .2s ease; }
+    .btn-primary { background: linear-gradient(90deg, var(--blue), var(--pink)); box-shadow: 0 6px 20px rgba(0,213,255,.35), 0 6px 20px rgba(255,46,146,.35); }
+    .btn-ghost { background: rgba(255,255,255,.08); border: 1px solid var(--border-light); }
+    .btn:hover { transform: translateY(-1px); }
+    .tips { margin-top: 16px; color: var(--text-light); font-size: .9rem; }
+  </style>
+</head>
+<body>
+  <main class="offline-card" role="main">
+    <div class="brand">JCHAT</div>
+    <div class="title">You’re offline</div>
+    <p class="desc">We couldn’t connect to the internet. Please check your connection. We’ll reconnect you as soon as you’re back online.</p>
+    <div class="actions">
+      <button class="btn btn-primary" id="retryBtn" aria-label="Retry connection">Try Again</button>
+      <a class="btn btn-ghost" href="/Home.html" aria-label="Go to Home">Go to Home</a>
+    </div>
+    <div class="tips">Tip: If you’re on mobile data, ensure it’s enabled. If you’re on Wi‑Fi, try toggling it off and on.</div>
+  </main>
+  <script>
+    function goOnlineIfReady(){ if(navigator.onLine){ window.location.replace('/Home.html'); } }
+    document.getElementById('retryBtn')?.addEventListener('click', goOnlineIfReady);
+    window.addEventListener('online', goOnlineIfReady);
+    // Periodic retry without UI flicker
+    setInterval(goOnlineIfReady, 4000);
+  </script>
+</body>
+</html>

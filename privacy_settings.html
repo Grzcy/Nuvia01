@@ -1,0 +1,1716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Last updated: 2025-08-21T18:19:29Z -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JCHAT - Privacy Settings</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://*.firebaseio.com" crossorigin>
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        /* Universal box-sizing for consistent layout */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        /* Global CSS Variables for easy theme switching (from Home.html / Profile.html) */
+        :root {
+            --pink: #ff2e92;
+            --blue: #00d5ff;
+            --glass-black: rgba(10, 10, 10, .75);
+            --glass-blue: rgba(0, 213, 255, .15);
+            --radius: 20px;
+            --transition: .3s ease;
+
+            /* These variables will be overridden by theme classes */
+            --white: #fff;
+            --text-light: rgba(255, 255, 255, .7);
+            --background-main: rgba(10, 10, 10, .75);
+            --background-gradient-1: #00d5ff;
+            --background-gradient-2: #ff2e92;
+            --card-background: linear-gradient(145deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01));
+            --header-background: linear-gradient(135deg, rgba(10, 10, 10, .85), rgba(10, 10, 10, .75));
+            --border-light: rgba(255, 255, 255, .05);
+            --input-background: rgba(255, 255, 255, 0.05);
+            --button-background: linear-gradient(90deg, var(--blue), var(--pink));
+            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+
+            /* New variables for consistent theming */
+            --background-color-primary: #1a1a2e;
+            --background-color-secondary: #0f0f1f;
+            --header-background-color: #2a2a4a;
+            --footer-background-color: #2a2a4a;
+            --content-background-color: #20203a;
+            --card-background-color: #2a2a4a;
+            --text-color-primary: #e0e0e0;
+            --text-color-secondary: #b0b0d0;
+            --notification-badge-color: #ff2e92;
+            --status-online: #4CAF50;
+            --status-offline: #6c757d;
+            --status-away: #FFC107;
+            --delete-button-color: #dc3545;
+            --warning-color: #ffc107;
+            --accent-color: #00d5ff; /* A bright cyan */
+            --accent-color-dark: #00aaff;
+            --border-color: #3a3a5a;
+        }
+
+        /* --- Theme Definitions (Light and Dark Mode) --- */
+        /* Light Mode */
+        body.theme-light-mode {
+            --background-main: #f0f2f5; /* Light gray background */
+            --background-gradient-1: #e0e2e5; /* Subtle lighter gradient */
+            --background-gradient-2: #d0d2d5; /* Subtle darker gradient */
+            --white: #333; /* Dark text for readability */
+            --text-light: #666; /* Lighter dark text */
+            --card-background: rgba(255, 255, 255, 0.95); /* Near white cards */
+            --header-background: rgba(255, 255, 255, 0.98); /* Near white header */
+            --border-light: rgba(0, 0, 0, 0.1); /* Light borders */
+            --input-background: rgba(0, 0, 0, 0.05); /* Light input background */
+            --button-background: linear-gradient(90deg, #6dd5ed, #2193b0); /* Blue gradient */
+            --button-shadow: 0 4px 15px rgba(109, 213, 237, 0.4), 0 4px 15px rgba(33, 147, 176, 0.4);
+
+            /* New variables override for light mode */
+            --background-color-primary: #f0f2f5;
+            --background-color-secondary: #e0e2e5;
+            --header-background-color: #ffffff;
+            --footer-background-color: #ffffff;
+            --content-background-color: #f7f9fb;
+            --card-background-color: #ffffff;
+            --text-color-primary: #333333;
+            --text-color-secondary: #666666;
+            --text-color-light: #999999;
+            --accent-color: #007bff;
+            --accent-color-dark: #0056b3;
+            --border-color: #e0e0e0;
+            --input-background-color: #f0f0f0;
+            --button-background: #e9ecef;
+            --button-hover-background: #dee2e6;
+            --active-item-background: rgba(0, 123, 255, 0.1);
+            --notification-badge-color: #dc3545;
+            --status-online: #28a745;
+            --status-offline: #6c757d;
+            --status-away: #ffc107;
+            --delete-button-color: #dc3545;
+            --warning-color: #ffc107;
+        }
+
+        /* Dark Mode */
+        body.theme-dark-mode {
+            --background-main: #1a1a2e; /* Deep purple-dark blue */
+            --background-gradient-1: #16213e; /* Slightly lighter deep blue */
+            --background-gradient-2: #0f3460; /* Darker blue */
+            --white: #e0e0e0; /* Off-white text */
+            --text-light: #a0a0a0; /* Grayish text */
+            --card-background: rgba(25, 25, 40, 0.7); /* Darker, less transparent cards */
+            --header-background: linear-gradient(135deg, rgba(10, 10, 20, .85), rgba(10, 10, 20, .75)); /* Original dark header */
+            --border-light: rgba(255, 255, 255, 0.08); /* Subtle white borders */
+            --input-background: rgba(255, 255, 255, 0.08);
+            --button-background: linear-gradient(90deg, #e94560, #ba2f49); /* Reddish gradient */
+            --button-shadow: 0 4px 15px rgba(233, 69, 96, 0.4), 0 4px 15px rgba(186, 47, 73, 0.4);
+
+            /* New variables override for dark mode */
+            --background-color-primary: #121212;
+            --background-color-secondary: #1e1e1e;
+            --header-background-color: #2c2c2c;
+            --footer-background-color: #2c2c2c;
+            --content-background-color: #242424;
+            --card-background-color: #2c2c2c;
+            --text-color-primary: #ffffff;
+            --text-color-secondary: #bbbbbb;
+            --accent-color: #bb86fc;
+            --accent-color-dark: #9a67ea;
+            --border-color: #444444;
+            --input-background-color: #383838;
+            --button-background: #383838;
+            --button-hover-background: #505050;
+            --active-item-background: rgba(187, 134, 252, 0.2);
+            --notification-badge-color: #cf6679;
+            --delete-button-color: #f44336;
+            --warning-color: #ffeb3b;
+        }
+
+        /* Glass Mode specific variables (from original Profile.html snippet, adapted) */
+        body.theme-glass-mode {
+            --background-main: rgba(10, 10, 10, 0.75);
+            background-image: url('https://source.unsplash.com/random/1920x1080?abstract,blur') !important;
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            backdrop-filter: blur(10px);
+            --card-background: rgba(25, 25, 40, 0.7);
+            --white: #e0e0e0; /* text-color */
+            --text-light: rgba(255, 255, 255, 0.7);
+            --input-background: rgba(255, 255, 255, 0.05);
+            --border-light: rgba(255, 255, 255, 0.1); /* glass-border-color */
+            --button-background: linear-gradient(90deg, var(--pink), var(--blue));
+            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5); /* Inner shadow for glass effect */
+
+            /* New variables override for glass mode */
+            --background-color-primary: rgba(10, 10, 10, 0.75);
+            --background-color-secondary: rgba(10, 10, 10, 0.6);
+            --header-background-color: rgba(10, 10, 10, 0.85);
+            --footer-background-color: rgba(10, 10, 10, 0.85);
+            --content-background-color: rgba(10, 10, 10, 0.75);
+            --card-background-color: rgba(25, 25, 40, 0.7);
+            --text-color-primary: #e0e0e0;
+            --text-color-secondary: #b0b0d0;
+            --accent-color: #00d5ff;
+            --accent-color-dark: #00aaff;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --input-background-color: rgba(255, 255, 255, 0.05);
+            --button-background: rgba(0, 213, 255, 0.15); /* Glassy button */
+            --button-hover-background: rgba(0, 213, 255, 0.25);
+            --active-item-background: rgba(0, 213, 255, 0.1);
+        }
+
+        /* NEW: Sunset Theme (from Home.html / Profile.html) */
+        body.theme-sunset-mode {
+            background: linear-gradient(to top, #ff7e5f, #feb47b) !important;
+            --background-main: linear-gradient(to top, #ff7e5f, #feb47b);
+            --card-background: rgba(255, 255, 255, 0.15); /* Slightly transparent white for contrast */
+            --white: #fff; /* White text for readability */
+            --text-light: rgba(255, 255, 255, 0.8);
+            --input-background: rgba(255, 255, 255, 0.1);
+            --border-light: rgba(255, 255, 255, 0.3);
+            --button-background: linear-gradient(90deg, #fd746c, #ff9068); /* Sunset gradient */
+            --button-shadow: 0 4px 15px rgba(253, 116, 108, 0.4), 0 44px 15px rgba(255, 144, 104, 0.4);
+
+            /* New variables override for sunset mode */
+            --background-color-primary: #ff7e5f;
+            --background-color-secondary: #feb47b;
+            --header-background-color: rgba(255, 126, 95, 0.9);
+            --footer-background-color: rgba(255, 126, 95, 0.9);
+            --content-background-color: rgba(255, 126, 95, 0.85);
+            --card-background-color: rgba(255, 255, 255, 0.15);
+            --text-color-primary: #fff;
+            --text-color-secondary: rgba(255, 255, 255, 0.8);
+            --accent-color: #ffd700;
+            --accent-color-dark: #ccaa00;
+            --border-color: rgba(255, 255, 255, 0.3);
+            --input-background-color: rgba(255, 255, 255, 0.1);
+            --button-background: rgba(255, 255, 255, 0.2);
+            --button-hover-background: rgba(255, 255, 255, 0.3);
+            --active-item-background: rgba(255, 215, 0, 0.1);
+        }
+
+        /* Always show scrollbar to prevent layout shifts */
+        html {
+            overflow-y: scroll;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            padding-bottom: 20px; /* Reduced padding as no bottom nav */
+            background-color: var(--background-main);
+            background-image: radial-gradient(circle at top left, var(--background-gradient-1), transparent 100px),
+                              radial-gradient(circle at bottom right, var(--background-gradient-2), transparent 150px);
+            color: var(--white);
+            transition: background-color 0.5s ease, color 0.5s ease; /* Smooth theme transition */
+        }
+
+        /* Header Styling (from Home.html) - MODIFIED */
+        header {
+            background: var(--header-background);
+            border-bottom: 1px solid var(--border-light);
+            padding: 10px 30px; /* Adjusted padding */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: sticky; /* Changed to sticky for simpler layout */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 55px;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between; /* Space out logo and profile */
+            align-items: center;
+        }
+
+        header .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            letter-spacing: -0.03em;
+            text-decoration: none;
+        }
+
+        /* User Profile Header Styling (from Home.html) */
+        .user-profile-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Removed Notification Icon Styling from header */
+        /* Removed Admin Icon Styling from header */
+
+        .user-profile-header #profileLink {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--white);
+            transition: opacity 0.3s ease, background-color 0.3s ease;
+            padding: 5px 10px;
+            border-radius: var(--radius);
+        }
+
+        .user-profile-header #profileLink:hover {
+            opacity: 0.8;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .user-profile-header img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent-color); /* Used accent-color for consistency */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: opacity 0.3s ease;
+        }
+
+        .user-profile-header i {
+            font-size: 30px;
+            color: var(--text-light);
+        }
+
+        .user-profile-header span {
+            font-weight: 600;
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
+        }
+
+        /* Logout Button Styling (from Home.html) */
+        #logoutButton {
+            background: linear-gradient(90deg, var(--pink), var(--blue));
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.3s ease;
+            opacity: 0.8;
+            margin-left: 10px;
+        }
+
+        #logoutButton:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px var(--pink), 0 4px 15px var(--blue);
+            opacity: 1;
+        }
+
+        #logoutButton i {
+            color: var(--white);
+            font-size: 0.9rem;
+        }
+
+        /* Main Content Area (from Home.html) */
+        main {
+            flex-grow: 1;
+            padding: 20px 0; /* Adjusted padding */
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Align content to top */
+            text-align: center;
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 800px; /* Adjust as needed */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        /* Section Card Styles (reused from Profile.html) */
+        .section-card {
+            background: var(--card-background);
+            border: 1px solid var(--glass-blue); /* Consistent border */
+            backdrop-filter: blur(10px) saturate(180%);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, .3);
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px; /* Max width for consistency */
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center content */
+            gap: 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .section-card h1, .section-card h2 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            margin-bottom: 1.5rem;
+        }
+        .section-card h1 { font-size: 2.5rem; }
+        .section-card h2 { font-size: 1.8rem; margin-bottom: 1rem; }
+
+        /* Form Grouping and Styling */
+        .form-group {
+            width: 100%;
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-light);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .form-group .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .form-group .checkbox-group input[type="checkbox"] {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            accent-color: var(--blue); /* Highlight color for checkbox */
+            cursor: pointer;
+        }
+
+        .form-group .checkbox-group label {
+            margin-bottom: 0;
+            color: var(--white);
+            font-weight: 400;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: 15px;
+            background: var(--input-background);
+            color: var(--white);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            -webkit-appearance: none; /* Remove default arrow */
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e0e0e0'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E"); /* Custom arrow */
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1.2em;
+        }
+
+        .form-group select:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(0, 213, 255, 0.2);
+        }
+
+        .form-group select option {
+            background-color: var(--background-color-primary);
+            color: var(--text-color-primary);
+        }
+
+        /* Block List Styling */
+        #blockListContainer {
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        #blockUserInput {
+            width: calc(100% - 80px); /* Adjust for button width */
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: 15px;
+            background: var(--input-background);
+            color: var(--white);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            margin-right: 10px;
+        }
+
+        #blockUserInput:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(0, 213, 255, 0.2);
+        }
+
+        #addBlockUserButton {
+            background: var(--button-background);
+            color: var(--white);
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 1.2rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: var(--button-shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        #addBlockUserButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--blue), 0 6px 20px var(--pink);
+        }
+
+        #blockedUsersList {
+            list-style: none;
+            padding: 0;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .blocked-user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            color: var(--white);
+            font-size: 0.95rem;
+        }
+
+        .blocked-user-item button {
+            background-color: var(--delete-button-color);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background-color 0.2s ease;
+            display: flex; /* For loader */
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .blocked-user-item button:hover {
+            background-color: #c82333;
+        }
+
+        /* Save Button */
+        #savePrivacySettingsButton {
+            background: var(--button-background);
+            color: var(--white);
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: var(--button-shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 2rem;
+        }
+
+        #savePrivacySettingsButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--blue), 0 6px 20px var(--pink);
+        }
+
+        /* Custom Message Box Styles (from Home.html) */
+        #messageBox {
+            position: fixed;
+            top: 50%; /* Center vertically */
+            left: 50%;
+            transform: translate(-50%, -50%); /* Center both horizontally and vertically */
+            background-color: var(--card-background-color); /* Default background, will be overridden for success */
+            color: var(--text-color-primary); /* Default text color */
+            padding: 20px 30px; /* Increased padding for a more substantial box */
+            border-radius: 15px; /* More rounded corners, slightly squarer */
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4); /* Enhanced shadow */
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            min-width: 280px; /* Ensure a decent minimum width */
+            max-width: 90%;
+            text-align: center;
+            flex-direction: column; /* Stack icon and text vertically */
+            align-items: center;
+            gap: 15px; /* Space between icon and text */
+        }
+        #messageBox.show {
+            opacity: 1;
+            display: flex;
+        }
+        /* Success message box specific styling */
+        #messageBox.success {
+            background-image: linear-gradient(45deg, var(--pink), var(--blue)); /* Pink and blue gradient */
+            color: var(--white); /* White text for contrast on gradient */
+            border: none; /* No border for gradient background */
+            box-shadow: 0 8px 30px rgba(0, 213, 255, 0.5), 0 8px 30px rgba(255, 46, 146, 0.5); /* Glowing shadow */
+        }
+        #messageBox.error { border-left: 5px solid var(--delete-button-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+        #messageBox.info { border-left: 5px solid var(--accent-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+        #messageBox.warning { border-left: 5px solid var(--warning-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+        #messageBox.loading { /* No border-left for loading */ background-color: var(--card-background-color); color: var(--text-color-primary); }
+
+
+        #messageBox i {
+            font-size: 2.5rem; /* Larger icon for prominence */
+            margin-bottom: 5px; /* Space between icon and text */
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+        #messageBox.success i { color: var(--white); } /* White icon for success */
+        #messageBox.error i { color: var(--delete-button-color); }
+        #messageBox.info i { color: var(--accent-color); }
+        #messageBox.warning i { color: var(--warning-color); }
+        #messageBox.loading i { background-image: linear-gradient(90deg, var(--accent-color), var(--pink)); }
+
+
+        #messageBox span {
+            font-size: 1.1rem; /* Slightly larger text */
+            font-weight: 600;
+        }
+
+        @keyframes pulse-bg {
+            0% { background-color: var(--accent-color); }
+            50% { background-color: rgba(0, 213, 255, 0.7); }
+            100% { background-color: var(--accent-color); }
+        }
+        #messageBox.loading-pulse { animation: pulse-bg 1.5s infinite ease-in-out; }
+
+        /* Loader styles for buttons (from Home.html) */
+        .button-loader {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid var(--white);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: none;
+            flex-shrink: 0; /* Prevent loader from shrinking */
+        }
+        .button-loader.active { display: block; }
+        .button-text { display: block; }
+        .loading .button-text { display: none; }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Custom Confirmation Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-content {
+            background: var(--card-background);
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .modal-overlay.active .modal-content { transform: translateY(0); opacity: 1; }
+        .modal-content h3 {
+            color: var(--white);
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        .modal-buttons button {
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .modal-buttons button.confirm-btn {
+            background: linear-gradient(90deg, var(--pink), var(--blue));
+            color: var(--white);
+            box-shadow: 0 4px 10px rgba(0, 213, 255, 0.3);
+        }
+        .modal-buttons button.confirm-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 213, 255, 0.4);
+        }
+        .modal-buttons button.cancel-btn {
+            background: var(--input-background);
+            color: var(--text-light);
+            border: 1px solid var(--border-light);
+        }
+        .modal-buttons button.cancel-btn:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+
+        /* Responsive Adjustments */
+        @media (max-width: 600px) {
+            header {
+                padding: 10px 20px;
+            }
+            .logo {
+                font-size: 1.6rem;
+            }
+            .user-profile-header #profileLink {
+                padding: 5px;
+            }
+            .user-profile-header span {
+                max-width: 90px;
+            }
+            .user-profile-header img {
+                width: 30px;
+                height: 30px;
+            }
+            .user-profile-header i {
+                font-size: 25px;
+            }
+            #logoutButton {
+                width: 25px;
+                height: 25px;
+                font-size: 0.8rem;
+                margin-left: 8px;
+            }
+            #logoutButton i {
+                font-size: 0.8rem;
+            }
+            .section-card {
+                padding: 1.5rem;
+            }
+            .section-card h1 {
+                font-size: 2rem;
+            }
+            .section-card h2 {
+                font-size: 1.5rem;
+            }
+            .form-group label {
+                font-size: 0.85rem;
+            }
+            .form-group .checkbox-group label {
+                font-size: 0.9rem;
+            }
+            .form-group select {
+                padding: 0.7rem 0.9rem;
+                font-size: 0.9rem;
+            }
+            #blockUserInput {
+                width: calc(100% - 70px); /* Adjust for smaller button on mobile */
+                padding: 0.7rem 0.9rem;
+                font-size: 0.9rem;
+            }
+            #addBlockUserButton {
+                padding: 0.7rem 1rem;
+                font-size: 0.8rem;
+            }
+            .blocked-user-item {
+                font-size: 0.85rem;
+                padding: 8px 12px;
+            }
+            .blocked-user-item button {
+                font-size: 0.7rem;
+            }
+            #savePrivacySettingsButton {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.9rem;
+            }
+            body {
+                padding-bottom: 20px; /* Still some padding at bottom */
+            }
+        }
+    </style>
+<style id="header-overflow-fix">/*header-overflow-fix*/header .header-content-wrapper{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap}header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0;justify-content:flex-end}#profileLink{display:inline-flex;align-items:center;column-gap:8px;row-gap:2px;flex-wrap:wrap;max-width:100%;min-width:0}#profileLink #headerDisplayName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;flex:0 1 auto}#headerProfilePic,#headerAvatarIcon{flex:0 0 auto}@media (max-width:600px){header .header-content-wrapper{gap:8px}#profileLink{column-gap:6px}}</style></head>
+<body class="theme-dark-mode">
+
+    <header>
+        <a href="/home.html" class="logo" style="display:flex;align-items:center;gap:10px"><img src="assets/security.png" alt="JCHAT Security" style="height:24px;width:auto" onerror="this.style.display='none'"><span>Nuvia</span></a>
+        <div class="user-profile-header">
+            <a href="/profile.html" id="profileLink">
+                <img id="headerProfilePic" src="" alt="Profile Picture" style="display: none;">
+                <i id="headerAvatarIcon" class="fas fa-user-circle"></i>
+                <span id="headerDisplayName">Loading...</span>
+            </a>
+            <button id="logoutButton" aria-label="Logout" disabled>
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div class="content-wrapper">
+            <div class="section-card">
+                <h1>Privacy Settings</h1>
+                <p style="color: var(--text-light); font-size: 0.95rem; margin-bottom: 1.5rem;">
+                    Control what information is visible to others and manage your blocked users.
+                </p>
+
+                <div class="form-group">
+                    <label>Profile Visibility</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="showDisplayName">
+                        <label for="showDisplayName">Show Display Name</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="showProfilePic">
+                        <label for="showProfilePic">Show Profile Picture</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="showBio">
+                        <label for="showBio">Show Bio</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="showLocation">
+                        <label for="showLocation">Show Location</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="showEmail">
+                        <label for="showEmail">Show Email Address</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="showLastSeen">
+                        <label for="showLastSeen">Show Last Online Status</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="showPhone">
+                        <label for="showPhone">Show Phone Number</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="showSchool">
+                        <label for="showSchool">Show School</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="showWork">
+                        <label for="showWork">Show Work</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="showHobby">
+                        <label for="showHobby">Show Hobby</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="showFavoritePlace">
+                        <label for="showFavoritePlace">Show Favorite Place</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="showRelationshipStatus">
+                        <label for="showRelationshipStatus">Show Relationship Status</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="showDateOfBirth">
+                        <label for="showDateOfBirth">Show Date of Birth / Age</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="showGender">
+                        <label for="showGender">Show Gender</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="showInterests">
+                        <label for="showInterests">Show Interests</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="showOnlineStatus">
+                        <label for="showOnlineStatus">Show Current Online Status</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Discovery Settings</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="allowFriendRequests">
+                        <label for="allowFriendRequests">Allow Friend Requests</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="allowMessages">
+                        <label for="allowMessages">Allow Messages from Friends</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="allowMessagesFromStrangers">
+                        <label for="allowMessagesFromStrangers">Allow Messages from Strangers</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="allowSearchByUsername">
+                        <label for="allowSearchByUsername">Allow Profile Search by Username</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="allowSearchByEmail">
+                        <label for="allowSearchByEmail">Allow Profile Search by Email</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="allowProfileDiscovery">
+                        <label for="allowProfileDiscovery">Allow Profile Discovery (e.g., suggested friends)</label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="storyPrivacy">Story Privacy</label>
+                    <select id="storyPrivacy" aria-label="Story Privacy Setting">
+                        <option value="public">Public (Everyone)</option>
+                        <option value="friends-only">Friends Only</option>
+                        <option value="private">Private (Only Me)</option>
+                    </select>
+                </div>
+
+                <h2>Blocked Users</h2>
+                <div class="block-user-input-group" style="display: flex; align-items: center;">
+                    <input type="text" id="blockUserInput" placeholder="Enter User ID to Block" aria-label="User ID to block">
+                    <button id="addBlockUserButton" aria-label="Add user to block list">
+                        <span class="button-text">Add</span>
+                        <div class="button-loader"></div>
+                    </button>
+                </div>
+                <ul id="blockedUsersList" role="list">
+                    <li style="color: var(--text-light); text-align: center;">No users blocked.</li>
+                    </ul>
+
+                <button id="savePrivacySettingsButton" aria-label="Save privacy settings">
+                    <span class="button-text">Save Settings</span>
+                    <div class="button-loader"></div>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <div id="messageBox" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+    <div id="customConfirmModal" class="modal-overlay" aria-modal="true" role="dialog" aria-labelledby="confirmModalMessage">
+        <div class="modal-content">
+            <h3 id="confirmModalMessage"></h3>
+            <div class="modal-buttons">
+                <button id="confirmYesBtn" class="confirm-btn" aria-label="Confirm Yes">Yes</button>
+                <button id="confirmNoBtn" class="cancel-btn" aria-label="Confirm No">No</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Firebase modules (Updated to v11.6.1)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Firebase & Canvas Environment Configuration ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+            authDomain: "jchat-1.firebaseapp.com",
+            databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+            projectId: "jchat-1",
+            storageBucket: "jchat-1.firebasestorage.app",
+            messagingSenderId: "328479683167",
+            appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
+            measurementId: "G-S6Z9GG0R9P"
+        };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Cloudinary Configuration (needed for header profile pic)
+        const cloudinaryConfig = {
+            cloudName: "dxld01rcp", // Your Cloudinary Cloud Name
+            uploadPreset: "Storage_preset" // Your Cloudinary Upload Preset
+        };
+
+        // Initialize Firebase services
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- Tone.js Synths for Notification Sounds ---
+        const successSynth = new Tone.Synth().toDestination();
+        const errorSynth = new Tone.Synth().toDestination();
+        const infoSynth = new Tone.Synth().toDestination();
+
+        // Set up basic sounds
+        successSynth.oscillator.type = "sine"; successSynth.envelope.attack = 0.01; successSynth.envelope.decay = 0.2; successSynth.envelope.sustain = 0.0; successSynth.envelope.release = 0.5;
+        errorSynth.oscillator.type = "sawtooth"; errorSynth.envelope.attack = 0.01; errorSynth.envelope.decay = 0.3; errorSynth.envelope.sustain = 0.0; errorSynth.envelope.release = 0.5;
+        infoSynth.oscillator.type = "triangle"; infoSynth.envelope.attack = 0.01; infoSynth.envelope.decay = 0.1; infoSynth.envelope.sustain = 0.0; infoSynth.envelope.release = 0.3;
+
+
+        // --- DOM Elements ---
+        const headerProfilePic = document.getElementById('headerProfilePic');
+        const headerAvatarIcon = document.getElementById('headerAvatarIcon');
+        const headerDisplayName = document.getElementById('headerDisplayName');
+        const logoutButton = document.getElementById('logoutButton');
+        // Removed notificationCountElement and adminIconLink as they are no longer in the header
+        const messageBox = document.getElementById('messageBox');
+
+        // Privacy Settings Form Elements
+        const showDisplayNameCheckbox = document.getElementById('showDisplayName');
+        const showProfilePicCheckbox = document.getElementById('showProfilePic');
+        const showBioCheckbox = document.getElementById('showBio');
+        const showLocationCheckbox = document.getElementById('showLocation');
+        const showEmailCheckbox = document.getElementById('showEmail');
+        const showLastSeenCheckbox = document.getElementById('showLastSeen');
+        const showPhoneCheckbox = document.getElementById('showPhone');
+        const showSchoolCheckbox = document.getElementById('showSchool');
+        const showWorkCheckbox = document.getElementById('showWork');
+        const showHobbyCheckbox = document.getElementById('showHobby');
+        const showFavoritePlaceCheckbox = document.getElementById('showFavoritePlace');
+        const showRelationshipStatusCheckbox = document.getElementById('showRelationshipStatus');
+        const showDateOfBirthCheckbox = document.getElementById('showDateOfBirth'); // New
+        const showGenderCheckbox = document.getElementById('showGender'); // New
+        const showInterestsCheckbox = document.getElementById('showInterests'); // New
+        const showOnlineStatusCheckbox = document.getElementById('showOnlineStatus'); // New
+
+        const allowFriendRequestsCheckbox = document.getElementById('allowFriendRequests');
+        const allowMessagesCheckbox = document.getElementById('allowMessages');
+        const allowMessagesFromStrangersCheckbox = document.getElementById('allowMessagesFromStrangers');
+        const allowSearchByUsernameCheckbox = document.getElementById('allowSearchByUsername'); // New
+        const allowSearchByEmailCheckbox = document.getElementById('allowSearchByEmail'); // New
+        const allowProfileDiscoveryCheckbox = document.getElementById('allowProfileDiscovery'); // New
+
+
+        const storyPrivacySelect = document.getElementById('storyPrivacy');
+
+        const blockUserInput = document.getElementById('blockUserInput');
+        const addBlockUserButton = document.getElementById('addBlockUserButton');
+        const blockedUsersList = document.getElementById('blockedUsersList');
+
+        const savePrivacySettingsButton = document.getElementById('savePrivacySettingsButton');
+
+        // Custom Confirmation Modal elements
+        const customConfirmModal = document.getElementById('customConfirmModal');
+        const confirmModalMessage = document.getElementById('confirmModalMessage');
+        const confirmYesBtn = document.getElementById('confirmYesBtn');
+        const confirmNoBtn = document.getElementById('confirmNo');
+
+        // --- Global State ---
+        let currentUser = null;
+        let isAuthReady = false;
+        let currentPrivacySettings = {}; // To store the fetched settings
+        const ADMIN_UID = 'cc96gdhCRPO72NFZtleRCujHvIq2'; // Admin's User ID
+
+        // --- Utility Functions ---
+
+        /**
+         * Plays a notification sound based on type.
+         * @param {string} type - 'success', 'error', 'info'.
+         */
+        function playNotificationSound(type) {
+            Tone.start(); // Ensure audio context is started
+            if (type === 'success') { successSynth.triggerAttackRelease("C5", "8n"); }
+            else if (type === 'error') { errorSynth.triggerAttackRelease("C3", "8n"); }
+            else if (type === 'info' || type === 'warning' || type === 'loading') { infoSynth.triggerAttackRelease("E4", "16n"); }
+        }
+
+        /**
+         * Displays a temporary message box with a given message and type.
+         * @param {string} message - The message to display.
+         * @param {string} type - The type of message ('success', 'error', 'info', 'loading', 'warning').
+         * @param {boolean} [isPersistent=false] - If true, message stays until explicitly cleared or replaced.
+         * @param {number} [durationMs=3000] - Duration in milliseconds for the message to display if not persistent.
+         */
+        function showMessageBox(message, type, isPersistent = false, durationMs = 3000) {
+            if (messageBox.timeoutId) {
+                clearTimeout(messageBox.timeoutId);
+            }
+
+            messageBox.innerHTML = `<i id="messageBoxIcon"></i><span id="messageBoxText"></span>`;
+            const messageBoxIcon = document.getElementById('messageBoxIcon');
+            const messageBoxText = document.getElementById('messageBoxText');
+
+            messageBoxText.textContent = message;
+            messageBox.className = 'message-box show ' + type;
+
+            if (messageBoxIcon) {
+                messageBoxIcon.className = ''; /* Reset classes */
+                if (type === 'success') { messageBoxIcon.classList.add('fas', 'fa-check-circle'); }
+                else if (type === 'error') { messageBoxIcon.classList.add('fas', 'fa-times-circle'); }
+                else if (type === 'info') { messageBoxIcon.classList.add('fas', 'fa-info-circle'); }
+                else if (type === 'warning') { messageBoxIcon.classList.add('fas', 'fa-exclamation-triangle'); }
+                else if (type === 'loading') { messageBoxIcon.classList.add('fas', 'fa-spinner', 'fa-spin'); }
+            }
+
+            if (type === 'loading') { messageBox.classList.add('loading-pulse'); }
+            else { messageBox.classList.remove('loading-pulse'); }
+
+            messageBox.style.display = 'flex';
+            messageBox.style.opacity = '1';
+
+            playNotificationSound(type); // Play sound based on type
+
+            if (!isPersistent) {
+                messageBox.timeoutId = setTimeout(() => {
+                    messageBox.style.opacity = '0';
+                    messageBox.addEventListener('transitionend', function handler() {
+                        messageBox.style.display = 'none';
+                        messageBox.removeEventListener('transitionend', handler);
+                        messageBox.classList.remove('loading-pulse');
+                    }, { once: true });
+                }, durationMs);
+            }
+        }
+
+        /**
+         * Displays a custom confirmation modal.
+         * @param {string} message - The message to display in the modal.
+         * @returns {Promise<boolean>} Resolves with true if 'Yes' is clicked, false if 'No'.
+         */
+        function showCustomConfirm(message) {
+            return new Promise((resolve) => {
+                if (!customConfirmModal || !confirmModalMessage || !confirmYesBtn || !confirmNoBtn) {
+                    console.error("JCHAT_ERROR: Custom confirmation modal elements not found.");
+                    resolve(false);
+                    return;
+                }
+
+                confirmModalMessage.textContent = message;
+                customConfirmModal.classList.add('active');
+                customConfirmModal.setAttribute('aria-hidden', 'false');
+
+                const handleYes = () => {
+                    customConfirmModal.classList.remove('active');
+                    customConfirmModal.setAttribute('aria-hidden', 'true');
+                    confirmYesBtn.removeEventListener('click', handleYes);
+                    confirmNoBtn.removeEventListener('click', handleNo);
+                    resolve(true);
+                };
+
+                const handleNo = () => {
+                    customConfirmModal.classList.remove('active');
+                    customConfirmModal.setAttribute('aria-hidden', 'true');
+                    confirmYesBtn.removeEventListener('click', handleYes);
+                    confirmNoBtn.removeEventListener('click', handleNo);
+                    resolve(false);
+                };
+
+                confirmYesBtn.addEventListener('click', handleYes);
+                confirmNoBtn.addEventListener('click', handleNo);
+            });
+        }
+
+
+        /**
+         * Toggles loading state for a button.
+         * @param {HTMLElement} buttonElement - The button to toggle.
+         * @param {boolean} isLoading - True to show loading, false to hide.
+         */
+        function toggleButtonLoading(buttonElement, isLoading) {
+            if (!buttonElement) return;
+            const loader = buttonElement.querySelector('.button-loader');
+            const text = buttonElement.querySelector('.button-text');
+
+            if (isLoading) {
+                buttonElement.disabled = true;
+                buttonElement.classList.add('loading');
+                if (loader) loader.classList.add('active');
+                if (text) text.style.display = 'none';
+            } else {
+                buttonElement.disabled = false;
+                buttonElement.classList.remove('loading');
+                if (loader) loader.classList.remove('active');
+                if (text) text.style.display = 'block';
+            }
+        }
+
+        /**
+         * Constructs a Cloudinary URL for an image/video.
+         * @param {string} urlOrPublicId - The full Cloudinary URL or the public ID of the image on Cloudinary.
+         * @param {string} transformations - Optional Cloudinary transformations.
+         * @returns {string|null} The full Cloudinary URL or null if urlOrPublicId is not provided.
+         */
+        function getCloudinaryImageUrl(urlOrPublicId, transformations = "w_auto,f_auto,q_auto") {
+            if (!urlOrPublicId) return null;
+            if (urlOrPublicId.startsWith('http://') || urlOrPublicId.startsWith('https://')) {
+                return urlOrPublicId;
+            }
+            return `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/${transformations}/${urlOrPublicId}`;
+        }
+
+        /**
+         * Displays the profile picture or a default icon.
+         * @param {HTMLElement} imgElement - The <img> element to update.
+         * @param {HTMLElement} iconElement - The <i> element to display if no image.
+         * @param {string|null} profilePicId - The Cloudinary public ID or URL, or null.
+         * @param {string} usernameInitial - Initial for placeholder.
+         * @param {string} transformations - Cloudinary transformations.
+         */
+        function displayProfilePicture(imgElement, iconElement, profilePicId, usernameInitial, transformations) {
+            if (profilePicId) {
+                const imageUrl = getCloudinaryImageUrl(profilePicId, transformations);
+                imgElement.src = imageUrl;
+                imgElement.style.display = 'block';
+                iconElement.style.display = 'none';
+                imgElement.onerror = () => {
+                    console.error(`Failed to load profile picture: ${profilePicId}. Using placeholder.`);
+                    imgElement.src = `https://placehold.co/120x120/CCCCCC/000000?text=${usernameInitial}`;
+                    imgElement.style.display = 'block';
+                    iconElement.style.display = 'none';
+                };
+            } else {
+                imgElement.src = '';
+                imgElement.style.display = 'none';
+                iconElement.style.display = 'block';
+            }
+        }
+
+        /**
+         * Fetches and displays the current user's profile data for the header.
+         * This function runs on every page to ensure header is consistent.
+         * @param {firebase.User} user - The authenticated Firebase user object.
+         */
+        async function fetchAndDisplayHeaderProfile(user) {
+            try {
+                const privateProfileDocRef = doc(db, "artifacts", appId, "users", user.uid, "profiles", "user_profile");
+                const privateDocSnap = await getDoc(privateProfileDocRef);
+
+                let profileData = null;
+                if (privateDocSnap.exists()) {
+                    profileData = privateDocSnap.data();
+                } else {
+                    profileData = {
+                        username: user.displayName || `User_${user.uid.substring(0, 8)}`,
+                        email: user.email || "",
+                        profilePicId: user.photoURL || null,
+                        bio: "",
+                        location: "",
+                        school: "",
+                        work: "",
+                        hobby: "",
+                        favoritePlace: "",
+                        relationshipStatus: "",
+                        friendsCount: 0,
+                        followersCount: 0,
+                        followingCount: 0,
+                        createdAt: serverTimestamp(),
+                        updatedAt: serverTimestamp(),
+                        inspirationType: "motivational",
+                        visibility: {
+                            displayName: true, profilePic: true, bio: false, location: false,
+                            emailPublic: false, lastOnline: false, allowFriendRequests: true, allowMessages: true,
+                            allowMessagesFromStrangers: false,
+                            showSchool: false, showWork: false, showHobby: false, showFavoritePlace: false, showRelationshipStatus: false,
+                            showDateOfBirth: false, showGender: false, showInterests: false, showOnlineStatus: true, // Defaults for new fields
+                            allowSearchByUsername: true, allowSearchByEmail: false, allowProfileDiscovery: true // Defaults for new fields
+                        },
+                        totalPosts: 0,
+                        jCoins: 0,
+                        level: 1,
+                        currentXp: 0,
+                        xpToNextLevel: 100,
+                        walletUnlocked: false
+                    };
+                    await setDoc(privateProfileDocRef, profileData);
+
+                    // Also create/update public profile
+                    const publicProfileDocRef = doc(db, "artifacts", appId, "public", "data", "users", user.uid);
+                    await setDoc(publicProfileDocRef, {
+                        username: profileData.username,
+                        profilePicId: profileData.profilePicId,
+                        bio: profileData.bio,
+                        location: profileData.location,
+                        school: profileData.school,
+                        work: profileData.work,
+                        hobby: profileData.hobby,
+                        favoritePlace: profileData.favoritePlace,
+                        relationshipStatus: profileData.relationshipStatus,
+                        createdAt: profileData.createdAt,
+                        updatedAt: profileData.updatedAt,
+                        visibility: profileData.visibility,
+                        totalPosts: profileData.totalPosts
+                    }, { merge: true });
+                }
+
+                // Update header UI
+                const usernameInitial = (profileData.username || "J").charAt(0).toUpperCase();
+                displayProfilePicture(headerProfilePic, headerAvatarIcon, profileData?.profilePicId, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
+                headerDisplayName.textContent = profileData.username || "JCHAT User";
+                document.getElementById('profileLink').href = `/profile.html?userId=${user.uid}`;
+
+                logoutButton.disabled = false;
+
+                // Admin icon is removed from header, so no need to manage its display here.
+
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error fetching or creating profile for header:", error);
+                const usernameInitial = (user.displayName || "J").charAt(0).toUpperCase();
+                displayProfilePicture(headerProfilePic, headerAvatarIcon, user.photoURL, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
+                headerDisplayName.textContent = user.displayName || "JCHAT User";
+                showMessageBox(`Error loading header profile: ${error.message}`, 'error');
+                logoutButton.disabled = false;
+            }
+        }
+
+        // --- Privacy Settings Specific Functions ---
+
+        /**
+         * Fetches and populates the privacy settings form.
+         */
+        async function fetchPrivacySettings() {
+            if (!currentUser) {
+                showMessageBox("Please log in to view privacy settings.", 'info', true);
+                return;
+            }
+
+            showMessageBox("Loading privacy settings...", 'loading', true);
+            toggleButtonLoading(savePrivacySettingsButton, true);
+            addBlockUserButton.disabled = true;
+            blockUserInput.disabled = true;
+
+            try {
+                const privacyDocRef = doc(db, "artifacts", appId, "users", currentUser.uid, "profiles", "privacy_settings");
+                const docSnap = await getDoc(privacyDocRef);
+
+                if (docSnap.exists()) {
+                    currentPrivacySettings = docSnap.data();
+                    console.log("JCHAT_DEBUG: Fetched privacy settings:", currentPrivacySettings);
+                } else {
+                    // Default settings if document doesn't exist
+                    currentPrivacySettings = {
+                        visibility: {
+                            displayName: true,
+                            profilePic: true,
+                            bio: false,
+                            location: false,
+                            emailPublic: false,
+                            lastOnline: false,
+                            showPhone: false,
+                            allowFriendRequests: true,
+                            allowMessages: true,
+                            allowMessagesFromStrangers: false,
+                            showSchool: false, showWork: false, showHobby: false, showFavoritePlace: false, showRelationshipStatus: false,
+                            showDateOfBirth: false, // New Default
+                            showGender: false, // New Default
+                            showInterests: false, // New Default
+                            showOnlineStatus: true, // New Default
+                            allowSearchByUsername: true, // New Default
+                            allowSearchByEmail: false, // New Default
+                            allowProfileDiscovery: true // New Default
+                        },
+                        storyPrivacy: "public",
+                        blockList: [],
+                        lastUpdated: serverTimestamp()
+                    };
+                    // Create the document with default settings
+                    await setDoc(privacyDocRef, currentPrivacySettings);
+                    console.log("JCHAT_DEBUG: Created default privacy settings.");
+                }
+
+                // Populate checkboxes
+                const visibility = currentPrivacySettings.visibility || {};
+                showDisplayNameCheckbox.checked = visibility.displayName ?? true;
+                showProfilePicCheckbox.checked = visibility.profilePic ?? true;
+                showBioCheckbox.checked = visibility.bio ?? false;
+                showLocationCheckbox.checked = visibility.location ?? false;
+                showEmailCheckbox.checked = visibility.emailPublic ?? false;
+                showLastSeenCheckbox.checked = visibility.lastOnline ?? false;
+                showPhoneCheckbox.checked = visibility.showPhone ?? false;
+                allowFriendRequestsCheckbox.checked = visibility.allowFriendRequests ?? true;
+                allowMessagesCheckbox.checked = visibility.allowMessages ?? true;
+                allowMessagesFromStrangersCheckbox.checked = visibility.allowMessagesFromStrangers ?? false;
+                showSchoolCheckbox.checked = visibility.showSchool ?? false;
+                showWorkCheckbox.checked = visibility.work ?? false; // Fixed: was showWork.checked
+                showHobbyCheckbox.checked = visibility.hobby ?? false; // Fixed: was showHobby.checked
+                showFavoritePlaceCheckbox.checked = visibility.favoritePlace ?? false; // Fixed: was showFavoritePlace.checked
+                showRelationshipStatusCheckbox.checked = visibility.relationshipStatus ?? false; // Fixed: was showRelationshipStatus.checked
+
+                // New fields
+                showDateOfBirthCheckbox.checked = visibility.showDateOfBirth ?? false;
+                showGenderCheckbox.checked = visibility.showGender ?? false;
+                showInterestsCheckbox.checked = visibility.showInterests ?? false;
+                showOnlineStatusCheckbox.checked = visibility.showOnlineStatus ?? true; // Default to true
+
+                allowSearchByUsernameCheckbox.checked = visibility.allowSearchByUsername ?? true; // Default to true
+                allowSearchByEmailCheckbox.checked = visibility.allowSearchByEmail ?? false;
+                allowProfileDiscoveryCheckbox.checked = visibility.allowProfileDiscovery ?? true; // Default to true
+
+
+                // Populate select dropdown
+                storyPrivacySelect.value = currentPrivacySettings.storyPrivacy || "public";
+
+                // Populate block list
+                renderBlockedUsersList(currentPrivacySettings.blockList || []);
+
+                showMessageBox("Privacy settings loaded!", 'success');
+
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error fetching privacy settings:", error);
+                showMessageBox(`Error loading settings: ${error.message}`, 'error');
+            } finally {
+                toggleButtonLoading(savePrivacySettingsButton, false);
+                addBlockUserButton.disabled = false;
+                blockUserInput.disabled = false;
+                // Ensure the message box clears if it was persistent loading type
+                if (messageBox.classList.contains('loading-pulse')) {
+                    messageBox.style.opacity = '0';
+                    messageBox.addEventListener('transitionend', function handler() {
+                        messageBox.style.display = 'none';
+                        messageBox.removeEventListener('transitionend', handler);
+                        messageBox.classList.remove('loading-pulse');
+                    }, { once: true });
+                }
+            }
+        }
+
+        /**
+         * Renders the list of blocked users.
+         * @param {Array<string>} blockList - Array of user UIDs that are blocked.
+         */
+        function renderBlockedUsersList(blockList) {
+            blockedUsersList.innerHTML = ''; // Clear existing list
+            if (blockList.length === 0) {
+                blockedUsersList.innerHTML = '<li style="color: var(--text-light); text-align: center;">No users blocked.</li>';
+                return;
+            }
+
+            blockList.forEach(blockedUid => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('blocked-user-item');
+                listItem.innerHTML = `
+                    <span>${blockedUid}</span>
+                    <button data-uid="${blockedUid}" aria-label="Unblock user ${blockedUid}">
+                        <span class="button-text">Unblock</span>
+                        <div class="button-loader"></div>
+                    </button>
+                `;
+                blockedUsersList.appendChild(listItem);
+            });
+
+            // Add event listeners to unblock buttons
+            blockedUsersList.querySelectorAll('button').forEach(button => {
+                button.addEventListener('click', async (event) => {
+                    const uidToUnblock = event.target.dataset.uid;
+                    await removeUserFromBlockList(uidToUnblock, event.target);
+                });
+            });
+        }
+
+        /**
+         * Adds a user to the block list.
+         * @param {string} uidToBlock - The UID of the user to block.
+         */
+        async function addUserToBlockList(uidToBlock) {
+            if (!currentUser) {
+                showMessageBox("Please log in to manage your block list.", 'error');
+                return;
+            }
+            const trimmedUid = uidToBlock.trim();
+            if (!trimmedUid) {
+                showMessageBox("Please enter a User ID to block.", 'warning');
+                return;
+            }
+            if (trimmedUid === currentUser.uid) {
+                showMessageBox("You cannot block yourself.", 'warning');
+                return;
+            }
+            if (currentPrivacySettings.blockList && currentPrivacySettings.blockList.includes(trimmedUid)) {
+                showMessageBox("This user is already in your block list.", 'info');
+                return;
+            }
+
+            toggleButtonLoading(addBlockUserButton, true);
+            showMessageBox(`Blocking user ${trimmedUid}...`, 'loading', true);
+
+            try {
+                const privacyDocRef = doc(db, "artifacts", appId, "users", currentUser.uid, "profiles", "privacy_settings");
+                await updateDoc(privacyDocRef, {
+                    blockList: arrayUnion(trimmedUid),
+                    lastUpdated: serverTimestamp()
+                });
+                showMessageBox(`User ${trimmedUid} blocked successfully!`, 'success');
+                blockUserInput.value = ''; // Clear input
+                // Re-fetch settings to update UI
+                await fetchPrivacySettings();
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error adding user to block list:", error);
+                showMessageBox(`Failed to block user: ${error.message}`, 'error');
+            } finally {
+                toggleButtonLoading(addBlockUserButton, false);
+            }
+        }
+
+        /**
+         * Removes a user from the block list.
+         * @param {string} uidToUnblock - The UID of the user to unblock.
+         * @param {HTMLElement} buttonElement - The button that triggered the unblock action.
+         */
+        async function removeUserFromBlockList(uidToUnblock, buttonElement) {
+            if (!currentUser) {
+                showMessageBox("Please log in to manage your block list.", 'error');
+                return;
+            }
+
+            const confirmUnblock = await showCustomConfirm(`Are you sure you want to unblock user ${uidToUnblock}?`);
+            if (!confirmUnblock) {
+                return;
+            }
+
+            toggleButtonLoading(buttonElement, true);
+            showMessageBox(`Unblocking user ${uidToUnblock}...`, 'loading', true);
+
+            try {
+                const privacyDocRef = doc(db, "artifacts", appId, "users", currentUser.uid, "profiles", "privacy_settings");
+                await updateDoc(privacyDocRef, {
+                    blockList: arrayRemove(uidToUnblock),
+                    lastUpdated: serverTimestamp()
+                });
+                showMessageBox(`User ${uidToUnblock} unblocked successfully!`, 'success');
+                // Re-fetch settings to update UI
+                await fetchPrivacySettings();
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error removing user from block list:", error);
+                showMessageBox(`Failed to unblock user: ${error.message}`, 'error');
+            } finally {
+                toggleButtonLoading(buttonElement, false);
+            }
+        }
+
+        /**
+         * Saves the current privacy settings to Firestore.
+         */
+        async function savePrivacySettings() {
+            if (!currentUser) {
+                showMessageBox("Please log in to save privacy settings.", 'error');
+                return;
+            }
+
+            toggleButtonLoading(savePrivacySettingsButton, true);
+            showMessageBox("Saving settings...", 'loading', true);
+
+            try {
+                const privacyDocRef = doc(db, "artifacts", appId, "users", currentUser.uid, "profiles", "privacy_settings");
+                const publicProfileDocRef = doc(db, "artifacts", appId, "public", "data", "users", currentUser.uid);
+
+                const newSettings = {
+                    visibility: {
+                        displayName: showDisplayNameCheckbox.checked,
+                        profilePic: showProfilePicCheckbox.checked,
+                        bio: showBioCheckbox.checked,
+                        location: showLocationCheckbox.checked,
+                        emailPublic: showEmailCheckbox.checked,
+                        lastOnline: showLastSeenCheckbox.checked,
+                        showPhone: showPhoneCheckbox.checked,
+                        allowFriendRequests: allowFriendRequestsCheckbox.checked,
+                        allowMessages: allowMessagesCheckbox.checked,
+                        allowMessagesFromStrangers: allowMessagesFromStrangersCheckbox.checked,
+                        showSchool: showSchoolCheckbox.checked,
+                        showWork: showWorkCheckbox.checked,
+                        showHobby: showHobbyCheckbox.checked,
+                        showFavoritePlace: showFavoritePlaceCheckbox.checked,
+                        showRelationshipStatus: showRelationshipStatusCheckbox.checked,
+                        showDateOfBirth: showDateOfBirthCheckbox.checked, // New
+                        showGender: showGenderCheckbox.checked, // New
+                        showInterests: showInterestsCheckbox.checked, // New
+                        showOnlineStatus: showOnlineStatusCheckbox.checked, // New
+                        allowSearchByUsername: allowSearchByUsernameCheckbox.checked, // New
+                        allowSearchByEmail: allowSearchByEmailCheckbox.checked, // New
+                        allowProfileDiscovery: allowProfileDiscoveryCheckbox.checked // New
+                    },
+                    storyPrivacy: storyPrivacySelect.value,
+                    // blockList is managed separately via arrayUnion/arrayRemove
+                    lastUpdated: serverTimestamp()
+                };
+
+                // Use setDoc with merge: true to create the document if it doesn't exist, or update it
+                await setDoc(privacyDocRef, newSettings, { merge: true });
+
+                // Also update the public profile with relevant visibility settings
+                await updateDoc(publicProfileDocRef, {
+                    visibility: newSettings.visibility,
+                    updatedAt: serverTimestamp()
+                });
+
+                // Update the local state
+                currentPrivacySettings = { ...currentPrivacySettings, ...newSettings };
+
+                showMessageBox("Privacy settings saved successfully!", 'success');
+
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error saving privacy settings:", error);
+                showMessageBox(`Failed to save settings: ${error.message}`, 'error');
+            } finally {
+                toggleButtonLoading(savePrivacySettingsButton, false);
+            }
+        }
+
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply theme on load
+            const savedTheme = localStorage.getItem('jchat-theme');
+            const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+            if (savedTheme && themes.includes(savedTheme)) {
+                document.body.classList.remove(...themes);
+                document.body.classList.add(savedTheme);
+            } else {
+                document.body.classList.remove(...themes);
+                document.body.classList.add('theme-dark-mode'); // Default
+            }
+        });
+
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'jchat-theme') {
+                const newTheme = event.newValue || 'theme-dark-mode';
+                const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+                if (themes.includes(newTheme)) {
+                    document.body.classList.remove(...themes);
+                    document.body.classList.add(newTheme);
+                }
+            }
+        });
+
+        logoutButton.addEventListener('click', async () => {
+            if (!isAuthReady) return;
+            try {
+                await signOut(auth);
+                showMessageBox("Logged out successfully! 👋", 'success');
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 1500);
+            } catch (error) {
+                console.error("Error logging out:", error);
+                showMessageBox("Failed to log out. Please try again.", 'error');
+            }
+        });
+
+        savePrivacySettingsButton.addEventListener('click', savePrivacySettings);
+
+        addBlockUserButton.addEventListener('click', () => {
+            const uid = blockUserInput.value.trim();
+            addUserToBlockList(uid);
+        });
+
+        blockUserInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                addBlockUserButton.click();
+            }
+        });
+
+        // --- Authentication State Listener ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                isAuthReady = true;
+                console.log("JCHAT_DEBUG: User authenticated in Privacy Settings Page:", user.uid);
+                await fetchAndDisplayHeaderProfile(user); // Update header
+                await fetchPrivacySettings(); // Fetch and populate privacy settings
+
+                // Admin icon is removed from header, no need to manage its display here.
+
+            } else {
+                console.log("JCHAT_DEBUG: No user signed in. Attempting anonymous sign-in or redirecting to login page.");
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        console.log("JCHAT_DEBUG: Signed in with custom token.");
+                    } else {
+                        await signInAnonymously(auth);
+                        console.log("JCHAT_DEBUG: Signed in anonymously.");
+                    }
+                    // onAuthStateChanged will be triggered again with the new user
+                } catch (error) {
+                    console.error("JCHAT_ERROR: Error during anonymous sign-in or custom token sign-in:", error);
+                    if (!auth.currentUser) {
+                        window.location.href = '/login.html';
+                    }
+                }
+                isAuthReady = false;
+                logoutButton.disabled = true;
+                headerDisplayName.textContent = "Guest";
+                headerProfilePic.style.display = 'none';
+                headerAvatarIcon.style.display = 'block';
+                // Admin icon is removed from header, no need to manage its display here.
+                showMessageBox("Please log in to manage privacy settings.", 'info', true);
+                // Disable form elements
+                showDisplayNameCheckbox.disabled = true;
+                showProfilePicCheckbox.disabled = true;
+                showBioCheckbox.disabled = true;
+                showLocationCheckbox.disabled = true;
+                showEmailCheckbox.disabled = true;
+                showLastSeenCheckbox.disabled = true;
+                showPhoneCheckbox.disabled = true;
+                allowFriendRequestsCheckbox.disabled = true;
+                allowMessagesCheckbox.disabled = true;
+                allowMessagesFromStrangersCheckbox.disabled = true;
+                showSchoolCheckbox.disabled = true;
+                showWorkCheckbox.disabled = true;
+                showHobbyCheckbox.disabled = true;
+                showFavoritePlaceCheckbox.disabled = true;
+                showRelationshipStatusCheckbox.disabled = true;
+                showDateOfBirthCheckbox.disabled = true; // New
+                showGenderCheckbox.disabled = true; // New
+                showInterestsCheckbox.disabled = true; // New
+                showOnlineStatusCheckbox.disabled = true; // New
+                allowSearchByUsernameCheckbox.disabled = true; // New
+                allowSearchByEmailCheckbox.disabled = true; // New
+                allowProfileDiscoveryCheckbox.disabled = true; // New
+                storyPrivacySelect.disabled = true;
+                blockUserInput.disabled = true;
+                addBlockUserButton.disabled = true;
+                savePrivacySettingsButton.disabled = true;
+                blockedUsersList.innerHTML = '<li style="color: var(--text-light); text-align: center;">Log in to view and manage your blocked users.</li>';
+            }
+        });
+    </script>
+	
+</body>
+</html>

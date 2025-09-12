@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nuvia — Notifications</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://firebaseio.com" crossorigin>
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+  <link rel="preconnect" href="https://api.cloudinary.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box}
+    :root{
+      --pink:#ff2e92;--blue:#00d5ff;--radius:16px;--transition:.25s ease;
+      --white:#e2e8f0;--text-light:#94a3b8;--border-light:rgba(255,255,255,.1);
+      --background-main:linear-gradient(135deg,#0f172a,#1a1a2e);
+      --card-background:rgba(30,41,59,.7);
+      --button-background:linear-gradient(90deg,var(--blue),var(--pink));
+      --button-shadow:0 6px 18px rgba(0,213,255,.25),0 6px 18px rgba(255,46,146,.25);
+      --accent-color:var(--blue);--accent-color-dark:#00aaff;--border-color:#3a3a5a;
+    }
+    html{overflow-y:auto}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--white);background:var(--background-main);min-height:100vh;display:flex;flex-direction:column}
+    /* Header */
+    header{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,rgba(10,10,20,.9),rgba(10,10,20,.75));backdrop-filter:blur(10px);border-bottom:1px solid var(--border-light)}
+    .header-wrap{max-width:1200px;margin:0 auto;padding:10px 16px;height:56px;display:flex;align-items:center;gap:12px}
+    .logo{font-family:Poppins,sans-serif;font-weight:800;letter-spacing:-.02em;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;font-size:1.25rem;text-decoration:none}
+    .header-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+    .back-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border-light);border-radius:10px;background:transparent;color:var(--white);padding:6px 10px;cursor:pointer}
+    .pref-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border-light);border-radius:10px;background:transparent;color:var(--white);padding:6px 10px;cursor:pointer}
+    .back-btn:hover,.pref-btn:hover{background:rgba(255,255,255,.06)}
+
+    /* Toolbar */
+    .toolbar{position:sticky;top:56px;z-index:19;background:linear-gradient(135deg,rgba(10,10,20,.85),rgba(10,10,20,.7));backdrop-filter:blur(10px);border-bottom:1px solid var(--border-light)}
+    .toolbar-wrap{max-width:1200px;margin:0 auto;padding:10px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+    .tabs{display:flex;gap:8px;overflow:auto;padding-bottom:4px}
+    .tab{border:1px solid var(--border-light);background:rgba(255,255,255,.04);color:var(--white);padding:6px 10px;border-radius:999px;cursor:pointer;white-space:nowrap}
+    .tab.active{background:var(--button-background);box-shadow:var(--button-shadow)}
+    .filters{margin-left:auto;display:flex;align-items:center;gap:8px}
+    .chip{border:1px solid var(--border-light);padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.04);cursor:pointer}
+    .chip.active{background:linear-gradient(90deg,rgba(0,213,255,.25),rgba(255,46,146,.25))}
+    .search{flex:1 1 260px;min-width:200px;display:flex;align-items:center;border:1px solid var(--border-light);border-radius:10px;background:rgba(255,255,255,.04);padding:6px 10px}
+    .search input{flex:1;background:transparent;border:none;outline:none;color:var(--white)}
+
+    /* Content */
+    main{max-width:900px;width:100%;margin:0 auto;padding:12px 12px 24px 12px}
+    .section{margin-top:16px}
+    .section-title{position:sticky;top:104px;z-index:10;background:transparent;color:var(--white);font-weight:700;font-size:.9rem;padding:6px 12px;backdrop-filter:blur(6px)}
+
+    /* List */
+    .list{list-style:none;margin:8px 0 0 0;padding:0}
+    .item{position:relative;display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:center;padding:12px;border:1px solid var(--border-light);border-radius:14px;background:var(--card-background);margin-bottom:10px;transition:transform .18s ease,background .2s ease}
+    .item:hover{transform:translateY(-1px)}
+    .avatar{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--accent-color)}
+    .item-main{min-width:0}
+    .line1{color:var(--white);font-size:.95rem}
+    .actor{font-weight:700}
+    .context{color:var(--text-light)}
+    .meta{display:flex;align-items:center;gap:6px;color:var(--text-light);font-size:.8rem;margin-top:4px}
+    .pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border-light);border-radius:999px;padding:4px 8px;background:rgba(255,255,255,.04)}
+    .icon{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff}
+    .actions{display:flex;align-items:center;gap:8px}
+    .btn{border:1px solid var(--border-light);border-radius:10px;background:transparent;color:var(--white);padding:6px 10px;cursor:pointer}
+    .btn.primary{background:var(--button-background);box-shadow:var(--button-shadow)}
+    .unread-dot{position:absolute;left:6px;top:6px;width:8px;height:8px;border-radius:50%;background:var(--blue)}
+    .item.read .unread-dot{display:none}
+
+    /* Swipe actions (mobile) */
+    .item.swipeable{touch-action:pan-y}
+    .swipe-actions{position:absolute;inset:0;border-radius:14px;display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:0 12px;pointer-events:none}
+    .swipe-actions .btn{pointer-events:auto}
+
+    /* Empty state */
+    .empty{border:1px solid var(--border-light);border-radius:16px;background:var(--card-background);padding:32px;text-align:center;color:var(--text-light);margin-top:16px}
+    .empty i{font-size:2rem;margin-bottom:8px;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+    /* Toast */
+    .toast{position:fixed;right:16px;bottom:16px;z-index:30;display:none;min-width:260px;border:1px solid var(--border-light);border-radius:12px;background:var(--card-background);padding:12px 14px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+    .toast.show{display:block;animation:slideIn .25s ease}
+    @keyframes slideIn{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+    /* Preferences Modal */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:40}
+    .modal.show{display:flex}
+    .modal-card{width:min(560px,92vw);border:1px solid var(--border-light);border-radius:16px;background:var(--card-background);overflow:hidden}
+    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border-light)}
+    .modal-body{padding:16px;display:grid;gap:14px}
+    .toggle{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border-light);border-radius:12px;background:rgba(255,255,255,.04);padding:10px 12px}
+
+    /* Sticky bulk bar */
+    .bulkbar{position:sticky;bottom:0;z-index:18;display:none;gap:8px;align-items:center;justify-content:space-between;margin-top:8px;border:1px solid var(--border-light);border-radius:12px;background:var(--card-background);padding:8px 10px}
+    .bulkbar.show{display:flex}
+
+    /* Responsive */
+    @media (max-width:600px){
+      .item{grid-template-columns:40px 1fr auto}
+      .avatar{width:40px;height:40px}
+      .section-title{top:108px}
+      .filters{flex:1 1 100%;order:3}
+      .search{flex:1 1 100%}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-wrap">
+      <a href="home.html" class="logo" aria-label="Go Home">Nuvia</a>
+      <div class="header-actions">
+        <button class="back-btn" onclick="window.history.back()" aria-label="Go Back"><i class="fa-solid fa-arrow-left"></i><span>Back</span></button>
+        <button class="pref-btn" id="openPrefs" aria-haspopup="dialog" aria-controls="prefsModal"><i class="fa-solid fa-sliders"></i><span>Preferences</span></button>
+      </div>
+    </div>
+  </header>
+
+  <div class="toolbar" role="region" aria-label="Notifications toolbar">
+    <div class="toolbar-wrap">
+      <nav class="tabs" role="tablist" aria-label="Categories">
+        <button class="tab active" role="tab" aria-selected="true" data-tab="all">All</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="mentions">Mentions</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="likes">Likes</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="comments">Comments</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="follows">Follows</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="system">System</button>
+      </nav>
+      <div class="filters">
+        <button id="unreadOnly" class="chip" aria-pressed="false"><i class="fa-solid fa-circle-dot"></i> Unread</button>
+        <div class="search" role="search">
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true" style="margin-right:8px"></i>
+          <input id="searchInput" type="search" placeholder="Search notifications" aria-label="Search notifications" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <section class="section" aria-labelledby="sec-new">
+      <div class="section-title" id="sec-new">New</div>
+      <ul id="listNew" class="list" role="list"></ul>
+    </section>
+    <section class="section" aria-labelledby="sec-early">
+      <div class="section-title" id="sec-early">Earlier</div>
+      <ul id="listEarlier" class="list" role="list"></ul>
+    </section>
+    <div id="emptyState" class="empty" style="display:none">
+      <i class="fa-regular fa-bell"></i>
+      <div style="font-weight:700;margin:6px 0">You're all caught up</div>
+      <div>New activity will appear here. Enjoy your day!</div>
+    </div>
+    <div id="bulkBar" class="bulkbar" aria-live="polite">
+      <div><span id="bulkCount">0</span> selected</div>
+      <div>
+        <button class="btn" id="bulkRead"><i class="fa-solid fa-envelope-open"></i> Mark read</button>
+        <button class="btn" id="bulkDelete"><i class="fa-solid fa-trash"></i> Delete</button>
+        <button class="btn" id="bulkClear">Clear</button>
+      </div>
+    </div>
+    <div id="sentinel" style="height:1px"></div>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <div class="modal" id="prefsModal" role="dialog" aria-modal="true" aria-labelledby="prefsTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div id="prefsTitle" style="font-weight:700">Notification Preferences</div>
+        <button class="btn" id="closePrefs" aria-label="Close preferences"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="toggle"><span>Do Not Disturb</span><label><input type="checkbox" id="prefDnd"> DND</label></div>
+        <div class="toggle"><span>Play sound</span><label><input type="checkbox" id="prefSound" checked> Enabled</label></div>
+        <div class="toggle"><span>Mute Likes</span><label><input type="checkbox" id="prefMuteLikes"> Mute</label></div>
+        <div class="toggle"><span>Mute Follows</span><label><input type="checkbox" id="prefMuteFollows"> Mute</label></div>
+        <div class="toggle"><span>Mute Comments</span><label><input type="checkbox" id="prefMuteComments"> Mute</label></div>
+        <div class="toggle"><span>Mute Mentions</span><label><input type="checkbox" id="prefMuteMentions"> Mute</label></div>
+      </div>
+      <div class="modal-header" style="border-top:1px solid var(--border-light)">
+        <button class="btn" id="savePrefs"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, orderBy, where, getDocs, addDoc, onSnapshot, limit, runTransaction, arrayUnion } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+  import { getCloudinaryImageUrl, displayProfilePicture } from "./assets/js/avatar-utils.js";
+
+  // Firebase config (from environment or fallback to Home.html defaults)
+  const firebaseConfig = typeof window.__firebase_config !== 'undefined' ? JSON.parse(window.__firebase_config) : {
+    apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+    authDomain: "jchat-1.firebaseapp.com",
+    databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+    projectId: "jchat-1",
+    storageBucket: "jchat-1.firebasestorage.app",
+    messagingSenderId: "328479683167",
+    appId: "1:328479683167:web:placeholder"
+  };
+  const appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'default-app-id';
+
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  (function(){
+    const listNew = document.getElementById('listNew');
+    const listEarlier = document.getElementById('listEarlier');
+    const emptyState = document.getElementById('emptyState');
+    const toast = document.getElementById('toast');
+    const sentinel = document.getElementById('sentinel');
+    const bulkBar = document.getElementById('bulkBar');
+    const bulkCount = document.getElementById('bulkCount');
+    const unreadOnlyBtn = document.getElementById('unreadOnly');
+    const searchInput = document.getElementById('searchInput');
+
+    const tabs = Array.from(document.querySelectorAll('.tab'));
+    let currentTab = 'all';
+    tabs.forEach(t=>t.addEventListener('click',()=>{
+      tabs.forEach(x=>{x.classList.toggle('active', x===t); x.setAttribute('aria-selected', x===t);});
+      currentTab = t.dataset.tab; refresh();
+    }));
+
+    unreadOnlyBtn.addEventListener('click',()=>{
+      const on = unreadOnlyBtn.getAttribute('aria-pressed')==='true' ? false : true;
+      unreadOnlyBtn.setAttribute('aria-pressed', String(on));
+      unreadOnlyBtn.classList.toggle('active', on); refresh();
+    });
+
+    const state = { items: [], loaded: 0, page: 20, selected: new Set(), prefs: loadPrefs() };
+    let currentUser = null;
+    let currentUserProfile = null;
+    let unsubscribeNotifications = null;
+
+    function loadPrefs(){
+      try{ return Object.assign({ dnd:false, sound:true, mute:{likes:false,follows:false,comments:false,mentions:false} }, JSON.parse(localStorage.getItem('nuvia_notification_prefs')||'{}')); }catch(e){ return { dnd:false, sound:true, mute:{likes:false,follows:false,comments:false,mentions:false} }; }
+    }
+    function savePrefs(){ localStorage.setItem('nuvia_notification_prefs', JSON.stringify(state.prefs)); }
+
+    // Data: Firestore-first with LocalStorage fallback
+    function loadItems(){
+      // Render from cache quickly
+      try{
+        const raw = localStorage.getItem('nuvia_notifications_cache');
+        if(raw){ state.items = JSON.parse(raw).map(mapCacheToItem); }
+      }catch(e){ /* ignore */ }
+      refresh();
+
+      onAuthStateChanged(auth, async (user)=>{
+        currentUser = user || null;
+        if(unsubscribeNotifications){ try{ unsubscribeNotifications(); }catch(_){} unsubscribeNotifications=null; }
+        if(!currentUser){ return; }
+        try{
+          // load current user profile
+          try{ const profRef = doc(db,'artifacts',appId,'users',currentUser.uid,'profiles','user_profile'); const profSnap = await getDoc(profRef); currentUserProfile = profSnap.exists() ? profSnap.data() : null; }catch(_){ currentUserProfile = null; }
+          const colRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'notifications');
+          const qRef = query(colRef, orderBy('timestamp','desc'), limit(200));
+          unsubscribeNotifications = onSnapshot(qRef, (snap)=>{
+            const items = [];
+            snap.forEach(docSnap=>{ items.push(mapFirestoreNotification(docSnap.id, docSnap.data())); });
+            state.items = items;
+            try{ localStorage.setItem('nuvia_notifications_cache', JSON.stringify(items.map(mapItemToCache))); }catch(e){}
+            state.loaded = Math.max(state.page, state.loaded||0);
+            refresh();
+          });
+        }catch(err){ console.error('Notifications subscribe failed', err); }
+      });
+    }
+
+    function genItem({type,actor,createdAt,unread}){
+      const id = Math.random().toString(36).slice(2);
+      const base = { id, type, actor, createdAt, unread, url:'#' };
+      switch(type){
+        case 'likes': return Object.assign(base,{ text:`${actor.name} liked your post`, actionLabel:'View', action:'open' });
+        case 'comments': return Object.assign(base,{ text:`${actor.name} commented: “Amazing work!”`, actionLabel:'Reply', action:'reply' });
+        case 'mentions': return Object.assign(base,{ text:`${actor.name} mentioned you in a post`, actionLabel:'Open', action:'open' });
+        case 'follows': return Object.assign(base,{ text:`${actor.name} started following you`, actionLabel:'Follow back', action:'follow_back' });
+        default: return Object.assign(base,{ text:`System message: Your account is secured.`, actionLabel:'Details', action:'open' });
+      }
+    }
+
+    function mapFirestoreNotification(id, n){
+      const ts = n.timestamp && typeof n.timestamp.toDate === 'function' ? n.timestamp.toDate() : (n.timestamp ? new Date(n.timestamp) : new Date());
+      const name = n.senderUsername || 'System';
+      const profilePicId = n.senderProfilePhoto || n.senderProfilePicId || n.senderPhotoURL || null;
+      const type = n.type || 'system';
+      const text = n.message || defaultTextFor(type, name);
+      const actionLabel = defaultActionLabel(type);
+      const action = defaultAction(type);
+      return { id, type, actor:{ name, profilePicId }, createdAt: ts, unread: n.read===false || !n.read, url: n.targetUrl || '#', text, actionLabel, action };
+    }
+    function mapCacheToItem(c){ return { ...c, createdAt: new Date(c.createdAt) }; }
+    function mapItemToCache(i){ return { ...i, createdAt: i.createdAt.getTime() }; }
+    function defaultTextFor(type,name){
+      if(type==='message') return `${name} sent you a message`;
+      if(type==='friend_request') return `${name} sent you a friend request`;
+      if(type==='friend_accepted') return `${name} accepted your friend request`;
+      if(type==='likes') return `${name} liked your post`;
+      if(type==='comments') return `${name} commented on your post`;
+      if(type==='mentions') return `${name} mentioned you`;
+      if(type==='follows') return `${name} started following you`;
+      return 'System notification';
+    }
+    function defaultActionLabel(type){
+      if(type==='message') return 'Open';
+      if(type==='friend_request') return 'View';
+      if(type==='friend_accepted') return 'Say hi';
+      if(type==='likes') return 'View';
+      if(type==='comments') return 'Reply';
+      if(type==='mentions') return 'Open';
+      if(type==='follows') return 'Follow back';
+      return 'Open';
+    }
+    function defaultAction(type){
+      if(type==='comments') return 'reply';
+      if(type==='follows') return 'follow_back';
+      return 'open';
+    }
+
+    function saveAll(){ try{ localStorage.setItem('nuvia_notifications', JSON.stringify(state.items)); }catch(e){} }
+
+    // Rendering
+    function refresh(){
+      const q = searchInput.value.trim().toLowerCase();
+      const unreadOnly = unreadOnlyBtn.getAttribute('aria-pressed')==='true';
+      const muted = state.prefs.mute;
+      const filtered = state.items.filter(n=>{
+        if(currentTab!=='all' && n.type!==currentTab) return false;
+        if(unreadOnly && !n.unread) return false;
+        if(q && !(`${n.text} ${n.actor.name}`.toLowerCase().includes(q))) return false;
+        if(n.type==='likes' && muted.likes) return false;
+        if(n.type==='follows' && muted.follows) return false;
+        if(n.type==='comments' && muted.comments) return false;
+        if(n.type==='mentions' && muted.mentions) return false;
+        return true;
+      }).sort((a,b)=>b.createdAt - a.createdAt);
+
+      const now = Date.now();
+      const newCutoff = now - 36*3600*1000; // within ~36h considered New
+      const newest = filtered.filter(n=>n.createdAt.getTime()>=newCutoff);
+      const earlier = filtered.filter(n=>n.createdAt.getTime()<newCutoff);
+
+      renderList(listNew, newest);
+      renderList(listEarlier, earlier);
+
+      const empty = (newest.length+earlier.length)===0;
+      emptyState.style.display = empty? 'block':'none';
+      updateBulkBar();
+    }
+
+    function renderList(ul, arr){
+      ul.innerHTML='';
+      const frag = document.createDocumentFragment();
+      for(const n of arr.slice(0, state.loaded || state.page)){
+        frag.appendChild(renderItem(n));
+      }
+      ul.appendChild(frag);
+    }
+
+    function renderItem(n){
+      const li = document.createElement('li');
+      li.className = `item ${n.unread?'':'read'} swipeable`;
+      li.setAttribute('role','listitem');
+      li.dataset.id = n.id;
+
+      const swipe = document.createElement('div');
+      swipe.className='swipe-actions';
+      swipe.innerHTML = `<button class="btn" data-act="delete"><i class="fa-solid fa-trash"></i></button>
+                         <button class="btn" data-act="read"><i class="fa-solid fa-envelope-open"></i></button>`;
+
+      const dot = document.createElement('span'); dot.className='unread-dot';
+      const avatar = document.createElement('img'); avatar.className='avatar'; avatar.alt = `${n.actor.name} avatar`; avatar.loading = 'lazy'; avatar.decoding = 'async';
+      const usernameInitial = (n.actor.name || 'U').charAt(0).toUpperCase();
+      const fallback = () => { avatar.onerror = null; avatar.src = `https://placehold.co/48x48/CCCCCC/000000?text=${usernameInitial}`; };
+      if (n.actor && (n.actor.profilePicId || n.actor.avatar)) {
+        const picId = n.actor.profilePicId || null;
+        if (picId) {
+          const imageUrl = getCloudinaryImageUrl(picId, 'w_60,h_60,c_fill,g_face,r_max');
+          avatar.src = imageUrl;
+          avatar.onerror = fallback;
+        } else {
+          avatar.src = n.actor.avatar;
+          avatar.onerror = fallback;
+        }
+      } else {
+        fallback();
+      }
+
+      const main = document.createElement('div'); main.className='item-main';
+      const line1 = document.createElement('div'); line1.className='line1';
+      line1.innerHTML = `<span class="actor">${escapeHtml(n.actor.name)}</span> <span class="context">${escapeHtml(n.text.replace(n.actor.name,''))}</span>`;
+      const meta = document.createElement('div'); meta.className='meta';
+      meta.innerHTML = `<span class="pill"><span class="icon">${typeIcon(n.type)}</span>${capitalize(n.type)}</span><span aria-label="time">${timeAgo(n.createdAt)}</span>`;
+      main.appendChild(line1); main.appendChild(meta);
+
+      const actions = document.createElement('div'); actions.className='actions';
+      const act = document.createElement('button'); act.className = `btn ${n.action==='open' || n.action==='reply' || n.action==='follow_back' ? 'primary':''}`; act.textContent = n.actionLabel; act.addEventListener('click',()=>handleAction(n));
+      const sel = document.createElement('input'); sel.type='checkbox'; sel.ariaLabel = 'Select notification'; sel.addEventListener('change',()=>toggleSelect(n.id, sel.checked));
+      actions.appendChild(act); actions.appendChild(sel);
+
+      li.appendChild(swipe); li.appendChild(dot); li.appendChild(avatar); li.appendChild(main); li.appendChild(actions);
+
+      // mark read on click
+      li.addEventListener('click', (e)=>{ if(e.target===sel||e.target===act) return; markRead(n.id); });
+
+      // swipe (simple)
+      let startX=0, dx=0; li.addEventListener('pointerdown',e=>{startX=e.clientX; li.setPointerCapture(e.pointerId);});
+      li.addEventListener('pointermove',e=>{ if(!startX) return; dx=e.clientX-startX; if(dx<-10){ li.style.transform=`translateX(${dx}px)`; swipe.style.opacity=Math.min(1,Math.abs(dx)/120);} });
+      li.addEventListener('pointerup',()=>{ if(Math.abs(dx)>100){ /* reveal */ swipe.style.opacity=1; li.style.transform='translateX(-96px)'; swipe.querySelector('[data-act="delete"]').onclick=()=>remove(n.id); swipe.querySelector('[data-act="read"]').onclick=()=>markRead(n.id); } else { li.style.transform=''; swipe.style.opacity=''; } startX=0; dx=0;});
+
+      return li;
+    }
+
+    function updateBulkBar(){
+      const count = state.selected.size; bulkCount.textContent = String(count);
+      bulkBar.classList.toggle('show', count>0);
+    }
+    function toggleSelect(id,on){ if(on) state.selected.add(id); else state.selected.delete(id); updateBulkBar(); }
+
+    async function handleAction(n){
+      if(n.type === 'group_invite'){
+        const ok = confirm(`${n.actor.name} invited you to join ${escapeHtml(n.groupName || 'a group')}. Accept?`);
+        if(ok){ await acceptGroupInvite(n.senderId, n.groupId, n.id); } else { await rejectGroupInvite(n.senderId, n.groupId, n.id); }
+        return;
+      }
+      if(n.action==='follow_back'){ showToast(`Followed ${n.actor.name}`); }
+      if(n.action==='reply'){ showToast('Opening reply...'); }
+      if(n.action==='open'){ window.location.href = n.url || '#'; }
+      markRead(n.id);
+    }
+
+    async function markRead(id){
+      const it = state.items.find(x=>x.id===id); if(!it) return; if(!it.unread) return;
+      it.unread = false; refresh();
+      try{ if(currentUser){ const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'notifications', id); await updateDoc(ref, { read: true }); } }catch(e){ console.warn('Failed to mark read in Firestore', e); }
+      try{ localStorage.setItem('nuvia_notifications_cache', JSON.stringify(state.items.map(mapItemToCache))); }catch(_){ }
+    }
+    async function remove(id){
+      state.items = state.items.filter(x=>x.id!==id); state.selected.delete(id); refresh(); showToast('Notification removed');
+      try{ if(currentUser){ const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'notifications', id); await deleteDoc(ref); } }catch(e){ console.warn('Failed to delete in Firestore', e); }
+      try{ localStorage.setItem('nuvia_notifications_cache', JSON.stringify(state.items.map(mapItemToCache))); }catch(_){ }
+    }
+
+    // Infinite scroll
+    const io = new IntersectionObserver(entries=>{
+      for(const e of entries){ if(e.isIntersecting){ state.loaded += state.page; refresh(); } }
+    },{root:null,threshold:1});
+    io.observe(sentinel);
+
+    // Search debounce
+    let tId; searchInput.addEventListener('input',()=>{ clearTimeout(tId); tId=setTimeout(refresh, 180); });
+
+    // Bulk actions
+    document.getElementById('bulkRead').addEventListener('click',async ()=>{
+      const ids = Array.from(state.selected);
+      state.items.forEach(n=>{ if(state.selected.has(n.id)) n.unread=false; }); state.selected.clear(); refresh();
+      if(currentUser){ for(const id of ids){ try{ await updateDoc(doc(db,'artifacts',appId,'users',currentUser.uid,'notifications',id), { read:true }); }catch(_){ } } }
+      try{ localStorage.setItem('nuvia_notifications_cache', JSON.stringify(state.items.map(mapItemToCache))); }catch(_){ }
+    });
+    document.getElementById('bulkDelete').addEventListener('click',async ()=>{
+      const ids = Array.from(state.selected);
+      state.items = state.items.filter(n=>!state.selected.has(n.id)); state.selected.clear(); refresh();
+      if(currentUser){ for(const id of ids){ try{ await deleteDoc(doc(db,'artifacts',appId,'users',currentUser.uid,'notifications',id)); }catch(_){ } } }
+      try{ localStorage.setItem('nuvia_notifications_cache', JSON.stringify(state.items.map(mapItemToCache))); }catch(_){ }
+    });
+    document.getElementById('bulkClear').addEventListener('click',()=>{ state.selected.clear(); updateBulkBar(); });
+
+    // Toast
+    function showToast(msg){ toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 2200); if(state.prefs.sound && !state.prefs.dnd){ try{ const synth = new Tone.Synth().toDestination(); synth.triggerAttackRelease('C6','8n'); }catch(e){} } }
+
+    // Preferences modal
+    const prefsModal = document.getElementById('prefsModal');
+    document.getElementById('openPrefs').addEventListener('click',()=>{ syncPrefForm(); prefsModal.classList.add('show'); });
+    document.getElementById('closePrefs').addEventListener('click',()=>prefsModal.classList.remove('show'));
+    document.getElementById('savePrefs').addEventListener('click',()=>{ state.prefs = collectPrefForm(); savePrefs(); prefsModal.classList.remove('show'); refresh(); showToast('Preferences saved'); });
+    prefsModal.addEventListener('click',e=>{ if(e.target===prefsModal) prefsModal.classList.remove('show'); });
+
+    function syncPrefForm(){
+      document.getElementById('prefDnd').checked = !!state.prefs.dnd;
+      document.getElementById('prefSound').checked = !!state.prefs.sound;
+      document.getElementById('prefMuteLikes').checked = !!state.prefs.mute.likes;
+      document.getElementById('prefMuteFollows').checked = !!state.prefs.mute.follows;
+      document.getElementById('prefMuteComments').checked = !!state.prefs.mute.comments;
+      document.getElementById('prefMuteMentions').checked = !!state.prefs.mute.mentions;
+    }
+    function collectPrefForm(){
+      return {
+        dnd: document.getElementById('prefDnd').checked,
+        sound: document.getElementById('prefSound').checked,
+        mute: {
+          likes: document.getElementById('prefMuteLikes').checked,
+          follows: document.getElementById('prefMuteFollows').checked,
+          comments: document.getElementById('prefMuteComments').checked,
+          mentions: document.getElementById('prefMuteMentions').checked
+        }
+      };
+    }
+
+    // Helpers
+    function escapeHtml(str){ return str.replace(/[&<>"]/g,s=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[s])); }
+    function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+    function timeAgo(d){ const s=(Date.now()-d.getTime())/1000; if(s<60) return Math.floor(s)+"s"; const m=s/60; if(m<60) return Math.floor(m)+"m"; const h=m/60; if(h<24) return Math.floor(h)+"h"; const dd=h/24; if(dd<7) return Math.floor(dd)+"d"; const w=dd/7; if(w<4) return Math.floor(w)+"w"; const mo=dd/30; if(mo<12) return Math.floor(mo)+"mo"; return Math.floor(dd/365)+"y"; }
+    function typeIcon(t){
+      if(t==='likes') return '<i class="fa-solid fa-heart"></i>';
+      if(t==='comments') return '<i class="fa-solid fa-comment"></i>';
+      if(t==='mentions') return '<i class="fa-solid fa-at"></i>';
+      if(t==='follows') return '<i class="fa-solid fa-user-plus"></i>';
+      return '<i class="fa-solid fa-bell"></i>';
+    }
+
+    async function acceptGroupInvite(senderId, groupId, notificationId){ if(!currentUser) return showToast('Sign in to accept','error'); try{ const confirmed = true; if(!confirmed) return; await runTransaction(db, async (tx)=>{ const reqCol = collection(db,'artifacts',appId,'public','data','group_requests'); const q = query(reqCol, where('senderId','==', senderId), where('receiverId','==', currentUser.uid), where('groupId','==', groupId), where('status','==','pending'), limit(1)); const snap = await getDocs(q); if(snap.empty) throw new Error('Invite not found'); const reqDoc = snap.docs[0]; const reqRef = doc(db,'artifacts',appId,'public','data','group_requests', reqDoc.id); tx.update(reqRef, { status: 'accepted', updatedAt: serverTimestamp() }); const gRef = doc(db,'artifacts',appId,'public','data','groups',groupId); const gSnap = await tx.get(gRef); if(!gSnap.exists()) throw new Error('Group missing'); const g = gSnap.data(); if(!(g.members||[]).includes(currentUser.uid)){ tx.update(gRef, { members: arrayUnion(currentUser.uid), memberCount: (g.memberCount||0)+1, updatedAt: serverTimestamp() }); }
+          const uRef = doc(db,'artifacts',appId,'users',currentUser.uid,'profiles','user_profile'); tx.set(uRef, { memberOfGroups: arrayUnion(groupId) }, { merge: true }); });
+        // notify sender
+        try{ const notifRef = collection(db,'artifacts',appId,'users', senderId, 'notifications'); await addDoc(notifRef, { type: 'group_invite_accepted', message: `${currentUserProfile?.username||'A user'} accepted your invite to join ${(groupId||'group')}`, senderId: currentUser.uid, recipientId: senderId, groupId, timestamp: serverTimestamp(), read: false }); }catch(e){}
+        showMessageBox('You joined the group!', 'success');
+      }catch(e){ console.error('acceptGroupInvite',e); showMessageBox('Failed to accept invite: '+(e.message||e), 'error'); }
+    }
+
+    async function rejectGroupInvite(senderId, groupId, notificationId){ if(!currentUser) return showToast('Sign in to respond','error'); try{ const reqCol = collection(db,'artifacts',appId,'public','data','group_requests'); const q = query(reqCol, where('senderId','==', senderId), where('receiverId','==', currentUser.uid), where('groupId','==', groupId), where('status','==','pending'), limit(1)); const snap = await getDocs(q); if(!snap.empty){ const reqDoc = snap.docs[0]; await deleteDoc(doc(db,'artifacts',appId,'public','data','group_requests', reqDoc.id)); }
+        try{ const notifRef = collection(db,'artifacts',appId,'users', senderId, 'notifications'); await addDoc(notifRef, { type: 'group_invite_rejected', message: `${currentUserProfile?.username||'A user'} rejected your invite to join ${(groupId||'group')}`, senderId: currentUser.uid, recipientId: senderId, groupId, timestamp: serverTimestamp(), read: false }); }catch(e){}
+        showMessageBox('Invite rejected.', 'info');
+      }catch(e){ console.error('rejectGroupInvite',e); showMessageBox('Failed to reject invite: '+(e.message||e), 'error'); }
+    }
+
+    // Init (no simulation when using Firestore)
+    loadItems(); state.loaded = state.page; refresh();
+  })();
+  </script>
+</body>
+</html>

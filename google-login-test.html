@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Login Test - JCHAT</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .button {
+            background: #4285f4;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .button:hover {
+            background: #3367d6;
+        }
+        .error {
+            color: #d32f2f;
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            color: #388e3c;
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .info {
+            color: #1976d2;
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        pre {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Google Login Test - JCHAT</h1>
+    
+    <div class="test-section">
+        <h2>📋 Configuration Check</h2>
+        <div id="configStatus"></div>
+        <button class="button" onclick="checkConfig()">Check Configuration</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>🔐 Google Authentication Test</h2>
+        <div id="authStatus"></div>
+        <button class="button" onclick="testGoogleAuth()">Test Google Login</button>
+        <button class="button" onclick="clearAuthStatus()">Clear Status</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>📊 Debug Information</h2>
+        <div id="debugInfo"></div>
+        <button class="button" onclick="showDebugInfo()">Show Debug Info</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>🚨 Common Issues & Solutions</h2>
+        <div class="info">
+            <h3>1. Firebase Configuration Issues</h3>
+            <ul>
+                <li>Ensure your Firebase project has Google Sign-In enabled</li>
+                <li>Check that the OAuth client ID is properly configured in Firebase Console</li>
+                <li>Verify the authorized domains include your current domain</li>
+            </ul>
+            
+            <h3>2. OAuth Client ID Issues</h3>
+            <ul>
+                <li>Your client ID: <code>328479683167-kcpfmo292u1lqkldem38totg9tau.apps.googleusercontent.com</code></li>
+                <li>Ensure this client ID is added to your Firebase project's OAuth configuration</li>
+                <li>Check that the client ID is not expired or inactive</li>
+            </ul>
+            
+            <h3>3. Domain Authorization</h3>
+            <ul>
+                <li>Add your current domain to Firebase Console → Authentication → Settings → Authorized domains</li>
+                <li>For local testing, add <code>localhost</code> and <code>127.0.0.1</code></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        // Firebase configuration (same as Login.html)
+        const firebaseConfig = {
+            apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+            authDomain: "jchat-1.firebaseapp.com",
+            databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+            projectId: "jchat-1",
+            storageBucket: "jchat-1.firebasestorage.app",
+            messagingSenderId: "328479683167",
+            appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
+            measurementId: "G-S6Z9GG0R9P"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        // Configure Google provider
+        googleProvider.addScope('profile');
+        googleProvider.addScope('email');
+        googleProvider.setCustomParameters({
+            prompt: 'select_account'
+        });
+
+        // Make functions globally available
+        window.checkConfig = function() {
+            const configStatus = document.getElementById('configStatus');
+            
+            try {
+                const config = {
+                    firebaseInitialized: !!app,
+                    authInitialized: !!auth,
+                    googleProviderInitialized: !!googleProvider,
+                    currentDomain: window.location.hostname,
+                    currentProtocol: window.location.protocol,
+                    userAgent: navigator.userAgent
+                };
+                
+                let statusHtml = '<div class="success">✅ Configuration loaded successfully</div>';
+                statusHtml += '<pre>' + JSON.stringify(config, null, 2) + '</pre>';
+                
+                configStatus.innerHTML = statusHtml;
+            } catch (error) {
+                configStatus.innerHTML = '<div class="error">❌ Configuration error: ' + error.message + '</div>';
+            }
+        };
+
+        window.testGoogleAuth = async function() {
+            const authStatus = document.getElementById('authStatus');
+            authStatus.innerHTML = '<div class="info">🔄 Redirecting to Google for authentication...</div>';
+            
+            try {
+                console.log('Testing Google auth with provider:', googleProvider);
+                console.log('Firebase auth instance:', auth);
+                await signInWithRedirect(auth, googleProvider);
+            } catch (error) {
+                console.error('Auth redirect error:', error);
+                let errorMessage = 'Unknown error occurred';
+                if (error.code === 'auth/unauthorized-domain') {
+                    errorMessage = 'This domain is not authorized for Google sign-in. Add it to Firebase Console → Authentication → Settings → Authorized domains.';
+                } else if (error.code === 'auth/operation-not-allowed') {
+                    errorMessage = 'Google sign-in is not enabled. Enable it in Firebase Console → Authentication → Sign-in method → Google.';
+                } else {
+                    errorMessage = `${error.code}: ${error.message}`;
+                }
+                
+                authStatus.innerHTML = `
+                    <div class="error">❌ Google authentication failed to start</div>
+                    <div class="error">${errorMessage}</div>
+                    <div class="info">
+                        <strong>Error Code:</strong> ${error.code}<br>
+                        <strong>Error Message:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        };
+
+        window.handleRedirectResult = async function() {
+            const authStatus = document.getElementById('authStatus');
+            try {
+                const result = await getRedirectResult(auth);
+                if (result && result.user) {
+                    const user = result.user;
+                    authStatus.innerHTML = `
+                        <div class="success">✅ Google authentication successful!</div>
+                        <div class="info">
+                            <strong>User:</strong> ${user.displayName || 'No name'} (${user.email})<br>
+                            <strong>UID:</strong> ${user.uid}<br>
+                            <strong>Provider:</strong> ${user.providerData[0]?.providerId || 'Unknown'}
+                        </div>
+                    `;
+                    console.log('Auth successful:', user);
+                }
+            } catch (error) {
+                console.error('Auth result error:', error);
+                let errorMessage = 'Unknown error occurred';
+                if (error.code === 'auth/unauthorized-domain') {
+                    errorMessage = 'This domain is not authorized for Google sign-in. Add it to Firebase Console → Authentication → Settings → Authorized domains.';
+                } else if (error.code === 'auth/operation-not-allowed') {
+                    errorMessage = 'Google sign-in is not enabled. Enable it in Firebase Console → Authentication → Sign-in method → Google.';
+                } else {
+                    errorMessage = `${error.code}: ${error.message}`;
+                }
+                
+                authStatus.innerHTML = `
+                    <div class="error">❌ Google authentication failed</div>
+                    <div class="error">${errorMessage}</div>
+                    <div class="info">
+                        <strong>Error Code:</strong> ${error.code}<br>
+                        <strong>Error Message:</strong> ${error.message}
+                    </div>
+                `;
+            }
+        };
+
+        window.clearAuthStatus = function() {
+            document.getElementById('authStatus').innerHTML = '';
+        };
+
+        window.showDebugInfo = function() {
+            const debugInfo = document.getElementById('debugInfo');
+            
+            const debug = {
+                firebaseApp: app,
+                firebaseAuth: auth,
+                googleProvider: googleProvider,
+                currentUser: auth.currentUser,
+                authState: auth.authStateReady ? 'Ready' : 'Not Ready',
+                timestamp: new Date().toISOString()
+            };
+            
+            debugInfo.innerHTML = '<pre>' + JSON.stringify(debug, null, 2) + '</pre>';
+        };
+
+        // Auto-check configuration on load and handle redirect result
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(checkConfig, 1000);
+            handleRedirectResult();
+        });
+    </script>
+</body>
+</html>

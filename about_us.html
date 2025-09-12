@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Last updated: 2025-08-21T18:19:29Z -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JCHAT - About Us</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://*.firebaseio.com" crossorigin>
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <style>
+        /* Universal box-sizing for consistent layout */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        /* Global CSS Variables for easy theme switching */
+        :root {
+            --pink: #ff2e92;
+            --blue: #00d5ff;
+            --glass-black: rgba(10, 10, 10, .75);
+            --glass-blue: rgba(0, 213, 255, .15);
+            --radius: 20px;
+            --transition: .3s ease;
+
+            /* These variables will be overridden by theme classes */
+            --white: #fff;
+            --text-light: rgba(255, 255, 255, .7);
+            --background-main: linear-gradient(135deg, #1a1a2e, #3a1a3e);
+            --background-gradient-1: #00d5ff;
+            --background-gradient-2: #ff2e92;
+            --card-background: rgba(25, 25, 40, 0.7);
+            --header-background: linear-gradient(135deg, rgba(10, 10, 20, .85), rgba(10, 10, 20, .75));
+            --border-light: rgba(255, 255, 255, .08);
+            --input-background: rgba(255, 255, 255, 0.08);
+            --button-background: linear-gradient(90deg, var(--blue), var(--pink));
+            --button-shadow: 0 4px 15px var(--blue), 0 44px 15px var(--pink);
+
+            /* New variables for consistent theming */
+            --background-color-primary: #1a1a2e;
+            --background-color-secondary: #0f0f1f;
+            --header-background-color: #2a2a4a;
+            --footer-background-color: #2a2a4a;
+            --content-background-color: #20203a;
+            --card-background-color: rgba(25, 25, 40, 0.7);
+            --text-color-primary: #e0e0e0;
+            --text-color-secondary: #bbbbbb;
+            --notification-badge-color: var(--pink);
+            --status-online: #4CAF50;
+            --status-offline: #6c757d;
+            --status-away: #FFC107;
+            --delete-button-color: #dc3545;
+            --warning-color: #ffc107;
+            --accent-color: var(--blue);
+            --accent-color-dark: #00aaff;
+            --border-color: #3a3a5a;
+
+            /* New Green for Play Button (if applicable, though not directly on this page) */
+            --play-button-green: linear-gradient(90deg, #4CAF50, #8BC34A);
+            --play-button-shadow: 0 4px 10px rgba(76, 175, 80, 0.4);
+        }
+
+        /* --- Theme Definitions (Light and Dark Mode) --- */
+        /* Light Mode */
+        body.theme-light-mode {
+            --background-main: #f0f2f5;
+            --background-gradient-1: #e0e2e5;
+            --background-gradient-2: #d0d2d5;
+            --white: #333;
+            --text-light: #666;
+            --card-background: rgba(255, 255, 255, 0.95);
+            --header-background: rgba(255, 255, 255, 0.98);
+            --border-light: rgba(0, 0, 0, 0.1);
+            --input-background: rgba(0, 0, 0, 0.05);
+            --button-background: linear-gradient(90deg, #6dd5ed, #2193b0);
+            --button-shadow: 0 4px 15px rgba(109, 213, 237, 0.4), 0 4px 15px rgba(33, 147, 176, 0.4);
+
+            --background-color-primary: #f0f2f5;
+            --background-color-secondary: #e0e2e5;
+            --header-background-color: #ffffff;
+            --footer-background-color: #ffffff;
+            --content-background-color: #f7f9fb;
+            --card-background-color: #ffffff;
+            --text-color-primary: #333333;
+            --text-color-secondary: #666666;
+            --text-color-light: #999999;
+            --accent-color: #007bff;
+            --accent-color-dark: #0056b3;
+            --border-color: #e0e0e0;
+            --input-background-color: #f0f0f0;
+            --button-background: #e9ecef;
+            --button-hover-background: #dee2e6;
+            --active-item-background: rgba(0, 123, 255, 0.1);
+            --notification-badge-color: #dc3545;
+            --status-online: #28a745;
+            --status-offline: #6c757d;
+            --status-away: #ffc107;
+            --delete-button-color: #dc3545;
+            --warning-color: #ffc107;
+
+            --play-button-green: linear-gradient(90deg, #28a745, #218838);
+            --play-button-shadow: 0 4px 10px rgba(40, 167, 69, 0.4);
+        }
+
+        /* Sweet Cool Theme (New Default) */
+        body.theme-sweet-cool {
+            --background-main: linear-gradient(135deg, #2c3e50, #4a69bd); /* Dark blue to purple */
+            --background-gradient-1: #6a89cc;
+            --background-gradient-2: #e5539a;
+            --white: #f5f5f5;
+            --text-light: #bbbbbb;
+            --card-background: rgba(44, 62, 80, 0.85); /* Darker, slightly transparent cards */
+            --header-background: linear-gradient(135deg, rgba(44, 62, 80, 0.9), rgba(44, 62, 80, 0.8));
+            --border-light: rgba(255, 255, 255, 0.15);
+            --input-background: rgba(255, 255, 255, 0.1);
+            --button-background: linear-gradient(90deg, #6a89cc, #e5539a);
+            --button-shadow: 0 6px 20px rgba(106, 137, 204, 0.4), 0 6px 20px rgba(229, 83, 154, 0.4);
+
+            --background-color-primary: #2c3e50;
+            --background-color-secondary: #34495e;
+            --header-background-color: rgba(44, 62, 80, 0.9);
+            --footer-background-color: rgba(44, 62, 80, 0.9);
+            --content-background-color: #34495e;
+            --card-background-color: rgba(44, 62, 80, 0.85);
+            --text-color-primary: #f5f5f5;
+            --text-color-secondary: #bbbbbb;
+            --accent-color: #e5539a;
+            --accent-color-dark: #cc4d87;
+            --border-color: #445b73;
+            --input-background-color: rgba(255, 255, 255, 0.1);
+            --button-hover-background: rgba(106, 137, 204, 0.2);
+            --active-item-background: rgba(229, 83, 154, 0.15);
+            --notification-badge-color: #ff2e92;
+            --delete-button-color: #e74c3c;
+            --warning-color: #f1c40f;
+        }
+
+        /* Glass Mode specific variables */
+        body.theme-glass-mode {
+            --background-main: rgba(10, 10, 10, 0.75);
+            background-image: url('https://source.unsplash.com/random/1920x1080?abstract,blur') !important;
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            backdrop-filter: blur(10px);
+            --card-background: rgba(25, 25, 40, 0.7);
+            --white: #e0e0e0; /* text-color */
+            --text-light: rgba(255, 255, 255, 0.7);
+            --input-background: rgba(255, 255, 255, 0.05);
+            --border-light: rgba(255, 255, 255, 0.1); /* glass-border-color */
+            --button-background: linear-gradient(90deg, var(--pink), var(--blue));
+            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5); /* Inner shadow for glass effect */
+
+            /* New variables override for glass mode */
+            --background-color-primary: rgba(10, 10, 10, 0.75);
+            --background-color-secondary: rgba(10, 10, 10, 0.6);
+            --header-background-color: rgba(10, 10, 10, 0.85);
+            --footer-background-color: rgba(10, 10, 10, 0.85);
+            --content-background-color: rgba(10, 10, 10, 0.75);
+            --card-background-color: rgba(25, 25, 40, 0.7);
+            --text-color-primary: #e0e0e0;
+            --text-color-secondary: #b0b0d0;
+            --accent-color: #00d5ff;
+            --accent-color-dark: #00aaff;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --input-background-color: rgba(255, 255, 255, 0.05);
+            --button-background: rgba(0, 213, 255, 0.15); /* Glassy button */
+            --button-hover-background: rgba(0, 213, 255, 0.25);
+            --active-item-background: rgba(0, 213, 255, 0.1);
+        }
+
+        /* Sunset Theme */
+        body.theme-sunset-mode {
+            background: linear-gradient(to top, #ff7e5f, #feb47b) !important;
+            --background-main: linear-gradient(to top, #ff7e5f, #feb47b);
+            --card-background: rgba(255, 255, 255, 0.15); /* Slightly transparent white for contrast */
+            --white: #fff; /* White text for readability */
+            --text-light: rgba(255, 255, 255, 0.8);
+            --input-background: rgba(255, 255, 255, 0.1);
+            --border-light: rgba(255, 255, 255, 0.3);
+            --button-background: linear-gradient(90deg, #fd746c, #ff9068); /* Sunset gradient */
+            --button-shadow: 0 4px 15px rgba(253, 116, 108, 0.4), 0 4px 15px rgba(255, 144, 104, 0.4);
+
+            /* New variables override for sunset mode */
+            --background-color-primary: #ff7e5f;
+            --background-color-secondary: #feb47b;
+            --header-background-color: rgba(255, 126, 95, 0.9);
+            --footer-background-color: rgba(255, 126, 95, 0.9);
+            --content-background-color: rgba(255, 126, 95, 0.85);
+            --card-background-color: rgba(255, 255, 255, 0.15);
+            --text-color-primary: #fff;
+            --text-color-secondary: rgba(255, 255, 255, 0.8);
+            --accent-color: #ffd700;
+            --accent-color-dark: #ccaa00;
+            --border-color: rgba(255, 255, 255, 0.3);
+            --input-background-color: rgba(255, 255, 255, 0.1);
+            --button-background: rgba(255, 255, 255, 0.2);
+            --button-hover-background: rgba(255, 255, 255, 0.3);
+            --active-item-background: rgba(255, 215, 0, 0.1);
+        }
+
+        /* Always show scrollbar to prevent layout shifts */
+        html {
+            overflow-y: scroll;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            padding-bottom: 40px;
+            background-color: var(--background-main);
+            background-image: radial-gradient(circle at top left, var(--background-gradient-1), transparent 100px),
+                              radial-gradient(circle at bottom right, var(--background-gradient-2), transparent 150px);
+            color: var(--white);
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        /* Header Styling */
+        header {
+            background: var(--header-background);
+            border-bottom: 1px solid var(--border-light);
+            padding: 10px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 55px;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+        }
+
+        header .header-content-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 30px;
+        }
+
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            letter-spacing: -0.03em;
+            text-decoration: none;
+        }
+
+        /* Header Navigation (Removed as per user request) */
+        header nav ul {
+            display: none;
+        }
+
+        /* User Profile Header Styling */
+        .user-profile-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Admin Icon Styling */
+        #adminIconLink {
+            display: none;
+            margin-right: 15px;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            font-size: 1.5rem;
+            transition: transform 0.2s ease;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Smooth shadow for icons */
+        }
+
+        #adminIconLink:hover {
+            transform: scale(1.1);
+        }
+
+        .user-profile-header #profileLink {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--white);
+            transition: opacity 0.3s ease, background-color 0.3s ease;
+            padding: 5px 10px;
+            border-radius: var(--radius);
+        }
+
+        .user-profile-header #profileLink:hover {
+            opacity: 0.8;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .user-profile-header img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: opacity 0.3s ease;
+        }
+
+        .user-profile-header i {
+            font-size: 30px;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Smooth shadow for icons */
+        }
+
+        .user-profile-header span {
+            font-weight: 600;
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+
+        /* --- Main Content Styling --- */
+        main {
+            flex-grow: 1;
+            padding: 0;
+            padding-top: 55px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            text-align: center;
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            gap: 4rem; /* Increased spacing between sections */
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 5rem 2rem;
+            width: 100%;
+            background: linear-gradient(135deg, rgba(255, 46, 146, 0.2), rgba(0, 213, 255, 0.2));
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--border-light);
+            text-align: center;
+        }
+
+        .hero-section h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 800;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            margin: 0;
+            line-height: 1.2;
+            letter-spacing: -1px;
+            animation: text-gradient-anim 5s ease-in-out infinite;
+        }
+
+        @keyframes text-gradient-anim {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            font-weight: 400;
+            max-width: 700px;
+            margin: 1rem 0 2rem;
+            color: var(--text-color-secondary);
+            line-height: 1.6; /* Improved readability for long text */
+        }
+
+        .cta-button {
+            display: inline-block;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            padding: 12px 30px;
+            border-radius: 50px;
+            color: var(--white);
+            background: var(--button-background);
+            text-decoration: none;
+            transition: all var(--transition);
+            box-shadow: var(--button-shadow);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 213, 255, 0.5), 0 8px 20px rgba(255, 46, 146, 0.5);
+            background-image: linear-gradient(90deg, var(--pink), var(--blue));
+        }
+
+        /* Generic Section Styling */
+        .about-section {
+            background: var(--card-background);
+            border: 1px solid var(--glass-blue);
+            backdrop-filter: blur(10px) saturate(180%);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, .3);
+            padding: 2.5rem; /* Increased padding */
+            width: 90%;
+            max-width: 800px;
+            text-align: left;
+            color: var(--text-color-secondary);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .about-section h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.2rem; /* Increased font size for headings */
+            font-weight: 600;
+            color: var(--text-color-primary);
+            margin-top: 0;
+            margin-bottom: 1.5rem; /* Increased spacing */
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px; /* Spacing between icon and text */
+        }
+
+        .about-section h2 .icon-wrapper {
+            font-size: 2.2rem;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .about-section p {
+            font-size: 1.1rem; /* Increased font size for readability */
+            line-height: 1.8; /* Increased line height for "long huge readings" */
+            margin-bottom: 1rem;
+        }
+
+        /* Features Section with Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px; /* Increased gap */
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: var(--header-background);
+            border-radius: var(--radius);
+            padding: 25px; /* Increased padding */
+            text-align: center;
+            border: 1px solid var(--border-light);
+            transition: transform var(--transition);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        }
+
+        .feature-card .icon-wrapper {
+            font-size: 3rem; /* Increased icon size */
+            margin-bottom: 20px;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* Smooth shadow for icons */
+        }
+
+        .feature-card h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.4rem; /* Increased heading size */
+            margin: 0 0 10px;
+            color: var(--text-color-primary);
+        }
+
+        .feature-card p {
+            font-size: 1rem; /* Slightly increased font size for readability */
+            margin: 0;
+            line-height: 1.6; /* Increased line height */
+        }
+
+        /* Call to Action Section */
+        .cta-section {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--header-background);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, .3);
+            border: 1px solid var(--border-light);
+            width: 100%;
+        }
+
+        .cta-section h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5rem;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--pink), var(--blue));
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px; /* Spacing between icon and text */
+        }
+
+        .cta-section h2 .icon-wrapper {
+            font-size: 2.5rem;
+            background-image: linear-gradient(90deg, var(--pink), var(--blue));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Footer styling */
+        footer {
+            width: 100%;
+            padding: 20px 0;
+            background: var(--header-background);
+            border-top: 1px solid var(--border-light);
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-top: auto;
+        }
+    </style>
+<style id="header-overflow-fix">/*header-overflow-fix*/header .header-content-wrapper{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap}header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0;justify-content:flex-end}#profileLink{display:inline-flex;align-items:center;column-gap:8px;row-gap:2px;flex-wrap:wrap;max-width:100%;min-width:0}#profileLink #headerDisplayName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;flex:0 1 auto}#headerProfilePic,#headerAvatarIcon{flex:0 0 auto}@media (max-width:600px){header .header-content-wrapper{gap:8px}#profileLink{column-gap:6px}}</style></head>
+<body class="theme-sweet-cool">
+
+    <header>
+        <div class="header-content-wrapper">
+            <a href="Home.html" class="logo" style="display:flex;align-items:center;gap:10px"><img src="assets/security.png" alt="JCHAT Security" style="height:24px;width:auto" onerror="this.style.display='none'"><span>Nuvia</span></a>
+            <div class="user-profile-header">
+                <a href="admin.html" id="adminIconLink" aria-label="Admin Dashboard">
+                    <i class="fas fa-tools"></i>
+                </a>
+                <a href="/profile.html" id="profileLink" aria-label="View Profile">
+                    <div class="user-profile-pic-wrapper">
+                        <img src="" id="headerProfilePic" alt="User Profile Picture" style="display: none;">
+                        <i class="fas fa-user-circle" id="headerAvatarIcon" style="display: block;"></i>
+                    </div>
+                    <span id="headerDisplayName">Guest</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="content-wrapper">
+            <section class="hero-section">
+                <h1>Welcome to JCHAT</h1>
+                <p>A vibrant social platform where connections are made, creativity is shared, and every interaction is a step in your journey. Join a community that inspires and rewards you every day.</p>
+                <a href="/Login.html" class="sidebar-nav-item">
+                <i class="fas fa-rocket"></i>
+                <span>Get Started</span>
+            </a>
+            </section>
+
+            <section class="about-section">
+                <h2>
+                    <span class="icon-wrapper"><i class="fas fa-bullseye"></i></span>
+                    Our Mission
+                </h2>
+                <p>JCHAT's mission is to **empower individuals** by providing a platform for meaningful interaction. We strive to create a space that encourages creativity and personal growth through community engagement and a unique gamified experience.</p>
+            </section>
+
+            <section class="about-section">
+                <h2>
+                    <span class="icon-wrapper"><i class="fas fa-rocket"></i></span>
+                    Unlock the JCHAT Experience
+                </h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="icon-wrapper"><i class="fas fa-user-circle"></i></div>
+                        <h3>Personalized Profiles</h3>
+                        <p>Create a unique profile with your bio, location, social links, and a customizable profile picture. Track your stats, activity, and progress.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon-wrapper"><i class="fas fa-lightbulb"></i></div>
+                        <h3>Daily Inspiration</h3>
+                        <p>Start your day with a new, motivating quote to spark creativity and positive thinking.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon-wrapper"><i class="fas fa-stream"></i></div>
+                        <h3>Real-time Feed</h3>
+                        <p>Stay up-to-date with your friends and the community with a live-updating feed of posts, comments, and reactions.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon-wrapper"><i class="fas fa-camera"></i></div>
+                        <h3>Interactive Posts</h3>
+                        <p>Share your stories, photos, and videos with the world in just a few clicks and express yourself freely.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon-wrapper"><i class="fas fa-comments"></i></div>
+                        <h3>Private Chat</h3>
+                        <p>Connect with friends through real-time private messaging, with rich features like audio messages and media sharing.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon-wrapper"><i class="fas fa-users"></i></div>
+                        <h3>User Connections</h3>
+                        <p>Connect with friends and expand your social network in a safe, dynamic environment.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="about-section">
+                <h2>
+                    <span class="icon-wrapper"><i class="fas fa-trophy"></i></span>
+                    Gamified Community
+                </h2>
+                <p>Beyond social networking, JCHAT is a **gamified experience** designed to reward your engagement. Earn points (Gas), level up your profile, and unlock exclusive rewards as you become a more active member of our community.</p>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="icon-wrapper"><i class="fas fa-level-up-alt"></i></div>
+                        <h3>Progressive Leveling</h3>
+                        <p>Your journey is tracked with a leveling system. Watch your progress and unlock new achievements at every milestone.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon-wrapper"><i class="fas fa-coins"></i></div>
+                        <h3>JCoins & Rewards</h3>
+                        <p>Earn JCoins, our in-app currency, through your activity. Use them to unlock unique badges, profile themes, and more.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon-wrapper"><i class="fas fa-gift"></i></div>
+                        <h3>Daily Bonuses</h3>
+                        <p>Claim daily rewards and bonuses for your continued engagement with the community.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="about-section">
+                <h2>
+                    <span class="icon-wrapper"><i class="fas fa-chart-line"></i></span>
+                    Level Benefits & Progression System
+                </h2>
+                <p>JCHAT features a comprehensive 500+ level progression system designed to reward your engagement and provide exciting goals. Each level brings unique benefits and unlocks new opportunities in your JCHAT journey.</p>
+                
+                <div style="margin: 2rem 0;">
+                    <h3 style="color: var(--blue); font-size: 1.3rem; margin-bottom: 1rem;"><i class="fas fa-star"></i> How to Level Up</h3>
+                    <div style="background: var(--header-background); padding: 1.5rem; border-radius: 15px; margin-bottom: 1.5rem;">
+                        <p><strong>Earn XP (Gas) through various activities:</strong></p>
+                        <ul style="list-style: none; padding-left: 0;">
+                            <li style="margin: 0.5rem 0;"><i class="fas fa-comments" style="color: var(--blue); margin-right: 0.5rem;"></i> <strong>Messaging:</strong> 1-5 XP per message sent</li>
+                            <li style="margin: 0.5rem 0;"><i class="fas fa-users" style="color: var(--pink); margin-right: 0.5rem;"></i> <strong>Group Participation:</strong> 2-8 XP per group interaction</li>
+                            <li style="margin: 0.5rem 0;"><i class="fas fa-user-plus" style="color: var(--blue); margin-right: 0.5rem;"></i> <strong>Social Activity:</strong> 3-10 XP for friend connections</li>
+                            <li style="margin: 0.5rem 0;"><i class="fas fa-calendar-check" style="color: var(--pink); margin-right: 0.5rem;"></i> <strong>Daily Login:</strong> 5-15 XP bonus</li>
+                            <li style="margin: 0.5rem 0;"><i class="fas fa-tasks" style="color: var(--blue); margin-right: 0.5rem;"></i> <strong>Community Tasks:</strong> 10-50 XP per task</li>
+                            <li style="margin: 0.5rem 0;"><i class="fas fa-trophy" style="color: var(--pink); margin-right: 0.5rem;"></i> <strong>Achievements:</strong> 25-100 XP per milestone</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="margin: 2rem 0;">
+                    <h3 style="color: var(--pink); font-size: 1.3rem; margin-bottom: 1rem;"><i class="fas fa-gift"></i> Level Tier Rewards</h3>
+                    
+                    <div class="features-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                        <div class="feature-card" style="background: linear-gradient(135deg, rgba(0, 213, 255, 0.1), rgba(0, 213, 255, 0.05));">
+                            <h4 style="color: var(--blue); margin-top: 0;"><i class="fas fa-seedling"></i> Levels 1-50: Newcomer</h4>
+                            <ul style="text-align: left; list-style: none; padding-left: 0;">
+                                <li><i class="fas fa-coins" style="color: gold;"></i> 10-50 JCoins per level</li>
+                                <li><i class="fas fa-medal" style="color: bronze;"></i> Basic badges & titles</li>
+                                <li><i class="fas fa-palette" style="color: var(--pink);"></i> 3 profile themes</li>
+                                <li><i class="fas fa-percent" style="color: green;"></i> 5% shop discount</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="feature-card" style="background: linear-gradient(135deg, rgba(255, 46, 146, 0.1), rgba(255, 46, 146, 0.05));">
+                            <h4 style="color: var(--pink); margin-top: 0;"><i class="fas fa-rocket"></i> Levels 51-150: Explorer</h4>
+                            <ul style="text-align: left; list-style: none; padding-left: 0;">
+                                <li><i class="fas fa-coins" style="color: gold;"></i> 51-100 JCoins per level</li>
+                                <li><i class="fas fa-crown" style="color: silver;"></i> Advanced badges & titles</li>
+                                <li><i class="fas fa-palette" style="color: var(--blue);"></i> 8 profile themes</li>
+                                <li><i class="fas fa-percent" style="color: green;"></i> 10% shop discount</li>
+                                <li><i class="fas fa-users" style="color: var(--pink);"></i> Access to VIP groups</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="feature-card" style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));">
+                            <h4 style="color: gold; margin-top: 0;"><i class="fas fa-star"></i> Levels 151-300: Champion</h4>
+                            <ul style="text-align: left; list-style: none; padding-left: 0;">
+                                <li><i class="fas fa-coins" style="color: gold;"></i> 101-200 JCoins per level</li>
+                                <li><i class="fas fa-gem" style="color: gold;"></i> Exclusive premium badges</li>
+                                <li><i class="fas fa-palette" style="color: var(--pink);"></i> 15 profile themes</li>
+                                <li><i class="fas fa-percent" style="color: green;"></i> 15% shop discount</li>
+                                <li><i class="fas fa-bolt" style="color: var(--blue);"></i> Priority message delivery</li>
+                                <li><i class="fas fa-shield-alt" style="color: var(--pink);"></i> Enhanced moderation tools</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="feature-card" style="background: linear-gradient(135deg, rgba(128, 0, 128, 0.1), rgba(128, 0, 128, 0.05));">
+                            <h4 style="color: purple; margin-top: 0;"><i class="fas fa-crown"></i> Levels 301-500: Master</h4>
+                            <ul style="text-align: left; list-style: none; padding-left: 0;">
+                                <li><i class="fas fa-coins" style="color: gold;"></i> 201-350 JCoins per level</li>
+                                <li><i class="fas fa-dragon" style="color: purple;"></i> Legendary badges & titles</li>
+                                <li><i class="fas fa-palette" style="color: var(--blue);"></i> Unlimited profile themes</li>
+                                <li><i class="fas fa-percent" style="color: green;"></i> 25% shop discount</li>
+                                <li><i class="fas fa-vip" style="color: gold;"></i> VIP customer support</li>
+                                <li><i class="fas fa-microphone" style="color: var(--pink);"></i> Voice chat privileges</li>
+                                <li><i class="fas fa-cog" style="color: var(--blue);"></i> Advanced customization options</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="feature-card" style="background: linear-gradient(135deg, rgba(255, 0, 0, 0.1), rgba(255, 0, 0, 0.05)); grid-column: 1 / -1;">
+                            <h4 style="color: #ff0000; margin-top: 0; font-size: 1.3rem;"><i class="fas fa-fire"></i> Levels 500+: Legend</h4>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                <ul style="text-align: left; list-style: none; padding-left: 0;">
+                                    <li><i class="fas fa-coins" style="color: gold;"></i> 400+ JCoins per level</li>
+                                    <li><i class="fas fa-infinity" style="color: #ff0000;"></i> Mythical badges & titles</li>
+                                    <li><i class="fas fa-palette" style="color: var(--pink);"></i> Custom theme creation</li>
+                                    <li><i class="fas fa-percent" style="color: green;"></i> 35% shop discount</li>
+                                </ul>
+                                <ul style="text-align: left; list-style: none; padding-left: 0;">
+                                    <li><i class="fas fa-hammer" style="color: var(--blue);"></i> Moderation privileges</li>
+                                    <li><i class="fas fa-users-cog" style="color: var(--pink);"></i> Community leadership roles</li>
+                                    <li><i class="fas fa-star" style="color: gold;"></i> Beta feature access</li>
+                                    <li><i class="fas fa-trophy" style="color: #ff0000;"></i> Hall of Fame recognition</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin: 2rem 0;">
+                    <h3 style="color: var(--blue); font-size: 1.3rem; margin-bottom: 1rem;"><i class="fas fa-lightbulb"></i> Maximizing Your Benefits</h3>
+                    <div style="background: var(--header-background); padding: 1.5rem; border-radius: 15px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                            <div>
+                                <h4 style="color: var(--pink); margin-top: 0;"><i class="fas fa-calendar-alt"></i> Daily Strategies</h4>
+                                <ul style="list-style: none; padding-left: 0;">
+                                    <li><i class="fas fa-check-circle" style="color: green;"></i> Login daily for bonus XP</li>
+                                    <li><i class="fas fa-comments" style="color: var(--blue);"></i> Participate in group chats</li>
+                                    <li><i class="fas fa-handshake" style="color: var(--pink);"></i> Connect with new friends</li>
+                                    <li><i class="fas fa-tasks" style="color: var(--blue);"></i> Complete daily challenges</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 style="color: var(--blue); margin-top: 0;"><i class="fas fa-bullseye"></i> Long-term Goals</h4>
+                                <ul style="list-style: none; padding-left: 0;">
+                                    <li><i class="fas fa-trophy" style="color: gold;"></i> Aim for milestone levels (50, 100, 250, 500)</li>
+                                    <li><i class="fas fa-medal" style="color: var(--pink);"></i> Collect all badge categories</li>
+                                    <li><i class="fas fa-crown" style="color: var(--blue);"></i> Unlock leadership roles</li>
+                                    <li><i class="fas fa-star" style="color: gold;"></i> Reach Legend status (500+)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div style="text-align: center; margin-top: 1.5rem; padding: 1rem; background: rgba(0, 213, 255, 0.1); border-radius: 10px;">
+                            <p style="margin: 0; font-weight: 600; color: var(--blue);"><i class="fas fa-info-circle"></i> <strong>Pro Tip:</strong> Consistent daily activity is more valuable than sporadic bursts - steady progress unlocks the best rewards!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cta-section">
+                <h2>
+                    <span class="icon-wrapper"><i class="fas fa-users"></i></span>
+                    Ready to join the fun?
+                </h2>
+                <p>Sign up now and start your journey with thousands of others who are sharing, connecting, and growing every day!</p>
+                <a href="#" class="cta-button">Join JCHAT</a>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 JCHAT. All Rights Reserved.</p>
+    </footer>
+
+	
+</body>
+</html>

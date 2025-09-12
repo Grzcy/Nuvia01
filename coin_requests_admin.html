@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Last updated: 2025-08-21T18:19:29Z -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JCHAT - Admin: Coin Requests</title>
+
+    <!-- Google Fonts: Poppins for headings, Inter for body text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        /* Universal box-sizing for consistent layout */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        /* Global CSS Variables for easy theme switching (from Home.html / privacy_settings.html) */
+        :root {
+            --pink: #ff2e92;
+            --blue: #00d5ff;
+            --glass-black: rgba(10, 10, 10, .75);
+            --glass-blue: rgba(0, 213, 255, .15);
+            --radius: 20px;
+            --transition: .3s ease;
+
+            /* These variables will be overridden by theme classes */
+            --white: #fff;
+            --text-light: rgba(255, 255, 255, .7);
+            --background-main: rgba(10, 10, 10, .75);
+            --background-gradient-1: #00d5ff;
+            --background-gradient-2: #ff2e92;
+            --card-background: linear-gradient(145deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01));
+            --header-background: linear-gradient(135deg, rgba(10, 10, 10, .85), rgba(10, 10, 10, .75));
+            --border-light: rgba(255, 255, 255, .05);
+            --input-background: rgba(255, 255, 255, 0.05);
+            --button-background: linear-gradient(90deg, var(--blue), var(--pink));
+            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+        }
+
+        /* --- Theme Definitions (Light and Dark Mode) --- */
+        /* Light Mode */
+        body.theme-light-mode {
+            --background-main: #f0f2f5; /* Light gray background */
+            --background-gradient-1: #e0e2e5; /* Subtle lighter gradient */
+            --background-gradient-2: #d0d2d5; /* Subtle darker gradient */
+            --white: #333; /* Dark text for readability */
+            --text-light: #666; /* Lighter dark text */
+            --card-background: rgba(255, 255, 255, 0.95); /* Near white cards */
+            --header-background: rgba(255, 255, 255, 0.98); /* Near white header */
+            --border-light: rgba(0, 0, 0, 0.1); /* Light borders */
+            --input-background: rgba(0, 0, 0, 0.05); /* Light input background */
+            --button-background: linear-gradient(90deg, #6dd5ed, #2193b0); /* Blue gradient */
+            --button-shadow: 0 4px 15px rgba(109, 213, 237, 0.4), 0 4px 15px rgba(33, 147, 176, 0.4);
+        }
+
+        /* Dark Mode */
+        body.theme-dark-mode {
+            --background-main: #1a1a2e; /* Deep purple-dark blue */
+            --background-gradient-1: #16213e; /* Slightly lighter deep blue */
+            --background-gradient-2: #0f3460; /* Darker blue */
+            --white: #e0e0e0; /* Off-white text */
+            --text-light: #a0a0a0; /* Grayish text */
+            --card-background: rgba(25, 25, 40, 0.7); /* Darker, less transparent cards */
+            --header-background: linear-gradient(135deg, rgba(10, 10, 20, .85), rgba(10, 10, 20, .75)); /* Original dark header */
+            --border-light: rgba(255, 255, 255, 0.08); /* Subtle white borders */
+            --input-background: rgba(255, 255, 255, 0.08); /* Dark input background */
+            --button-background: linear-gradient(90deg, #e94560, #ba2f49); /* Reddish gradient */
+            --button-shadow: 0 4px 15px rgba(233, 69, 96, 0.4), 0 4px 15px rgba(186, 47, 73, 0.4);
+        }
+
+        /* Glass Mode specific variables */
+        body.theme-glass-mode {
+            --background-main: rgba(10, 10, 10, 0.75);
+            background-image: url('https://source.unsplash.com/random/1920x1080?abstract,blur');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            backdrop-filter: blur(10px);
+            --card-background: rgba(25, 25, 40, 0.7);
+            --white: #e0e0e0; /* text-color */
+            --text-light: rgba(255, 255, 255, 0.7);
+            --input-background: rgba(255, 255, 255, 0.05);
+            --border-light: rgba(255, 255, 255, 0.1); /* glass-border-color */
+            --button-background: linear-gradient(90deg, var(--pink), var(--blue));
+            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5); /* Inner shadow for glass effect */
+        }
+
+        /* Sunset Theme */
+        body.theme-sunset-mode {
+            background: linear-gradient(to top, #ff7e5f, #feb47b); /* Orange to peach */
+            --background-main: linear-gradient(to top, #ff7e5f, #feb47b);
+            --card-background: rgba(255, 255, 255, 0.15); /* Slightly transparent white for contrast */
+            --white: #fff; /* White text for readability */
+            --text-light: rgba(255, 255, 255, 0.8);
+            --input-background: rgba(255, 255, 255, 0.1);
+            --border-light: rgba(255, 255, 255, 0.3);
+            --button-background: linear-gradient(90deg, #fd746c, #ff9068); /* Sunset gradient */
+            --button-shadow: 0 4px 15px rgba(253, 116, 108, 0.4), 0 4px 15px rgba(255, 144, 104, 0.4);
+        }
+
+        /* Always show scrollbar to prevent layout shifts */
+        html {
+            overflow-y: scroll;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            padding-bottom: 120px; /* Space for nav bar (60px) + toggle button (60px) */
+            background-color: var(--background-main);
+            background-image: radial-gradient(circle at top left, var(--background-gradient-1), transparent 100px),
+                              radial-gradient(circle at bottom right, var(--background-gradient-2), transparent 150px);
+            color: var(--white);
+            transition: background-color 0.5s ease, color 0.5s ease; /* Smooth theme transition */
+        }
+
+        /* Header Styling */
+        header {
+            background: var(--header-background);
+            border-bottom: 1px solid var(--border-light);
+            padding: 10px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 55px;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+        }
+
+        header .header-content-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 30px;
+        }
+
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            letter-spacing: -0.03em;
+            text-decoration: none;
+        }
+
+        /* Header Navigation */
+        header nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            gap: 25px;
+        }
+
+        header nav ul li a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 5px 0;
+            position: relative;
+            transition: color var(--transition);
+        }
+
+        header nav ul li a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0;
+            height: 3px;
+            background: var(--blue);
+            border-radius: 2px;
+            transition: width var(--transition);
+        }
+
+        header nav ul li a:hover {
+            color: var(--blue);
+        }
+
+        header nav ul li a:hover::after {
+            width: 100%;
+        }
+
+        /* User Profile Header Styling */
+        .user-profile-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Notification Icon Styling */
+        .notification-icon-wrapper {
+            position: relative;
+            margin-right: 15px; /* Space between notification and profile */
+        }
+
+        .notification-icon-wrapper a {
+            text-decoration: none; /* Remove underline from link */
+            color: inherit; /* Inherit color from parent */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-icon-wrapper i {
+            font-size: 1.5rem; /* Adjust size as needed */
+            color: var(--text-light);
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .notification-icon-wrapper i:hover {
+            color: var(--white);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--pink); /* Use pink for notifications */
+            color: var(--white);
+            border-radius: 50%;
+            padding: 3px 7px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            min-width: 20px;
+            text-align: center;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Hide if no notifications */
+            display: none;
+        }
+
+        .user-profile-header #profileLink {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--white);
+            transition: opacity 0.3s ease, background-color 0.3s ease;
+            padding: 5px 10px;
+            border-radius: var(--radius);
+        }
+
+        .user-profile-header #profileLink:hover {
+            opacity: 0.8;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .user-profile-header img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--blue);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: opacity 0.3s ease;
+        }
+
+        .user-profile-header i {
+            font-size: 30px;
+            color: var(--text-light);
+        }
+
+        .user-profile-header span {
+            font-weight: 600;
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
+        }
+
+        /* Logout Button Styling */
+        #logoutButton {
+            background: linear-gradient(90deg, var(--pink), var(--blue));
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.3s ease;
+            opacity: 0.8;
+            margin-left: 10px;
+        }
+
+        #logoutButton:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px var(--pink), 0 4px 15px var(--blue);
+            opacity: 1;
+        }
+
+        #logoutButton i {
+            color: var(--white);
+            font-size: 0.9rem;
+        }
+
+        /* Main Content Area */
+        main {
+            flex-grow: 1;
+            padding: 40px 0;
+            padding-top: 55px; /* Adjust for fixed header */
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Align content to top */
+            text-align: center;
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 900px; /* Wider for table */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        /* General Section Styling */
+        .section-card {
+            background: var(--card-background);
+            border: 1px solid var(--glass-blue);
+            backdrop-filter: blur(10px) saturate(180%);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, .3);
+            padding: 2rem;
+            width: 90%;
+            max-width: 800px; /* Adjust as needed */
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            text-align: center;
+        }
+
+        .section-card h1, .section-card h2 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            margin-bottom: 1.5rem;
+        }
+        .section-card h1 { font-size: 2.5rem; }
+        .section-card h2 { font-size: 1.8rem; margin-bottom: 1rem; }
+
+        /* Filters and Search */
+        .filters-container {
+            width: 100%;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 1.5rem;
+            justify-content: center;
+        }
+        .filters-container input,
+        .filters-container select {
+            flex-grow: 1;
+            min-width: 150px;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--border-light);
+            border-radius: 15px;
+            background: var(--input-background);
+            color: var(--white);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            appearance: none; /* Remove default select arrow */
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1rem center;
+            background-size: 1em;
+        }
+        .filters-container input:focus,
+        .filters-container select:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(0, 213, 255, 0.2);
+        }
+        .filters-container button {
+            background: var(--button-background);
+            color: var(--white);
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 1.2rem;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: var(--button-shadow);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .filters-container button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--blue), 0 6px 20px var(--pink);
+        }
+
+        /* Requests Table */
+        .requests-table-container {
+            width: 100%;
+            overflow-x: auto; /* Enable horizontal scrolling for small screens */
+        }
+
+        .requests-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            min-width: 600px; /* Ensure table is wide enough */
+        }
+
+        .requests-table th, .requests-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+            white-space: nowrap; /* Prevent wrapping in cells */
+        }
+
+        .requests-table th {
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--white);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .requests-table td {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .requests-table tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .status-pending { color: orange; font-weight: 600; }
+        .status-approved { color: #28a745; font-weight: 600; } /* Green */
+        .status-rejected { color: #dc3545; font-weight: 600; } /* Red */
+
+        .action-buttons button {
+            background: var(--blue);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+            margin-right: 5px;
+        }
+        .action-buttons button:hover {
+            opacity: 0.8;
+        }
+        .action-buttons button.approve { background: #28a745; } /* Green */
+        .action-buttons button.approve:hover { background: #218838; }
+        .action-buttons button.reject { background: #dc3545; } /* Red */
+        .action-buttons button.reject:hover { background: #c82333; }
+
+        /* Loader styles for buttons */
+        .button-loader {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid var(--white);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        .button-loader.active { display: block; }
+        .button-text { display: block; }
+        .loading .button-text { display: none; }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Custom Message Box Styles */
+        #messageBox {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            min-width: 250px;
+            text-align: center;
+        }
+        #messageBox.success { background-color: rgba(46, 204, 113, 0.9); }
+        #messageBox.error { background-color: rgba(231, 76, 60, 0.9); }
+        #messageBox.info { background-color: rgba(52, 152, 219, 0.9); }
+        @keyframes pulse-bg {
+            0% { background-color: rgba(52, 152, 219, 0.9); }
+            50% { background-color: rgba(52, 152, 219, 0.7); }
+            100% { background-color: rgba(52, 152, 219, 0.9); }
+        }
+        #messageBox.loading-pulse { animation: pulse-bg 1.5s infinite ease-in-out; }
+
+        /* Confirmation Dialog */
+        .confirmation-dialog-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001; /* Higher than messageBox */
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .confirmation-dialog-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .confirmation-dialog-content {
+            background: var(--card-background);
+            border: 1px solid var(--glass-blue);
+            backdrop-filter: blur(10px) saturate(180%);
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            padding: 2rem;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            animation: slideIn 0.3s ease-out forwards;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .confirmation-dialog-content h3 {
+            font-size: 1.5rem;
+            color: var(--pink);
+            margin-bottom: 1rem;
+        }
+        .confirmation-dialog-content p {
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+        }
+        .confirmation-dialog-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .confirmation-dialog-actions button {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .confirmation-dialog-actions .confirm-yes {
+            background: linear-gradient(90deg, #28a745, #218838); /* Green for confirm */
+            color: white;
+            border: none;
+        }
+        .confirmation-dialog-actions .confirm-yes:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(40, 167, 69, 0.4);
+        }
+        .confirmation-dialog-actions .confirm-no {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            border: 1px solid var(--border-light);
+        }
+        .confirmation-dialog-actions .confirm-no:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+
+        /* --- Bottom Navigation Bar --- */
+        #bottomNavBar {
+            position: fixed;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: var(--header-background);
+            border-top: 1px solid var(--border-light);
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 10px;
+            z-index: 50;
+            bottom: 60px; /* Positioned above the toggle button */
+            transition: bottom 0.3s ease-out; /* Smooth slide transition */
+        }
+
+        #bottomNavBar.nav-bar-hidden-full {
+            bottom: -60px; /* Move it completely off-screen below */
+        }
+
+        .nav-icon-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-light);
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: color 0.2s ease;
+            flex: 1;
+            max-width: 80px;
+        }
+
+        .nav-icon-item:hover {
+            color: var(--white);
+        }
+
+        .nav-icon-circle {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--blue), var(--pink));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .nav-icon-item:hover .nav-icon-circle {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px var(--blue), 0 4px 12px var(--pink);
+        }
+
+        .nav-icon-circle i {
+            color: var(--white);
+            font-size: 1.3rem;
+            transition: transform 0.2s ease;
+        }
+
+        .nav-icon-item.active .nav-icon-circle {
+            background: linear-gradient(45deg, var(--pink), var(--blue));
+            box-shadow: 0 4px 12px var(--pink), 0 4px 12px var(--blue);
+        }
+        .nav-icon-item.active {
+            color: var(--white);
+        }
+
+        /* New Toggle Button */
+        #navToggleBtn {
+            position: fixed;
+            bottom: 0px; /* Position at the very bottom */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px; /* Slightly larger button */
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--pink), var(--blue)); /* Pink to blue gradient */
+            color: var(--white);
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem; /* Larger icon */
+            cursor: pointer;
+            z-index: 60; /* Higher than nav bar */
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
+        }
+
+        #navToggleBtn:hover {
+            transform: translateX(-50%) scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(45deg, var(--blue), var(--pink)); /* Reverse gradient on hover */
+        }
+
+        #navToggleBtn i {
+            transition: transform 0.3s ease; /* Smooth icon rotation */
+        }
+
+        #navToggleBtn.rotated i {
+            transform: rotate(180deg); /* Rotate icon when nav is hidden */
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 600px) {
+            header .header-content-wrapper {
+                padding: 0 20px;
+            }
+            .logo {
+                font-size: 1.6rem;
+            }
+            header nav ul {
+                gap: 15px;
+            }
+            header nav ul li a {
+                font-size: 1.1rem;
+            }
+            .user-profile-header #profileLink {
+                padding: 5px;
+            }
+            .user-profile-header span {
+                max-width: 90px;
+            }
+            .user-profile-header img {
+                width: 30px;
+                height: 30px;
+            }
+            .user-profile-header i {
+                font-size: 25px;
+            }
+            #logoutButton {
+                width: 25px;
+                height: 25px;
+                font-size: 0.8rem;
+                margin-left: 8px;
+            }
+            #logoutButton i {
+                font-size: 0.8rem;
+            }
+            .section-card {
+                padding: 1.5rem;
+            }
+            .section-card h1 {
+                font-size: 2rem;
+            }
+            .section-card h2 {
+                font-size: 1.5rem;
+            }
+            .filters-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .filters-container input,
+            .filters-container select,
+            .filters-container button {
+                width: 100%;
+                min-width: unset;
+            }
+            .requests-table th, .requests-table td {
+                padding: 8px 10px;
+                font-size: 0.8rem;
+            }
+            .action-buttons button {
+                padding: 5px 8px;
+                font-size: 0.75rem;
+            }
+            #bottomNavBar {
+                height: 55px;
+                padding: 0 5px;
+                bottom: 55px; /* Adjust for smaller button height on mobile */
+            }
+            #bottomNavBar.nav-bar-hidden-full {
+                bottom: -55px; /* Adjust for smaller button height on mobile */
+            }
+            #navToggleBtn {
+                width: 55px;
+                height: 55px;
+                font-size: 1.5rem;
+            }
+            .nav-icon-circle {
+                width: 40px;
+                height: 40px;
+            }
+            .nav-icon-circle i {
+                font-size: 1.2rem;
+            }
+            .nav-icon-item {
+                font-size: 0.7rem;
+            }
+            body {
+                padding-bottom: 110px; /* 55px (nav) + 55px (toggle) */
+            }
+        }
+    </style>
+<style id="header-overflow-fix">/*header-overflow-fix*/header .header-content-wrapper{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap}header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0;justify-content:flex-end}#profileLink{display:inline-flex;align-items:center;column-gap:8px;row-gap:2px;flex-wrap:wrap;max-width:100%;min-width:0}#profileLink #headerDisplayName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;flex:0 1 auto}#headerProfilePic,#headerAvatarIcon{flex:0 0 auto}@media (max-width:600px){header .header-content-wrapper{gap:8px}#profileLink{column-gap:6px}}</style></head>
+<body class="theme-dark-mode">
+
+    <header>
+        <div class="header-content-wrapper">
+            <a href="/home.html" class="logo" style="display:flex;align-items:center;gap:10px"><img src="assets/security.png" alt="JCHAT Security" style="height:24px;width:auto" onerror="this.style.display='none'"><span>Nuvia</span></a>
+            <nav>
+                <ul>
+                    <li><a href="/home.html">Home</a></li>
+                    <li><a href="/profile.html" id="headerNavLinkProfile">Profile</a></li>
+                </ul>
+            </nav>
+            <div class="user-profile-header">
+                <!-- Notification Icon with Badge -->
+                <div class="notification-icon-wrapper">
+                    <a href="/notifications.html" aria-label="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationCount" style="display: none;">0</span>
+                    </a>
+                </div>
+                <!-- Logout Button -->
+                <button id="logoutButton" aria-label="Logout" disabled>
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+                <a href="/profile.html" id="profileLink">
+                    <img id="headerProfilePic" src="" alt="Profile Picture" style="display: none;">
+                    <i id="headerAvatarIcon" class="fas fa-user-circle"></i>
+                    <span id="headerDisplayName">Loading...</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="content-wrapper">
+            <div class="section-card">
+                <h1>Manage Coin Requests</h1>
+                <p style="color: var(--pink); font-weight: 600; margin-top: -1rem; margin-bottom: 1rem;">
+                    <i class="fas fa-exclamation-triangle"></i> Warning: This tool is for authorized administrators only.
+                </p>
+                <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                    Review and process JCoin requests from users. Approving a request will automatically add coins to the user's account.
+                </p>
+
+                <div class="filters-container">
+                    <input type="text" id="requesterIdSearch" placeholder="Search by Requester ID...">
+                    <select id="statusFilter">
+                        <option value="">All Statuses</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Approved">Approved</option>
+                        <option value="Rejected">Rejected</option>
+                    </select>
+                    <button id="applyFiltersBtn"><i class="fas fa-filter"></i> Apply Filters</button>
+                </div>
+
+                <div class="requests-table-container">
+                    <table class="requests-table">
+                        <thead>
+                            <tr>
+                                <th>Requester ID</th>
+                                <th>Coins</th>
+                                <th>Payment Proof</th>
+                                <th>Status</th>
+                                <th>Requested On</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requestsTableBody">
+                            <tr><td colspan="6" style="text-align: center; color: var(--text-light);">Loading requests...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Custom Message Box -->
+    <div id="messageBox"></div>
+
+    <!-- Confirmation Dialog -->
+    <div id="confirmationDialogOverlay" class="confirmation-dialog-overlay">
+        <div class="confirmation-dialog-content">
+            <h3>Confirm Action</h3>
+            <p id="confirmationMessage">Are you sure you want to perform this action?</p>
+            <div class="confirmation-dialog-actions">
+                <button class="confirm-no" id="confirmNoBtn">No</button>
+                <button class="confirm-yes" id="confirmYesBtn">Yes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav id="bottomNavBar" class="nav-bar-hidden-full">
+        <a href="/home.html" class="nav-icon-item">
+            <div class="nav-icon-circle"><i class="fas fa-home"></i></div>
+            <span>Home</span>
+        </a>
+        <a href="/chat.html" class="nav-icon-item">
+            <div class="nav-icon-circle"><i class="fas fa-comment-dots"></i></div>
+            <span>Chat</span>
+        </a>
+        <a href="/find_friends.html" class="nav-icon-item">
+            <div class="nav-icon-circle"><i class="fas fa-users"></i></div>
+            <span>Users</span>
+        </a>
+        <a href="/friends.html" class="nav-icon-item">
+            <div class="nav-icon-circle"><i class="fas fa-user-friends"></i></div>
+            <span>Friends</span>
+        </a>
+        <a href="/settings.html" class="nav-icon-item active">
+            <div class="nav-icon-circle"><i class="fas fa-cog"></i></div>
+            <span>Settings</span>
+        </a>
+    </nav>
+
+    <!-- Navigation Toggle Button -->
+    <button id="navToggleBtn" aria-label="Toggle Navigation">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc, collection, query, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // --- Firebase & Canvas Environment Configuration ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+            authDomain: "jchat-1.firebaseapp.com",
+            databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+            projectId: "jchat-1",
+            storageBucket: "jchat-1.firebasestorage.app",
+            messagingSenderId: "328479683167",
+            appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
+            measurementId: "G-S6Z9GG0R9P"
+        };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? initialAuthToken : null;
+
+        // Cloudinary Configuration (needed for header profile pic)
+        const cloudinaryConfig = {
+            cloudName: "dxld01rcp", // Your Cloudinary Cloud Name
+            uploadPreset: "Storage_preset" // Your Cloudinary Upload Preset
+        };
+
+        // Initialize Firebase services
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- DOM Elements ---
+        const headerProfilePic = document.getElementById('headerProfilePic');
+        const headerAvatarIcon = document.getElementById('headerAvatarIcon');
+        const headerDisplayName = document.getElementById('headerDisplayName');
+        const logoutButton = document.getElementById('logoutButton');
+        const notificationCountElement = document.getElementById('notificationCount');
+        const messageBox = document.getElementById('messageBox');
+        const headerNavLinkProfile = document.getElementById('headerNavLinkProfile');
+
+        const requesterIdSearch = document.getElementById('requesterIdSearch');
+        const statusFilter = document.getElementById('statusFilter');
+        const applyFiltersBtn = document.getElementById('applyFiltersBtn');
+        const requestsTableBody = document.getElementById('requestsTableBody');
+
+        // Confirmation Dialog Elements
+        const confirmationDialogOverlay = document.getElementById('confirmationDialogOverlay');
+        const confirmationMessage = document.getElementById('confirmationMessage');
+        const confirmYesBtn = document.getElementById('confirmYesBtn');
+        const confirmNoBtn = document.getElementById('confirmNoBtn');
+
+        // --- Global State ---
+        let isAuthReady = false;
+        let currentUser = null;
+        let allRequests = []; // Stores all fetched requests
+        let unsubscribeFromRequests = null; // To manage real-time listener
+
+        // --- Admin Specific ID ---
+        const ADMIN_UID = 'cc96gdhCRPO72NFZtleRCujHvIq2'; // Hardcoded admin ID
+
+        // --- Utility Functions ---
+
+        /**
+         * Displays a temporary message box with a given message and type.
+         * @param {string} message - The message to display.
+         * @param {string} type - The type of message ('success', 'error', 'info', 'loading').
+         * @param {boolean} [isPersistent=false] - If true, message stays until explicitly cleared or replaced.
+         */
+        function showMessageBox(message, type, isPersistent = false) {
+            if (messageBox.timeoutId) {
+                clearTimeout(messageBox.timeoutId);
+                messageBox.timeoutId = null;
+            }
+
+            messageBox.textContent = message;
+            messageBox.className = '';
+            messageBox.classList.add(type);
+
+            if (type === 'loading') {
+                messageBox.classList.add('loading-pulse');
+            } else {
+                messageBox.classList.remove('loading-pulse');
+            }
+
+            messageBox.style.display = 'block';
+            messageBox.style.opacity = '1';
+
+            if (!isPersistent) {
+                messageBox.timeoutId = setTimeout(() => {
+                    messageBox.style.opacity = '0';
+                    messageBox.addEventListener('transitionend', function handler() {
+                        messageBox.style.display = 'none';
+                        messageBox.removeEventListener('transitionend', handler);
+                        messageBox.classList.remove('loading-pulse');
+                    }, { once: true });
+                }, 3000);
+            }
+        }
+
+        /**
+         * Toggles loading state for a button.
+         * @param {HTMLElement} buttonElement - The button to toggle.
+         * @param {boolean} isLoading - True to show loading, false to hide.
+         */
+        function toggleButtonLoading(buttonElement, isLoading) {
+            if (!buttonElement) return;
+            const loader = buttonElement.querySelector('.button-loader');
+            const text = buttonElement.querySelector('.button-text');
+
+            if (isLoading) {
+                buttonElement.disabled = true;
+                if (loader) loader.classList.add('active');
+                if (text) text.style.display = 'none';
+            } else {
+                buttonElement.disabled = false;
+                if (loader) loader.classList.remove('active');
+                if (text) text.style.display = 'block';
+            }
+        }
+
+        /**
+         * Shows a custom confirmation dialog.
+         * @param {string} message - The message to display in the dialog.
+         * @returns {Promise<boolean>} Resolves true if confirmed, false if cancelled.
+         */
+        function showConfirmationDialog(message) {
+            return new Promise((resolve) => {
+                confirmationMessage.textContent = message;
+                confirmationDialogOverlay.classList.add('active');
+
+                const handleConfirm = () => {
+                    confirmationDialogOverlay.classList.remove('active');
+                    confirmYesBtn.removeEventListener('click', handleConfirm);
+                    confirmNoBtn.removeEventListener('click', handleCancel);
+                    resolve(true);
+                };
+
+                const handleCancel = () => {
+                    confirmationDialogOverlay.classList.remove('active');
+                    confirmYesBtn.removeEventListener('click', handleConfirm);
+                    confirmNoBtn.removeEventListener('click', handleCancel);
+                    resolve(false);
+                };
+
+                confirmYesBtn.addEventListener('click', handleConfirm);
+                confirmNoBtn.addEventListener('click', handleCancel);
+            });
+        }
+
+        /**
+         * Constructs a Cloudinary URL for an image/video.
+         * @param {string} urlOrPublicId - The full Cloudinary URL or the public ID of the image on Cloudinary.
+         * @param {string} transformations - Optional Cloudinary transformations.
+         * @returns {string|null} The full Cloudinary URL or null if urlOrPublicId is not provided.
+         */
+        function getCloudinaryImageUrl(urlOrPublicId, transformations = "w_auto,f_auto,q_auto") {
+            if (!urlOrPublicId) return null;
+            if (urlOrPublicId.startsWith('http://') || urlOrPublicId.startsWith('https://')) {
+                return urlOrPublicId;
+            }
+            return `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/${transformations}/${urlOrPublicId}`;
+        }
+
+        /**
+         * Displays the profile picture or a default icon.
+         * @param {HTMLElement} imgElement - The <img> element to update.
+         * @param {HTMLElement} iconElement - The <i> element to display if no image.
+         * @param {string|null} profilePicId - The Cloudinary public ID or URL, or null.
+         * @param {string} usernameInitial - Initial for placeholder.
+         * @param {string} transformations - Cloudinary transformations.
+         */
+        function displayProfilePicture(imgElement, iconElement, profilePicId, usernameInitial, transformations) {
+            if (profilePicId) {
+                const imageUrl = getCloudinaryImageUrl(profilePicId, transformations);
+                imgElement.src = imageUrl;
+                imgElement.style.display = 'block';
+                if (iconElement) iconElement.style.display = 'none';
+                imgElement.onerror = () => {
+                    console.error(`Failed to load profile picture: ${profilePicId}. Using placeholder.`);
+                    imgElement.src = `https://placehold.co/120x120/CCCCCC/000000?text=${usernameInitial}`;
+                    imgElement.style.display = 'block';
+                    if (iconElement) iconElement.style.display = 'none';
+                };
+            } else {
+                imgElement.src = '';
+                imgElement.style.display = 'none';
+                if (iconElement) iconElement.style.display = 'block';
+            }
+        }
+
+        /**
+         * Fetches and displays the current user's profile data for the header.
+         * This function runs on every page to ensure header is consistent.
+         * Also updates the public profile summary.
+         * @param {firebase.User} user - The authenticated Firebase user object.
+         */
+        async function fetchAndDisplayHeaderProfile(user) {
+            try {
+                const privateProfileDocRef = doc(db, "artifacts", appId, "users", user.uid, "profiles", "user_profile");
+                const publicProfileDocRef = doc(db, "artifacts", appId, "public_user_data", user.uid);
+
+                const privateDocSnap = await getDoc(privateProfileDocRef);
+                let profileData = null;
+
+                if (privateDocSnap.exists()) {
+                    profileData = privateDocSnap.data();
+                } else {
+                    // Create a basic profile if it doesn't exist
+                    profileData = {
+                        username: user.displayName || `User_${user.uid.substring(0, 8)}`,
+                        email: user.email || "",
+                        profilePicId: user.photoURL || null,
+                        bio: "",
+                        location: "",
+                        friendsCount: 0,
+                        followersCount: 0,
+                        followingCount: 0,
+                        createdAt: Date.now(),
+                        updatedAt: Date.now(),
+                        inspirationType: "motivational",
+                        visibility: {
+                            displayName: true, profilePic: true, bio: false, location: false,
+                            emailPublic: false, lastOnline: false, allowFriendRequests: true, allowMessages: true,
+                        },
+                        totalPosts: 0,
+                        jCoins: 0,
+                        level: 1,
+                        currentXp: 0,
+                        xpToNextLevel: 100
+                    };
+                    await setDoc(privateProfileDocRef, profileData); // Create private profile
+                    console.log("JCHAT_DEBUG: Created new private profile for header:", profileData);
+                }
+
+                // Update public profile summary
+                const publicProfileSummary = {
+                    username: profileData.username,
+                    profilePicId: profileData.profilePicId,
+                    jCoins: profileData.jCoins,
+                    level: profileData.level,
+                    userId: user.uid, // Store UID in public profile
+                    email: profileData.email // Include email for admin search
+                };
+                await setDoc(publicProfileDocRef, publicProfileSummary, { merge: true }); // Create/update public profile
+                console.log("JCHAT_DEBUG: Updated public profile summary:", publicProfileSummary);
+
+
+                // Update header UI
+                const usernameInitial = (profileData.username || "J").charAt(0).toUpperCase();
+                displayProfilePicture(headerProfilePic, headerAvatarIcon, profileData?.profilePicId, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
+                headerDisplayName.textContent = profileData.username || "JCHAT User";
+                headerNavLinkProfile.href = `/profile.html?userId=${user.uid}`;
+                document.getElementById('profileLink').href = `/profile.html?userId=${user.uid}`;
+
+                logoutButton.disabled = false;
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error fetching or creating profile for header:", error);
+                const usernameInitial = (user.displayName || "J").charAt(0).toUpperCase();
+                displayProfilePicture(headerProfilePic, headerAvatarIcon, user.photoURL, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
+                headerDisplayName.textContent = user.displayName || "JCHAT User";
+                showMessageBox(`Error loading header profile: ${error.message}`, 'error');
+                logoutButton.disabled = false;
+            }
+        }
+
+        /**
+         * Fetches and displays the notification count for the current user.
+         * @param {string} userId - The UID of the current user.
+         */
+        async function fetchNotificationCount(userId) {
+            notificationCountElement.style.display = 'none'; // Placeholder for now
+        }
+
+        /**
+         * Renders the filtered requests to the table.
+         * @param {Array<Object>} requestsToDisplay - Array of request objects.
+         */
+        function renderRequests(requestsToDisplay) {
+            requestsTableBody.innerHTML = ''; // Clear existing rows
+            if (requestsToDisplay.length === 0) {
+                requestsTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-light);">No requests found.</td></tr>';
+                return;
+            }
+
+            requestsToDisplay.forEach(request => {
+                const row = requestsTableBody.insertRow();
+                const timestamp = request.timestamp ? new Date(request.timestamp.toDate()).toLocaleString() : 'N/A';
+                const statusClass = `status-${request.status.toLowerCase()}`;
+
+                row.innerHTML = `
+                    <td>${request.requesterId}</td>
+                    <td>${request.requestedCoins}</td>
+                    <td>${request.paymentProof || 'N/A'}</td>
+                    <td class="${statusClass}">${request.status}</td>
+                    <td>${timestamp}</td>
+                    <td class="action-buttons">
+                        ${request.status === 'Pending' ? `
+                            <button class="approve" data-id="${request.id}" data-requester-id="${request.requesterId}" data-coins="${request.requestedCoins}">Approve</button>
+                            <button class="reject" data-id="${request.id}">Reject</button>
+                        ` : 'No Actions'}
+                    </td>
+                `;
+            });
+
+            // Add event listeners for action buttons
+            requestsTableBody.querySelectorAll('.approve').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const requestId = event.target.dataset.id;
+                    const requesterId = event.target.dataset.requesterId;
+                    const coins = parseInt(event.target.dataset.coins);
+                    handleRequestAction(requestId, requesterId, coins, 'Approved');
+                });
+            });
+
+            requestsTableBody.querySelectorAll('.reject').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const requestId = event.target.dataset.id;
+                    handleRequestAction(requestId, null, 0, 'Rejected');
+                });
+            });
+        }
+
+        /**
+         * Applies filters and renders the requests.
+         */
+        function applyFiltersAndRender() {
+            const searchTerm = requesterIdSearch.value.toLowerCase().trim();
+            const selectedStatus = statusFilter.value;
+
+            const filteredRequests = allRequests.filter(request => {
+                const matchesSearch = searchTerm === '' || request.requesterId.toLowerCase().includes(searchTerm);
+                const matchesStatus = selectedStatus === '' || request.status === selectedStatus;
+                return matchesSearch && matchesStatus;
+            });
+
+            renderRequests(filteredRequests);
+        }
+
+        /**
+         * Handles approving or rejecting a coin request.
+         * @param {string} requestId - The ID of the request document.
+         * @param {string} requesterId - The UID of the user who made the request.
+         * @param {number} coins - The amount of coins to add (only for approval).
+         * @param {string} newStatus - The new status ('Approved' or 'Rejected').
+         */
+        async function handleRequestAction(requestId, requesterId, coins, newStatus) {
+            const confirmMsg = newStatus === 'Approved'
+                ? `Are you sure you want to APPROVE this request and add ${coins} JCoins to user ${requesterId}'s account?`
+                : `Are you sure you want to REJECT this request?`;
+
+            const confirmed = await showConfirmationDialog(confirmMsg);
+            if (!confirmed) {
+                showMessageBox("Action cancelled.", 'info');
+                return;
+            }
+
+            showMessageBox(`Processing request...`, 'loading', true);
+            try {
+                const requestDocRef = doc(db, "artifacts", appId, "coin_requests", requestId);
+                await updateDoc(requestDocRef, { status: newStatus });
+
+                if (newStatus === 'Approved') {
+                    const userProfileRef = doc(db, "artifacts", appId, "users", requesterId, "profiles", "user_profile");
+                    const publicUserProfileRef = doc(db, "artifacts", appId, "public_user_data", requesterId);
+
+                    // Atomically increment jCoins
+                    await updateDoc(userProfileRef, { jCoins: increment(coins) });
+                    await updateDoc(publicUserProfileRef, { jCoins: increment(coins) }); // Update public summary too
+
+                    showMessageBox(`Request Approved! ${coins} JCoins added to ${requesterId}'s account.`, 'success');
+                } else {
+                    showMessageBox("Request Rejected.", 'info');
+                }
+            } catch (error) {
+                console.error(`JCHAT_ERROR: Error processing request ${newStatus}:`, error);
+                showMessageBox(`Failed to ${newStatus.toLowerCase()} request: ${error.message}`, 'error');
+            }
+        }
+
+        /**
+         * Sets up the real-time listener for coin requests.
+         */
+        function setupCoinRequestsListener() {
+            if (unsubscribeFromRequests) {
+                unsubscribeFromRequests(); // Detach previous listener if exists
+            }
+
+            const coinRequestsColRef = collection(db, "artifacts", appId, "coin_requests");
+            // Using onSnapshot for real-time updates.
+            // Note: orderBy is commented out as per previous instructions to avoid index issues.
+            // If you need sorting, fetch all and sort in memory.
+            const q = query(coinRequestsColRef); //, orderBy('timestamp', 'desc'));
+
+            unsubscribeFromRequests = onSnapshot(q, (snapshot) => {
+                allRequests = [];
+                snapshot.forEach((doc) => {
+                    allRequests.push({ id: doc.id, ...doc.data() });
+                });
+                // Sort by timestamp descending in memory
+                allRequests.sort((a, b) => (b.timestamp?.toDate() || 0) - (a.timestamp?.toDate() || 0));
+                applyFiltersAndRender(); // Re-render with current filters
+                showMessageBox("Coin requests updated.", 'info');
+            }, (error) => {
+                console.error("JCHAT_ERROR: Error listening to coin requests:", error);
+                requestsTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--pink);">Failed to load requests. Check console.</td></tr>';
+                showMessageBox(`Error loading requests: ${error.message}`, 'error');
+            });
+        }
+
+        // --- Authentication State Listener ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                isAuthReady = true;
+                console.log("JCHAT_DEBUG: User authenticated in Coin Requests Admin Page:", user.uid);
+
+                // Hardcoded admin check
+                if (user.uid === ADMIN_UID) {
+                    console.log("JCHAT_DEBUG: User is the hardcoded administrator.");
+                    await fetchAndDisplayHeaderProfile(user); // Update header
+                    setupCoinRequestsListener(); // Start real-time listener for requests
+                } else {
+                    console.log("JCHAT_DEBUG: User is NOT the hardcoded administrator. Redirecting.");
+                    isAuthReady = false;
+                    logoutButton.disabled = true;
+                    headerDisplayName.textContent = "Unauthorized";
+                    headerProfilePic.style.display = 'none';
+                    headerAvatarIcon.style.display = 'block';
+                    requestsTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--pink);">Access Denied. You must be the designated administrator.</td></tr>';
+                    showMessageBox("Access Denied. You must be the designated administrator to view this page.", 'error', true);
+                    setTimeout(() => {
+                        window.location.href = '/home.html'; // Redirect to home or login
+                    }, 3000);
+                }
+            } else {
+                console.log("JCHAT_DEBUG: No user signed in. Redirecting to login page for admin access.");
+                isAuthReady = false;
+                logoutButton.disabled = true;
+                headerDisplayName.textContent = "Guest";
+                headerProfilePic.style.display = 'none';
+                headerAvatarIcon.style.display = 'block';
+                requestsTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-light);">Please log in to access admin tools.</td></tr>';
+                showMessageBox("You must be logged in to access Coin Request Management.", 'error', true);
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 2000); // Redirect after 2 seconds
+            }
+        });
+
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply theme on load
+            const savedTheme = localStorage.getItem('jchat-theme');
+            const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+            if (savedTheme && themes.includes(savedTheme)) {
+                document.body.classList.remove(...themes);
+                document.body.classList.add(savedTheme);
+            } else {
+                document.body.classList.add('theme-dark-mode'); // Default
+            }
+
+            applyFiltersBtn.addEventListener('click', applyFiltersAndRender);
+            requesterIdSearch.addEventListener('input', applyFiltersAndRender); // Live filter
+            statusFilter.addEventListener('change', applyFiltersAndRender); // Live filter
+
+            // Ensure the listener is detached when the page is unloaded
+            window.addEventListener('beforeunload', () => {
+                if (unsubscribeFromRequests) {
+                    unsubscribeFromRequests();
+                    console.log("JCHAT_DEBUG: Detached Firestore coin requests listener.");
+                }
+            });
+        });
+
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'jchat-theme') {
+                const newTheme = event.newValue || 'theme-dark-mode';
+                const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+                if (themes.includes(newTheme)) {
+                    document.body.classList.remove(...themes);
+                    document.body.classList.add(newTheme);
+                }
+            }
+        });
+
+        logoutButton.addEventListener('click', async () => {
+            if (!isAuthReady) return;
+            try {
+                await signOut(auth);
+                showMessageBox("Logged out successfully!", 'success');
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 1000);
+            } catch (error) {
+                console.error("Error logging out:", error);
+                showMessageBox("Failed to log out. Please try again.", 'error');
+            }
+        });
+
+        // --- Bottom Navigation Bar Toggle Logic (reused from Home.html) ---
+        const bottomNavBar = document.getElementById('bottomNavBar');
+        const navToggleBtn = document.getElementById('navToggleBtn');
+
+        function toggleNavBarVisibility() {
+            const toggleIcon = navToggleBtn.querySelector('i');
+            const isHidden = bottomNavBar.classList.toggle('nav-bar-hidden-full');
+
+            if (isHidden) {
+                toggleIcon.classList.remove('fa-chevron-down');
+                toggleIcon.classList.add('fa-chevron-up');
+            } else {
+                toggleIcon.classList.remove('fa-chevron-up');
+                toggleIcon.classList.add('fa-chevron-down');
+            }
+        }
+
+        bottomNavBar.classList.add('nav-bar-hidden-full');
+        navToggleBtn.querySelector('i').classList.remove('fa-chevron-down');
+        navToggleBtn.querySelector('i').classList.add('fa-chevron-up');
+        navToggleBtn.addEventListener('click', toggleNavBarVisibility);
+    </script>
+	
+</body>
+</html>

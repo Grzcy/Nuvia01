@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Last updated: 2025-08-21T18:19:29Z -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JCHAT - Admin Panel - Activity Logs</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://*.firebaseio.com" crossorigin>
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('jchat-theme');
+        const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+        if (savedTheme && themes.includes(savedTheme)) {
+            document.body.classList.remove(...themes);
+            document.body.classList.add(savedTheme);
+        } else {
+            document.body.classList.add('theme-dark-mode'); // Default to dark mode if no theme is saved
+        }
+      });
+    </script>
+
+    <style>
+        /* Universal box-sizing for consistent layout */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        /* Global CSS Variables for easy theme switching (copied from Admin.html) */
+        :root {
+            /* Theme Original Default */
+            --background-color-primary: #1a1a2e;
+            --background-color-secondary: #0f0f1f;
+            --header-background-color: #2a2a4a;
+            --footer-background-color: #2a2a4a;
+            --content-background-color: #20203a;
+            --card-background-color: #2a2a4a;
+            --text-color-primary: #e0e0e0;
+            --text-color-secondary: #b0b0d0;
+            --text-color-light: #f5f5f5;
+            --accent-color: #00d5ff; /* A bright cyan */
+            --accent-color-dark: #00aaff;
+            --border-color: #3a3a5a;
+            --input-background-color: #3a3a5a;
+            --button-background: #3a3a5a;
+            --button-hover-background: #4a4a6a;
+            --active-item-background: rgba(0, 213, 255, 0.2); /* Accent with transparency */
+            --notification-badge-color: #ff2e92; /* Pinkish-red */
+            --status-online: #4CAF50;
+            --status-offline: #6c757d;
+            --status-away: #FFC107;
+            --delete-button-color: #dc3545; /* Red for delete actions */
+            --warning-color: #ffc107; /* Orange for warnings */
+            --success-color: #28a745; /* Green for success */
+
+            /* Variables for original gradient background */
+            --pink: #ff2e92;
+            --blue: #00d5ff;
+            --glass-black: rgba(10, 10, 10, .75);
+            --glass-blue: rgba(0, 213, 255, .15);
+            --radius: 20px;
+            --transition: .3s ease;
+            --white: #fff; /* This will be overridden by theme classes */
+            --text-light: rgba(255, 255, 255, .7);
+            --background-main: rgba(10, 10, 10, .75);
+            --background-gradient-1: #00d5ff;
+            --background-gradient-2: #ff2e92;
+            --card-background: linear-gradient(145deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01));
+            --header-background: linear-gradient(135deg, rgba(10, 10, 10, .85), rgba(10, 10, 10, .75));
+            --border-light: rgba(255, 255, 255, .05);
+            --input-background: rgba(255, 255, 255, 0.05);
+            --button-background-gradient: linear-gradient(90deg, var(--blue), var(--pink));
+            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+        }
+
+        /* --- Theme Definitions (Light and Dark Mode from Admin.html) --- */
+        /* Light Mode */
+        body.theme-light-mode {
+            --background-color-primary: #f0f2f5;
+            --background-color-secondary: #e0e2e5;
+            --header-background-color: #ffffff;
+            --footer-background-color: #ffffff;
+            --content-background-color: #f7f9fb;
+            --card-background-color: #ffffff;
+            --text-color-primary: #333333;
+            --text-color-secondary: #666666;
+            --text-color-light: #999999;
+            --accent-color: #007bff; /* A standard blue */
+            --accent-color-dark: #0056b3;
+            --border-color: #e0e0e0;
+            --input-background-color: #f0f0f0;
+            --button-background: #e9ecef;
+            --button-hover-background: #dee2e6;
+            --active-item-background: rgba(0, 123, 255, 0.1);
+            --notification-badge-color: #dc3545;
+            --status-online: #28a745;
+            --status-offline: #6c757d;
+            --status-away: #ffc107;
+            --delete-button-color: #dc3545;
+            --warning-color: #ffc107;
+            --success-color: #28a745;
+
+            /* Override for original gradient background in light mode */
+            --background-main: #f0f2f5;
+            background-image: none !important; /* Remove gradient for light mode */
+            --white: #333;
+            --text-light: #666;
+            --card-background: rgba(255, 255, 255, 0.95);
+            --header-background: rgba(255, 255, 255, 0.98);
+            --border-light: rgba(0, 0, 0, 0.1);
+            --input-background: rgba(0, 0, 0, 0.05);
+            --button-background-gradient: linear-gradient(90deg, #6dd5ed, #2193b0);
+            --button-shadow: 0 4px 15px rgba(109, 213, 237, 0.4), 0 4px 15px rgba(33, 147, 176, 0.4);
+        }
+
+        /* Dark Mode */
+        body.theme-dark-mode {
+            --background-color-primary: #121212;
+            --background-color-secondary: #1e1e1e;
+            --header-background-color: #2c2c2c;
+            --footer-background-color: #2c2c2c;
+            --content-background-color: #242424;
+            --card-background-color: #2c2c2c;
+            --text-color-primary: #ffffff;
+            --text-color-secondary: #bbbbbb;
+            --accent-color: #bb86fc; /* Purple accent */
+            --accent-color-dark: #9a67ea;
+            --border-color: #444444;
+            --input-background-color: #383838;
+            --button-background: #383838;
+            --button-hover-background: #505050;
+            --active-item-background: rgba(187, 134, 252, 0.2);
+            --notification-badge-color: #cf6679;
+            --delete-button-color: #f44336;
+            --warning-color: #ffeb3b;
+            --success-color: #8bc34a;
+
+            /* Override for original gradient background in dark mode */
+            --background-main: #1a1a2e;
+            background-image: radial-gradient(circle at top left, #16213e, transparent 100px),
+                              radial-gradient(circle at bottom right, #0f3460, transparent 150px) !important;
+            --white: #e0e0e0;
+            --text-light: #a0a0a0;
+            --card-background: rgba(25, 25, 40, 0.7);
+            --header-background: linear-gradient(135deg, rgba(10, 10, 20, .85), rgba(10, 10, 20, .75));
+            --border-light: rgba(255, 255, 255, 0.08);
+            --input-background: rgba(255, 255, 255, 0.08);
+            --button-background-gradient: linear-gradient(90deg, #e94560, #ba2f49);
+            --button-shadow: 0 4px 15px rgba(233, 69, 96, 0.4), 0 4px 15px rgba(186, 47, 73, 0.4);
+        }
+
+        /* Glass Mode specific variables (copied from Admin.html) */
+        body.theme-glass-mode {
+            --background-main: rgba(10, 10, 10, 0.75);
+            background-image: url('https://source.unsplash.com/random/1920x1080?abstract,blur') !important; /* Override background */
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            backdrop-filter: blur(10px);
+            --card-background: rgba(25, 25, 40, 0.7);
+            --white: #e0e0e0; /* text-color */
+            --text-light: rgba(255, 255, 255, 0.7);
+            --input-background: rgba(255, 255, 255, 0.05);
+            --border-light: rgba(255, 255, 255, 0.1); /* glass-border-color */
+            --button-background-gradient: linear-gradient(90deg, var(--pink), var(--blue));
+            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5); /* Inner shadow for glass effect */
+
+            /* Ensure main theme vars are consistent with glass */
+            --background-color-primary: rgba(10, 10, 10, 0.75);
+            --background-color-secondary: rgba(10, 10, 10, 0.6);
+            --header-background-color: rgba(10, 10, 10, 0.85);
+            --footer-background-color: rgba(10, 10, 10, 0.85);
+            --content-background-color: rgba(10, 10, 10, 0.75);
+            --card-background-color: rgba(25, 25, 40, 0.7);
+            --text-color-primary: #e0e0e0;
+            --text-color-secondary: #b0b0d0;
+            --accent-color: #00d5ff;
+            --accent-color-dark: #00aaff;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --input-background-color: rgba(255, 255, 255, 0.05);
+            --button-background: rgba(0, 213, 255, 0.15); /* Glassy button */
+            --button-hover-background: rgba(0, 213, 255, 0.25);
+            --active-item-background: rgba(0, 213, 255, 0.1);
+            --success-color: #00d5ff; /* Use accent for success in glass */
+        }
+
+        /* Sunset Theme (copied from Admin.html) */
+        body.theme-sunset-mode {
+            background: linear-gradient(to top, #ff7e5f, #feb47b) !important; /* Override background */
+            --background-main: linear-gradient(to top, #ff7e5f, #feb47b);
+            --card-background: rgba(255, 255, 255, 0.15); /* Slightly transparent white for contrast */
+            --white: #fff; /* White text for readability */
+            --text-light: rgba(255, 255, 255, 0.8);
+            --input-background: rgba(255, 255, 255, 0.1);
+            --border-light: rgba(255, 255, 255, 0.3);
+            --button-background-gradient: linear-gradient(90deg, #fd746c, #ff9068); /* Sunset gradient */
+            --button-shadow: 0 4px 15px rgba(253, 116, 108, 0.4), 0 4px 15px rgba(255, 144, 104, 0.4);
+
+            /* Ensure main theme vars are consistent with sunset */
+            --background-color-primary: #ff7e5f;
+            --background-color-secondary: #feb47b;
+            --header-background-color: rgba(255, 126, 95, 0.9);
+            --footer-background-color: rgba(255, 126, 95, 0.9);
+            --content-background-color: rgba(255, 126, 95, 0.85);
+            --card-background-color: rgba(255, 255, 255, 0.15);
+            --text-color-primary: #fff;
+            --text-color-secondary: rgba(255, 255, 255, 0.8);
+            --accent-color: #ffd700; /* Gold accent */
+            --accent-color-dark: #ccaa00;
+            --border-color: rgba(255, 255, 255, 0.3);
+            --input-background-color: rgba(255, 255, 255, 0.1);
+            --button-background: rgba(255, 255, 255, 0.2);
+            --button-hover-background: rgba(255, 255, 255, 0.3);
+            --active-item-background: rgba(255, 215, 0, 0.1);
+            --success-color: #ffd700; /* Use accent for success in sunset */
+        }
+
+        /* Always show scrollbar to prevent layout shifts */
+        html {
+            overflow-y: scroll;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            padding-bottom: 120px; /* Space for nav bar (60px) + toggle button (60px) */
+            background-color: var(--background-main);
+            background-image: radial-gradient(circle at top left, var(--background-gradient-1), transparent 100px),
+                              radial-gradient(circle at bottom right, var(--background-gradient-2), transparent 150px);
+            color: var(--white);
+            transition: background-color 0.5s ease, color 0.5s ease; /* Smooth theme transition */
+        }
+
+        /* Header Styling (copied from Admin.html) */
+        header {
+            background: var(--header-background);
+            border-bottom: 1px solid var(--border-light);
+            padding: 10px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 55px;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+        }
+
+        header .header-content-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 30px;
+        }
+
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            letter-spacing: -0.03em;
+            text-decoration: none;
+        }
+
+        /* Header Navigation */
+        header nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            gap: 25px;
+        }
+
+        header nav ul li a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 5px 0;
+            position: relative;
+            transition: color var(--transition);
+        }
+
+        header nav ul li a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0;
+            height: 3px;
+            background: var(--blue);
+            border-radius: 2px;
+            transition: width var(--transition);
+        }
+
+        header nav ul li a:hover {
+            color: var(--blue);
+        }
+
+        header nav ul li a:hover::after,
+        header nav ul li a.active::after { /* Added active state for nav */
+            width: 100%;
+        }
+        header nav ul li a.active { /* Added active state for nav */
+            color: var(--blue);
+        }
+
+        /* User Profile Header Styling */
+        .user-profile-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Notification Icon Styling */
+        .notification-icon-wrapper {
+            position: relative;
+            margin-right: 15px; /* Space between notification and profile */
+        }
+
+        .notification-icon-wrapper a {
+            text-decoration: none; /* Remove underline from link */
+            color: inherit; /* Inherit color from parent */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-icon-wrapper i {
+            font-size: 1.5rem; /* Adjust size as needed */
+            color: var(--text-light);
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .notification-icon-wrapper i:hover {
+            color: var(--white);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--notification-badge-color); /* Use pink for notifications */
+            color: var(--white);
+            border-radius: 50%;
+            padding: 3px 7px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            min-width: 20px;
+            text-align: center;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Hide if no notifications */
+            display: none;
+        }
+
+        .user-profile-header #profileLink {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--white);
+            transition: opacity 0.3s ease, background-color 0.3s ease;
+            padding: 5px 10px;
+            border-radius: var(--radius);
+        }
+
+        .user-profile-header #profileLink:hover {
+            opacity: 0.8;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .user-profile-header img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent-color); /* Used accent-color for consistency */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: opacity 0.3s ease;
+        }
+
+        .user-profile-header i {
+            font-size: 30px;
+            color: var(--text-light);
+        }
+
+        .user-profile-header span {
+            font-weight: 600;
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
+        }
+
+        /* Logout Button Styling */
+        #logoutButton {
+            background: var(--button-background-gradient); /* Use gradient variable */
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.3s ease;
+            opacity: 0.8;
+            margin-left: 10px;
+        }
+
+        #logoutButton:hover {
+            transform: scale(1.1);
+            box-shadow: var(--button-shadow); /* Use button shadow variable */
+            opacity: 1;
+        }
+
+        #logoutButton i {
+            color: var(--white);
+            font-size: 0.9rem;
+        }
+
+        /* Main Content Area (copied from Admin.html) */
+        main {
+            flex-grow: 1;
+            padding: 40px 0;
+            padding-top: 85px; /* Adjust for fixed header and some top margin */
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Align content to top */
+            text-align: center;
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 1200px; /* Adjusted for better table layout */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        /* General Section Styling (copied from Admin.html) */
+        .section-card {
+            background: var(--card-background);
+            border: 1px solid var(--border-color); /* Used border-color from root */
+            backdrop-filter: blur(10px) saturate(180%);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, .3);
+            padding: 2rem;
+            width: 100%; /* Full width within content-wrapper */
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            text-align: left;
+        }
+
+        .section-card h1, .section-card h2 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            margin-bottom: 1.5rem;
+            text-align: center;
+            width: 100%;
+        }
+        .section-card h1 { font-size: 2.5rem; }
+        .section-card h2 { font-size: 1.8rem; margin-bottom: 1rem; }
+
+        /* --- Log Table Specific Styles --- */
+        .log-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .log-controls label {
+            color: var(--text-color-secondary);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .log-controls input[type="date"],
+        .log-controls select,
+        .log-controls button {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-background-color);
+            color: var(--text-color-primary);
+            font-size: 1rem;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+
+        .log-controls input[type="date"]:focus,
+        .log-controls select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(0, 213, 255, 0.2);
+        }
+
+        .log-controls button {
+            cursor: pointer;
+            background: var(--button-background-gradient);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.3s ease;
+            opacity: 0.9;
+        }
+
+        .log-controls button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--button-shadow);
+            opacity: 1;
+        }
+
+        .log-table-container {
+            width: 100%;
+            max-height: 600px; /* Fixed height with scroll */
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+            min-width: 700px; /* Ensure table doesn't get too small */
+        }
+
+        .log-table th, .log-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .log-table thead {
+            background-color: var(--header-background-color);
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .log-table th {
+            color: var(--text-color-light);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        .log-table tbody tr:nth-child(even) {
+            background-color: var(--background-color-secondary);
+        }
+        .log-table tbody tr:nth-child(odd) {
+            background-color: var(--card-background-color);
+        }
+
+        .log-table tbody tr:hover {
+            background-color: var(--active-item-background);
+            transition: background-color 0.2s ease;
+        }
+
+        .log-table td {
+            color: var(--text-color-primary);
+        }
+
+        .log-table .timestamp-col {
+            white-space: nowrap; /* Prevent line breaks for timestamps */
+        }
+
+        .log-table .details-col {
+            max-width: 300px; /* Limit width of details column */
+            word-wrap: break-word; /* Allow long words to break */
+            font-size: 0.85rem;
+            color: var(--text-color-secondary);
+        }
+
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .pagination-controls button {
+            background-color: var(--button-background);
+            color: var(--white);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            font-weight: 600;
+        }
+
+        .pagination-controls button:hover:not(:disabled) {
+            background-color: var(--button-hover-background);
+        }
+
+        .pagination-controls button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: var(--button-background);
+        }
+
+        /* --- Custom Message Box Styles (copied from Admin.html) --- */
+        #messageBox {
+            position: fixed;
+            top: 50%; /* Center vertically */
+            left: 50%;
+            transform: translate(-50%, -50%); /* Center both horizontally and vertically */
+            background-color: var(--card-background-color); /* Default background, will be overridden for success */
+            color: var(--text-color-primary); /* Default text color */
+            padding: 20px 30px; /* Increased padding for a more substantial box */
+            border-radius: 15px; /* More rounded corners, slightly squarer */
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4); /* Enhanced shadow */
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            min-width: 280px; /* Ensure a decent minimum width */
+            max-width: 90%;
+            text-align: center;
+            flex-direction: column; /* Stack icon and text vertically */
+            align-items: center;
+            gap: 15px; /* Space between icon and text */
+        }
+        #messageBox.show {
+            opacity: 1;
+            display: flex;
+        }
+        /* Success message box specific styling */
+        #messageBox.success {
+            background-image: linear-gradient(45deg, var(--pink), var(--blue)); /* Pink and blue gradient */
+            color: var(--white); /* White text for contrast on gradient */
+            border: none; /* No border for gradient background */
+            box-shadow: 0 8px 30px rgba(0, 213, 255, 0.5), 0 8px 30px rgba(255, 46, 146, 0.5); /* Glowing shadow */
+        }
+        #messageBox.error { border-left: 5px solid var(--delete-button-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+        #messageBox.info { border-left: 5px solid var(--accent-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+        #messageBox.warning { border-left: 5px solid var(--warning-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+
+        #messageBox i {
+            font-size: 2.5rem; /* Larger icon for prominence */
+            margin-bottom: 5px; /* Space between icon and text */
+        }
+        #messageBox.success i { color: var(--white); } /* White icon for success */
+        #messageBox.error i { color: var(--delete-button-color); }
+        #messageBox.info i { color: var(--accent-color); }
+        #messageBox.warning i { color: var(--warning-color); }
+
+        #messageBox span {
+            font-size: 1.1rem; /* Slightly larger text */
+            font-weight: 600;
+        }
+
+        @keyframes pulse-bg {
+            0% { background-color: var(--accent-color); }
+            50% { background-color: rgba(0, 213, 255, 0.7); }
+            100% { background-color: var(--accent-color); }
+        }
+        #messageBox.loading-pulse { animation: pulse-bg 1.5s infinite ease-in-out; }
+
+
+        /* --- Bottom Navigation Bar (copied from Admin.html) --- */
+        #bottomNavBar {
+            position: fixed;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: var(--header-background);
+            border-top: 1px solid var(--border-light);
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 10px;
+            z-index: 50;
+            bottom: 60px; /* Positioned above the toggle button */
+            transition: bottom 0.3s ease-out; /* Smooth slide transition */
+        }
+
+        #bottomNavBar.nav-bar-hidden-full {
+            bottom: -60px; /* Move it completely off-screen below */
+        }
+
+        .nav-icon-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-light);
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: color 0.2s ease;
+            flex: 1;
+            max-width: 80px;
+        }
+
+        .nav-icon-item:hover {
+            color: var(--white);
+        }
+
+        .nav-icon-circle {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: var(--button-background-gradient); /* Use gradient variable */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .nav-icon-item:hover .nav-icon-circle {
+            transform: translateY(-3px);
+            box-shadow: var(--button-shadow); /* Use button shadow variable */
+        }
+
+        .nav-icon-item.active .nav-icon-circle {
+            background: var(--button-background-gradient); /* Active state also uses gradient */
+            box-shadow: var(--button-shadow);
+        }
+        .nav-icon-item.active {
+            color: var(--white);
+        }
+
+        /* New Toggle Button (copied from Admin.html) */
+        #navToggleBtn {
+            position: fixed;
+            bottom: 0px; /* Position at the very bottom */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px; /* Slightly larger button */
+            height: 60px;
+            border-radius: 50%;
+            background: var(--button-background-gradient); /* Use gradient variable */
+            color: var(--white);
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem; /* Larger icon */
+            cursor: pointer;
+            z-index: 60; /* Higher than nav bar */
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
+        }
+
+        #navToggleBtn:hover {
+            transform: translateX(-50%) scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(45deg, var(--blue), var(--pink)); /* Reverse gradient on hover */
+        }
+
+        #navToggleBtn i {
+            transition: transform 0.3s ease; /* Smooth icon rotation */
+        }
+
+        #navToggleBtn.rotated i {
+            transform: rotate(180deg); /* Rotate icon when nav is hidden */
+        }
+
+        /* Loader styles for buttons (reused from other pages) */
+        .button-loader {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid var(--white);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        .button-loader.active { display: block; }
+        .button-text { display: block; }
+        .loading .button-text { display: none; }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Disabled link style */
+        .disabled-link {
+            opacity: 0.6;
+            cursor: not-allowed;
+            pointer-events: none; /* Disables click events */
+        }
+        .disabled-link:hover {
+            transform: none;
+            box-shadow: none;
+        }
+    </style>
+<style id="header-overflow-fix">/*header-overflow-fix*/header .header-content-wrapper{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap}header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0;justify-content:flex-end}#profileLink{display:inline-flex;align-items:center;column-gap:8px;row-gap:2px;flex-wrap:wrap;max-width:100%;min-width:0}#profileLink #headerDisplayName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;flex:0 1 auto}#headerProfilePic,#headerAvatarIcon{flex:0 0 auto}@media (max-width:600px){header .header-content-wrapper{gap:8px}#profileLink{column-gap:6px}}</style></head>
+<body class="theme-dark-mode">
+
+    <header>
+        <div class="header-content-wrapper">
+            <a href="/home.html" class="logo" style="display:flex;align-items:center;gap:10px"><img src="assets/security.png" alt="JCHAT Security" style="height:24px;width:auto" onerror="this.style.display='none'"><span>Nuvia</span></a>
+            <nav>
+                <ul>
+                    <li><a href="/admin.html">Admin Dashboard</a></li>
+                    <li><a href="/content_moderation.html">Content Moderation</a></li>
+                    <li><a href="/analytics.html">Analytics</a></li>
+                    <li><a href="/admin_logs.html" class="active">Activity Logs</a></li>
+                </ul>
+            </nav>
+            <div class="user-profile-header">
+                <div class="notification-icon-wrapper">
+                    <a href="/notifications.html" aria-label="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationCount" style="display: none;">0</span>
+                    </a>
+                </div>
+                <button id="logoutButton" aria-label="Logout" disabled>
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+                <a href="/profile.html" id="profileLink">
+                    <img id="headerProfilePic" src="" alt="Profile Picture" style="display: none;">
+                    <i id="headerAvatarIcon" class="fas fa-user-circle"></i>
+                    <span id="headerDisplayName">Loading...</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="content-wrapper">
+            <div class="section-card">
+                <h1>Admin Activity Logs 📜</h1>
+                <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                    Review administrative actions performed on the platform.
+                </p>
+
+                <div class="log-controls">
+                    <label for="filterAdminUID">Admin UID:</label>
+                    <input type="text" id="filterAdminUID" placeholder="Enter Admin UID (optional)">
+
+                    <label for="filterActionType">Action Type:</label>
+                    <select id="filterActionType">
+                        <option value="">All Types</option>
+                        <option value="user_blocked">User Blocked</option>
+                        <option value="user_unblocked">User Unblocked</option>
+                        <option value="post_deleted">Post Deleted</option>
+                        <option value="comment_deleted">Comment Deleted</option>
+                        <option value="warning_issued">Warning Issued</option>
+                        <option value="view_analytics_dashboard">View Analytics</option>
+                        <option value="content_reviewed">Content Reviewed</option>
+                        <option value="admin_login">Admin Login</option>
+                        <option value="admin_logout">Admin Logout</option>
+                        </select>
+
+                    <label for="filterStartDate">From:</label>
+                    <input type="date" id="filterStartDate">
+
+                    <label for="filterEndDate">To:</label>
+                    <input type="date" id="filterEndDate">
+
+                    <button id="applyFiltersButton">
+                        <span class="button-text">Apply Filters</span>
+                        <div class="button-loader"></div>
+                    </button>
+                    <button id="clearFiltersButton">
+                        <span class="button-text">Clear Filters</span>
+                        <div class="button-loader"></div>
+                    </button>
+                </div>
+
+                <div class="log-table-container">
+                    <table class="log-table">
+                        <thead>
+                            <tr>
+                                <th class="timestamp-col">Timestamp</th>
+                                <th>Admin UID</th>
+                                <th>Action Type</th>
+                                <th class="details-col">Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminLogsTableBody">
+                            <tr>
+                                <td colspan="4" style="text-align: center; color: var(--text-color-secondary); padding: 20px;">
+                                    Loading admin logs...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="pagination-controls">
+                    <button id="prevPageButton" disabled>Previous</button>
+                    <span id="pageInfo" style="color: var(--text-color-secondary);">Page 1 of 1</span>
+                    <button id="nextPageButton" disabled>Next</button>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <div id="messageBox"></div>
+
+    <nav id="bottomNavBar" class="nav-bar-hidden-full">
+        <a href="/home.html" class="nav-icon-item">
+            <div class="nav-icon-circle"><i class="fas fa-home"></i></div>
+            <span>Home</span>
+        </a>
+        <a href="/chat.html" class="nav-icon-item">
+            <div class="nav-icon-circle"><i class="fas fa-comment-dots"></i></div>
+            <span>Chat</span>
+        </a>
+        <a href="/find_friends.html" class="nav-icon-item">
+            <div class="nav-icon-circle"><i class="fas fa-users"></i></div>
+            <span>Users</span>
+        </a>
+        <a href="/friends.html" class="nav-icon-item">
+            <div class="nav-icon-circle"><i class="fas fa-user-friends"></i></div>
+            <span>Friends</span>
+        </a>
+        <a href="/jcoin_shop.html" class="nav-icon-item">
+            <div class="nav-icon-circle"><i class="fas fa-store"></i></div>
+            <span>Shop</span>
+        </a>
+        <a href="/settings.html" class="nav-icon-item">
+            <div class="nav-icon-circle"><i class="fas fa-cog"></i></div>
+            <span>Settings</span>
+        </a>
+    </nav>
+
+    <button id="navToggleBtn" aria-label="Toggle Navigation">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, query, where, orderBy, limit, startAfter, endBefore, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // --- Firebase & Canvas Environment Configuration ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+            authDomain: "jchat-1.firebaseapp.com",
+            databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+            projectId: "jchat-1",
+            storageBucket: "jchat-1.firebasestorage.app",
+            messagingSenderId: "328479683167",
+            appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
+            measurementId: "G-S6Z9GG0R9P"
+        };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // Cloudinary Configuration (needed for header profile pic)
+        const cloudinaryConfig = {
+            cloudName: "dxld01rcp", // Your Cloudinary Cloud Name
+            uploadPreset: "Storage_preset" // Your Cloudinary Upload Preset
+        };
+
+        // Initialize Firebase services
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- DOM Elements ---
+        const headerProfilePic = document.getElementById('headerProfilePic');
+        const headerAvatarIcon = document.getElementById('headerAvatarIcon');
+        const headerDisplayName = document.getElementById('headerDisplayName');
+        const logoutButton = document.getElementById('logoutButton');
+        const notificationCountElement = document.getElementById('notificationCount');
+        const messageBox = document.getElementById('messageBox');
+        const headerNavLinkProfile = document.getElementById('profileLink');
+
+        const filterAdminUIDInput = document.getElementById('filterAdminUID');
+        const filterActionTypeSelect = document.getElementById('filterActionType');
+        const filterStartDateInput = document.getElementById('filterStartDate');
+        const filterEndDateInput = document.getElementById('filterEndDate');
+        const applyFiltersButton = document.getElementById('applyFiltersButton');
+        const clearFiltersButton = document.getElementById('clearFiltersButton');
+        const adminLogsTableBody = document.getElementById('adminLogsTableBody');
+        const prevPageButton = document.getElementById('prevPageButton');
+        const nextPageButton = document.getElementById('nextPageButton');
+        const pageInfoSpan = document.getElementById('pageInfo');
+
+        // --- Global State ---
+        let isAuthReady = false; // Flag to indicate if auth state has been checked
+        let currentUser = null; // The currently authenticated user (Firebase Auth object)
+        const ADMIN_UID = 'cc96gdhCRPO72NFZtleRCujHvIq2'; // Hardcoded admin ID - **IMPORTANT: REPLACE WITH YOUR ACTUAL ADMIN UID IN PRODUCTION**
+
+        // Pagination state
+        const PAGE_SIZE = 20; // Number of logs per page
+        let currentPage = 1;
+        let lastVisible = null; // Last document of the current page for next pagination
+        let firstVisible = null; // First document of the current page for previous pagination
+        let pageHistory = []; // To store lastVisible for previous pages
+
+        // --- Utility Functions ---
+
+        /**
+         * Plays a short notification sound.
+         */
+        function playNotificationSound() {
+            const audio = new Audio('/assets/sounds/success_notification.mp3'); // Ensure this path is correct
+            audio.play().catch(e => console.error("Error playing sound:", e));
+        }
+
+        /**
+         * Displays a temporary message box with a given message and type.
+         * @param {string} message - The message to display.
+         * @param {string} type - The type of message ('success', 'error', 'info', 'loading', 'warning').
+         * @param {number} [durationMs=3000] - Duration in milliseconds for the message to display.
+         * @param {boolean} [isPersistent=false] - If true, message stays until explicitly cleared or replaced.
+         */
+        function showMessageBox(message, type, durationMs = 3000, isPersistent = false) {
+            if (messageBox.timeoutId) {
+                clearTimeout(messageBox.timeoutId);
+                messageBox.timeoutId = null;
+            }
+
+            messageBox.innerHTML = `<i id="messageBoxIcon"></i><span id="messageBoxText"></span>`;
+            const messageBoxIcon = document.getElementById('messageBoxIcon');
+            const messageBoxText = document.getElementById('messageBoxText');
+
+            messageBoxText.textContent = message;
+            messageBox.className = 'message-box show ' + type;
+
+            if (type === 'success') {
+                messageBoxIcon.classList.add('fas', 'fa-check-circle');
+                playNotificationSound();
+            } else if (type === 'error') {
+                messageBoxIcon.classList.add('fas', 'fa-times-circle');
+            } else if (type === 'info') {
+                messageBoxIcon.classList.add('fas', 'fa-info-circle');
+            } else if (type === 'warning') {
+                messageBoxIcon.classList.add('fas', 'fa-exclamation-triangle');
+            } else {
+                messageBoxIcon.className = '';
+            }
+
+            if (type === 'loading') {
+                messageBox.classList.add('loading-pulse');
+            } else {
+                messageBox.classList.remove('loading-pulse');
+            }
+
+            messageBox.style.display = 'flex';
+            messageBox.style.opacity = '1';
+
+            if (!isPersistent) {
+                messageBox.timeoutId = setTimeout(() => {
+                    messageBox.style.opacity = '0';
+                    messageBox.addEventListener('transitionend', function handler() {
+                        messageBox.style.display = 'none';
+                        messageBox.removeEventListener('transitionend', handler);
+                        messageBox.classList.remove('loading-pulse');
+                    }, { once: true });
+                }, durationMs);
+            }
+        }
+
+        /**
+         * Toggles loading state for a button.
+         * @param {HTMLElement} buttonElement - The button to toggle.
+         * @param {boolean} isLoading - True to show loading, false to hide.
+         */
+        function toggleButtonLoading(buttonElement, isLoading) {
+            if (!buttonElement) return;
+            const loader = buttonElement.querySelector('.button-loader');
+            const text = buttonElement.querySelector('.button-text');
+
+            if (isLoading) {
+                buttonElement.disabled = true;
+                buttonElement.classList.add('loading');
+                if (loader) loader.classList.add('active');
+                if (text) text.style.display = 'none';
+            } else {
+                buttonElement.disabled = false;
+                buttonElement.classList.remove('loading');
+                if (loader) loader.classList.remove('active');
+                if (text) text.style.display = 'block';
+            }
+        }
+
+        /**
+         * Constructs a Cloudinary URL for an image/video.
+         * @param {string} urlOrPublicId - The full Cloudinary URL or the public ID of the image on Cloudinary.
+         * @param {string} transformations - Optional Cloudinary transformations.
+         * @returns {string|null} The full Cloudinary URL or null if urlOrPublicId is not provided.
+         */
+        function getCloudinaryImageUrl(urlOrPublicId, transformations = "w_auto,f_auto,q_auto") {
+            if (!urlOrPublicId) return null;
+            if (urlOrPublicId.startsWith('http://') || urlOrPublicId.startsWith('https://')) {
+                return urlOrPublicId;
+            }
+            return `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/${transformations}/${urlOrPublicId}`;
+        }
+
+        /**
+         * Displays the profile picture or a default icon.
+         * @param {HTMLElement} imgElement - The <img> element to update.
+         * @param {HTMLElement} iconElement - The <i> element to display if no image.
+         * @param {string|null} profilePicId - The Cloudinary public ID or URL, or null.
+         * @param {string} usernameInitial - Initial for placeholder.
+         * @param {string} transformations - Cloudinary transformations.
+         */
+        function displayProfilePicture(imgElement, iconElement, profilePicId, usernameInitial, transformations) {
+            if (profilePicId) {
+                const imageUrl = getCloudinaryImageUrl(profilePicId, transformations);
+                imgElement.src = imageUrl;
+                imgElement.style.display = 'block';
+                if (iconElement) iconElement.style.display = 'none';
+                imgElement.onerror = () => {
+                    console.error(`Failed to load profile picture: ${profilePicId}. Using placeholder.`);
+                    // Fallback to a generic placeholder image if Cloudinary URL fails
+                    imgElement.src = `https://placehold.co/120x120/CCCCCC/000000?text=${usernameInitial}`;
+                    imgElement.style.display = 'block';
+                    if (iconElement) iconElement.style.display = 'none';
+                };
+            } else {
+                imgElement.src = '';
+                imgElement.style.display = 'none';
+                if (iconElement) iconElement.style.display = 'block';
+            }
+        }
+
+        /**
+         * Fetches and displays the current user's profile data for the header.
+         * This function runs on every page to ensure header is consistent.
+         * Also updates the public profile summary.
+         * @param {firebase.User} user - The authenticated Firebase user object.
+         */
+        async function fetchAndDisplayHeaderProfile(user) {
+            try {
+                const privateProfileDocRef = doc(db, "artifacts", appId, "users", user.uid, "profiles", "user_profile");
+                const publicProfileDocRef = doc(db, "artifacts", appId, "public", "data", "users", user.uid);
+
+                const privateDocSnap = await getDoc(privateProfileDocRef);
+                let profileData = null;
+
+                if (privateDocSnap.exists()) {
+                    profileData = privateDocSnap.data();
+                } else {
+                    // Create a basic profile if it doesn't exist
+                    profileData = {
+                        username: user.displayName || `User_${user.uid.substring(0, 8)}`,
+                        email: user.email || "",
+                        profilePicId: user.photoURL || null,
+                        bio: "",
+                        location: "",
+                        friendsCount: 0,
+                        followersCount: 0,
+                        followingCount: 0,
+                        createdAt: Date.now(),
+                        updatedAt: Date.now(),
+                        inspirationType: "motivational",
+                        visibility: {
+                            displayName: true, profilePic: true, bio: false, location: false,
+                            emailPublic: false, lastOnline: false, allowFriendRequests: true, allowMessages: true,
+                        },
+                        totalPosts: 0,
+                        jCoins: 0,
+                        level: 1,
+                        currentXp: 0,
+                        xpToNextLevel: 100
+                    };
+                    await setDoc(privateProfileDocRef, profileData);
+                }
+
+                // Update public profile summary
+                const publicProfileSummary = {
+                    username: profileData.username,
+                    profilePicId: profileData.profilePicId,
+                    jCoins: profileData.jCoins,
+                    level: profileData.level,
+                    userId: user.uid,
+                    email: profileData.email
+                };
+                await setDoc(publicProfileDocRef, publicProfileSummary, { merge: true });
+
+                // Update header UI
+                const usernameInitial = (profileData.username || "J").charAt(0).toUpperCase();
+                displayProfilePicture(headerProfilePic, headerAvatarIcon, profileData?.profilePicId, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
+                headerDisplayName.textContent = profileData.username || "JCHAT User";
+                headerNavLinkProfile.href = `/profile.html?userId=${user.uid}`;
+
+                logoutButton.disabled = false;
+            } catch (error) {
+                console.error("Error fetching or creating profile for header:", error);
+                const usernameInitial = (user.displayName || "J").charAt(0).toUpperCase();
+                displayProfilePicture(headerProfilePic, headerAvatarIcon, user.photoURL, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
+                headerDisplayName.textContent = user.displayName || "JCHAT User";
+                showMessageBox(`Error loading header profile: ${error.message}`, 'error');
+                logoutButton.disabled = false;
+            }
+        }
+
+        /**
+         * Fetches and displays the notification count for the current user.
+         * @param {string} userId - The UID of the current user.
+         */
+        async function fetchNotificationCount(userId) {
+            // This is currently set to 'none' as per Admin.html snippet,
+            // but would be implemented with real-time listeners for notifications.
+            // Example:
+            // const notificationsRef = collection(db, "artifacts", appId, "users", userId, "notifications");
+            // const q = query(notificationsRef, where("read", "==", false));
+            // onSnapshot(q, (snapshot) => {
+            //     const unreadCount = snapshot.size;
+            //     if (unreadCount > 0) {
+            //         notificationCountElement.textContent = unreadCount;
+            //         notificationCountElement.style.display = 'flex';
+            //     } else {
+            //         notificationCountElement.style.display = 'none';
+            //     }
+            // });
+            notificationCountElement.style.display = 'none'; // Keeps it hidden as per original logic if not implemented
+        }
+
+        /**
+         * Logs an admin action to Firestore.
+         * @param {string} adminUid - The UID of the admin performing the action.
+         * @param {string} actionType - The type of action (e.g., 'view_logs', 'apply_filter').
+         * @param {object} [details={}] - Optional additional details for the log entry.
+         */
+        async function logAdminAction(adminUid, actionType, details = {}) {
+            try {
+                const logsCollectionRef = collection(db, "artifacts", appId, "admin_logs");
+                await addDoc(logsCollectionRef, {
+                    adminUid: adminUid,
+                    actionType: actionType,
+                    details: details,
+                    timestamp: serverTimestamp()
+                });
+            } catch (error) {
+                console.error("Error logging admin action:", error);
+            }
+        }
+
+        // --- Authentication State Listener ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                // --- ADMIN AUTHORIZATION CHECK ---
+                if (currentUser.uid !== ADMIN_UID) {
+                    showMessageBox("Unauthorized access. Redirecting to home page.", 'error', 2000, true);
+                    isAuthReady = false;
+                    document.querySelectorAll('a, button').forEach(el => {
+                        if (el.id !== 'logoutButton') {
+                            el.classList.add('disabled-link');
+                            el.style.pointerEvents = 'none';
+                        }
+                    });
+                    logoutButton.disabled = true;
+                    setTimeout(() => {
+                        window.location.href = '/home.html';
+                    }, 2000);
+                    return;
+                }
+                // --- END ADMIN AUTHORIZATION CHECK ---
+
+                isAuthReady = true;
+                await fetchAndDisplayHeaderProfile(user);
+                fetchNotificationCount(user.uid);
+
+                // Initial message for admin on this page
+                showMessageBox("Admin activity logs loaded.", 'info', 3000);
+
+                // Log that admin viewed logs
+                await logAdminAction(currentUser.uid, 'view_admin_logs');
+
+                // Load initial logs
+                await fetchAdminLogs();
+
+            } else {
+                isAuthReady = false;
+                logoutButton.disabled = true;
+                headerDisplayName.textContent = "Guest";
+                headerProfilePic.style.display = 'none';
+                headerAvatarIcon.style.display = 'block';
+                document.querySelector('.content-wrapper').innerHTML = `
+                    <div class="section-card">
+                        <h1>Access Denied</h1>
+                        <p style="color: var(--pink); font-weight: 600;">
+                            <i class="fas fa-exclamation-triangle"></i> Please log in to access admin tools.
+                        </p>
+                        <p style="color: var(--text-light);">Redirecting to login page...</p>
+                    </div>
+                `;
+                showMessageBox("You must be logged in to access the Admin Dashboard.", 'error', 2000, true);
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 2000);
+            }
+        });
+
+        // --- Log Fetching & Display Logic ---
+
+        /**
+         * Fetches and displays admin logs from Firestore based on current filters and pagination.
+         * @param {string} direction - 'next', 'prev', or 'initial'.
+         */
+        async function fetchAdminLogs(direction = 'initial') {
+            if (!isAuthReady) return; // Ensure auth is ready before fetching
+
+            toggleButtonLoading(applyFiltersButton, true);
+            toggleButtonLoading(clearFiltersButton, true);
+            prevPageButton.disabled = true;
+            nextPageButton.disabled = true;
+            adminLogsTableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-color-secondary); padding: 20px;">
+                                                <i class="fas fa-spinner fa-spin"></i> Fetching logs...
+                                            </td></tr>`;
+            showMessageBox("Fetching logs...", 'loading', 0, true);
+
+            try {
+                let logsRef = collection(db, "artifacts", appId, "admin_logs");
+                let q = query(logsRef, orderBy("timestamp", "desc")); // Order by timestamp descending
+
+                // Apply filters
+                const adminUID = filterAdminUIDInput.value.trim();
+                const actionType = filterActionTypeSelect.value;
+                const startDate = filterStartDateInput.value;
+                const endDate = filterEndDateInput.value;
+
+                if (adminUID) {
+                    q = query(q, where("adminUid", "==", adminUID));
+                }
+                if (actionType) {
+                    q = query(q, where("actionType", "==", actionType));
+                }
+                if (startDate) {
+                    const startTimestamp = new Date(startDate).getTime();
+                    q = query(q, where("timestamp", ">=", startTimestamp));
+                }
+                if (endDate) {
+                    const endTimestamp = new Date(endDate);
+                    endTimestamp.setHours(23, 59, 59, 999); // End of day
+                    q = query(q, where("timestamp", "<=", endTimestamp.getTime()));
+                }
+
+                // Apply pagination
+                if (direction === 'next' && lastVisible) {
+                    q = query(q, startAfter(lastVisible));
+                    pageHistory.push(lastVisible); // Save current lastVisible for 'prev' button
+                } else if (direction === 'prev' && pageHistory.length > 0) {
+                    const prevLastVisible = pageHistory.pop();
+                    q = query(logsRef, orderBy("timestamp", "desc")); // Reset query for prev page
+                    if (adminUID) q = query(q, where("adminUid", "==", adminUID));
+                    if (actionType) q = query(q, where("actionType", "==", actionType));
+                    if (startDate) q = query(q, where("timestamp", ">=", new Date(startDate).getTime()));
+                    if (endDate) q = query(q, where("timestamp", "<=", new Date(endDate).setHours(23, 59, 59, 999)));
+                    q = query(q, startAfter(prevLastVisible), limit(PAGE_SIZE)); // Get previous page
+                    // Need to reverse the results for 'prev' to get correct order for the table
+                } else if (direction === 'initial') {
+                    currentPage = 1;
+                    pageHistory = [];
+                }
+
+                q = query(q, limit(PAGE_SIZE));
+                const querySnapshot = await getDocs(q);
+
+                const logs = [];
+                querySnapshot.forEach((doc) => {
+                    logs.push({ id: doc.id, ...doc.data() });
+                });
+
+                // For 'prev' pagination, if we query 'desc' and startAfter(prevLastVisible),
+                // the results are in descending order from that point.
+                // If we need the "previous" page in ascending order, it's more complex,
+                // often involving querying `limit(PAGE_SIZE).endBefore(firstVisible)` and reversing the result.
+                // For simplicity here, we assume descending order and just re-query.
+                // If the user presses "prev" we actually want the logs *before* the firstVisible
+                // In this simplified example, `pageHistory` stores the `lastVisible` of the *previous* page,
+                // which acts as `startAfter` for the next page.
+                // If implementing `prev` properly, you might store `firstVisible` and use `endBefore`.
+
+                displayLogs(logs);
+
+                lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+                firstVisible = querySnapshot.docs[0];
+
+                // Check for more pages
+                const nextQuerySnapshot = await getDocs(query(
+                    logsRef,
+                    orderBy("timestamp", "desc"),
+                    ...(adminUID ? [where("adminUid", "==", adminUID)] : []),
+                    ...(actionType ? [where("actionType", "==", actionType)] : []),
+                    ...(startDate ? [where("timestamp", ">=", new Date(startDate).getTime())] : []),
+                    ...(endDate ? [where("timestamp", "<=", new Date(endDate).setHours(23, 59, 59, 999))] : []),
+                    startAfter(lastVisible),
+                    limit(1)
+                ));
+
+                nextPageButton.disabled = nextQuerySnapshot.empty;
+                prevPageButton.disabled = currentPage === 1; // || pageHistory.length === 0;
+
+                pageInfoSpan.textContent = `Page ${currentPage}`;
+                showMessageBox("Logs loaded successfully.", 'success', 2000);
+
+            } catch (error) {
+                console.error("Error fetching admin logs:", error);
+                adminLogsTableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--delete-button-color); padding: 20px;">
+                                                    Error loading logs: ${error.message}
+                                                </td></tr>`;
+                showMessageBox(`Error fetching logs: ${error.message}`, 'error', 5000);
+            } finally {
+                toggleButtonLoading(applyFiltersButton, false);
+                toggleButtonLoading(clearFiltersButton, false);
+            }
+        }
+
+        /**
+         * Renders the fetched logs into the table.
+         * @param {Array<Object>} logs - Array of log objects.
+         */
+        function displayLogs(logs) {
+            adminLogsTableBody.innerHTML = ''; // Clear existing rows
+
+            if (logs.length === 0) {
+                adminLogsTableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-color-secondary); padding: 20px;">
+                                                    No logs found for the current filters.
+                                                </td></tr>`;
+                return;
+            }
+
+            logs.forEach(log => {
+                const row = adminLogsTableBody.insertRow();
+                const timestampCell = row.insertCell();
+                const adminUIDCell = row.insertCell();
+                const actionTypeCell = row.insertCell();
+                const detailsCell = row.insertCell();
+
+                const timestamp = log.timestamp && log.timestamp.toDate ? log.timestamp.toDate() : new Date(log.timestamp);
+                timestampCell.textContent = timestamp.toLocaleString();
+                timestampCell.classList.add('timestamp-col');
+
+                adminUIDCell.textContent = log.adminUid || 'N/A';
+                actionTypeCell.textContent = formatActionType(log.actionType || 'Unknown Action');
+                detailsCell.textContent = JSON.stringify(log.details || {});
+                detailsCell.classList.add('details-col');
+            });
+        }
+
+        /**
+         * Formats action type string for better readability.
+         * @param {string} type - The raw action type string.
+         * @returns {string} Formatted string.
+         */
+        function formatActionType(type) {
+            return type.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+        }
+
+        // --- Event Listeners ---
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'jchat-theme') {
+                const newTheme = event.newValue || 'theme-dark-mode';
+                const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+                if (themes.includes(newTheme)) {
+                    document.body.classList.remove(...themes);
+                    document.body.classList.add(newTheme);
+                }
+            }
+        });
+
+        logoutButton.addEventListener('click', async () => {
+            if (!isAuthReady) return;
+            toggleButtonLoading(logoutButton, true);
+            try {
+                await signOut(auth);
+                showMessageBox("Logged out successfully! 👋", 'success');
+                if (currentUser && currentUser.uid === ADMIN_UID) {
+                     await logAdminAction(currentUser.uid, 'admin_logout');
+                }
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 1500);
+            } catch (error) {
+                console.error("Error logging out:", error);
+                showMessageBox("Failed to log out. Please try again.", 'error');
+                toggleButtonLoading(logoutButton, false);
+            }
+        });
+
+        applyFiltersButton.addEventListener('click', async () => {
+            currentPage = 1;
+            pageHistory = [];
+            await fetchAdminLogs('initial');
+            if (currentUser && currentUser.uid === ADMIN_UID) {
+                await logAdminAction(currentUser.uid, 'apply_log_filters', {
+                    adminUID: filterAdminUIDInput.value,
+                    actionType: filterActionTypeSelect.value,
+                    startDate: filterStartDateInput.value,
+                    endDate: filterEndDateInput.value
+                });
+            }
+        });
+
+        clearFiltersButton.addEventListener('click', async () => {
+            filterAdminUIDInput.value = '';
+            filterActionTypeSelect.value = '';
+            filterStartDateInput.value = '';
+            filterEndDateInput.value = '';
+            currentPage = 1;
+            pageHistory = [];
+            await fetchAdminLogs('initial');
+            if (currentUser && currentUser.uid === ADMIN_UID) {
+                await logAdminAction(currentUser.uid, 'clear_log_filters');
+            }
+        });
+
+        prevPageButton.addEventListener('click', async () => {
+            if (currentPage > 1) {
+                currentPage--;
+                await fetchAdminLogs('prev');
+                if (currentUser && currentUser.uid === ADMIN_UID) {
+                    await logAdminAction(currentUser.uid, 'navigate_logs_prev', { page: currentPage });
+                }
+            }
+        });
+
+        nextPageButton.addEventListener('click', async () => {
+            currentPage++;
+            await fetchAdminLogs('next');
+            if (currentUser && currentUser.uid === ADMIN_UID) {
+                await logAdminAction(currentUser.uid, 'navigate_logs_next', { page: currentPage });
+            }
+        });
+
+        // --- Bottom Navigation Bar Toggle Logic (reused from Admin.html) ---
+        const bottomNavBar = document.getElementById('bottomNavBar');
+        const navToggleBtn = document.getElementById('navToggleBtn');
+
+        function toggleNavBarVisibility() {
+            const toggleIcon = navToggleBtn.querySelector('i');
+            const isHidden = bottomNavBar.classList.toggle('nav-bar-hidden-full');
+
+            if (isHidden) {
+                toggleIcon.classList.remove('fa-chevron-down');
+                toggleIcon.classList.add('fa-chevron-up');
+            } else {
+                toggleIcon.classList.remove('fa-chevron-up');
+                toggleIcon.classList.add('fa-chevron-down');
+            }
+        }
+
+        // Set initial state: nav bar is HIDDEN by default in admin page, icon points UP
+        bottomNavBar.classList.add('nav-bar-hidden-full');
+        navToggleBtn.querySelector('i').classList.remove('fa-chevron-down');
+        navToggleBtn.querySelector('i').classList.add('fa-chevron-up');
+        navToggleBtn.addEventListener('click', toggleNavBarVisibility);
+    </script>
+	
+</body>
+</html>

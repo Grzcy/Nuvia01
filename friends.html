@@ -1,0 +1,2597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Last updated: 2025-08-21T18:19:29Z -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JCHAT - My Friends</title>
+
+    <!-- Google Fonts: Poppins for headings, Inter for body text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Preconnect to Firebase and Cloudinary domains for faster loading -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://*.firebaseio.com" crossorigin>
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Tone.js for audio notifications -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        /* Universal box-sizing for consistent layout */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        /* Global CSS Variables for easy theme switching */
+        :root {
+            --pink: #ff2e92;
+            --blue: #00d5ff;
+            --glass-black: rgba(10, 10, 10, .75);
+            --glass-blue: rgba(0, 213, 255, .15);
+            --radius: 20px;
+            --transition: .3s ease;
+
+            /* These variables will be overridden by theme classes */
+            --white: #fff;
+            --text-light: rgba(255, 255, 255, .7);
+            --background-main: rgba(10, 10, 10, .75);
+            --background-gradient-1: #00d5ff;
+            --background-gradient-2: #ff2e92;
+            --card-background: linear-gradient(145deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01));
+            --header-background: linear-gradient(135deg, rgba(10, 10, 10, .85), rgba(10, 10, 10, .75));
+            --border-light: rgba(255, 255, 255, .05);
+            --input-background: rgba(255, 255, 255, 0.05);
+            --button-background: linear-gradient(90deg, var(--blue), var(--pink));
+            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+
+            /* New variables for consistent theming */
+            --background-color-primary: #1a1a2e;
+            --background-color-secondary: #0f0f1f;
+            --header-background-color: #2a2a4a;
+            --footer-background-color: #2a2a4a;
+            --content-background-color: #20203a;
+            --card-background-color: #2a2a4a;
+            --text-color-primary: #e0e0e0;
+            --text-color-secondary: #bbbbbb;
+            --notification-badge-color: #ff2e92;
+            --status-online: #4CAF50;
+            --status-offline: #6c757d;
+            --status-away: #FFC107;
+            --delete-button-color: #dc3545;
+            --warning-color: #ffc107;
+            --accent-color: #00d5ff; /* A bright cyan */
+            --accent-color-dark: #00aaff;
+            --border-color: #3a3a5a;
+        }
+
+        /* --- Theme Definitions (Light and Dark Mode) --- */
+        /* Light Mode */
+        body.theme-light-mode {
+            --background-main: #f0f2f5; /* Light gray background */
+            --background-gradient-1: #e0e2e5; /* Subtle lighter gradient */
+            --background-gradient-2: #d0d2d5; /* Subtle darker gradient */
+            --white: #333; /* Dark text for readability */
+            --text-light: #666; /* Lighter dark text */
+            --card-background: rgba(255, 255, 255, 0.95); /* Near white cards */
+            --header-background: rgba(255, 255, 255, 0.98); /* Near white header */
+            --border-light: rgba(0, 0, 0, 0.1); /* Light borders */
+            --input-background: rgba(0, 0, 0, 0.05); /* Light input background */
+            --button-background: linear-gradient(90deg, #6dd5ed, #2193b0); /* Blue gradient */
+            --button-shadow: 0 4px 15px rgba(109, 213, 237, 0.4), 0 4px 15px rgba(33, 147, 176, 0.4);
+
+            /* New variables override for light mode */
+            --background-color-primary: #f0f2f5;
+            --background-color-secondary: #e0e2e5;
+            --header-background-color: #ffffff;
+            --footer-background-color: #ffffff;
+            --content-background-color: #f7f9fb;
+            --card-background-color: #ffffff;
+            --text-color-primary: #333333;
+            --text-color-secondary: #666666;
+            --text-color-light: #999999;
+            --accent-color: #007bff;
+            --accent-color-dark: #0056b3;
+            --border-color: #e0e0e0;
+            --input-background-color: #f0f0f0;
+            --button-background: #e9ecef;
+            --button-hover-background: #dee2e6;
+            --active-item-background: rgba(0, 123, 255, 0.1);
+            --notification-badge-color: #dc3545;
+            --status-online: #28a745;
+            --status-offline: #6c757d;
+            --status-away: #ffc107;
+            --delete-button-color: #dc3545;
+            --warning-color: #ffc107;
+        }
+
+        /* Dark Mode */
+        body.theme-dark-mode {
+            --background-main: #1a1a2e; /* Deep purple-dark blue */
+            --background-gradient-1: #16213e; /* Slightly lighter deep blue */
+            --background-gradient-2: #0f3460; /* Darker blue */
+            --white: #e0e0e0; /* Off-white text */
+            --text-light: #a0a0a0; /* Grayish text */
+            --card-background: rgba(25, 25, 40, 0.7); /* Darker, less transparent cards */
+            --header-background: linear-gradient(135deg, rgba(10, 10, 20, .85), rgba(10, 10, 20, .75)); /* Original dark header */
+            --border-light: rgba(255, 255, 255, 0.08); /* Subtle white borders */
+            --input-background: rgba(255, 255, 255, 0.08);
+            --button-background: linear-gradient(90deg, #e94560, #ba2f49); /* Reddish gradient */
+            --button-shadow: 0 4px 15px rgba(233, 69, 96, 0.4), 0 4px 15px rgba(186, 47, 73, 0.4);
+
+            /* New variables override for dark mode */
+            --background-color-primary: #121212;
+            --background-color-secondary: #1e1e1e;
+            --header-background-color: #2c2c2c;
+            --footer-background-color: #2c2c2c;
+            --content-background-color: #242424;
+            --card-background-color: #2c2c2c;
+            --text-color-primary: #ffffff;
+            --text-color-secondary: #bbbbbb;
+            --accent-color: #bb86fc;
+            --accent-color-dark: #9a67ea;
+            --border-color: #444444;
+            --input-background-color: #383838;
+            --button-background: #383838;
+            --button-hover-background: #505050;
+            --active-item-background: rgba(187, 134, 252, 0.2);
+            --notification-badge-color: #cf6679;
+            --delete-button-color: #f44336;
+            --warning-color: #ffeb3b;
+        }
+
+        /* Glass Mode specific variables */
+        body.theme-glass-mode {
+            --background-main: rgba(10, 10, 10, 0.75);
+            background-image: url('https://source.unsplash.com/random/1920x1080?abstract,blur') !important;
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            backdrop-filter: blur(10px);
+            --card-background: rgba(25, 25, 40, 0.7);
+            --white: #e0e0e0; /* text-color */
+            --text-light: rgba(255, 255, 255, 0.7);
+            --input-background: rgba(255, 255, 255, 0.05);
+            --border-light: rgba(255, 255, 255, 0.1); /* glass-border-color */
+            --button-background: linear-gradient(90deg, var(--pink), var(--blue));
+            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5); /* Inner shadow for glass effect */
+
+            /* New variables override for glass mode */
+            --background-color-primary: rgba(10, 10, 10, 0.75);
+            --background-color-secondary: rgba(10, 10, 10, 0.6);
+            --header-background-color: rgba(10, 10, 10, 0.85);
+            --footer-background-color: rgba(10, 10, 10, 0.85);
+            --content-background-color: rgba(10, 10, 10, 0.75);
+            --card-background-color: rgba(25, 25, 40, 0.7);
+            --text-color-primary: #e0e0e0;
+            --text-color-secondary: #b0b0d0;
+            --accent-color: #00d5ff;
+            --accent-color-dark: #00aaff;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --input-background-color: rgba(255, 255, 255, 0.05);
+            --button-background: rgba(0, 213, 255, 0.15); /* Glassy button */
+            --button-hover-background: rgba(0, 213, 255, 0.25);
+            --active-item-background: rgba(0, 213, 255, 0.1);
+        }
+
+        /* Sunset Theme */
+        body.theme-sunset-mode {
+            background: linear-gradient(to top, #ff7e5f, #feb47b) !important;
+            --background-main: linear-gradient(to top, #ff7e5f, #feb47b);
+            --card-background: rgba(255, 255, 255, 0.15); /* Slightly transparent white for contrast */
+            --white: #fff; /* White text for readability */
+            --text-light: rgba(255, 255, 255, 0.8);
+            --input-background: rgba(255, 255, 255, 0.1);
+            --border-light: rgba(255, 255, 255, 0.3);
+            --button-background: linear-gradient(90deg, #fd746c, #ff9068); /* Sunset gradient */
+            --button-shadow: 0 4px 15px rgba(253, 116, 108, 0.4), 0 4px 15px rgba(255, 144, 104, 0.4);
+
+            /* New variables override for sunset mode */
+            --background-color-primary: #ff7e5f;
+            --background-color-secondary: #feb47b;
+            --header-background-color: rgba(255, 126, 95, 0.9);
+            --footer-background-color: rgba(255, 126, 95, 0.9);
+            --content-background-color: rgba(255, 126, 95, 0.85);
+            --card-background-color: rgba(255, 255, 255, 0.15);
+            --text-color-primary: #fff;
+            --text-color-secondary: rgba(255, 255, 255, 0.8);
+            --accent-color: #ffd700;
+            --accent-color-dark: #ccaa00;
+            --border-color: rgba(255, 255, 255, 0.3);
+            --input-background-color: rgba(255, 255, 255, 0.1);
+            --button-background: rgba(255, 255, 255, 0.2);
+            --button-hover-background: rgba(255, 255, 255, 0.3);
+            --active-item-background: rgba(255, 215, 0, 0.1);
+        }
+
+        /* Always show scrollbar to prevent layout shifts */
+        html {
+            overflow-y: scroll;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            padding-bottom: 40px; /* Adjusted padding as bottom nav is removed */
+            background-color: var(--background-main);
+            background-image: radial-gradient(circle at top left, var(--background-gradient-1), transparent 100px),
+                              radial-gradient(circle at bottom right, var(--background-gradient-2), transparent 150px);
+            color: var(--white);
+            transition: all 0.5s ease; /* Smooth theme transition for all properties */
+        }
+
+        /* Header Styling */
+        header {
+            background: var(--header-background);
+            border-bottom: 1px solid var(--border-light);
+            padding: 10px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 55px;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+        }
+
+        header .header-content-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 30px;
+        }
+
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            letter-spacing: -0.03em;
+            text-decoration: none;
+        }
+
+        /* User Profile Header Styling */
+        .user-profile-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Notification Icon Styling */
+        .notification-icon-wrapper {
+            position: relative;
+            margin-right: 15px; /* Space between notification and profile */
+        }
+
+        .notification-icon-wrapper a {
+            text-decoration: none; /* Remove underline from link */
+            color: inherit; /* Inherit color from parent */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-icon-wrapper i {
+            font-size: 1.5rem; /* Adjust size as needed */
+            /* Apply a cool gradient to icons */
+            background-image: linear-gradient(90deg, #8A2BE2, #00FFFF); /* Blue Violet to Aqua */
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent; /* Fallback for browsers that don't support background-clip: text on icons */
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .notification-icon-wrapper i:hover {
+            transform: scale(1.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--notification-badge-color); /* Use pink for notifications */
+            color: var(--white);
+            border-radius: 50%;
+            padding: 3px 7px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            min-width: 20px;
+            text-align: center;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Hide if no notifications */
+            display: none;
+        }
+
+        .user-profile-header #profileLink {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--white);
+            transition: opacity 0.3s ease, background-color 0.3s ease;
+            padding: 5px 10px;
+            border-radius: var(--radius);
+        }
+
+        .user-profile-header #profileLink:hover {
+            opacity: 0.8;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .user-profile-header img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent-color); /* Used accent-color for consistency */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: opacity 0.3s ease;
+        }
+
+        .user-profile-header i {
+            font-size: 30px;
+            /* Apply gradient to icons */
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent; /* Fallback */
+        }
+
+        .user-profile-header span {
+            font-weight: 600;
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
+            /* Apply gradient to names */
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent; /* Fallback */
+        }
+
+        /* Admin Icon Styling */
+        #adminIconLink {
+            display: none; /* Hidden by default */
+            margin-right: 15px; /* Space it out from other icons */
+            /* Apply gradient to icons */
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent; /* Fallback */
+            font-size: 1.5rem;
+            transition: transform 0.2s ease;
+        }
+
+        #adminIconLink:hover {
+            transform: scale(1.1);
+        }
+
+        /* Sound Toggle */
+        .sound-toggle {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+
+        .sound-toggle i {
+            font-size: 1.5rem;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .sound-toggle i.active {
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Main Content Area */
+        main {
+            flex-grow: 1;
+            padding: 40px 0;
+            padding-top: 55px; /* Adjust for fixed header */
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Align content to top */
+            text-align: center;
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 800px; /* Adjust as needed */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        /* Friends List Specific Styles */
+        .friends-list-container {
+            width: 100%;
+            background: var(--card-background);
+            border: 1px solid var(--glass-blue);
+            backdrop-filter: blur(10px) saturate(180%);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, .3);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .friends-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 15px;
+        }
+
+        .friends-header h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 600;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            margin: 0;
+            flex: 1;
+        }
+
+        .friends-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toggle-btn {
+            background: linear-gradient(90deg, var(--pink), var(--blue));
+            color: var(--white);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(255, 46, 146, 0.3);
+        }
+
+        .toggle-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(255, 46, 146, 0.4);
+        }
+
+        .toggle-btn:active {
+            transform: scale(0.95);
+        }
+
+        .toggle-btn.hidden {
+            background: linear-gradient(90deg, var(--status-offline), var(--status-offline));
+        }
+
+        .toggle-btn.hidden i {
+            transform: rotate(180deg);
+        }
+
+        /* Friends list visibility toggle */
+        .friends-list-hidden {
+            opacity: 0.3;
+            filter: blur(2px);
+            pointer-events: none;
+            transition: all 0.3s ease;
+            transform: scale(0.98);
+        }
+
+        .friends-list-visible {
+            opacity: 1;
+            filter: blur(0);
+            pointer-events: auto;
+            transition: all 0.3s ease;
+            transform: scale(1);
+        }
+
+        /* Add a subtle indicator when friends are hidden */
+        .friends-list-hidden::before {
+            content: '👥 Friends Hidden';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--card-background);
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 1px solid var(--border-light);
+            color: var(--text-color-secondary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .refresh-btn {
+            background: linear-gradient(90deg, var(--accent-color), var(--accent-color-dark));
+            color: var(--white);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 213, 255, 0.3);
+        }
+
+        .refresh-btn:hover {
+            transform: rotate(180deg) scale(1.1);
+            box-shadow: 0 4px 15px rgba(0, 213, 255, 0.4);
+        }
+
+        .refresh-btn:active {
+            transform: rotate(180deg) scale(0.95);
+        }
+
+        .refresh-btn.loading {
+            animation: spin 1s linear infinite;
+        }
+
+        .friend-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--input-background);
+            border: 1px solid var(--border-light);
+            border-radius: 15px;
+            padding: 10px 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .friend-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            border-color: var(--accent-color);
+        }
+
+        .friend-item:active {
+            transform: translateY(0);
+            transition: transform 0.1s ease;
+        }
+
+        /* Add subtle animation for online friends */
+        .friend-item[data-online-status="online"] {
+            border-left: 3px solid var(--status-online);
+        }
+
+        .friend-item[data-online-status="away"] {
+            border-left: 3px solid var(--status-away);
+        }
+
+        .friend-item[data-online-status="offline"] {
+            border-left: 3px solid var(--status-offline);
+        }
+
+        .friend-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-grow: 1;
+            cursor: pointer; /* Make the info clickable to go to profile */
+            padding: 5px;
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+
+        .friend-info:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .friend-info:focus {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+
+        .friend-info img, .friend-info .default-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+
+        .friend-info .default-avatar {
+            background: linear-gradient(45deg, var(--blue), var(--pink));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: var(--white);
+        }
+
+        .friend-info .default-avatar i {
+            background-image: linear-gradient(90deg, var(--pink), var(--blue));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent; /* Fallback */
+        }
+
+        .friend-info span {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-color-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Real-time Presence Indicators (like Chat.html) */
+        .friend-presence {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .friend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--status-offline);
+            box-shadow: none;
+            transition: all 0.3s ease;
+        }
+
+        .friend-dot.online {
+            background: var(--status-online);
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.7);
+            animation: onlinePulse 1.8s ease-in-out infinite;
+        }
+
+        .friend-dot.away {
+            background: var(--status-away);
+            box-shadow: 0 0 6px rgba(255, 193, 7, 0.8);
+            animation: onlinePulse 2s ease-in-out infinite;
+        }
+
+        .friend-dot.offline {
+            background: var(--status-offline);
+        }
+
+        @keyframes onlinePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        /* Smooth transitions for presence changes */
+        .friend-dot {
+            transition: all 0.3s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        /* Hover effects for presence indicators */
+        .friend-presence:hover .friend-dot {
+            transform: scale(1.1);
+        }
+
+        .friend-presence:hover .friend-dot.online {
+            box-shadow: 0 0 12px rgba(76, 175, 80, 0.9);
+        }
+
+        .friend-presence:hover .friend-dot.away {
+            box-shadow: 0 0 10px rgba(255, 193, 7, 1);
+        }
+
+        /* Online Status Styling */
+        .friend-avatar-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .friend-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex-grow: 1;
+        }
+
+        .friend-presence {
+            font-size: 0.8rem;
+            color: var(--text-color-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .friend-username {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-color-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .status-indicator {
+            position: absolute;
+            bottom: -2px;
+            right: -2px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid var(--background-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+        }
+
+        /* Pulse animation for online status */
+        .status-indicator.online {
+            background-color: var(--status-online);
+            color: var(--status-online);
+            animation: pulse-online 2s infinite;
+        }
+
+        @keyframes pulse-online {
+            0% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(76, 175, 80, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+        }
+
+        .status-indicator.away {
+            background-color: var(--status-away);
+            color: var(--status-away);
+        }
+
+        .status-indicator.offline {
+            background-color: var(--status-offline);
+            color: var(--status-offline);
+        }
+
+        .status-text {
+            font-size: 0.8rem;
+            font-weight: 400;
+        }
+
+        .status-text.online {
+            color: var(--status-online);
+        }
+
+        .status-text.away {
+            color: var(--status-away);
+        }
+
+        .status-text.offline {
+            color: var(--status-offline);
+        }
+
+        .friend-actions {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .friend-actions button {
+            background: linear-gradient(90deg, var(--blue), var(--pink));
+            color: var(--white);
+            border: none;
+            border-radius: 10px;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 213, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            min-height: 38px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .friend-actions button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .friend-actions button:hover::before {
+            left: 100%;
+        }
+
+        .friend-actions button.unfriend-btn {
+            background: var(--delete-button-color);
+            box-shadow: 0 2px 8px rgba(220, 53, 69, 0.2);
+        }
+
+        .friend-actions button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 213, 255, 0.3);
+        }
+        .friend-actions button.unfriend-btn:hover:not(:disabled) {
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+
+        .friend-actions button:focus {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+
+        .friend-actions button:focus:not(:focus-visible) {
+            outline: none;
+        }
+
+        .friend-actions button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* Empty state and loading messages */
+        .empty-friends, .loading-friends {
+            text-align: center;
+            color: var(--text-light);
+            padding: 40px 20px;
+            font-style: italic;
+            background: var(--card-background);
+            border-radius: var(--radius);
+            border: 1px dashed var(--border-light);
+            margin: 20px 0;
+        }
+
+        .loading-friends {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-style: normal;
+        }
+
+        .loading-friends::before {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-light);
+            border-top: 2px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .empty-friends {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .empty-friends::before {
+            content: '👥';
+            font-size: 3rem;
+            opacity: 0.7;
+        }
+
+        .empty-friends a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 16px;
+            border: 1px solid var(--accent-color);
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .empty-friends a:hover {
+            background: var(--accent-color);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        /* Add some spacing and visual improvements */
+        .friends-list-container:empty::after {
+            content: '';
+            display: block;
+            height: 100px;
+        }
+
+        /* Better visual hierarchy for friend items */
+        .friend-item + .friend-item {
+            margin-top: 8px;
+        }
+
+        /* Add some breathing room for the content */
+        .friends-list-container {
+            margin: 20px 0;
+        }
+
+        /* Improve button spacing in friend actions */
+        .friend-actions {
+            gap: 8px;
+        }
+
+        /* Better visual feedback for interactive elements */
+        .friend-info:hover .friend-username {
+            color: var(--accent-color);
+        }
+
+        /* Smooth transitions for all interactive elements */
+        .friend-item * {
+            transition: all 0.2s ease;
+        }
+
+        /* Custom Message Box Styles (reused from Private_Chat.html) */
+        #messageBox {
+            position: fixed;
+            top: 50%; /* Center vertically */
+            left: 50%;
+            transform: translate(-50%, -50%); /* Center both horizontally and vertically */
+            background-color: var(--card-background-color); /* Default background, will be overridden for success */
+            color: var(--text-color-primary); /* Default text color */
+            padding: 20px 30px; /* Increased padding for a more substantial box */
+            border-radius: 15px; /* More rounded corners, slightly squarer */
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4); /* Enhanced shadow */
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            min-width: 280px; /* Ensure a decent minimum width */
+            max-width: 90%;
+            text-align: center;
+            flex-direction: column; /* Stack icon and text vertically */
+            align-items: center;
+            gap: 15px; /* Space between icon and text */
+        }
+        #messageBox.show {
+            opacity: 1;
+            display: flex;
+        }
+        /* Success message box specific styling */
+        #messageBox.success {
+            background-image: linear-gradient(45deg, var(--pink), var(--blue)); /* Pink and blue gradient */
+            color: var(--white); /* White text for contrast on gradient */
+            border: none; /* No border for gradient background */
+            box-shadow: 0 8px 30px rgba(0, 213, 255, 0.5), 0 8px 30px rgba(255, 46, 146, 0.5); /* Glowing shadow */
+        }
+        #messageBox.error { border-left: 5px solid var(--delete-button-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+        #messageBox.info { border-left: 5px solid var(--accent-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+        #messageBox.warning { border-left: 5px solid var(--warning-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+
+        #messageBox i {
+            font-size: 2.5rem; /* Larger icon for prominence */
+            margin-bottom: 5px; /* Space between icon and text */
+            /* Apply gradient to message box icons */
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent; /* Fallback */
+        }
+        #messageBox.success i { color: var(--white); } /* White icon for success */
+        #messageBox.error i { color: var(--delete-button-color); }
+        #messageBox.info i { color: var(--accent-color); }
+        #messageBox.warning i { color: var(--warning-color); }
+
+        #messageBox span {
+            font-size: 1.1rem; /* Slightly larger text */
+            font-weight: 600;
+        }
+
+        @keyframes pulse-bg {
+            0% { background-color: var(--accent-color); }
+            50% { background-color: rgba(0, 213, 255, 0.7); }
+            100% { background-color: var(--accent-color); }
+        }
+        #messageBox.loading-pulse { animation: pulse-bg 1.5s infinite ease-in-out; }
+
+        /* Loader styles for buttons */
+        .button-loader {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid var(--white);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: none;
+            flex-shrink: 0; /* Prevent loader from shrinking */
+        }
+        .button-loader.active { display: block; }
+        .button-text { display: block; }
+        .loading .button-text { display: none; }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Custom Confirmation Modal (reused from Private_Chat.html) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background: var(--card-background);
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .modal-content h3 {
+            color: var(--white);
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .modal-content .modal-preview-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .modal-content .modal-preview-info img,
+        .modal-content .modal-preview-info .default-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent-color);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .modal-content .modal-preview-info .default-avatar {
+            background: linear-gradient(45deg, var(--blue), var(--pink));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: var(--white);
+        }
+        .modal-content .modal-preview-info .default-avatar i {
+            background-image: linear-gradient(90deg, var(--pink), var(--blue));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent; /* Fallback */
+        }
+        .modal-content .modal-preview-info span {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-color-primary);
+        }
+        .modal-content p {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            line-height: 1.5;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        .modal-buttons button {
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .modal-buttons button.confirm-btn {
+            background: linear-gradient(90deg, var(--pink), var(--blue));
+            color: var(--white);
+            box-shadow: 0 4px 10px rgba(0, 213, 255, 0.3);
+        }
+        .modal-buttons button.confirm-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 213, 255, 0.4);
+        }
+        .modal-buttons button.cancel-btn {
+            background: var(--input-background);
+            color: var(--text-light);
+            border: 1px solid var(--border-light);
+        }
+        .modal-buttons button.cancel-btn:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Responsive Design for All Screen Sizes */
+        
+        /* Large screens (1200px and up) */
+        @media (min-width: 1200px) {
+            .content-wrapper {
+                max-width: 1000px;
+            }
+            .friends-list-container {
+                padding: 30px;
+            }
+            .friend-item {
+                padding: 15px 20px;
+            }
+            .friend-info img, .friend-info .default-avatar {
+                width: 55px;
+                height: 55px;
+            }
+            .friend-username {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Medium screens (768px to 1199px) */
+        @media (max-width: 1199px) and (min-width: 768px) {
+            .content-wrapper {
+                max-width: 700px;
+            }
+            .friends-list-container {
+                padding: 25px;
+            }
+        }
+
+        /* Small tablets (600px to 767px) */
+        @media (max-width: 767px) and (min-width: 600px) {
+            .content-wrapper {
+                max-width: 600px;
+                padding: 15px;
+            }
+            .friends-list-container {
+                padding: 20px;
+            }
+            .friend-item {
+                padding: 12px 18px;
+            }
+            .friend-actions {
+                gap: 8px;
+            }
+            .friend-actions button {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Mobile phones (up to 599px) */
+        @media (max-width: 599px) {
+            header .header-content-wrapper {
+                padding: 0 15px;
+            }
+            .logo {
+                font-size: 1.5rem;
+            }
+            .user-profile-header #profileLink {
+                padding: 4px;
+            }
+            .user-profile-header span {
+                max-width: 80px;
+                font-size: 0.9rem;
+            }
+            .user-profile-header img {
+                width: 28px;
+                height: 28px;
+            }
+            .user-profile-header i {
+                font-size: 24px;
+            }
+            .content-wrapper {
+                padding: 10px;
+            }
+            .friends-list-container {
+                padding: 15px;
+                gap: 12px;
+            }
+            .friends-header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            .friends-header h2 {
+                font-size: 1.4rem;
+                margin-bottom: 0;
+            }
+            .friends-controls {
+                gap: 8px;
+            }
+            .toggle-btn, .refresh-btn {
+                width: 35px;
+                height: 35px;
+            }
+            .friend-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 12px 15px;
+            }
+            .friend-info {
+                width: 100%;
+                gap: 12px;
+            }
+            .friend-info img, .friend-info .default-avatar {
+                width: 50px;
+                height: 50px;
+            }
+            .friend-username {
+                font-size: 1rem;
+            }
+            .friend-actions {
+                width: 100%;
+                justify-content: space-between;
+                gap: 8px;
+            }
+            .friend-actions button {
+                flex: 1;
+                font-size: 0.8rem;
+                padding: 8px 10px;
+                min-height: 40px;
+            }
+            .status-indicator {
+                width: 12px;
+                height: 12px;
+                font-size: 6px;
+            }
+            .status-text {
+                font-size: 0.75rem;
+            }
+            body {
+                padding-bottom: 20px;
+            }
+        }
+
+        /* Extra small phones (up to 480px) */
+        @media (max-width: 480px) {
+            /* Ensure minimum touch target size for mobile */
+            .friend-actions button {
+                min-height: 44px; /* iOS recommended minimum */
+            }
+            
+            .friend-info {
+                min-height: 44px; /* iOS recommended minimum */
+            }
+            header .header-content-wrapper {
+                padding: 0 10px;
+            }
+            .logo {
+                font-size: 1.3rem;
+            }
+            .user-profile-header #profileLink {
+                padding: 3px;
+            }
+            .user-profile-header span {
+                max-width: 70px;
+                font-size: 0.85rem;
+            }
+            .user-profile-header img {
+                width: 25px;
+                height: 25px;
+            }
+            .user-profile-header i {
+                font-size: 22px;
+            }
+            .content-wrapper {
+                padding: 8px;
+            }
+            .friends-list-container {
+                padding: 12px;
+                gap: 10px;
+            }
+            .friends-header {
+                gap: 8px;
+            }
+            .friends-header h2 {
+                font-size: 1.3rem;
+                margin-bottom: 0;
+            }
+            .friends-controls {
+                gap: 6px;
+            }
+            .toggle-btn, .refresh-btn {
+                width: 32px;
+                height: 32px;
+            }
+            .friend-item {
+                padding: 10px 12px;
+                gap: 10px;
+            }
+            .friend-info {
+                gap: 10px;
+            }
+            .friend-info img, .friend-info .default-avatar {
+                width: 45px;
+                height: 45px;
+            }
+            .friend-username {
+                font-size: 0.95rem;
+            }
+            .friend-actions button {
+                font-size: 0.75rem;
+                padding: 6px 8px;
+                min-height: 36px;
+            }
+            .status-indicator {
+                width: 10px;
+                height: 10px;
+                font-size: 5px;
+            }
+            .status-text {
+                font-size: 0.7rem;
+            }
+        }
+
+        /* Landscape orientation adjustments for mobile */
+        @media (max-height: 500px) and (orientation: landscape) {
+            header {
+                height: 45px;
+            }
+            main {
+                padding-top: 45px;
+            }
+            .friends-list-container {
+                padding: 15px;
+            }
+            .friend-item {
+                padding: 10px 15px;
+            }
+        }
+
+        /* High DPI displays */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .friend-info img, .friend-info .default-avatar {
+                image-rendering: -webkit-optimize-contrast;
+                image-rendering: crisp-edges;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            header, .friend-actions {
+                display: none;
+            }
+            .friend-item {
+                break-inside: avoid;
+                border: 1px solid #ccc;
+            }
+            body {
+                background: white;
+                color: black;
+            }
+        }
+
+        /* Accessibility improvements */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            .friend-item {
+                border-width: 2px;
+            }
+            .status-indicator {
+                border-width: 3px;
+            }
+        }
+
+        /* Focus visible for keyboard navigation */
+        .friend-info:focus-visible {
+            outline: 3px solid var(--accent-color);
+            outline-offset: 3px;
+        }
+
+        .friend-actions button:focus-visible {
+            outline: 3px solid var(--accent-color);
+            outline-offset: 3px;
+        }
+    </style>
+<style id="header-overflow-fix">/*header-overflow-fix*/header .header-content-wrapper{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap}header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0;justify-content:flex-end}#profileLink{display:inline-flex;align-items:center;column-gap:8px;row-gap:2px;flex-wrap:wrap;max-width:100%;min-width:0}#profileLink #headerDisplayName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;flex:0 1 auto}#headerProfilePic,#headerAvatarIcon{flex:0 0 auto}@media (max-width:600px){header .header-content-wrapper{gap:8px}#profileLink{column-gap:6px}}</style></head>
+<body class="theme-dark-mode">
+
+    <header>
+        <div class="header-content-wrapper">
+            <a href="/home.html" class="logo" style="display:flex;align-items:center;gap:10px"><img src="assets/security.png" alt="JCHAT Security" style="height:24px;width:auto" onerror="this.style.display='none'"><span>Nuvia</span></a>
+            <nav>
+                <ul>
+                    <!-- Removed Home and Profile links from header navigation -->
+                </ul>
+            </nav>
+            <div class="user-profile-header">
+                <!-- Admin Icon Link (visible only to admin) -->
+                <a href="/coin_management.html" id="adminIconLink" aria-label="Admin Dashboard" style="display: none;">
+                    <i class="fas fa-user-cog"></i>
+                </a>
+                <!-- Notification Icon with Badge -->
+                <div class="notification-icon-wrapper">
+                    <a href="/notifications.html" aria-label="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationCount" style="display: none;">0</span>
+                    </a>
+                </div>
+                <!-- Sound Toggle -->
+                <div class="sound-toggle">
+                    <i id="soundToggleIcon" class="fas fa-volume-up active" title="Toggle Notification Sounds"></i>
+                </div>
+                <a href="Profile.html" id="profileLink">
+                    <img id="headerProfilePic" src="" alt="Profile Picture" style="display: none;">
+                    <i id="headerAvatarIcon" class="fas fa-user-circle"></i>
+                    <span id="headerDisplayName">Loading...</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="content-wrapper">
+            <div class="friends-list-container">
+                <div class="friends-header">
+                    <h2>My Friends</h2>
+                    <div class="friends-controls">
+                        <button id="toggleFriendsBtn" class="toggle-btn" title="Toggle friends visibility">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button id="refreshFriendsBtn" class="refresh-btn" title="Refresh friends list">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="friendsList" class="friends-list-visible">
+                    <p id="loadingFriends" class="loading-friends">Loading friends...</p>
+                    <p id="noFriends" class="empty-friends" style="display: none;">You don't have any friends yet. <a href="Find_Friends.html">Find new friends!</a></p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Custom Message Box -->
+    <div id="messageBox"></div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="customConfirmModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="confirmModalTitle">Confirm Action</h3>
+            <div class="modal-preview-info" id="confirmModalPreview">
+                <!-- Image/Icon and Name will be inserted here -->
+            </div>
+            <p id="confirmModalMessage">Are you sure?</p>
+            <div class="modal-buttons">
+                <button id="confirmNoBtn" class="cancel-btn">No</button>
+                <button id="confirmYesBtn" class="confirm-btn">Yes</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, query, onSnapshot, updateDoc, deleteDoc, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getCloudinaryImageUrl, displayProfilePicture } from "./assets/js/avatar-utils.js";
+
+        // --- Firebase & Canvas Environment Configuration ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+            authDomain: "jchat-1.firebaseapp.com",
+            databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+            projectId: "jchat-1",
+            storageBucket: "jchat-1.firebasestorage.app",
+            messagingSenderId: "328479683167",
+            appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
+            measurementId: "G-S6Z9GG0R9P"
+        };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Cloudinary Configuration
+        const cloudinaryConfig = {
+            cloudName: "dxld01rcp", // Your Cloudinary Cloud Name
+            uploadPreset: "Storage_preset" // Your Cloudinary Upload Preset
+        };
+
+        // Initialize Firebase services
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- DOM Elements ---
+        const headerProfilePic = document.getElementById('headerProfilePic');
+        const headerAvatarIcon = document.getElementById('headerAvatarIcon');
+        const headerDisplayName = document.getElementById('headerDisplayName');
+        const notificationCountElement = document.getElementById('notificationCount');
+        const messageBox = document.getElementById('messageBox');
+        const adminIconLink = document.getElementById('adminIconLink');
+        const profileLink = document.getElementById('profileLink');
+        const soundToggleIcon = document.getElementById('soundToggleIcon');
+        const friendsListContainer = document.getElementById('friendsList');
+        const loadingFriends = document.getElementById('loadingFriends');
+        const noFriends = document.getElementById('noFriends');
+        const refreshFriendsBtn = document.getElementById('refreshFriendsBtn');
+        const toggleFriendsBtn = document.getElementById('toggleFriendsBtn');
+
+        // Custom Confirmation Modal elements
+        const customConfirmModal = document.getElementById('customConfirmModal');
+        const confirmModalTitle = document.getElementById('confirmModalTitle'); // New
+        const confirmModalPreview = document.getElementById('confirmModalPreview'); // New
+        const confirmModalMessage = document.getElementById('confirmModalMessage');
+        const confirmYesBtn = document.getElementById('confirmYesBtn');
+        const confirmNoBtn = document.getElementById('confirmNoBtn');
+
+        // --- Global State ---
+        let isAuthReady = false; // Flag to indicate if auth state has been checked
+        let currentUser = null; // The currently authenticated user (Firebase Auth object)
+        let currentUserProfileData = null; // Store the current user's profile data
+        let unsubscribeFriends = null; // To store unsubscribe function for friends list
+        let unsubscribeFriendStatus = null; // To store unsubscribe function for friend status
+        let unsubscribeNotifications = null; // To store unsubscribe function for notifications
+        
+        // Real-time presence management (like Chat.html)
+        let heartbeatTimer = null;
+        const friendPresenceUnsubs = new Map();
+        const friendPresenceCache = new Map(); // friendId -> { state, lastMs }
+        let friendsVisible = true; // Track friends list visibility
+
+        let notificationSoundEnabled = true; // State for sound toggle
+
+        // --- Tone.js Synths for Notification Sounds ---
+        const successSynth = new Tone.Synth().toDestination();
+        const errorSynth = new Tone.Synth().toDestination();
+        const infoSynth = new Tone.Synth().toDestination();
+
+        // Set up basic sounds
+        successSynth.oscillator.type = "sine";
+        successSynth.envelope.attack = 0.01;
+        successSynth.envelope.decay = 0.2;
+        successSynth.envelope.sustain = 0.0;
+        successSynth.envelope.release = 0.5;
+
+        errorSynth.oscillator.type = "sawtooth";
+        errorSynth.envelope.attack = 0.01;
+        errorSynth.envelope.decay = 0.3;
+        errorSynth.envelope.sustain = 0.0;
+        errorSynth.envelope.release = 0.5;
+
+        infoSynth.oscillator.type = "triangle";
+        infoSynth.envelope.attack = 0.01;
+        infoSynth.envelope.decay = 0.1;
+        infoSynth.envelope.sustain = 0.0;
+        infoSynth.envelope.release = 0.3;
+
+        /**
+         * Formats relative time for presence display.
+         * @param {number} timestamp - Timestamp in milliseconds.
+         * @returns {string} Formatted relative time.
+         */
+        function formatRelativeTime(timestamp) {
+            const now = Date.now();
+            const diff = now - timestamp;
+            
+            if (diff < 60 * 1000) return 'just now';
+            if (diff < 60 * 60 * 1000) return `${Math.floor(diff / (60 * 1000))}m ago`;
+            if (diff < 24 * 60 * 60 * 1000) return `${Math.floor(diff / (60 * 60 * 1000))}h ago`;
+            return `${Math.floor(diff / (24 * 60 * 60 * 1000))}d ago`;
+        }
+
+        /**
+         * Starts presence heartbeat for current user (like Chat.html).
+         */
+        function startPresenceHeartbeat() {
+            try {
+                if (!currentUser) return;
+                
+                const userDocRef = doc(db, "artifacts", appId, "public", "data", "users", currentUser.uid);
+                const computeOnline = () => navigator.onLine && document.visibilityState === 'visible';
+                
+                const post = async () => {
+                    try { 
+                        await setDoc(userDocRef, { 
+                            online: computeOnline(), 
+                            lastActive: serverTimestamp() 
+                        }, { merge: true }); 
+                    } catch (error) {
+                        console.error("JCHAT_ERROR: Error updating presence:", error);
+                    }
+                };
+                
+                post();
+                if (heartbeatTimer) clearInterval(heartbeatTimer);
+                heartbeatTimer = setInterval(post, 15000); // Update every 15 seconds
+                
+                const debounced = () => { post(); };
+                window.addEventListener('online', debounced);
+                window.addEventListener('offline', debounced);
+                document.addEventListener('visibilitychange', debounced);
+                window.addEventListener('pagehide', () => { try { post(); } catch {} });
+                window.addEventListener('beforeunload', () => { try { post(); } catch {} });
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error starting presence heartbeat:", error);
+            }
+        }
+
+        /**
+         * Subscribes to real-time presence updates for a friend (like Chat.html).
+         * @param {string} friendId - The friend's user ID.
+         */
+        function subscribeFriendPresence(friendId) {
+            try {
+                if (friendPresenceUnsubs.has(friendId)) return;
+                
+                const ref = doc(db, "artifacts", appId, "public", "data", "users", friendId);
+                const unsub = onSnapshot(ref, (snap) => {
+                    const d = snap.data() || {};
+                    const lastMs = d.lastActive?.toMillis ? d.lastActive.toMillis() : (d.lastActive || 0);
+                    const now = Date.now();
+                    const fresh = now - lastMs <= 60000; // 60s freshness guard
+                    const withinGrace = now - lastMs <= 2 * 60 * 1000; // 2-minute grace
+                    let state = 'offline';
+                    
+                    if ((d.online && fresh) || (!d.online && withinGrace)) state = 'online';
+                    else if (now - lastMs <= 5 * 60 * 1000) state = 'away';
+                    
+                    friendPresenceCache.set(friendId, { state, lastMs });
+                    
+                    // Update UI elements if they exist
+                    const dot = document.querySelector(`[data-presence-id="${friendId}"]`);
+                    const text = document.querySelector(`[data-presence-text-id="${friendId}"]`);
+                    
+                    if (dot) {
+                        dot.className = 'friend-dot ' + (state === 'online' ? 'online' : state === 'away' ? 'away' : 'offline');
+                    }
+                    if (text) {
+                        text.textContent = state === 'online' ? 'Online' : 
+                                         (state === 'away' ? `Away • ${formatRelativeTime(lastMs)}` : 
+                                         `Offline • ${formatRelativeTime(lastMs)}`);
+                    }
+                });
+                
+                friendPresenceUnsubs.set(friendId, unsub);
+            } catch (error) {
+                console.error(`JCHAT_ERROR: Error subscribing to friend presence ${friendId}:`, error);
+            }
+        }
+
+        /**
+         * Plays a notification sound.
+         * @param {string} type - 'success', 'error', or 'info'.
+         */
+        function playNotificationSound(type) {
+            if (!notificationSoundEnabled) return; // Check if sound is enabled
+
+            Tone.start(); // Ensure audio context is started
+            if (type === 'success') {
+                successSynth.triggerAttackRelease("C5", "8n"); // C5 note, 8th note duration
+            } else if (type === 'error') {
+                errorSynth.triggerAttackRelease("C3", "8n"); // C3 note, 8th note duration
+            } else if (type === 'info') {
+                infoSynth.triggerAttackRelease("E4", "16n"); // E4 note, 16th note duration
+            }
+        }
+
+        /**
+         * Displays a temporary message box with a given message and type.
+         * @param {string} message - The message to display.
+         * @param {string} type - The type of message ('success', 'error', 'info', 'loading', 'warning').
+         * @param {boolean} [isPersistent=false] - If true, message stays until explicitly cleared or replaced.
+         * @param {number} [durationMs=3000] - Duration in milliseconds for the message to display if not persistent.
+         */
+        function showMessageBox(message, type, isPersistent = false, durationMs = 3000) {
+            if (messageBox.timeoutId) {
+                clearTimeout(messageBox.timeoutId);
+            }
+
+            messageBox.innerHTML = `<i id="messageBoxIcon"></i><span id="messageBoxText"></span>`;
+            const messageBoxIcon = document.getElementById('messageBoxIcon');
+            const messageBoxText = document.getElementById('messageBoxText');
+
+            messageBoxText.textContent = message;
+            messageBox.className = 'message-box show ' + type; // Add type class for styling
+
+            // Set icon based on type
+            if (type === 'success') {
+                messageBoxIcon.classList.add('fas', 'fa-check-circle');
+            } else if (type === 'error') {
+                messageBoxIcon.classList.add('fas', 'fa-times-circle');
+            } else if (type === 'info') {
+                messageBoxIcon.classList.add('fas', 'fa-info-circle');
+            } else if (type === 'warning') {
+                messageBoxIcon.classList.add('fas', 'fa-exclamation-triangle');
+            } else if (type === 'loading') {
+                 messageBoxIcon.classList.add('fas', 'fa-spinner', 'fa-spin'); // Spinner for loading
+            } else {
+                messageBoxIcon.className = ''; // No specific icon
+            }
+
+            if (type === 'loading') {
+                messageBox.classList.add('loading-pulse');
+            } else {
+                messageBox.classList.remove('loading-pulse');
+            }
+
+            messageBox.style.display = 'flex';
+            messageBox.style.opacity = '1';
+
+            if (!isPersistent) {
+                messageBox.timeoutId = setTimeout(() => {
+                    messageBox.style.opacity = '0';
+                    messageBox.addEventListener('transitionend', function handler() {
+                        messageBox.style.display = 'none';
+                        messageBox.removeEventListener('transitionend', handler);
+                        messageBox.classList.remove('loading-pulse');
+                    }, { once: true });
+                }, durationMs);
+            }
+        }
+
+        /**
+         * Toggles loading state for a button.
+         * @param {HTMLElement} buttonElement - The button to toggle.
+         * @param {boolean} isLoading - True to show loading, false to hide.
+         */
+        function toggleButtonLoading(buttonElement, isLoading) {
+            if (!buttonElement) return;
+            // Find the loader and text elements within the button
+            const loader = buttonElement.querySelector('.button-loader');
+            const text = buttonElement.querySelector('.button-text');
+
+            if (isLoading) {
+                buttonElement.disabled = true;
+                buttonElement.classList.add('loading');
+                if (loader) loader.classList.add('active');
+                if (text) text.style.display = 'none';
+            } else {
+                buttonElement.disabled = false;
+                buttonElement.classList.remove('loading');
+                if (loader) loader.classList.remove('active');
+                if (text) text.style.display = 'block';
+            }
+        }
+
+        /**
+         * Displays a custom confirmation modal with optional preview content.
+         * @param {Object} options - Configuration for the modal.
+         * @param {string} options.title - The title of the modal.
+         * @param {string} options.message - The main message to display.
+         * @param {string} [options.imageUrl] - URL for a preview image.
+         * @param {string} [options.imageAlt] - Alt text for the preview image.
+         * @param {string} [options.iconClass] - Font Awesome icon class for preview.
+         * @param {string} [options.previewName] - Name to display in the preview.
+         * @returns {Promise<boolean>} Resolves with true if 'Yes' is clicked, false if 'No'.
+         */
+        function showCustomConfirm({ title, message, imageUrl = null, imageAlt = '', iconClass = null, previewName = null }) {
+            return new Promise((resolve) => {
+                if (!customConfirmModal || !confirmModalTitle || !confirmModalMessage || !confirmYesBtn || !confirmNoBtn || !confirmModalPreview) {
+                    console.error("JCHAT_ERROR: Custom confirmation modal elements not found.");
+                    resolve(false); // Fallback to false if elements are missing
+                    return;
+                }
+
+                confirmModalTitle.textContent = title;
+                confirmModalMessage.textContent = message;
+                confirmModalPreview.innerHTML = ''; // Clear previous preview content
+
+                if (imageUrl || iconClass || previewName) {
+                    let previewHtml = '';
+                    if (imageUrl) {
+                        previewHtml += `<img src="${imageUrl}" alt="${imageAlt || 'Preview Image'}">`;
+                    } else if (iconClass) {
+                        previewHtml += `<div class="default-avatar"><i class="${iconClass}"></i></div>`;
+                    }
+                    if (previewName) {
+                        previewHtml += `<span>${previewName}</span>`;
+                    }
+                    confirmModalPreview.innerHTML = previewHtml;
+                }
+
+                customConfirmModal.classList.add('active');
+
+                const handleYes = () => {
+                    customConfirmModal.classList.remove('active');
+                    confirmYesBtn.removeEventListener('click', handleYes);
+                    confirmNoBtn.removeEventListener('click', handleNo);
+                    resolve(true);
+                };
+
+                const handleNo = () => {
+                    customConfirmModal.classList.remove('active');
+                    confirmYesBtn.removeEventListener('click', handleYes);
+                    confirmNoBtn.removeEventListener('click', handleNo);
+                    resolve(false);
+                };
+
+                confirmYesBtn.addEventListener('click', handleYes);
+                confirmNoBtn.addEventListener('click', handleNo);
+            });
+        }
+
+        /**
+         * Constructs a Cloudinary URL for an image/video.
+         * @param {string} urlOrPublicId - The full Cloudinary URL or the public ID of the image on Cloudinary.
+         * @param {string} transformations - Optional Cloudinary transformations.
+         * @returns {string|null} The full Cloudinary URL or null if urlOrPublicId is not provided.
+         */
+
+        /**
+         * Displays the profile picture or a default icon.
+         * @param {HTMLElement} imgElement - The <img> element to update.
+         * @param {HTMLElement} iconElement - The <i> or <div> element to display if no image.
+         * @param {string|null} profilePicId - The Cloudinary public ID or URL, or null.
+         * @param {string} usernameInitial - Initial for placeholder.
+         * @param {string} transformations - Cloudinary transformations.
+         */
+
+        /**
+         * Fetches and displays the current user's profile data for the header.
+         * This function runs on every page to ensure header is consistent.
+         * @param {firebase.User} user - The authenticated Firebase user object.
+         */
+        async function fetchAndDisplayHeaderProfile(user) {
+            console.log("JCHAT_DEBUG: fetchAndDisplayHeaderProfile called for user:", user.uid);
+            try {
+                const privateProfileDocRef = doc(db, "artifacts", appId, "users", user.uid, "profiles", "user_profile");
+                const privateDocSnap = await getDoc(privateProfileDocRef);
+
+                let profileData = null;
+                if (privateDocSnap.exists()) {
+                    profileData = privateDocSnap.data();
+                    console.log("JCHAT_DEBUG: Fetched existing profile data for header:", profileData);
+                } else {
+                    // If private profile doesn't exist, create a basic one
+                    console.warn("JCHAT_WARN: Private profile not found for header, creating a new one.");
+                    profileData = {
+                        username: user.displayName || `User_${user.uid.substring(0, 8)}`,
+                        email: user.email || "",
+                        profilePicId: user.photoURL || null,
+                        bio: "",
+                        location: "",
+                        friendsCount: 0,
+                        followersCount: 0,
+                        followingCount: 0,
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                        inspirationType: "motivational",
+                        visibility: {
+                            displayName: true, profilePic: true, bio: false, location: false,
+                            emailPublic: false, lastOnline: false, allowFriendRequests: true, allowMessages: true,
+                        },
+                        totalPosts: 0,
+                        jCoins: 0,
+                        gas: 0,
+                        level: 1,
+                        currentXp: 0,
+                        xpToNextLevel: 500,
+                        walletUnlocked: false,
+                        lastLoginBonusClaimed: null,
+                        isAdmin: false
+                    };
+                    await setDoc(privateProfileDocRef, profileData);
+
+                    // Also create/update public profile
+                    const publicProfileDocRef = doc(db, "artifacts", appId, "public", "data", "users", user.uid);
+                    await setDoc(publicProfileDocRef, {
+                        username: profileData.username,
+                        profilePicId: profileData.profilePicId,
+                        bio: profileData.bio,
+                        location: profileData.location,
+                        createdAt: profileData.createdAt,
+                        updatedAt: profileData.updatedAt,
+                        visibility: profileData.visibility,
+                        totalPosts: profileData.totalPosts
+                    }, { merge: true });
+                }
+
+                currentUserProfileData = profileData;
+                console.log("JCHAT_DEBUG: currentUserProfileData set:", currentUserProfileData);
+
+                // Update header UI
+                const usernameInitial = (profileData.username || "J").charAt(0).toUpperCase();
+                displayProfilePicture(headerProfilePic, headerAvatarIcon, profileData?.profilePicId, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
+                headerDisplayName.textContent = profileData.username || "JCHAT User";
+
+                // Safely set href for profileLink if it exists
+                if (profileLink) {
+                    profileLink.href = `Profile.html?userId=${user.uid}`;
+                }
+
+                // Show Admin Icon only if the current user is the ADMIN_UID
+                const ADMIN_UID = 'cc96gdhCRPO72NFZtleRCujHvIq2';
+                if (adminIconLink) {
+                    if (user.uid === ADMIN_UID) {
+                        adminIconLink.style.display = 'block';
+                    } else {
+                        adminIconLink.style.display = 'none';
+                    }
+                }
+
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error fetching or creating profile for header:", error);
+                const usernameInitial = (user.displayName || "J").charAt(0).toUpperCase();
+                displayProfilePicture(headerProfilePic, headerAvatarIcon, user.photoURL, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
+                headerDisplayName.textContent = user.displayName || "JCHAT User";
+                showMessageBox(`Error loading header profile: ${error.message}`, 'error');
+            }
+        }
+
+        /**
+         * Fetches and displays the notification count for the current user.
+         * @param {string} userId - The UID of the current user.
+         */
+        async function fetchNotificationCount(userId) {
+            try {
+                const notificationsCollectionRef = collection(db, "artifacts", appId, "users", userId, "notifications");
+                const q = query(notificationsCollectionRef); // No orderBy to avoid index issues, sort in client
+                const unsubscribe = onSnapshot(q, (snapshot) => {
+                    const unreadCount = snapshot.docs.filter(doc => !doc.data().read).length;
+
+                    if (notificationCountElement) {
+                        if (unreadCount > 0) {
+                            notificationCountElement.textContent = unreadCount;
+                            notificationCountElement.style.display = 'flex';
+                        } else {
+                            notificationCountElement.style.display = 'none';
+                        }
+                    }
+                });
+                // Return the unsubscribe function to be called on page unload
+                return unsubscribe;
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error fetching notification count:", error);
+                if (notificationCountElement) notificationCountElement.style.display = 'none';
+                return () => {}; // Return a no-op function if an error occurs
+            }
+        }
+
+        /**
+         * Gets the chat room ID for two users.
+         * Ensures the ID is always the same regardless of the order of UIDs.
+         * @param {string} uid1
+         * @param {string} uid2
+         * @returns {string} The combined chat room ID.
+         */
+        function getChatRoomId(uid1, uid2) {
+            return uid1 < uid2 ? `${uid1}_${uid2}` : `${uid2}_${uid1}`;
+        }
+
+        /**
+         * Renders the list of friends.
+         * @param {Array<Object>} friends - An array of friend objects (with userId, username, profilePicId).
+         */
+        function renderFriendsList(friends) {
+            friendsListContainer.innerHTML = ''; // Clear existing list
+
+            if (loadingFriends) loadingFriends.style.display = 'none';
+
+            if (friends.length === 0) {
+                if (noFriends) noFriends.style.display = 'block';
+                return;
+            } else {
+                if (noFriends) noFriends.style.display = 'none';
+            }
+
+            friends.forEach(friend => {
+                const friendItem = document.createElement('div');
+                friendItem.classList.add('friend-item');
+                friendItem.setAttribute('data-user-id', friend.userId);
+                friendItem.setAttribute('data-online-status', friend.onlineStatus);
+
+                const usernameInitial = (friend.username || "J").charAt(0).toUpperCase();
+                const profilePicHtml = friend.profilePicId
+                    ? `<img src="${getCloudinaryImageUrl(friend.profilePicId, 'w_90,h_90,c_fill,g_face,r_max')}" alt="${friend.username}'s profile picture" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='https://placehold.co/45x45/CCCCCC/000000?text=${usernameInitial}';">`
+                    : `<div class="default-avatar"><i class="fas fa-user-circle"></i></div>`;
+
+                // Get status indicator
+                const getStatusIndicator = (status) => {
+                    switch (status) {
+                        case 'online':
+                            return '<span class="status-indicator online" title="Online"><i class="fas fa-circle"></i></span>';
+                        case 'away':
+                            return '<span class="status-indicator away" title="Away"><i class="fas fa-circle"></i></span>';
+                        case 'offline':
+                        default:
+                            return '<span class="status-indicator offline" title="Offline"><i class="fas fa-circle"></i></span>';
+                    }
+                };
+
+                // Get status text
+                const getStatusText = (status, lastOnline) => {
+                    switch (status) {
+                        case 'online':
+                            return '<span class="status-text online">Online</span>';
+                        case 'away':
+                            return '<span class="status-text away">Away</span>';
+                        case 'offline':
+                        default:
+                            if (lastOnline && lastOnline.toDate) {
+                                const lastSeenTime = lastOnline.toDate();
+                                const now = new Date();
+                                const timeDiff = now - lastSeenTime;
+                                
+                                if (timeDiff < 60 * 1000) {
+                                    return '<span class="status-text offline">Last seen just now</span>';
+                                } else if (timeDiff < 60 * 60 * 1000) {
+                                    const minutes = Math.floor(timeDiff / (60 * 1000));
+                                    return `<span class="status-text offline">Last seen ${minutes}m ago</span>`;
+                                } else if (timeDiff < 24 * 60 * 60 * 1000) {
+                                    const hours = Math.floor(timeDiff / (60 * 60 * 1000));
+                                    return `<span class="status-text offline">Last seen ${hours}h ago</span>`;
+                                } else {
+                                    const days = Math.floor(timeDiff / (24 * 60 * 60 * 1000));
+                                    return `<span class="status-text offline">Last seen ${days}d ago</span>`;
+                                }
+                            }
+                            return '<span class="status-text offline">Offline</span>';
+                    }
+                };
+
+                // Add real-time presence indicators (like Chat.html)
+                const getPresenceIndicator = (friendId) => {
+                    return `<span class="friend-presence">
+                        <span class="friend-dot offline" data-presence-id="${friendId}"></span>
+                        <span data-presence-text-id="${friendId}">Offline</span>
+                    </span>`;
+                };
+
+                friendItem.innerHTML = `
+                    <div class="friend-info" data-user-id="${friend.userId}">
+                        <div class="friend-avatar-container">
+                            ${profilePicHtml}
+                            ${getStatusIndicator(friend.onlineStatus)}
+                        </div>
+                        <div class="friend-details">
+                            <span class="friend-username">${friend.username || 'Unknown User'}</span>
+                            ${getPresenceIndicator(friend.userId)}
+                        </div>
+                    </div>
+                    <div class="friend-actions">
+                        <button class="chat-btn" data-user-id="${friend.userId}"><i class="fas fa-comment"></i> Chat</button>
+                        <button class="unfriend-btn" data-user-id="${friend.userId}"><i class="fas fa-user-minus"></i> Unfriend</button>
+                    </div>
+                `;
+
+                // Add event listener for chat button
+                friendItem.querySelector('.chat-btn').addEventListener('click', (e) => {
+                    const friendId = e.currentTarget.getAttribute('data-user-id');
+                    window.location.href = `/private_chat.html?partnerId=${friendId}`;
+                });
+
+                // Add event listener for unfriend button
+                friendItem.querySelector('.unfriend-btn').addEventListener('click', (e) => {
+                    const friendId = e.currentTarget.getAttribute('data-user-id');
+                    const friendUsername = friend.username || 'this user';
+                    const friendProfilePic = friend.profilePicId;
+                    const friendInitial = (friend.username || "J").charAt(0).toUpperCase();
+
+                    unfriendUser(friendId, friendUsername, friendProfilePic, friendInitial);
+                });
+
+                // Add event listener for clicking on friend info to go to profile
+                friendItem.querySelector('.friend-info').addEventListener('click', (e) => {
+                    const friendId = e.currentTarget.getAttribute('data-user-id');
+                    window.location.href = `Profile.html?userId=${friendId}`;
+                });
+
+                // Add keyboard navigation support
+                friendItem.querySelector('.friend-info').addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        const friendId = e.currentTarget.getAttribute('data-user-id');
+                        window.location.href = `Profile.html?userId=${friendId}`;
+                    }
+                });
+
+                // Add event listener for Enter key on buttons
+                friendItem.querySelectorAll('button').forEach(button => {
+                    button.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            button.click();
+                        }
+                    });
+                });
+
+                friendsListContainer.appendChild(friendItem);
+            });
+
+            // Subscribe to real-time presence updates for all friends (like Chat.html)
+            friends.forEach(friend => {
+                subscribeFriendPresence(friend.userId);
+            });
+
+            // Apply cached presence data immediately to avoid flicker
+            friends.forEach(friend => {
+                const cached = friendPresenceCache.get(friend.userId);
+                if (cached) {
+                    const dot = document.querySelector(`[data-presence-id="${friend.userId}"]`);
+                    const text = document.querySelector(`[data-presence-text-id="${friend.userId}"]`);
+                    
+                    if (dot) {
+                        dot.className = 'friend-dot ' + (cached.state === 'online' ? 'online' : cached.state === 'away' ? 'away' : 'offline');
+                    }
+                    if (text) {
+                        text.textContent = cached.state === 'online' ? 'Online' : 
+                                         (cached.state === 'away' ? `Away �� ${formatRelativeTime(cached.lastMs)}` : 
+                                         `Offline • ${formatRelativeTime(cached.lastMs)}`);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Fetches ALL friends from the public friends collection (same logic as Find_Friends.html).
+         * This ensures we display all friends with proper online status indicators.
+         */
+        async function fetchFriends() {
+            try {
+            if (!currentUser) {
+                console.log("JCHAT_DEBUG: No current user to fetch friends for.");
+                if (loadingFriends) loadingFriends.style.display = 'none';
+                if (noFriends) noFriends.style.display = 'block';
+                return;
+            }
+
+            console.log("JCHAT_DEBUG: Fetching friends for user:", currentUser.uid);
+            if (loadingFriends) loadingFriends.style.display = 'block';
+            if (noFriends) noFriends.style.display = 'none';
+
+            // Unsubscribe previous listeners to prevent memory leaks
+            if (unsubscribeFriends) unsubscribeFriends();
+            if (unsubscribeFriendStatus) unsubscribeFriendStatus();
+
+            const publicFriendsRef = collection(db, "artifacts", appId, "public", "data", "friends");
+            const publicUsersCollectionRef = collection(db, "artifacts", appId, "public", "data", "users");
+
+            // Listen for changes in the public friends collection
+            unsubscribeFriends = onSnapshot(publicFriendsRef, async (snapshot) => {
+                const friendsData = [];
+                const currentUserFriends = new Set();
+
+                // Get all friends of current user
+                snapshot.forEach(docSnap => {
+                    const friendData = docSnap.data();
+                    if (friendData.user1Id === currentUser.uid) {
+                        currentUserFriends.add(friendData.user2Id);
+                    } else if (friendData.user2Id === currentUser.uid) {
+                        currentUserFriends.add(friendData.user1Id);
+                    }
+                });
+
+                if (currentUserFriends.size === 0) {
+                    renderFriendsList([]); // Render empty list
+                    return;
+                }
+
+                // Fetch public profiles for each friend
+                for (const friendId of currentUserFriends) {
+                    try {
+                        const publicProfileDocRef = doc(db, "artifacts", appId, "public", "data", "users", friendId);
+                        const publicDocSnap = await getDoc(publicProfileDocRef);
+                        if (publicDocSnap.exists()) {
+                            const friendProfile = publicDocSnap.data();
+                            
+                            // Determine online status
+                            let onlineStatus = 'offline';
+                            if (friendProfile.lastOnline && friendProfile.lastOnline.toDate) {
+                                const lastOnlineTime = friendProfile.lastOnline.toDate();
+                                const now = new Date();
+                                const timeDiff = now - lastOnlineTime;
+                                
+                                // Consider online if last seen within 2 minutes
+                                if (timeDiff <= 2 * 60 * 1000) {
+                                    onlineStatus = 'online';
+                                } else if (timeDiff <= 10 * 60 * 1000) {
+                                    // Consider away if last seen within 10 minutes
+                                    onlineStatus = 'away';
+                                }
+                            }
+                            
+                            friendsData.push({
+                                userId: friendId,
+                                username: friendProfile.username,
+                                profilePicId: friendProfile.profilePicId,
+                                onlineStatus: onlineStatus,
+                                lastOnline: friendProfile.lastOnline,
+                                // Add other public data you want to display
+                            });
+                        } else {
+                            console.warn(`JCHAT_WARN: Public profile not found for friend ID: ${friendId}`);
+                            friendsData.push({
+                                userId: friendId,
+                                username: `Unknown User (${friendId.substring(0, 8)})`,
+                                profilePicId: null,
+                                onlineStatus: 'offline',
+                                lastOnline: null,
+                            });
+                        }
+                    } catch (error) {
+                        console.error(`JCHAT_ERROR: Error fetching public profile for friend ${friendId}:`, error);
+                        friendsData.push({
+                            userId: friendId,
+                            username: `Error User (${friendId.substring(0, 8)})`,
+                            profilePicId: null,
+                            onlineStatus: 'offline',
+                            lastOnline: null,
+                        });
+                    }
+                }
+                
+                // Sort friends: online first, then away, then offline
+                friendsData.sort((a, b) => {
+                    const statusOrder = { 'online': 0, 'away': 1, 'offline': 2 };
+                    const aOrder = statusOrder[a.onlineStatus] || 2;
+                    const bOrder = statusOrder[b.onlineStatus] || 2;
+                    
+                    if (aOrder !== bOrder) {
+                        return aOrder - bOrder;
+                    }
+                    
+                    // If same status, sort by username
+                    return (a.username || '').localeCompare(b.username || '');
+                });
+                
+                renderFriendsList(friendsData);
+            }, (error) => {
+                console.error("JCHAT_ERROR: Error fetching friends list:", error);
+                showMessageBox(`Error loading friends: ${error.message}`, 'error');
+                playNotificationSound('error');
+                if (loadingFriends) loadingFriends.style.display = 'none';
+                if (noFriends) {
+                    noFriends.style.display = 'block';
+                    noFriends.textContent = "Failed to load friends. Please try again.";
+                }
+            });
+        } catch (error) {
+            console.error("JCHAT_ERROR: Unexpected error in fetchFriends:", error);
+            showMessageBox(`Unexpected error: ${error.message}`, 'error');
+            playNotificationSound('error');
+            if (loadingFriends) loadingFriends.style.display = 'none';
+            if (noFriends) {
+                noFriends.style.display = 'block';
+                noFriends.textContent = "An unexpected error occurred. Please try again.";
+            }
+        }
+        }
+
+        /**
+         * Generates a consistent friendship ID for two users.
+         * @param {string} uid1 - First user ID.
+         * @param {string} uid2 - Second user ID.
+         * @returns {string} The friendship ID.
+         */
+        function getFriendshipId(uid1, uid2) {
+            // Sort IDs to ensure consistent friendship ID regardless of who initiated
+            return [uid1, uid2].sort().join('_');
+        }
+
+        /**
+         * Unfriends a user.
+         * @param {string} friendId - The UID of the user to unfriend.
+         * @param {string} friendUsername - The username of the user to unfriend.
+         * @param {string|null} friendProfilePicId - The Cloudinary public ID or URL of the friend's profile picture.
+         * @param {string} friendInitial - Initial for placeholder if no profile pic.
+         */
+        async function unfriendUser(friendId, friendUsername, friendProfilePicId, friendInitial) {
+            if (!currentUser) {
+                showMessageBox("You must be logged in to unfriend.", 'error');
+                return;
+            }
+
+            const confirmed = await showCustomConfirm({
+                title: "Unfriend Confirmation",
+                message: `Are you sure you want to unfriend ${friendUsername}? You will no longer receive messages from them, and they will be removed from your friends list.`,
+                imageUrl: friendProfilePicId ? getCloudinaryImageUrl(friendProfilePicId, 'w_160,h_160,c_fill,g_face,r_max') : null,
+                imageAlt: `${friendUsername}'s profile picture`,
+                iconClass: friendProfilePicId ? null : 'fas fa-user-circle',
+                previewName: friendUsername
+            });
+
+            if (!confirmed) return;
+
+            showMessageBox(`Unfriending ${friendUsername}...`, 'loading', true);
+
+            try {
+                // Delete from public friends collection (same logic as Find_Friends.html)
+                const friendshipId = getFriendshipId(currentUser.uid, friendId);
+                const publicFriendsDocRef = doc(db, "artifacts", appId, "public", "data", "friends", friendshipId);
+                await deleteDoc(publicFriendsDocRef);
+                console.log(`JCHAT_DEBUG: Removed friendship ${friendshipId} from public collection.`);
+
+                // Also delete chat metadata for this chat if friendship is completely severed
+                const chatMetadataDocRef = doc(db, "artifacts", appId, "users", currentUser.uid, "chat_metadata", friendId);
+                await deleteDoc(chatMetadataDocRef);
+                console.log(`JCHAT_DEBUG: Cleared chat metadata for ${friendId}.`);
+
+                showMessageBox(`${friendUsername} unfriended successfully.`, 'success');
+                playNotificationSound('success');
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error unfriending user:", error);
+                showMessageBox(`Failed to unfriend ${friendUsername}: ${error.message}`, 'error');
+                playNotificationSound('error');
+            } finally {
+                toggleButtonLoading(buttonElement, false);
+            }
+        }
+
+        /**
+         * Listens for new notifications for the current user and displays pop-ups.
+         * @param {string} userId - The UID of the current user.
+         */
+        async function listenForNewNotifications(userId) {
+            if (!userId) {
+                console.log("JCHAT_DEBUG: No user ID for notification listener.");
+                return;
+            }
+
+            const notificationsCollectionRef = collection(db, "artifacts", appId, "users", userId, "notifications");
+            // Query for unread notifications only (removed orderBy to avoid composite index requirement)
+            const q = query(notificationsCollectionRef, where('read', '==', false));
+
+            if (unsubscribeNotifications) unsubscribeNotifications(); // Clean up previous listener
+
+            unsubscribeNotifications = onSnapshot(q, (snapshot) => {
+                snapshot.docChanges().forEach(async (change) => {
+                    if (change.type === "added") {
+                        const notificationData = change.doc.data();
+                        const notificationId = change.doc.id;
+                        console.log("JCHAT_DEBUG: New notification received:", notificationData);
+
+                        if (notificationData.type === 'new_message' && !notificationData.read) {
+                            playNotificationSound('info'); // Play a distinct sound for new messages
+                            showMessageBox(`New message from ${notificationData.senderUsername}!`, 'info', false, 5000);
+
+                            // Mark the notification as read immediately after showing the pop-up
+                            try {
+                                const notificationDocRef = doc(db, "artifacts", appId, "users", userId, "notifications", notificationId);
+                                await updateDoc(notificationDocRef, { read: true });
+                                console.log(`JCHAT_DEBUG: Notification ${notificationId} marked as read.`);
+                            } catch (error) {
+                                console.error("JCHAT_ERROR: Error marking notification as read:", error);
+                            }
+                        }
+                        // Handle other notification types if needed (e.g., friend requests, call notifications)
+                        // Note: Call notifications are handled directly in Private_Chat.html's call status listener.
+                    }
+                });
+            }, (error) => {
+                console.error("JCHAT_ERROR: Error listening for new notifications:", error);
+            });
+        }
+
+
+        // --- Authentication State Listener ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                isAuthReady = true;
+                console.log("JCHAT_DEBUG: User authenticated in My Friends Page:", user.uid);
+                await fetchAndDisplayHeaderProfile(user);
+                fetchFriends(); // Fetch friends once authenticated
+                fetchNotificationCount(user.uid);
+                listenForNewNotifications(user.uid); // Start listening for pop-up notifications
+                
+                // Start real-time presence heartbeat (like Chat.html)
+                startPresenceHeartbeat();
+                
+                // Initialize presence data for existing friends
+                setTimeout(() => {
+                    if (friendPresenceCache.size === 0) {
+                        // If no cached presence data, trigger a refresh to get initial data
+                        fetchFriends();
+                    }
+                }, 1000);
+
+            } else {
+                console.log("JCHAT_DEBUG: No user signed in. Attempting anonymous sign-in or redirecting to login page.");
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        console.log("JCHAT_DEBUG: Signed in with custom token.");
+                    } else {
+                        await signInAnonymously(auth);
+                        console.log("JCHAT_DEBUG: Signed in anonymously.");
+                    }
+                    // onAuthStateChanged will be triggered again with the new user
+                } catch (error) {
+                    console.error("JCHAT_ERROR: Error during anonymous sign-in or custom token sign-in:", error);
+                    // If anonymous sign-in also fails, redirect to login
+                    if (!auth.currentUser) {
+                        isAuthReady = false;
+                        currentUser = null;
+                        if (headerDisplayName) headerDisplayName.textContent = "Guest";
+                        if (headerProfilePic) headerProfilePic.style.display = 'none';
+                        if (headerAvatarIcon) headerAvatarIcon.style.display = 'block';
+                        if (adminIconLink) adminIconLink.style.display = 'none';
+                        showMessageBox("You must be logged in to access your friends list.", 'error', true);
+                        setTimeout(() => {
+                            window.location.href = '/login.html';
+                        }, 2000);
+                    }
+                }
+            }
+        });
+
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply theme on load
+            const savedTheme = localStorage.getItem('jchat-theme');
+            const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+            if (savedTheme && themes.includes(savedTheme)) {
+                document.body.classList.remove(...themes);
+                document.body.classList.add(savedTheme);
+            } else {
+                document.body.classList.remove(...themes);
+                document.body.classList.add('theme-dark-mode'); // Default
+            }
+
+            // Load sound preference from localStorage
+            const savedSoundPreference = localStorage.getItem('jchat-sound-enabled');
+            if (savedSoundPreference !== null) {
+                notificationSoundEnabled = JSON.parse(savedSoundPreference);
+                if (soundToggleIcon) {
+                    if (notificationSoundEnabled) {
+                        soundToggleIcon.classList.add('active');
+                        soundToggleIcon.classList.remove('fa-volume-mute');
+                        soundToggleIcon.classList.add('fa-volume-up');
+                    } else {
+                        soundToggleIcon.classList.remove('active');
+                        soundToggleIcon.classList.remove('fa-volume-up');
+                        soundToggleIcon.classList.add('fa-volume-mute');
+                    }
+                }
+            }
+
+            // Sound toggle click listener
+            if (soundToggleIcon) {
+                soundToggleIcon.addEventListener('click', () => {
+                    notificationSoundEnabled = !notificationSoundEnabled;
+                    localStorage.setItem('jchat-sound-enabled', JSON.stringify(notificationSoundEnabled));
+                    if (notificationSoundEnabled) {
+                        soundToggleIcon.classList.add('active');
+                        soundToggleIcon.classList.remove('fa-volume-mute');
+                        soundToggleIcon.classList.add('fa-volume-up');
+                        showMessageBox("Notification sounds ON", 'info');
+                    } else {
+                        soundToggleIcon.classList.remove('active');
+                        soundToggleIcon.classList.remove('fa-volume-up');
+                        soundToggleIcon.classList.add('fa-volume-mute');
+                        showMessageBox("Notification sounds OFF", 'info');
+                    }
+                });
+            }
+
+            // Toggle friends visibility button click listener
+            if (toggleFriendsBtn) {
+                toggleFriendsBtn.addEventListener('click', () => {
+                    friendsVisible = !friendsVisible;
+                    const friendsList = document.getElementById('friendsList');
+                    
+                    if (friendsVisible) {
+                        friendsList.classList.remove('friends-list-hidden');
+                        friendsList.classList.add('friends-list-visible');
+                        toggleFriendsBtn.classList.remove('hidden');
+                        toggleFriendsBtn.innerHTML = '<i class="fas fa-eye"></i>';
+                        toggleFriendsBtn.title = 'Hide friends list';
+                    } else {
+                        friendsList.classList.remove('friends-list-visible');
+                        friendsList.classList.add('friends-list-hidden');
+                        toggleFriendsBtn.classList.add('hidden');
+                        toggleFriendsBtn.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                        toggleFriendsBtn.title = 'Show friends list';
+                    }
+                });
+            }
+
+            // Refresh friends button click listener
+            if (refreshFriendsBtn) {
+                refreshFriendsBtn.addEventListener('click', async () => {
+                    if (refreshFriendsBtn.classList.contains('loading')) return;
+                    
+                    refreshFriendsBtn.classList.add('loading');
+                    try {
+                        await fetchFriends();
+                        showMessageBox("Friends list refreshed!", 'success');
+                    } catch (error) {
+                        console.error("JCHAT_ERROR: Error refreshing friends:", error);
+                        showMessageBox("Failed to refresh friends list", 'error');
+                    } finally {
+                        refreshFriendsBtn.classList.remove('loading');
+                    }
+                });
+            }
+        });
+
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'jchat-theme') {
+                const newTheme = event.newValue || 'theme-dark-mode';
+                const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+                if (themes.includes(newTheme)) {
+                    document.body.classList.remove(...themes);
+                    document.body.classList.add(newTheme);
+                }
+            }
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (unsubscribeFriends) unsubscribeFriends();
+            if (unsubscribeNotifications) unsubscribeNotifications(); // Unsubscribe new notification listener
+            
+            // Clean up presence subscriptions and heartbeat
+            friendPresenceUnsubs.forEach(unsub => unsub());
+            friendPresenceUnsubs.clear();
+            friendPresenceCache.clear();
+            if (heartbeatTimer) clearInterval(heartbeatTimer);
+        });
+    </script>
+	
+    <script src="assets/js/lazy-images.js" defer></script>
+</body>
+</html>

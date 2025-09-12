@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nuvia — Leaderboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://firebaseio.com" crossorigin>
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <style>
+    *,*::before,*::after{box-sizing:border-box}
+    :root{--pink:#ff2e92;--blue:#00d5ff;--radius:16px;--transition:.25s ease;--white:#e2e8f0;--text-light:#94a3b8;--border-light:rgba(255,255,255,.1);--background-main:linear-gradient(135deg,#052d26,#0b3a2e);--card-background:rgba(6,36,32,.7);--button-background:linear-gradient(90deg,#34d399,#10b981);--button-shadow:0 6px 18px rgba(52,211,153,.25),0 6px 18px rgba(16,185,129,.25);--accent-color:#34d399;--accent-color-dark:#059669;--border-color:#1f3d38}
+    html{overflow-y:auto}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--white);background:var(--background-main);min-height:100vh;display:flex;flex-direction:column}
+    header{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,rgba(3,20,17,.9),rgba(3,20,17,.75));backdrop-filter:blur(10px);border-bottom:1px solid var(--border-light)}
+    .header-wrap{max-width:1200px;margin:0 auto;padding:10px 16px;height:56px;display:flex;align-items:center;gap:12px}
+    .logo{font-family:Poppins,sans-serif;font-weight:800;letter-spacing:-.02em;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;font-size:1.25rem;text-decoration:none}
+    .header-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+    .back-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border-light);border-radius:10px;background:transparent;color:var(--white);padding:6px 10px;cursor:pointer}
+    .back-btn:hover{background:rgba(255,255,255,.06)}
+    .toolbar{position:sticky;top:56px;z-index:19;background:linear-gradient(135deg,rgba(3,20,17,.85),rgba(3,20,17,.7));backdrop-filter:blur(10px);border-bottom:1px solid var(--border-light)}
+    .toolbar-wrap{max-width:1200px;margin:0 auto;padding:10px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .tabs{display:flex;gap:8px;overflow:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+    .tab{border:1px solid var(--border-light);background:rgba(255,255,255,.04);color:var(--white);padding:6px 10px;border-radius:999px;cursor:pointer;white-space:nowrap}
+    .tab.active{background:var(--button-background);box-shadow:var(--button-shadow)}
+    .filters{margin-left:auto;display:flex;align-items:center;gap:8px;overflow:auto;-webkit-overflow-scrolling:touch}
+    .chip{border:1px solid var(--border-light);padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.04);cursor:pointer}
+    .chip.active{background:linear-gradient(90deg,rgba(0,213,255,.25),rgba(255,46,146,.25))}
+    .toggle{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border-light);border-radius:999px;background:rgba(255,255,255,.04);padding:6px 10px}
+    .search{flex:1 1 260px;min-width:200px;display:flex;align-items:center;border:1px solid var(--border-light);border-radius:10px;background:rgba(255,255,255,.04);padding:6px 10px}
+    .search input{flex:1;background:transparent;border:none;outline:none;color:var(--white)}
+    main{max-width:900px;width:100%;margin:0 auto;padding:12px 12px 24px 12px}
+    .list{list-style:none;margin:12px 0 0 0;padding:0}
+    .row{display:grid;grid-template-columns:48px 48px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px;border:1px solid var(--border-light);border-radius:14px;background:var(--card-background);margin-bottom:10px;overflow:hidden}
+    .rank{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;border:1px solid var(--border-light);font-weight:700}
+    .rank.top1{background:linear-gradient(135deg,#ffd700,#ffb300);color:#000}
+    .rank.top2{background:linear-gradient(135deg,#c0c0c0,#a9a9a9);color:#000}
+    .rank.top3{background:linear-gradient(135deg,#cd7f32,#b87333);color:#000}
+    .avatar{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--accent-color)}
+    .name{font-weight:700;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .meta{color:var(--text-light);font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .value{font-weight:800;white-space:nowrap;text-align:right}
+    .empty{border:1px solid var(--border-light);border-radius:16px;background:var(--card-background);padding:32px;text-align:center;color:var(--text-light);margin-top:16px}
+    .empty i{font-size:2rem;margin-bottom:8px;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+    .toast{position:fixed;right:16px;bottom:16px;z-index:30;display:none;min-width:240px;border:1px solid var(--border-light);border-radius:12px;background:var(--card-background);padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+    .toast.show{display:block}
+    .hidden{display:none}
+    .scroll-sentinel{height:1px}
+    .search-icon{margin-right:8px}
+    .filter-select{appearance:none;-webkit-appearance:none;-moz-appearance:none;background:rgba(255,255,255,.04);border:1px solid var(--border-light);color:var(--white);padding:6px 28px 6px 10px;border-radius:999px;position:relative}
+    .filter-select:focus{outline:none;box-shadow:0 0 0 2px rgba(0,213,255,.25)}
+    .podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:12px 0;align-items:end}
+    .podium-card{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;border:1px solid var(--border-light);border-radius:16px;background:var(--card-background);padding:12px;min-height:140px;text-align:center;cursor:pointer}
+    .podium-card:hover{transform:translateY(-2px);transition:transform var(--transition)}
+    .podium-card .podium-rank{position:absolute;top:8px;left:8px;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1px solid var(--border-light);font-weight:800}
+    .podium-card.top1{background:linear-gradient(135deg, rgba(255,215,0,.15), rgba(255,215,0,0));min-height:180px}
+    .podium-card.top2{background:linear-gradient(135deg, rgba(192,192,192,.15), rgba(192,192,192,0));min-height:160px}
+    .podium-card.top3{background:linear-gradient(135deg, rgba(205,127,50,.15), rgba(205,127,50,0));min-height:160px}
+    .podium-rank.top1{background:linear-gradient(135deg,#ffd700,#ffb300);color:#000}
+    .podium-rank.top2{background:linear-gradient(135deg,#c0c0c0,#a9a9a9);color:#000}
+    .podium-rank.top3{background:linear-gradient(135deg,#cd7f32,#b87333);color:#000}
+    .podium-avatar{width:72px;height:72px;border-radius:50%;object-fit:cover;border:3px solid var(--accent-color);margin-bottom:8px}
+    .podium-name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--white)}
+    .podium-meta{color:var(--text-light);font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .podium-value{font-weight:800;margin-top:6px}
+    .podium-card .crown{position:absolute;top:-14px;left:50%;transform:translateX(-50%);color:#ffd700;text-shadow:0 2px 6px rgba(0,0,0,.5)}
+    .empty-title{font-weight:700;margin:6px 0}
+    .page-grid{max-width:1200px;margin:0 auto;padding:12px;display:grid;grid-template-columns:1fr 320px;gap:16px}
+    .right-rail{background:var(--card-background);border:1px solid var(--border-light);border-radius:12px;padding:12px;min-height:200px}
+    .rail-section{margin-bottom:12px}
+    .rail-section h3{font-size:1rem;margin:0 0 8px 0;color:var(--white)}
+    .rising-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+    @media (max-width:900px){.page-grid{grid-template-columns:1fr}.right-rail{order:2}.podium{grid-template-columns:repeat(3,1fr);}}
+    @media (max-width:600px){.row{grid-template-columns:36px 40px minmax(0,1fr) auto}.avatar{width:40px;height:40px}.podium{grid-template-columns:repeat(3,1fr);gap:8px}.podium-card{min-height:120px;padding:10px}.podium-card.top1{min-height:140px}.podium-card.top2,.podium-card.top3{min-height:130px}.podium-avatar{width:56px;height:56px;border-width:2px}.podium-name{font-size:.95rem}.podium-meta{font-size:.75rem}.podium-value{font-size:.95rem}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-wrap">
+      <a href="home.html" class="logo" aria-label="Go Home">Nuvia</a>
+      <div class="header-actions">
+        <button class="back-btn" onclick="window.history.back()" aria-label="Go Back"><i class="fa-solid fa-arrow-left"></i><span>Back</span></button>
+      </div>
+    </div>
+  </header>
+
+  <div class="toolbar" role="region" aria-label="Leaderboard toolbar">
+    <div class="toolbar-wrap">
+      <nav class="tabs" role="tablist" aria-label="Metric">
+        <button class="tab active" role="tab" aria-selected="true" data-metric="jCoins">JCoins</button>
+        <button class="tab" role="tab" aria-selected="false" data-metric="level">Level</button>
+        <button class="tab" role="tab" aria-selected="false" data-metric="currentXp">XP</button>
+      </nav>
+      <div class="filters">
+        <button class="chip" data-timeframe="daily">Today</button>
+        <button class="chip active" data-timeframe="weekly">Week</button>
+        <button class="chip" data-timeframe="monthly">Month</button>
+        <label class="toggle"><input id="friendsOnly" type="checkbox"> Friends only</label>
+        <select id="locationFilter" class="filter-select" aria-label="Filter by location">
+          <option value="all">All locations</option>
+        </select>
+        <button class="chip" id="myRankBtn" title="Jump to my rank"><i class="fa-solid fa-location-arrow"></i> My rank</button>
+        <button class="chip" id="exportCsvBtn" title="Export CSV"><i class="fa-solid fa-file-csv"></i> CSV</button>
+        <button class="chip" id="exportJsonBtn" title="Export JSON"><i class="fa-solid fa-code"></i> JSON</button>
+        <button class="chip" id="shareBtn" title="Share link"><i class="fa-solid fa-share-nodes"></i> Share</button>
+        <div class="search"><i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
+          <input id="searchInput" type="search" placeholder="Search users" aria-label="Search users" /></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-grid">
+    <main>
+      <section id="podium" class="podium" aria-label="Top 3"></section>
+      <ul id="list" class="list" role="list"></ul>
+      <div id="emptyState" class="empty hidden">
+        <i class="fa-regular fa-trophy"></i>
+        <div class="empty-title">No results</div>
+        <div>Try changing filters or search.</div>
+      </div>
+      <div id="sentinel" class="scroll-sentinel"></div>
+    </main>
+    <aside class="right-rail" id="personalRail" aria-label="Personalized highlights">
+      <div class="rail-section">
+        <h3>Rising this <span id="railTimeframe">week</span></h3>
+        <ul id="risingList" class="rising-list"></ul>
+      </div>
+      <div class="rail-section">
+        <h3>Friends to follow</h3>
+        <ul id="friendsRecommend" class="rising-list"></ul>
+      </div>
+      <div class="rail-section">
+        <h3>Featured</h3>
+        <div id="featuredProfile">Loading...</div>
+      </div>
+    </aside>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
+    import { getFirestore, Timestamp, collection, collectionGroup, query, orderBy, limit, getDocs, where, doc, getDoc, startAfter, documentId } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+    import { getCloudinaryImageUrl, displayProfilePicture } from "./assets/js/avatar-utils.js";
+
+    const firebaseConfig = typeof window.__firebase_config !== 'undefined' ? JSON.parse(window.__firebase_config) : {
+      apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+      authDomain: "jchat-1.firebaseapp.com",
+      databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+      projectId: "jchat-1",
+      storageBucket: "jchat-1.firebasestorage.app",
+      messagingSenderId: "328479683167",
+      appId: "1:328479683167:web:placeholder"
+    };
+    const appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'default-app-id';
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const listEl = document.getElementById('list');
+    const podiumEl = document.getElementById('podium');
+    const emptyEl = document.getElementById('emptyState');
+    const sentinel = document.getElementById('sentinel');
+    const toast = document.getElementById('toast');
+    const tabs = Array.from(document.querySelectorAll('.tab'));
+    const timeframeChips = Array.from(document.querySelectorAll('.chip[data-timeframe]'));
+    const friendsOnly = document.getElementById('friendsOnly');
+    const locationFilter = document.getElementById('locationFilter');
+    const searchInput = document.getElementById('searchInput');
+
+    // Helper: create an avatar <img> using shared displayProfilePicture to ensure consistent placeholders and Cloudinary transforms
+    function createAvatarElement(u, size = 48, className = 'avatar', transformations = 'w_60,h_60,c_fill,g_face,r_max') {
+      const img = document.createElement('img');
+      img.className = className;
+      img.alt = `${u.username} avatar`;
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      const initial = (u.username || 'U').charAt(0).toUpperCase();
+      displayProfilePicture(img, null, u.profilePicId || null, initial, transformations);
+      return img;
+    }
+
+    let currentUser = null;
+    const state = { metric: 'jCoins', timeframe: 'weekly', friendsOnly: false, location: 'all', search:'', items: [], page: 30, lastCursor: null, loading: false, friends: new Set(), agg: {} };
+
+    tabs.forEach(t=>t.addEventListener('click',()=>{ tabs.forEach(x=>{x.classList.toggle('active', x===t); x.setAttribute('aria-selected', x===t);}); state.metric = t.dataset.metric; render(); if(state.timeframe!=='all') computeAggregation(state.metric, state.timeframe).then(()=>render()); }));
+    timeframeChips.forEach(c=>c.addEventListener('click',()=>{ timeframeChips.forEach(x=>x.classList.toggle('active', x===c)); state.timeframe=c.dataset.timeframe; render(); if(state.timeframe!=='all') computeAggregation(state.metric, state.timeframe).then(()=>render()); }));
+    friendsOnly.addEventListener('change',()=>{ state.friendsOnly = friendsOnly.checked; resetAndLoad(); });
+    locationFilter.addEventListener('change',()=>{ state.location = locationFilter.value || 'all'; render(); });
+    let st; searchInput.addEventListener('input',()=>{ clearTimeout(st); st=setTimeout(()=>{ state.search = searchInput.value.trim().toLowerCase(); render(); }, 180); });
+
+    onAuthStateChanged(auth, async (user)=>{
+      currentUser = user || null;
+      if(currentUser){ try{ await loadFriendsSet(currentUser.uid); }catch(_){} }
+      resetAndLoad();
+    });
+
+    async function loadFriendsSet(uid){
+      state.friends.clear();
+      const friendsRef = collection(db, 'artifacts', appId, 'public', 'data', 'friends');
+      const snap = await getDocs(friendsRef);
+      snap.forEach(d=>{ const v=d.data(); if(v.user1Id===uid) state.friends.add(v.user2Id); else if(v.user2Id===uid) state.friends.add(v.user1Id); });
+    }
+
+    function getCacheKey(){ return `leaderboard::${state.metric}`; }
+    function loadCache(){ try{ const raw = sessionStorage.getItem(getCacheKey()); if(raw){ const arr = JSON.parse(raw); if(Array.isArray(arr)){ state.items = arr; render(); updateLocationOptions(); } } }catch(_){ }
+    function saveCache(){ try{ const arr = state.items.slice(0,200); sessionStorage.setItem(getCacheKey(), JSON.stringify(arr)); }catch(_){ }
+    function resetAndLoad(){ state.items = []; state.lastCursor = null; listEl.innerHTML=''; if(podiumEl) podiumEl.innerHTML=''; loadCache(); if(state.timeframe!=='all') computeAggregation(state.metric, state.timeframe).then(()=>render()); else render(); loadMore(); }
+
+    async function loadMore(){
+      if(state.loading) return; state.loading = true;
+      try{
+        const metric = state.metric;
+        // collectionGroup over profiles to access jCoins/level/currentXp (document id 'user_profile')
+        let qRef = query(collectionGroup(db,'profiles'), where(documentId(),'==','user_profile'), orderBy(metric,'desc'), limit(state.page));
+        if(state.lastCursor){ qRef = query(collectionGroup(db,'profiles'), where(documentId(),'==','user_profile'), orderBy(metric,'desc'), startAfter(state.lastCursor), limit(state.page)); }
+        const snap = await getDocs(qRef);
+        const batch = [];
+        for(const docSnap of snap.docs){
+          const d = docSnap.data() || {};
+          const uid = docSnap.ref.parent.parent?.id || null;
+          if(!uid) continue;
+          // Load public profile for username/avatar
+          let username = d.username || null, profilePicId = d.profilePicId || null;
+          try{ const pub = await getDoc(doc(db,'artifacts',appId,'public','data','users',uid)); if(pub.exists()){ const pd=pub.data(); username = pd.username || username; profilePicId = pd.profilePicId || profilePicId; }}catch(_){ }
+          batch.push({ id: uid, username: username || `User_${uid.slice(0,6)}`, profilePicId: profilePicId||null, jCoins: d.jCoins||0, level: d.level||0, currentXp: d.currentXp||0, location: (d.location||'').toString() });
+        }
+        state.items = state.items.concat(batch);
+        state.lastCursor = snap.docs.length ? snap.docs[snap.docs.length-1] : state.lastCursor;
+        render();
+        updateLocationOptions();
+        saveCache();
+      }catch(e){ console.error('Leaderboard load failed', e); showToast('Failed to load leaderboard'); }
+      finally{ state.loading = false; }
+    }
+
+    function render(){
+      const q = state.search;
+      let arr = state.items.slice();
+      if(state.friendsOnly && currentUser){ arr = arr.filter(x=>state.friends.has(x.id)); }
+      if(state.location && state.location!=='all'){ const sel = state.location.toLowerCase(); arr = arr.filter(x=> (x.location||'').toLowerCase()===sel); }
+      if(q){ arr = arr.filter(x=> (`${x.username}`.toLowerCase().includes(q))); }
+      const needAgg = state.timeframe!=='all' && state.metric!=='level';
+      let totals = null;
+      if(needAgg){ const key = `${state.metric}_${state.timeframe}`; totals = state.agg[key] || null; }
+      if(needAgg && !totals){ return; }
+      arr.sort((a,b)=>{
+        if(needAgg){ const av=(totals.get(a.id)||0), bv=(totals.get(b.id)||0); return bv-av; }
+        return (b[state.metric]||0) - (a[state.metric]||0);
+      });
+
+      if(podiumEl){
+        podiumEl.innerHTML='';
+        const top = arr.slice(0,3);
+        if(top.length){
+          const order=[1,0,2];
+          order.forEach(i=>{
+            if(typeof top[i] === 'undefined'){ const ph=document.createElement('div'); ph.className='podium-card'; podiumEl.appendChild(ph); return; }
+            const u = top[i]; const rank = i+1;
+            const card = document.createElement('div'); card.className='podium-card top'+rank; card.tabIndex=0;
+            card.addEventListener('click',()=>{ window.location.href = `/profile.html?userId=${u.id}`; });
+            card.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); window.location.href = `/profile.html?userId=${u.id}`; } });
+            const pr = document.createElement('div'); pr.className='podium-rank'; pr.textContent=String(rank); if(rank===1) pr.classList.add('top1'); if(rank===2) pr.classList.add('top2'); if(rank===3) pr.classList.add('top3');
+            if(rank===1){ const crown=document.createElement('i'); crown.className='fa-solid fa-crown crown'; crown.setAttribute('aria-hidden','true'); card.appendChild(crown); }
+            const av = createAvatarElement(u, 72, 'podium-avatar', 'w_120,h_120,c_fill,g_face,r_max');
+            const name=document.createElement('div'); name.className='podium-name'; name.textContent=u.username;
+            const meta=document.createElement('div'); meta.className='podium-meta'; meta.textContent=`Level ${u.level} • ${u.jCoins} JCoins • ${u.currentXp} XP`;
+            const value=document.createElement('div'); value.className='podium-value'; value.textContent=valueLabel(u);
+            card.appendChild(pr); card.appendChild(av); card.appendChild(name); card.appendChild(meta); card.appendChild(value);
+            podiumEl.appendChild(card);
+          });
+        }
+      }
+
+      listEl.innerHTML='';
+      const frag = document.createDocumentFragment();
+      const rest = arr.slice(3);
+      rest.forEach((u,idx)=>{ frag.appendChild(row(u, idx+3)); });
+      listEl.appendChild(frag);
+
+      if(arr.length){ emptyEl.classList.add('hidden'); } else { emptyEl.classList.remove('hidden'); }
+      const myIdx = currentUser ? arr.findIndex(x=>x.id===currentUser.uid) : -1;
+      const btn = document.getElementById('myRankBtn');
+      if(btn){
+        btn.disabled = myIdx<0;
+        btn.onclick = ()=>{
+          if(myIdx>=0){
+            if(myIdx<=2){
+              podiumEl.scrollIntoView({behavior:'smooth', block:'center'});
+              const c = podiumEl.children[ myIdx===0?1 : (myIdx===1?0:2) ];
+              if(c){ c.style.outline='2px solid var(--accent-color)'; setTimeout(()=>{ c.style.outline=''; }, 1500); }
+            } else {
+              const el = listEl.children[myIdx-3];
+              if(el){ el.scrollIntoView({behavior:'smooth', block:'center'}); el.style.outline='2px solid var(--accent-color)'; setTimeout(()=>{ el.style.outline=''; }, 1500); }
+            }
+          }
+        };
+      }
+    }
+
+    function row(u, idx){
+      const li = document.createElement('li'); li.className='row'; li.setAttribute('role','listitem'); li.tabIndex=0; li.addEventListener('click',()=>{ window.location.href = `/profile.html?userId=${u.id}`; }); li.addEventListener('keydown',(e)=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); window.location.href = `/profile.html?userId=${u.id}`; } });
+      const r = document.createElement('div'); r.className='rank'; r.textContent = String(idx+1);
+      if(idx===0) r.classList.add('top1'); else if(idx===1) r.classList.add('top2'); else if(idx===2) r.classList.add('top3');
+      const av = createAvatarElement(u, 48, 'avatar', 'w_60,h_60,c_fill,g_face,r_max');
+      const main = document.createElement('div');
+      const name = document.createElement('div'); name.className='name'; name.textContent = u.username;
+      const meta = document.createElement('div'); meta.className='meta'; meta.textContent = `Level ${u.level} • ${u.jCoins} JCoins • ${u.currentXp} XP`;
+      main.appendChild(name); main.appendChild(meta);
+      const val = document.createElement('div'); val.className='value'; val.textContent = valueLabel(u);
+      li.appendChild(r); li.appendChild(av); li.appendChild(main); li.appendChild(val);
+      return li;
+    }
+
+    function valueLabel(u){ const m=state.metric; const needAgg = state.timeframe!=='all' && m!=='level'; if(needAgg){ const key=`${m}_${state.timeframe}`; const totals=state.agg[key]; const v = totals ? (totals.get(u.id)||0) : 0; if(m==='jCoins') return `${v.toLocaleString()} JC`; return `${v.toLocaleString()} XP`; } if(m==='jCoins') return `${u.jCoins.toLocaleString()} JC`; if(m==='level') return `Lv ${u.level}`; return `${u.currentXp.toLocaleString()} XP`; }
+
+    function showToast(msg){ toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 2200); }
+
+    function currentFiltered(){ const q=state.search; let arr=state.items.slice(); if(state.friendsOnly && currentUser){ arr=arr.filter(x=>state.friends.has(x.id)); } if(state.location && state.location!=='all'){ const sel=state.location.toLowerCase(); arr=arr.filter(x=>(x.location||'').toLowerCase()===sel); } if(q){ arr=arr.filter(x=>(`${x.username}`.toLowerCase().includes(q))); } arr.sort((a,b)=>(b[state.metric]||0)-(a[state.metric]||0)); return arr; }
+
+    function exportCsv(){ const rows = currentFiltered().map((u,i)=>({ rank:i+1, username:u.username, jCoins:u.jCoins, level:u.level, currentXp:u.currentXp })); const header=['rank','username','jCoins','level','currentXp']; const csv=[header.join(',')].concat(rows.map(r=>header.map(h=>`"${String(r[h]).replace(/"/g,'""')}"`).join(','))).join('\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='leaderboard.csv'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+    function exportJson(){ const data = currentFiltered(); const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='leaderboard.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+    function shareLink(){ const url=new URL(window.location.href); url.searchParams.set('metric', state.metric); url.searchParams.set('friends', String(state.friendsOnly)); url.searchParams.set('tf', state.timeframe); if(state.location && state.location!=='all') url.searchParams.set('loc', state.location); if(state.search) url.searchParams.set('q', state.search); const link=url.toString(); if(navigator.share){ navigator.share({ title:'Nuvia Leaderboard', url:link }).catch(()=>navigator.clipboard.writeText(link).then(()=>showToast('Link copied'))); } else { navigator.clipboard.writeText(link).then(()=>showToast('Link copied')); } }
+
+    const io = new IntersectionObserver(es=>{ for(const e of es){ if(e.isIntersecting) loadMore(); } },{root:null,threshold:1}); io.observe(sentinel);
+
+    function updateLocationOptions(){ if(!locationFilter) return; const opts = new Set(['all']); state.items.forEach(x=>{ const loc=(x.location||'').toString().trim(); if(loc) opts.add(loc); }); const current = locationFilter.value; const frag=document.createDocumentFragment(); Array.from(opts).sort((a,b)=>a==='all'?-1:b==='all'?1:a.localeCompare(b)).forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent = v==='all'?'All locations':v; frag.appendChild(o); }); locationFilter.innerHTML=''; locationFilter.appendChild(frag); if(opts.has(current)) locationFilter.value=current; }
+
+    function applyFromUrl(){ const sp=new URLSearchParams(window.location.search); const metric=sp.get('metric'); const friends=sp.get('friends'); const q=sp.get('q'); const loc=sp.get('loc'); const tf=sp.get('tf'); const allowed=['jCoins','level','currentXp']; if(metric && allowed.includes(metric)){ state.metric=metric; tabs.forEach(t=>{ const active=t.dataset.metric===metric; t.classList.toggle('active',active); t.setAttribute('aria-selected', String(active)); }); }
+      if(friends==='true'||friends==='1'){ state.friendsOnly=true; friendsOnly.checked=true; }
+      if(q){ state.search=q.toLowerCase(); searchInput.value=q; }
+      if(loc){ state.location=loc; if(locationFilter) locationFilter.value=loc; }
+      if(tf && ['daily','weekly','monthly','all'].includes(tf)){ state.timeframe=tf; timeframeChips.forEach(x=>x.classList.toggle('active', x.dataset.timeframe===tf)); }
+    }
+    applyFromUrl();
+    // Populate personal rail based on current metric/timeframe
+    populatePersonalRail().catch(()=>{});
+
+    // Bind export/share
+    document.getElementById('exportCsvBtn')?.addEventListener('click', exportCsv);
+    document.getElementById('exportJsonBtn')?.addEventListener('click', exportJson);
+    document.getElementById('shareBtn')?.addEventListener('click', shareLink);
+
+    async function populatePersonalRail(){
+      try{
+        const railTimeframeEl = document.getElementById('railTimeframe'); if(railTimeframeEl) railTimeframeEl.textContent = state.timeframe;
+        const map = await computeAggregation(state.metric, state.timeframe);
+        const entries = Array.from(map.entries()).sort((a,b)=>b[1]-a[1]).slice(0,5);
+        const list = document.getElementById('risingList'); if(!list) return; list.innerHTML='';
+        for(const [uid,value] of entries){
+          let username = `User_${uid.slice(0,6)}`;
+          let profilePicId = null;
+          try{ const pub = await getDoc(doc(db,'artifacts',appId,'public','data','users',uid)); if(pub.exists()){ const pd=pub.data(); username = pd.username || username; profilePicId = pd.profilePicId || null; } }catch(_){ }
+          const li = document.createElement('li'); li.style.display='flex'; li.style.alignItems='center'; li.style.gap='8px'; li.tabIndex=0; li.className='rail-item';
+          const img = createAvatarElement({username, profilePicId}, 40, 'avatar', 'w_60,h_60,c_fill,g_face,r_max'); img.style.width='36px'; img.style.height='36px';
+          const span = document.createElement('div'); span.style.flex='1'; span.textContent = username;
+          const val = document.createElement('div'); val.style.fontWeight='700'; val.textContent = state.metric==='jCoins' ? `${Number(value).toLocaleString()} JC` : `${Number(value).toLocaleString()} XP`;
+          li.appendChild(img); li.appendChild(span); li.appendChild(val);
+          li.addEventListener('click', ()=> window.location.href = `/profile.html?userId=${uid}`);
+          list.appendChild(li);
+        }
+      }catch(e){ console.error('populatePersonalRail', e); }
+    }
+
+    async function computeAggregation(metric, timeframe){
+      try{
+        const key = `${metric}_${timeframe}`; if(state.agg[key]) return state.agg[key];
+        let start = new Date(); start.setHours(0,0,0,0);
+        if(timeframe==='weekly'){ const d=start.getDay(); const diff=(d+6)%7; start.setDate(start.getDate()-diff); }
+        else if(timeframe==='monthly'){ start.setDate(1); }
+        else if(timeframe==='all'){ state.agg[key]=new Map(); return state.agg[key]; }
+        const q = query(collectionGroup(db,'transactions'), where('timestamp','>=', Timestamp.fromDate(start)), orderBy('timestamp','asc'));
+        const snap = await getDocs(q);
+        const map = new Map();
+        snap.forEach(ds=>{ const data=ds.data()||{}; const uid = ds.ref.parent.parent?.id; if(!uid) return; let delta=0; if(metric==='jCoins'){
+            const t=(data.type||'');
+            if(t==='p2p_transfer_in' || t==='credit') delta += Number(data.amount||0);
+            else if(t==='p2p_transfer_out') delta -= Number((data.amount||0)) + Number((data.fee||0));
+            else if(t==='admin_adjustment') delta += Number(data.amount||0);
+            else if(t==='swap_jcoins_to_gas') delta -= Number((data.fromAmount||0)) + Number((data.fee||0));
+            else if(typeof data.amount==='number'){ delta += Number(data.amount||0); }
+          } else if(metric==='currentXp'){
+            const t=(data.type||''); if(t==='xp_credit' || t==='xp_admin_adjustment') delta += Number(data.amount||0);
+          }
+          if(delta!==0){ map.set(uid, (map.get(uid)||0) + delta); }
+        });
+        state.agg[key]=map; return map;
+      }catch(e){ console.error('Aggregation failed', e); showToast('Failed to load period data'); return new Map(); }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bible Reader</title>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <style>
+    :root{--pink:#ff2e92;--blue:#00d5ff;--white:#fff;--text-light:rgba(255,255,255,.7);--card-background:rgba(255,255,255,0.05);--border-light:rgba(255,255,255,0.15);--header-background:linear-gradient(135deg, rgba(10,10,10,.85), rgba(10,10,10,.75));}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--white);background:linear-gradient(135deg,#ff2e92,#ffd700);background-attachment:fixed;background-size:cover}
+    header{position:sticky;top:0;background:var(--header-background);border-bottom:1px solid var(--border-light);backdrop-filter:saturate(140%) blur(6px);z-index:10}
+    header .inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:10px 16px}
+    a.btn{background:linear-gradient(90deg,var(--blue),var(--pink));color:#fff;border:none;border-radius:12px;padding:8px 12px;text-decoration:none;font-weight:700;box-shadow:0 3px 10px rgba(0,0,0,.3)}
+    main{max-width:900px;margin:16px auto;padding:0 16px;display:grid;grid-template-columns:280px 1fr;gap:16px}
+    .panel{background:var(--card-background);border:1px solid var(--border-light);border-radius:12px;padding:12px}
+    .panel h2{margin:0 0 8px 0;font-size:1rem}
+    select,button,input{background:rgba(255,255,255,.08);border:1px solid var(--border-light);border-radius:10px;color:#fff;padding:8px 10px;font-size:.95rem}
+    button.primary{background:linear-gradient(90deg,var(--blue),var(--pink));border:none;box-shadow:0 3px 10px rgba(0,0,0,.3);font-weight:700}
+    .verse{padding:10px;border-bottom:1px solid var(--border-light)}
+    .verse.highlight{background:rgba(255,223,0,.35);border-radius:8px}
+    .verse:last-child{border-bottom:none}
+    .verse .num{opacity:.7;margin-right:6px}
+    .controls{display:flex;flex-wrap:wrap;gap:8px}
+    .sticky{position:sticky;top:76px}
+    .field{display:flex;gap:6px}
+    input[type=text]{flex:1;min-width:140px}
+    input[type=number]{width:100px}
+    .book-grid,.chapter-grid,.verse-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(48px,1fr));gap:6px;margin-top:10px}
+    .book-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+    .grid-btn{background:rgba(255,255,255,.08);border:1px solid var(--border-light);border-radius:10px;color:#fff;padding:8px 10px;font-size:.9rem;cursor:pointer}
+    .grid-btn:hover{background:rgba(255,255,255,.12)}
+    .grid-btn.active{background:linear-gradient(90deg,var(--blue),var(--pink));border:none}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="inner">
+      <a href="/Home.html" class="btn">← Home</a>
+      <div style="font-weight:800">Bible Reader</div>
+      <div style="margin-left:auto" class="controls">
+        <button id="continueBtn" class="primary" title="Continue where you left off">Continue</button>
+      </div>
+    </div>
+  </header>
+  <main>
+    <aside class="panel sticky">
+      <h2>Book & Chapter</h2>
+      <div class="controls">
+        <div class="field"><input type="text" id="bookInput" placeholder="e.g. John" aria-label="Book" list="bookList"><input type="number" id="chapterInput" min="1" step="1" value="3" aria-label="Chapter"></div>
+        <datalist id="bookList"></datalist>
+        <div class="field"><input type="text" id="refInput" placeholder="Go to (e.g. John 3:16)" aria-label="Go to reference"><button id="goRefBtn" class="primary">Go</button></div>
+        <select id="editionSelectBible" aria-label="Edition">
+          <option value="web">Nuvia Edition (Simple)</option>
+          <option value="kjv">King James Version (KJV)</option>
+        </select>
+        <button id="loadBtn" class="primary">Load</button>
+        <button id="prevChapter">Prev</button>
+        <button id="nextChapter">Next</button>
+      </div>
+      <div id="bookGrid" class="book-grid" aria-label="Books"></div>
+      <div id="chapterGrid" class="chapter-grid" aria-label="Chapters"></div>
+      <small id="sourceLabel" style="opacity:.7;display:block;margin-top:6px">Source: bible-api.com (WEB) • Nuvia Edition</small>
+    </aside>
+    <section id="content" class="panel" aria-live="polite">
+      <div id="title" style="font-weight:700;margin-bottom:8px"></div>
+      <div id="verseGrid" class="verse-grid" aria-label="Verses"></div>
+      <div id="verses"></div>
+    </section>
+  </main>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js';
+    import { initializeFirestore, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js';
+
+    const firebaseConfig = typeof window.__firebase_config !== 'undefined' ? JSON.parse(window.__firebase_config) : null;
+    let app=null, db=null, auth=null, user=null, appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'default-app-id';
+    if (firebaseConfig) {
+      app = initializeApp(firebaseConfig);
+      db = initializeFirestore(app, { experimentalForceLongPolling: true, useFetchStreams: false });
+      auth = getAuth(app);
+      onAuthStateChanged(auth, u=>{ user=u||null; });
+    }
+
+    const bookInput = document.getElementById('bookInput');
+    const editionSelectBible = document.getElementById('editionSelectBible');
+    const sourceLabel = document.getElementById('sourceLabel');
+    let currentBibleEdition = 'web';
+    const chapterInput = document.getElementById('chapterInput');
+    const loadBtn = document.getElementById('loadBtn');
+    const titleEl = document.getElementById('title');
+    const versesEl = document.getElementById('verses');
+    const HIGHLIGHT_KEY = 'bible_highlights';
+    const prevBtn = document.getElementById('prevChapter');
+    const nextBtn = document.getElementById('nextChapter');
+    const continueBtn = document.getElementById('continueBtn');
+    const refInput = document.getElementById('refInput');
+    const goRefBtn = document.getElementById('goRefBtn');
+    const bookList = document.getElementById('bookList');
+
+    const norm = (s)=> String(s||'').toLowerCase().replace(/[\W_]+/g,'').replace(/^(1st|first|i)\b/,'1').replace(/^(2nd|second|ii)\b/,'2').replace(/^(3rd|third|iii)\b/,'3').trim();
+
+    const books = [
+      'Genesis','Exodus','Leviticus','Numbers','Deuteronomy','Joshua','Judges','Ruth','1 Samuel','2 Samuel','1 Kings','2 Kings','1 Chronicles','2 Chronicles','Ezra','Nehemiah','Esther','Job','Psalm','Proverbs','Ecclesiastes','Song of Solomon','Isaiah','Jeremiah','Lamentations','Ezekiel','Daniel','Hosea','Joel','Amos','Obadiah','Jonah','Micah','Nahum','Habakkuk','Zephaniah','Haggai','Zechariah','Malachi','Matthew','Mark','Luke','John','Acts','Romans','1 Corinthians','2 Corinthians','Galatians','Ephesians','Philippians','Colossians','1 Thessalonians','2 Thessalonians','1 Timothy','2 Timothy','Titus','Philemon','Hebrews','James','1 Peter','2 Peter','1 John','2 John','3 John','Jude','Revelation'
+    ];
+
+    const aliasTable = {
+      'genesis':['gen','ge'],
+      'exodus':['exo','ex'],
+      'leviticus':['lev','lv'],
+      'numbers':['num','nu','nm'],
+      'deuteronomy':['deut','dt','deu'],
+      'joshua':['josh','jos'],
+      'judges':['judg','jdg'],
+      'ruth':['ru'],
+      '1samuel':['1sam','1sa','i samuel','1st samuel'],
+      '2samuel':['2sam','2sa','ii samuel','2nd samuel'],
+      '1kings':['1ki','1kgs','i kings','1st kings'],
+      '2kings':['2ki','2kgs','ii kings','2nd kings'],
+      '1chronicles':['1chr','1ch','i chronicles','1st chronicles'],
+      '2chronicles':['2chr','2ch','ii chronicles','2nd chronicles'],
+      'ezra':['ezr'],
+      'nehemiah':['neh','ne'],
+      'esther':['est','es'],
+      'job':['jb'],
+      'psalm':['ps','psa','psalm','psalms'],
+      'proverbs':['prov','pr','prv'],
+      'ecclesiastes':['eccl','ecc','qoheleth'],
+      'songofsolomon':['song','songs','songofsongs','canticles','cant'],
+      'isaiah':['isa','is'],
+      'jeremiah':['jer','je'],
+      'lamentations':['lam','la'],
+      'ezekiel':['ezek','eze','ezk'],
+      'daniel':['dan','da','dn'],
+      'hosea':['hos','ho'],
+      'joel':['jl'],
+      'amos':['am'],
+      'obadiah':['obad','ob'],
+      'jonah':['jon','jh'],
+      'micah':['mic','mi'],
+      'nahum':['nah','na'],
+      'habakkuk':['hab','hb'],
+      'zephaniah':['zeph','zp'],
+      'haggai':['hag','hg'],
+      'zechariah':['zech','zc','za'],
+      'malachi':['mal','ml'],
+      'matthew':['mat','mt','matt'],
+      'mark':['mk','mrk'],
+      'luke':['lk','luk'],
+      'john':['jn','jhn'],
+      'acts':['ac','act'],
+      'romans':['rom','ro','rm'],
+      '1corinthians':['1cor','1co','i corinthians','1st corinthians'],
+      '2corinthians':['2cor','2co','ii corinthians','2nd corinthians'],
+      'galatians':['gal','ga'],
+      'ephesians':['eph','ep'],
+      'philippians':['phil','php','pp'],
+      'colossians':['col','co'],
+      '1thessalonians':['1thess','1th','i thessalonians','1st thessalonians'],
+      '2thessalonians':['2thess','2th','ii thessalonians','2nd thessalonians'],
+      '1timothy':['1tim','1ti','i timothy','1st timothy'],
+      '2timothy':['2tim','2ti','ii timothy','2nd timothy'],
+      'titus':['tit','ti'],
+      'philemon':['philem','phm','pm'],
+      'hebrews':['heb','he'],
+      'james':['jas','jm','ja'],
+      '1peter':['1pet','1pe','i peter','1st peter'],
+      '2peter':['2pet','2pe','ii peter','2nd peter'],
+      '1john':['1jn','1jo','i john','1st john'],
+      '2john':['2jn','2jo','ii john','2nd john'],
+      '3john':['3jn','3jo','iii john','3rd john'],
+      'jude':['jud'],
+      'revelation':['rev','re','apocalypse']
+    };
+
+    const aliasToCanonical = (()=>{
+      const map = new Map();
+      for (const b of books){ map.set(norm(b), b); }
+      for (const [key, arr] of Object.entries(aliasTable)){
+        const canon = (()=>{
+          // map alias key back to canonical name
+          const k = key.replace(/(\d)([a-z])/i,'$1 $2');
+          const match = books.find(b => norm(b)===norm(k));
+          return match || books.find(b=> norm(b).startsWith(norm(k.replace(/\s/g,''))) ) || key;
+        })();
+        arr.forEach(a=> map.set(norm(a), canon));
+      }
+      return map;
+    })();
+
+    // Chapter counts per canonical book (KJV)
+    const bibleChapterCounts = {
+      'Genesis':50,'Exodus':40,'Leviticus':27,'Numbers':36,'Deuteronomy':34,'Joshua':24,'Judges':21,'Ruth':4,
+      '1 Samuel':31,'2 Samuel':24,'1 Kings':22,'2 Kings':25,'1 Chronicles':29,'2 Chronicles':36,'Ezra':10,'Nehemiah':13,'Esther':10,
+      'Job':42,'Psalm':150,'Proverbs':31,'Ecclesiastes':12,'Song of Solomon':8,'Isaiah':66,'Jeremiah':52,'Lamentations':5,'Ezekiel':48,'Daniel':12,
+      'Hosea':14,'Joel':3,'Amos':9,'Obadiah':1,'Jonah':4,'Micah':7,'Nahum':3,'Habakkuk':3,'Zephaniah':3,'Haggai':2,'Zechariah':14,'Malachi':4,
+      'Matthew':28,'Mark':16,'Luke':24,'John':21,'Acts':28,'Romans':16,'1 Corinthians':16,'2 Corinthians':13,'Galatians':6,'Ephesians':6,'Philippians':4,'Colossians':4,
+      '1 Thessalonians':5,'2 Thessalonians':3,'1 Timothy':6,'2 Timothy':4,'Titus':3,'Philemon':1,'Hebrews':13,'James':5,'1 Peter':5,'2 Peter':3,'1 John':5,'2 John':1,'3 John':1,'Jude':1,'Revelation':22
+    };
+
+    function renderBookGrid(){
+      const grid = document.getElementById('bookGrid'); if(!grid) return; grid.innerHTML='';
+      books.forEach(b=>{
+        const btn = document.createElement('button'); btn.className='grid-btn'; btn.textContent=b; btn.type='button';
+        btn.addEventListener('click',()=>{ bookInput.value=b; const c = (bibleChapterCounts[b]||1); chapterInput.value = Math.min(c, parseInt(chapterInput.value)||1); renderChapterGrid(b); });
+        grid.appendChild(btn);
+      });
+    }
+    function renderChapterGrid(book){
+      const grid = document.getElementById('chapterGrid'); if(!grid) return; grid.innerHTML='';
+      const count = bibleChapterCounts[book] || 1; const current = parseInt(chapterInput.value)||1;
+      for(let i=1;i<=count;i++){
+        const btn = document.createElement('button'); btn.className='grid-btn'+(i===current?' active':''); btn.textContent=String(i); btn.type='button';
+        btn.addEventListener('click',()=>{ chapterInput.value=i; loadChapter(book, i); Array.from(grid.children).forEach(c=>c.classList.remove('active')); btn.classList.add('active'); });
+        grid.appendChild(btn);
+      }
+    }
+    function renderVerseGrid(total){
+      const grid = document.getElementById('verseGrid'); if(!grid) return; grid.innerHTML='';
+      const t = Math.max(0, Number(total)||0); if(!t) return;
+      for(let i=1;i<=t;i++){
+        const btn = document.createElement('button'); btn.className='grid-btn'; btn.textContent=String(i); btn.type='button';
+        btn.addEventListener('click',()=>{
+          const bookKey = String(currentBook || bookInput.value).replace(/\s+/g,'');
+          const chapKey = String(currentChapter || chapterInput.value);
+          const targetId1 = `b${bookKey}-c${chapKey}-v${i}`; // appended chapters use this id
+          const targetId2 = `v-${i}`; // initial chapter uses this id
+          const el = document.getElementById(targetId1) || document.getElementById(targetId2);
+          if(el) el.scrollIntoView({behavior:'smooth'});
+          persistProgress(bookInput.value.trim(), chapterInput.value, i);
+        });
+        grid.appendChild(btn);
+      }
+    }
+
+    // Populate datalist with canonical names (clean UI)
+    books.forEach(b=>{ const o=document.createElement('option'); o.value=b; bookList.appendChild(o); });
+
+    function updateSource(){ if(sourceLabel){ const tag = (currentBibleEdition||'web').toUpperCase(); sourceLabel.textContent = `Source: bible-api.com (${tag})${currentBibleEdition==='web' ? ' • Nuvia Edition' : ''}`; } }
+
+    async function loadChapter(book, chapter){
+      if (!book || !chapter) return;
+      titleEl.textContent = 'Loading...'; versesEl.innerHTML='';
+      const q = encodeURIComponent(`${book} ${chapter}`);
+      const res = await fetch(`https://bible-api.com/${q}?translation=${currentBibleEdition}`);
+      const data = await res.json();
+      const ref = data.reference || `${book} ${chapter}`;
+      titleEl.textContent = ref; currentBook = book; currentChapter = Number(chapter);
+      const versesArr = (data.verses||[]);
+      const key = `${book} ${chapter}`;
+      const highlights = getHighlightsFor(key);
+      versesArr.forEach(v=>{
+        const div = document.createElement('div');
+        div.className='verse'+(highlights.has(v.verse)?' highlight':'');
+        div.id = `v-${v.verse}`;
+        div.innerHTML = `<span class=\"num\">${v.verse}.</span> ${v.text}`;
+        versesEl.appendChild(div);
+      });
+      renderVerseGrid(versesArr.length);
+      persistProgress(book, Number(chapter), 1);
+    }
+
+    // --- Infinite scroll helpers (append next chapters)
+    let currentBook = null;
+    let currentChapter = null;
+    let isLoadingChapter = false;
+
+    async function appendChapter(book, chapter) {
+      if (!book || !chapter) return;
+      if (isLoadingChapter) return;
+      isLoadingChapter = true;
+      try {
+        const q = encodeURIComponent(`${book} ${chapter}`);
+        const res = await fetch(`https://bible-api.com/${q}?translation=${currentBibleEdition}`);
+        const data = await res.json();
+        const ref = data.reference || `${book} ${chapter}`;
+        const sep = document.createElement('div');
+        sep.className='verse-separator';
+        sep.style.margin = '18px 0 8px';
+        sep.style.opacity = '.9';
+        sep.style.fontWeight = '700';
+        sep.textContent = ref;
+        versesEl.appendChild(sep);
+        const versesArr = (data.verses||[]);
+        versesArr.forEach(v=>{
+          const div = document.createElement('div');
+          div.className = 'verse';
+          const id = `b${book.replace(/\s+/g,'')}-c${chapter}-v${v.verse}`;
+          div.id = id;
+          div.innerHTML = `<span class=\"num\">${v.verse}.</span> ${v.text}`;
+          versesEl.appendChild(div);
+        });
+        renderVerseGrid(versesArr.length);
+        persistProgress(book, Number(chapter), 1);
+        currentBook = book;
+        currentChapter = Number(chapter);
+      } catch(e) { console.error('Failed to append chapter', e); }
+      finally { isLoadingChapter = false; }
+    }
+
+    function getNextChapter(book, chapter) {
+      const canonicalList = books.slice();
+      const counts = bibleChapterCounts;
+      const idx = canonicalList.findIndex(b => b === book);
+      if (idx === -1) return null;
+      const ch = Number(chapter);
+      const max = counts[book] || 1;
+      if (ch < max) return { book, chapter: ch+1 };
+      for (let i = idx+1; i < canonicalList.length; i++){
+        const nextBook = canonicalList[i];
+        if ((counts[nextBook]||0) > 0) return { book: nextBook, chapter: 1 };
+      }
+      return null;
+    }
+
+    function bibleCheckScroll(){
+      try{
+        if (isLoadingChapter) return;
+        if (!currentBook || !currentChapter) return;
+        const rect = versesEl.getBoundingClientRect();
+        const distanceFromBottom = rect.bottom - window.innerHeight;
+        if (distanceFromBottom < 300) {
+          const next = getNextChapter(currentBook, currentChapter);
+          if (next) appendChapter(next.book, next.chapter);
+        }
+      }catch(e){console.warn(e)}
+    }
+    window.addEventListener('scroll', bibleCheckScroll);
+
+    function persistProgress(book, chapter, verse){
+      try {
+        localStorage.setItem('bible_progress', JSON.stringify({ book, chapter, verse }));
+        if (user && db){
+          const r = doc(db, 'artifacts', appId, 'users', user.uid, 'profiles', 'user_profile');
+          updateDoc(r, { lastBibleBook: String(book), lastBibleChapter: Number(chapter), lastBibleVerse: Number(verse) }).catch(()=>{});
+        }
+      } catch(_) {}
+    }
+
+    function resume(){
+      try{
+        const s = JSON.parse(localStorage.getItem('bible_progress')||'{}');
+        if (!s || !s.book) return;
+        bookInput.value = s.book; chapterInput.value = s.chapter || 1;
+        loadChapter(bookInput.value, chapterInput.value).then(()=>{
+          const t = document.getElementById(`v-${s.verse||1}`); if (t) t.scrollIntoView({behavior:'smooth'});
+        });
+      }catch(_){}
+    }
+
+    loadBtn.addEventListener('click', ()=> loadChapter(bookInput.value.trim(), chapterInput.value));
+    if (editionSelectBible){
+      const savedEdition = (localStorage.getItem('bible_edition')||'web');
+      const paramsEdition = new URLSearchParams(location.search).get('edition');
+      currentBibleEdition = (paramsEdition || savedEdition || 'web').toLowerCase();
+      if (editionSelectBible.querySelector(`option[value="${currentBibleEdition}"]`)) editionSelectBible.value = currentBibleEdition;
+      updateSource();
+      editionSelectBible.addEventListener('change', ()=>{ currentBibleEdition = editionSelectBible.value; localStorage.setItem('bible_edition', currentBibleEdition); updateSource(); loadChapter(bookInput.value.trim(), chapterInput.value); });
+    } else { updateSource(); }
+    prevBtn.addEventListener('click', ()=>{ const ch = Math.max(1, (parseInt(chapterInput.value)||1)-1); chapterInput.value = ch; loadChapter(bookInput.value.trim(), ch); });
+    nextBtn.addEventListener('click', ()=>{ const ch = Math.max(1, (parseInt(chapterInput.value)||1)+1); chapterInput.value = ch; loadChapter(bookInput.value.trim(), ch); });
+    versesEl.addEventListener('click', (e)=>{ const p=e.target.closest('.verse'); if(!p) return; const id = parseInt(((p.id.match(/(\d+)$/)||[])[1])||'1'); persistProgress(bookInput.value.trim(), chapterInput.value, id); toggleHighlight(`${bookInput.value.trim()} ${chapterInput.value}`, id, p); });
+    continueBtn.addEventListener('click', resume);
+    function canonicalizeBook(raw){
+      const n = norm(raw);
+      if (!n) return null;
+      // Try direct
+      if (aliasToCanonical.has(n)) return aliasToCanonical.get(n);
+      // Try contains match
+      for (const [k,v] of aliasToCanonical){ if (k.includes(n) || n.includes(k)) return v; }
+      return raw; // fallback as-is (API is forgiving)
+    }
+
+    function parseRef(raw){
+      const s = String(raw||'').trim(); if(!s) return null;
+      const m = s.match(/^(\S+(?:\s+\S+)*)\s+(\d+)(?::(\d+))?$/); // Book words, chapter, optional :verse
+      if(!m) return null; const book = canonicalizeBook(m[1]); return { book, chapter:Number(m[2]), verse: m[3] ? Number(m[3]) : 1 };
+    }
+    function goToRef(){ const r = parseRef(refInput.value); if(!r) return; bookInput.value=r.book; chapterInput.value=r.chapter; loadChapter(r.book, r.chapter).then(()=>{ const t=document.getElementById(`v-${r.verse}`); if(t) t.scrollIntoView({behavior:'smooth'}); persistProgress(r.book, r.chapter, r.verse); }); }
+    goRefBtn.addEventListener('click', goToRef);
+    refInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') goToRef(); });
+
+    // Autocanonicalize on blur/change
+    bookInput.addEventListener('change', ()=>{ const c = canonicalizeBook(bookInput.value); if (c) bookInput.value = c; });
+
+    function getHighlightsFor(key){ try{ const raw=JSON.parse(localStorage.getItem(HIGHLIGHT_KEY)||'{}'); const arr=raw[key]||[]; return new Set(Array.isArray(arr)?arr:[]);}catch(_){return new Set();} }
+    function toggleHighlight(key, verse, el){ try{ const raw=JSON.parse(localStorage.getItem(HIGHLIGHT_KEY)||'{}'); const arr=new Set(Array.isArray(raw[key])?raw[key]:[]); if(arr.has(verse)){ arr.delete(verse); el.classList.remove('highlight'); } else { arr.add(verse); el.classList.add('highlight'); } raw[key]=Array.from(arr); localStorage.setItem(HIGHLIGHT_KEY, JSON.stringify(raw)); }catch(_){} }
+
+    (function init(){
+      const params = new URLSearchParams(location.search);
+      const saved = JSON.parse(localStorage.getItem('bible_progress')||'{}');
+      let initialBook = 'John';
+      let initialChapter = 3;
+      let initialVerse = 1;
+      if (params.has('ref')){
+        const r = parseRef(params.get('ref'));
+        if (r && r.book){ initialBook = r.book; initialChapter = r.chapter || 1; initialVerse = r.verse || 1; }
+      } else if (params.has('book') && params.has('chapter')){
+        initialBook = canonicalizeBook(params.get('book')) || params.get('book');
+        initialChapter = Math.max(1, Number(params.get('chapter')) || 1);
+        initialVerse = Math.max(1, Number(params.get('verse')) || 1);
+      } else if (saved.book){
+        initialBook = saved.book; initialChapter = saved.chapter || 1; initialVerse = saved.verse || 1;
+      }
+      bookInput.value = initialBook; chapterInput.value = initialChapter;
+      renderBookGrid();
+      renderChapterGrid(initialBook);
+      loadChapter(initialBook, initialChapter).then(()=>{
+        const t = document.getElementById(`v-${initialVerse}`);
+        if (t) t.scrollIntoView({behavior:'smooth'});
+      });
+      try { currentBook = initialBook; currentChapter = Number(initialChapter); } catch(e){}
+    })();
+  </script>
+</body>
+</html>

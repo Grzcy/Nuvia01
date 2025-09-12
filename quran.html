@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quran Reader</title>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <style>
+    :root{--pink:#ff2e92;--blue:#00d5ff;--white:#fff;--text-light:rgba(255,255,255,.7);--card-background:rgba(255,255,255,0.05);--border-light:rgba(255,255,255,0.15);--header-background:linear-gradient(135deg, rgba(10,10,10,.85), rgba(10,10,10,.75));}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--white);background:linear-gradient(135deg,#ff2e92,#ffd700);background-attachment:fixed;background-size:cover}
+    header{position:sticky;top:0;background:var(--header-background);border-bottom:1px solid var(--border-light);backdrop-filter:saturate(140%) blur(6px);z-index:10}
+    header .inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:10px;padding:10px 16px}
+    a.btn{background:linear-gradient(90deg,var(--blue),var(--pink));color:#fff;border:none;border-radius:12px;padding:8px 12px;text-decoration:none;font-weight:700;box-shadow:0 3px 10px rgba(0,0,0,.3)}
+    main{max-width:900px;margin:16px auto;padding:0 16px;display:grid;grid-template-columns:280px 1fr;gap:16px}
+    .panel{background:var(--card-background);border:1px solid var(--border-light);border-radius:12px;padding:12px}
+    .panel h2{margin:0 0 8px 0;font-size:1rem}
+    select,button,input{background:rgba(255,255,255,.08);border:1px solid var(--border-light);border-radius:10px;color:#fff;padding:8px 10px;font-size:.95rem}
+    button.primary{background:linear-gradient(90deg,var(--blue),var(--pink));border:none;box-shadow:0 3px 10px rgba(0,0,0,.3);font-weight:700}
+    .ayah{padding:10px;border-bottom:1px solid var(--border-light)}
+    .ayah.highlight{background:rgba(255,223,0,.35);border-radius:8px}
+    .ayah:last-child{border-bottom:none}
+    .ayah .num{opacity:.7;margin-right:6px}
+    .controls{display:flex;flex-wrap:wrap;gap:8px}
+    .field{display:flex;gap:6px}
+    input[type=text]{flex:1;min-width:140px}
+    .sticky{position:sticky;top:76px}
+    .surah-grid,.ayah-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(48px,1fr));gap:6px;margin-top:10px}
+    .surah-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+    .grid-btn{background:rgba(255,255,255,.08);border:1px solid var(--border-light);border-radius:10px;color:#fff;padding:8px 10px;font-size:.9rem;cursor:pointer}
+    .grid-btn:hover{background:rgba(255,255,255,.12)}
+    .grid-btn.active{background:linear-gradient(90deg,var(--blue),var(--pink));border:none}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="inner">
+      <a href="/Home.html" class="btn">← Home</a>
+      <div style="font-weight:800">Quran Reader</div>
+      <div style="margin-left:auto" class="controls">
+        <button id="continueBtn" class="primary" title="Continue where you left off">Continue</button>
+      </div>
+    </div>
+  </header>
+  <main>
+    <aside class="panel sticky">
+      <h2>Surah</h2>
+      <div class="controls">
+        <div class="field">
+          <input type="text" id="surahSearch" list="surahList" placeholder="Search Surah (name or number)" aria-label="Search Surah">
+          <datalist id="surahList"></datalist>
+        </div>
+        <select id="surahSelect" aria-label="Select Surah"></select>
+        <select id="editionSelect" aria-label="Translation">
+          <option value="en.sahih" selected>Nuvia Edition (Simple English)</option>
+          <option value="en.pickthall">English (Pickthall)</option>
+          <option value="en.asad">English (Asad)</option>
+        </select>
+        <div class="field"><input type="text" id="refInput" placeholder="Go to (e.g. 2:255)" aria-label="Go to Surah:Ayah"><button id="goRefBtn" class="primary">Go</button></div>
+        <button id="prevSurah">Prev</button>
+        <button id="nextSurah">Next</button>
+      </div>
+      <div id="surahGrid" class="surah-grid" aria-label="Surahs"></div>
+    </aside>
+    <section id="content" class="panel" aria-live="polite">
+      <div id="title" style="font-weight:700;margin-bottom:8px"></div>
+      <div id="bismillah" style="opacity:.8;margin-bottom:10px"></div>
+      <div id="ayahGrid" class="ayah-grid" aria-label="Ayahs"></div>
+      <div id="ayahs"></div>
+    </section>
+  </main>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js';
+    import { initializeFirestore, doc, updateDoc } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js';
+
+    const firebaseConfig = typeof window.__firebase_config !== 'undefined' ? JSON.parse(window.__firebase_config) : null;
+    let app=null, db=null, auth=null, user=null, appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'default-app-id';
+    if (firebaseConfig) {
+      app = initializeApp(firebaseConfig);
+      db = initializeFirestore(app, { experimentalForceLongPolling: true, useFetchStreams: false });
+      auth = getAuth(app);
+      onAuthStateChanged(auth, u=>{ user=u||null; });
+    }
+
+    const surahSelect = document.getElementById('surahSelect');
+    const editionSelect = document.getElementById('editionSelect');
+    const ayahsEl = document.getElementById('ayahs');
+    const HIGHLIGHT_KEY = 'quran_highlights';
+    const titleEl = document.getElementById('title');
+    const bismillahEl = document.getElementById('bismillah');
+    const prevBtn = document.getElementById('prevSurah');
+    const nextBtn = document.getElementById('nextSurah');
+    const continueBtn = document.getElementById('continueBtn');
+    const refInput = document.getElementById('refInput');
+    const goRefBtn = document.getElementById('goRefBtn');
+    const surahSearch = document.getElementById('surahSearch');
+    const surahList = document.getElementById('surahList');
+
+    let surahMeta = []; // cache of surah info for search
+
+    const norm = (s)=> String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'').trim();
+
+    async function loadSurahList(){
+      const res = await fetch('https://api.alquran.cloud/v1/surah');
+      const data = await res.json();
+      surahMeta = (data.data||[]).map(s=>({
+        number: s.number,
+        name: s.englishName,
+        trans: s.englishNameTranslation,
+        ayahCount: s.numberOfAyahs
+      }));
+      surahMeta.forEach(s=>{
+        const opt = document.createElement('option');
+        opt.value = String(s.number);
+        opt.textContent = `${s.number}. ${s.name} (${s.trans})`;
+        surahSelect.appendChild(opt);
+        const dl = document.createElement('option');
+        dl.value = `${s.number}. ${s.name} (${s.trans})`;
+        surahList.appendChild(dl);
+      });
+    }
+
+    let currentSurah = null;
+    let isLoadingSurah = false;
+
+    async function loadSurah(num, edition, append = false){
+      if (!num) return;
+      if (isLoadingSurah) return;
+      isLoadingSurah = true;
+      try {
+        if (!append) { titleEl.textContent = 'Loading...'; if (ayahsEl) ayahsEl.innerHTML = ''; bismillahEl.textContent=''; }
+        const res = await fetch(`https://api.alquran.cloud/v1/surah/${num}/${edition}`);
+        const data = await res.json();
+        const s = data.data;
+        if (!append) {
+          titleEl.textContent = `${s.englishName} • ${s.englishNameTranslation} (${s.numberOfAyahs} ayah)`;
+        } else {
+          // when appending, add a small header separator
+          const sep = document.createElement('div');
+          sep.className = 'ayah-separator';
+          sep.style.margin = '18px 0 8px';
+          sep.style.opacity = '.9';
+          sep.style.fontWeight = '700';
+          sep.textContent = `${s.englishName} • ${s.englishNameTranslation}`;
+          ayahsEl.appendChild(sep);
+        }
+        bismillahEl.textContent = s.bismillah && s.bismillah.text ? s.bismillah.text : '';
+        const total = (s.ayahs||[]).length;
+        const key = `${s.number}-${edition}`;
+        const highlights = getHighlightsFor(key);
+        s.ayahs.forEach((a, idx)=>{
+          const div = document.createElement('div');
+          const ayahIndex = idx+1;
+          div.className='ayah'+(highlights.has(ayahIndex)?' highlight':'');
+          // when appending, ensure unique ids by prefixing with surah number
+          div.id = `s${s.number}-a-${ayahIndex}`;
+          div.innerHTML = `<span class=\"num\">${ayahIndex}.</span> ${a.text}`;
+          ayahsEl.appendChild(div);
+        });
+        renderAyahGrid(total);
+        persistProgress(num, 1, edition);
+        currentSurah = Number(num);
+      } catch (e) {
+        console.error('Failed to load surah', e);
+      } finally {
+        isLoadingSurah = false;
+      }
+    }
+
+    // Infinite scroll: append next surah when user nears bottom of page
+    function quranCheckScroll() {
+      try {
+        if (isLoadingSurah) return;
+        if (!currentSurah) return;
+        if (currentSurah >= 114) return; // last surah
+        const rect = ayahsEl.getBoundingClientRect();
+        const distanceFromBottom = rect.bottom - window.innerHeight;
+        if (distanceFromBottom < 300) {
+          loadSurah(currentSurah + 1, editionSelect.value, true);
+        }
+      } catch(e) { console.warn(e); }
+    }
+    window.addEventListener('scroll', quranCheckScroll);
+
+    function persistProgress(surah, ayah, edition){
+      try {
+        localStorage.setItem('quran_progress', JSON.stringify({ surah, ayah, edition }));
+        if (user && db){
+          const ref = doc(db, 'artifacts', appId, 'users', user.uid, 'profiles', 'user_profile');
+          updateDoc(ref, { lastQuranSurah: Number(surah), lastQuranAyah: Number(ayah), lastQuranEdition: edition }).catch(()=>{});
+        }
+      } catch(_) {}
+    }
+
+    function resume(){
+      try{
+        const s = JSON.parse(localStorage.getItem('quran_progress')||'{}');
+        if (!s || !s.surah) return;
+        surahSelect.value = String(s.surah);
+        editionSelect.value = s.edition || 'en.sahih';
+        loadSurah(s.surah, editionSelect.value).then(()=>{
+          const ay = s.ayah || 1; const t = document.getElementById(`s${s.surah}-a-${ay}`) || document.getElementById(`a-${ay}`); if (t) t.scrollIntoView({behavior:'smooth'});
+        });
+      }catch(_){}
+    }
+
+    surahSelect.addEventListener('change', ()=> loadSurah(surahSelect.value, editionSelect.value));
+    editionSelect.addEventListener('change', ()=> loadSurah(surahSelect.value, editionSelect.value));
+    prevBtn.addEventListener('click', ()=>{ const v=Math.max(1, (parseInt(surahSelect.value)||1)-1); surahSelect.value=String(v); loadSurah(v, editionSelect.value); });
+    nextBtn.addEventListener('click', ()=>{ const v=Math.min(114, (parseInt(surahSelect.value)||1)+1); surahSelect.value=String(v); loadSurah(v, editionSelect.value); });
+    ayahsEl.addEventListener('click', (e)=>{ const p=e.target.closest('.ayah'); if(!p) return; const id = parseInt(p.id.split('-').pop()); persistProgress(surahSelect.value, id, editionSelect.value); toggleHighlight(`${surahSelect.value}-${editionSelect.value}`, id, p); });
+    continueBtn.addEventListener('click', resume);
+    function parseRef(raw){ const s=String(raw||'').trim(); if(!s) return null; const m = s.match(/^(\d{1,3})(?::(\d{1,3}))?$/); if(!m) return null; return { surah:Number(m[1]), ayah: m[2]?Number(m[2]):1 }; }
+    function goToRef(){ const r = parseRef(refInput.value); if(!r) return; surahSelect.value=String(r.surah); loadSurah(r.surah, editionSelect.value).then(()=>{ const t=document.getElementById(`s${r.surah}-a-${r.ayah}`) || document.getElementById(`a-${r.ayah}`); if(t) t.scrollIntoView({behavior:'smooth'}); persistProgress(r.surah, r.ayah, editionSelect.value); }); }
+    goRefBtn.addEventListener('click', goToRef);
+    refInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') goToRef(); });
+
+    function renderSurahGrid(){
+      const grid = document.getElementById('surahGrid'); if(!grid) return; grid.innerHTML='';
+      const current = parseInt(surahSelect.value)||1;
+      surahMeta.forEach(s=>{
+        const btn = document.createElement('button'); btn.className='grid-btn'+(s.number===current?' active':''); btn.type='button';
+        btn.textContent = `${s.number}. ${s.name}`;
+        btn.addEventListener('click',()=>{ surahSelect.value=String(s.number); loadSurah(s.number, editionSelect.value); Array.from(grid.children).forEach(c=>c.classList.remove('active')); btn.classList.add('active'); });
+        grid.appendChild(btn);
+      });
+    }
+    function renderAyahGrid(total){
+      const grid = document.getElementById('ayahGrid'); if(!grid) return; grid.innerHTML='';
+      const t = Math.max(0, Number(total)||0); if(!t) return;
+      for(let i=1;i<=t;i++){
+        const btn = document.createElement('button'); btn.className='grid-btn'; btn.type='button'; btn.textContent=String(i);
+        btn.addEventListener('click',()=>{ const targetId1 = `s${String(currentSurah||surahSelect.value)}-a-${i}`; const targetId2 = `a-${i}`; const el = document.getElementById(targetId1) || document.getElementById(targetId2); if(el) el.scrollIntoView({behavior:'smooth'}); persistProgress(surahSelect.value, i, editionSelect.value); });
+        grid.appendChild(btn);
+      }
+    }
+
+    function selectSurahFromSearch(value){
+      const v = String(value||'').trim(); if(!v) return false;
+      const mNum = v.match(/^\s*(\d{1,3})\b/);
+      if (mNum){
+        const n = Math.max(1, Math.min(114, Number(mNum[1])));
+        surahSelect.value = String(n);
+        surahSearch.value = '';
+        loadSurah(n, editionSelect.value);
+        return true;
+      }
+      const nval = norm(v);
+      const found = surahMeta.find(s => nval.includes(norm(s.name)) || nval.includes(norm(s.trans)) || norm(s.name).includes(nval) || norm(s.trans).includes(nval));
+      if (found){
+        surahSelect.value = String(found.number);
+        surahSearch.value = '';
+        loadSurah(found.number, editionSelect.value);
+        return true;
+      }
+      return false;
+    }
+
+    surahSearch.addEventListener('change', ()=> selectSurahFromSearch(surahSearch.value));
+    surahSearch.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ selectSurahFromSearch(surahSearch.value); } });
+
+    function getHighlightsFor(key){ try{ const raw=JSON.parse(localStorage.getItem(HIGHLIGHT_KEY)||'{}'); const arr=raw[key]||[]; return new Set(Array.isArray(arr)?arr:[]);}catch(_){return new Set();} }
+    function toggleHighlight(key, ayah, el){ try{ const raw=JSON.parse(localStorage.getItem(HIGHLIGHT_KEY)||'{}'); const arr=new Set(Array.isArray(raw[key])?raw[key]:[]); if(arr.has(ayah)){ arr.delete(ayah); el.classList.remove('highlight'); } else { arr.add(ayah); el.classList.add('highlight'); } raw[key]=Array.from(arr); localStorage.setItem(HIGHLIGHT_KEY, JSON.stringify(raw)); }catch(_){} }
+
+    (async ()=>{
+      await loadSurahList();
+      renderSurahGrid();
+      const params = new URLSearchParams(location.search);
+      const saved = JSON.parse(localStorage.getItem('quran_progress')||'{}');
+      let startSurah = 1, startEdition = 'en.sahih', startAyah = 1;
+      if (params.has('ref')){ const r = parseRef(params.get('ref')); if (r){ startSurah = Math.max(1, Math.min(114, r.surah)); startAyah = Math.max(1, r.ayah||1); } }
+      if (params.has('surah')) startSurah = Math.max(1, Math.min(114, Number(params.get('surah'))||1));
+      if (params.has('ayah')) startAyah = Math.max(1, Number(params.get('ayah'))||1);
+      if (params.has('edition')) startEdition = params.get('edition') || 'en.sahih';
+      if (!params.has('ref') && !params.has('surah') && saved.surah){ startSurah = saved.surah; startEdition = saved.edition || 'en.sahih'; startAyah = saved.ayah || 1; }
+      surahSelect.value = String(startSurah); editionSelect.value = startEdition;
+      await loadSurah(startSurah, startEdition);
+      { const t = document.getElementById(`s${startSurah}-a-${startAyah}`) || document.getElementById(`a-${startAyah}`); if (t) t.scrollIntoView({behavior:'smooth'}); }
+    })();
+  </script>
+</body>
+</html>

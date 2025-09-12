@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Last updated: 2025-08-21T18:19:29Z -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JCHAT - Main Admin Dashboard</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://*.firebaseio.com" crossorigin>
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" onload="this.rel='stylesheet'" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /></noscript>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" defer crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <style>
+        /* Universal box-sizing for consistent layout */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        /* Global CSS Variables for easy theme switching */
+        :root {
+            /* Core JCHAT Colors */
+            --pink: #ff2e92;
+            --blue: #00d5ff;
+            --radius: 20px;
+            --transition: .3s ease;
+
+            /* Default Dark Mode variables */
+            --white: #fff; /* Primary text color */
+            --text-light: rgba(255, 255, 255, .7); /* Secondary text color */
+            --background-main: rgba(10, 10, 10, .75); /* Main background color */
+            --background-gradient-1: #00d5ff; /* Gradient start */
+            --background-gradient-2: #ff2e92; /* Gradient end */
+            --card-background: linear-gradient(145deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01)); /* Card background with subtle gradient */
+            --header-background: linear-gradient(135deg, rgba(10, 10, 10, .85), rgba(10, 10, 10, .75)); /* Header background */
+            --border-light: rgba(255, 255, 255, .05); /* Light border color */
+            --input-background: rgba(255, 255, 255, 0.05); /* Input field background */
+            --button-background-gradient: linear-gradient(90deg, var(--blue), var(--pink)); /* Button gradient */
+            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink); /* Button shadow */
+
+            /* Semantic Colors (for consistency across themes) */
+            --background-color-primary: #1a1a2e; /* Deeper background for sections */
+            --background-color-secondary: #0f0f1f; /* Even deeper background */
+            --header-background-color: #2a2a4a; /* Header/footer solid background */
+            --footer-background-color: #2a2a4a;
+            --content-background-color: #20203a; /* Main content card background */
+            --card-background-color: #2a2a4a; /* General card background */
+            --text-color-primary: #e0e0e0; /* Primary text for content */
+            --text-color-secondary: #b0b0d0; /* Secondary text for content */
+            --notification-badge-color: #ff2e92; /* Pink for badges */
+            --status-online: #4CAF50; /* Green for online status */
+            --status-offline: #6c757d; /* Grey for offline status */
+            --status-away: #FFC107; /* Yellow for away status */
+            --delete-button-color: #dc3545; /* Red for destructive actions */
+            --warning-color: #ffc107; /* Orange for warnings */
+            --accent-color: #00d5ff; /* Main accent color (blue) */
+            --accent-color-dark: #00aaff; /* Darker accent color */
+            --border-color: #3a3a5a; /* General border color */
+        }
+
+        /* --- Theme Definitions (Light, Dark, Glass, Sunset) --- */
+        body.theme-light-mode {
+            --background-main: #f0f2f5;
+            background-image: none !important; /* Remove gradient for light mode */
+            --white: #333;
+            --text-light: #666;
+            --card-background: rgba(255, 255, 255, 0.95);
+            --header-background: rgba(255, 255, 255, 0.98);
+            --border-light: rgba(0, 0, 0, 0.1);
+            --input-background: rgba(0, 0, 0, 0.05);
+            --button-background-gradient: linear-gradient(90deg, #6dd5ed, #2193b0);
+            --button-shadow: 0 4px 15px rgba(109, 213, 237, 0.4), 0 4px 15px rgba(33, 147, 176, 0.4);
+
+            --background-color-primary: #f0f2f5;
+            --background-color-secondary: #e0e2e5;
+            --header-background-color: #ffffff;
+            --footer-background-color: #ffffff;
+            --content-background-color: #f7f9fb;
+            --card-background-color: #ffffff;
+            --text-color-primary: #333333;
+            --text-color-secondary: #666666;
+            --accent-color: #007bff;
+            --accent-color-dark: #0056b3;
+            --border-color: #e0e0e0;
+            --input-background-color: #f0f0f0;
+            --button-background: #e9ecef;
+            --button-hover-background: #dee2e6;
+            --active-item-background: rgba(0, 123, 255, 0.1);
+            --notification-badge-color: #dc3545;
+            --status-online: #28a745;
+            --status-offline: #6c757d;
+            --status-away: #ffc107;
+            --delete-button-color: #dc3545;
+            --warning-color: #ffc107;
+        }
+
+        body.theme-dark-mode {
+            --background-main: #1a1a2e;
+            background-image: radial-gradient(circle at top left, #16213e, transparent 100px),
+                              radial-gradient(circle at bottom right, #0f3460, transparent 150px) !important;
+            --white: #e0e0e0;
+            --text-light: #a0a0a0;
+            --card-background: rgba(25, 25, 40, 0.7);
+            --header-background: linear-gradient(135deg, rgba(10, 10, 20, .85), rgba(10, 10, 20, .75));
+            --border-light: rgba(255, 255, 255, 0.08);
+            --input-background: rgba(255, 255, 255, 0.08);
+            --button-background-gradient: linear-gradient(90deg, #e94560, #ba2f49);
+            --button-shadow: 0 4px 15px rgba(233, 69, 96, 0.4), 0 4px 15px rgba(186, 47, 73, 0.4);
+
+            --background-color-primary: #121212;
+            --background-color-secondary: #1e1e1e;
+            --header-background-color: #2c2c2c;
+            --footer-background-color: #2c2c2c;
+            --content-background-color: #242424;
+            --card-background-color: #2c2c2c;
+            --text-color-primary: #ffffff;
+            --text-color-secondary: #bbbbbb;
+            --accent-color: #bb86fc;
+            --accent-color-dark: #9a67ea;
+            --border-color: #444444;
+            --input-background-color: #383838;
+            --button-background: #383838;
+            --button-hover-background: #505050;
+            --active-item-background: rgba(187, 134, 252, 0.2);
+            --notification-badge-color: #cf6679;
+            --delete-button-color: #f44336;
+            --warning-color: #ffeb3b;
+        }
+
+        body.theme-glass-mode {
+            --background-main: rgba(10, 10, 10, 0.75);
+            background-image: url('https://source.unsplash.com/random/1920x1080?abstract,blur') !important;
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            backdrop-filter: blur(10px);
+            --card-background: rgba(25, 25, 40, 0.7);
+            --white: #e0e0e0;
+            --text-light: rgba(255, 255, 255, 0.7);
+            --input-background: rgba(255, 255, 255, 0.05);
+            --border-light: rgba(255, 255, 255, 0.1);
+            --button-background-gradient: linear-gradient(90deg, var(--pink), var(--blue));
+            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5);
+
+            --background-color-primary: rgba(10, 10, 10, 0.75);
+            --background-color-secondary: rgba(10, 10, 10, 0.6);
+            --header-background-color: rgba(10, 10, 10, 0.85);
+            --footer-background-color: rgba(10, 10, 10, 0.85);
+            --content-background-color: rgba(10, 10, 10, 0.75);
+            --card-background-color: rgba(25, 25, 40, 0.7);
+            --text-color-primary: #e0e0e0;
+            --text-color-secondary: #b0b0d0;
+            --accent-color: #00d5ff;
+            --accent-color-dark: #00aaff;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --input-background-color: rgba(255, 255, 255, 0.05);
+            --button-background: rgba(0, 213, 255, 0.15);
+            --button-hover-background: rgba(0, 213, 255, 0.25);
+            --active-item-background: rgba(0, 213, 255, 0.1);
+        }
+
+        body.theme-sunset-mode {
+            background: linear-gradient(to top, #ff7e5f, #feb47b) !important;
+            --background-main: linear-gradient(to top, #ff7e5f, #feb47b);
+            --card-background: rgba(255, 255, 255, 0.15);
+            --white: #fff;
+            --text-light: rgba(255, 255, 255, 0.8);
+            --input-background: rgba(255, 255, 255, 0.1);
+            --border-light: rgba(255, 255, 255, 0.3);
+            --button-background-gradient: linear-gradient(90deg, #fd746c, #ff9068);
+            --button-shadow: 0 4px 15px rgba(253, 116, 108, 0.4), 0 4px 15px rgba(255, 144, 104, 0.4);
+
+            --background-color-primary: #ff7e5f;
+            --background-color-secondary: #feb47b;
+            --header-background-color: rgba(255, 126, 95, 0.9);
+            --footer-background-color: rgba(255, 126, 95, 0.9);
+            --content-background-color: rgba(255, 126, 95, 0.85);
+            --card-background-color: rgba(255, 255, 255, 0.15);
+            --text-color-primary: #fff;
+            --text-color-secondary: rgba(255, 255, 255, 0.8);
+            --accent-color: #ffd700;
+            --accent-color-dark: #ccaa00;
+            --border-color: rgba(255, 255, 255, 0.3);
+            --input-background-color: rgba(255, 255, 255, 0.1);
+            --button-background: rgba(255, 255, 255, 0.2);
+            --button-hover-background: rgba(255, 255, 255, 0.3);
+            --active-item-background: rgba(255, 215, 0, 0.1);
+        }
+
+        /* Always show scrollbar to prevent layout shifts */
+        html {
+            overflow-y: scroll;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            padding-bottom: 20px; /* Space for content at bottom */
+            background-color: var(--background-main);
+            background-image: radial-gradient(circle at top left, var(--background-gradient-1), transparent 100px),
+                              radial-gradient(circle at bottom right, var(--background-gradient-2), transparent 150px);
+            color: var(--white);
+            transition: background-color 0.5s ease, color 0.5s ease; /* Smooth theme transition */
+        }
+
+        /* Header Styling */
+        header {
+            background: var(--header-background);
+            border-bottom: 1px solid var(--border-light);
+            padding: 10px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 55px;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+        }
+
+        header .header-content-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 30px;
+        }
+
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            letter-spacing: -0.03em;
+            text-decoration: none;
+        }
+
+        /* Header Navigation */
+        header nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            gap: 25px;
+        }
+
+        header nav ul li a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 5px 0;
+            position: relative;
+            transition: color var(--transition);
+        }
+
+        header nav ul li a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0;
+            height: 3px;
+            background: var(--blue);
+            border-radius: 2px;
+            transition: width var(--transition);
+        }
+
+        header nav ul li a:hover {
+            color: var(--blue);
+        }
+
+        header nav ul li a:hover::after {
+            width: 100%;
+        }
+
+        /* User Profile Header Styling */
+        .user-profile-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Notification Icon Styling */
+        .notification-icon-wrapper {
+            position: relative;
+            margin-right: 15px; /* Space between notification and profile */
+        }
+
+        .notification-icon-wrapper a {
+            text-decoration: none; /* Remove underline from link */
+            color: inherit; /* Inherit color from parent */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-icon-wrapper i {
+            font-size: 1.5rem; /* Adjust size as needed */
+            color: var(--text-light);
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .notification-icon-wrapper i:hover {
+            color: var(--white);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--notification-badge-color); /* Use pink for badges */
+            color: var(--white);
+            border-radius: 50%;
+            padding: 3px 7px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            min-width: 20px;
+            text-align: center;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Hide if no notifications */
+            display: none;
+        }
+
+        .user-profile-header #profileLink {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--white);
+            transition: opacity 0.3s ease, background-color 0.3s ease;
+            padding: 5px 10px;
+            border-radius: var(--radius);
+        }
+
+        .user-profile-header #profileLink:hover {
+            opacity: 0.8;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .user-profile-header img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent-color); /* Used accent-color for consistency */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: opacity 0.3s ease;
+        }
+
+        .user-profile-header i {
+            font-size: 30px;
+            color: var(--text-light);
+        }
+
+        .user-profile-header span {
+            font-weight: 600;
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
+        }
+
+        /* Logout Button Styling */
+        #logoutButton {
+            background: var(--button-background-gradient); /* Use gradient variable */
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.3s ease;
+            opacity: 0.8;
+            margin-left: 10px;
+        }
+
+        #logoutButton:hover {
+            transform: scale(1.1);
+            box-shadow: var(--button-shadow); /* Use button shadow variable */
+            opacity: 1;
+        }
+
+        #logoutButton i {
+            color: var(--white);
+            font-size: 0.9rem;
+        }
+
+        /* Main Content Area */
+        main {
+            flex-grow: 1;
+            padding: 40px 0;
+            padding-top: 80px; /* Adjust for fixed header and some top margin */
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Align content to top */
+            text-align: center;
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 1000px; /* Increased max-width for more space */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px; /* Increased gap between sections */
+            align-items: center;
+        }
+
+        /* General Section Styling */
+        .section-card {
+            background: var(--card-background);
+            border: 1px solid var(--border-color); /* Used border-color from root */
+            backdrop-filter: blur(10px) saturate(180%);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, .3);
+            padding: 2.5rem; /* Increased padding */
+            width: 95%; /* Slightly wider */
+            max-width: 900px; /* Adjusted max-width */
+            margin: 0 auto; /* Center the card */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            text-align: center;
+        }
+
+        .section-card h1, .section-card h2 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            margin-bottom: 1.5rem; /* Consistent margin */
+        }
+        .section-card h1 { font-size: 2.8rem; } /* Larger main title */
+        .section-card h2 { font-size: 2rem; margin-bottom: 1.2rem; } /* Larger section title */
+
+        .admin-tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Larger min-width for cards */
+            gap: 25px; /* Increased gap */
+            width: 100%;
+            max-width: 900px; /* Match section-card max-width */
+        }
+
+        .admin-tool-card {
+            background: var(--input-background);
+            border: 1px solid var(--border-light);
+            border-radius: 15px;
+            padding: 1.8rem; /* Increased padding */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 12px; /* Increased gap */
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+            text-decoration: none;
+            color: var(--text-color-primary); /* Ensure text color is primary */
+            position: relative;
+            overflow: hidden; /* Hide overflow for pseudo-elements */
+        }
+
+        .admin-tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(0, 213, 255, 0.1), rgba(255, 46, 146, 0.1)); /* Subtle gradient overlay */
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 0;
+        }
+
+        .admin-tool-card:hover::before {
+            opacity: 1;
+        }
+
+        .admin-tool-card:hover {
+            transform: translateY(-8px) scale(1.02); /* More pronounced lift */
+            box-shadow: 0 12px 30px rgba(0, 0, 0, .5); /* Stronger shadow */
+            background: var(--card-background-color); /* Slightly change background on hover */
+        }
+
+        .admin-tool-card i {
+            font-size: 3.5rem; /* Larger icons */
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink)); /* Gradient for icons */
+            margin-bottom: 10px;
+            position: relative; /* For z-index */
+            z-index: 1;
+        }
+
+        .admin-tool-card h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.6rem; /* Larger heading */
+            font-weight: 700;
+            color: var(--white);
+            margin: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .admin-tool-card p {
+            font-size: 1rem; /* Slightly larger paragraph text */
+            color: var(--text-light);
+            flex-grow: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Disabled link style */
+        .disabled-link {
+            opacity: 0.5; /* More visible disabled state */
+            cursor: not-allowed;
+            pointer-events: none; /* Disables click events */
+            box-shadow: none !important; /* Remove shadow when disabled */
+            transform: none !important; /* Remove transform when disabled */
+        }
+        .disabled-link:hover::before {
+            opacity: 0; /* No hover effect when disabled */
+        }
+
+
+        /* Loader styles for buttons (reused from other pages) */
+        .button-loader {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid var(--white);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        .button-loader.active { display: block; }
+        .button-text { display: block; }
+        .loading .button-text { display: none; }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Custom Message Box Styles */
+        #messageBox {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--card-background-color);
+            color: var(--text-color-primary);
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            min-width: 280px;
+            max-width: 90%;
+            text-align: center;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        #messageBox.show {
+            opacity: 1;
+            display: flex;
+        }
+        #messageBox.success {
+            background-image: linear-gradient(45deg, var(--pink), var(--blue));
+            color: var(--white);
+            border: none;
+            box-shadow: 0 8px 30px rgba(0, 213, 255, 0.5), 0 8px 30px rgba(255, 46, 146, 0.5);
+        }
+        #messageBox.error { border-left: 5px solid var(--delete-button-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+        #messageBox.info { border-left: 5px solid var(--accent-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+        #messageBox.warning { border-left: 5px solid var(--warning-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+
+        #messageBox i {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+        #messageBox.success i { color: var(--white); }
+        #messageBox.error i { color: var(--delete-button-color); }
+        #messageBox.info i { color: var(--accent-color); }
+        #messageBox.warning i { color: var(--warning-color); }
+
+        #messageBox span {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        @keyframes pulse-bg {
+            0% { background-color: var(--accent-color); }
+            50% { background-color: rgba(0, 213, 255, 0.7); }
+            100% { background-color: var(--accent-color); }
+        }
+        #messageBox.loading-pulse { animation: pulse-bg 1.5s infinite ease-in-out; }
+
+        /* Responsive Adjustments */
+        @media (max-width: 600px) {
+            header .header-content-wrapper {
+                padding: 0 20px;
+            }
+            .logo {
+                font-size: 1.6rem;
+            }
+            header nav ul {
+                gap: 15px;
+            }
+            header nav ul li a {
+                font-size: 1.1rem;
+            }
+            .user-profile-header #profileLink {
+                padding: 5px;
+            }
+            .user-profile-header span {
+                max-width: 90px;
+            }
+            .user-profile-header img {
+                width: 30px;
+                height: 30px;
+            }
+            .user-profile-header i {
+                font-size: 25px;
+            }
+            #logoutButton {
+                width: 25px;
+                height: 25px;
+                font-size: 0.8rem;
+                margin-left: 8px;
+            }
+            #logoutButton i {
+                font-size: 0.8rem;
+            }
+            .section-card {
+                padding: 1.5rem;
+            }
+            .section-card h1 {
+                font-size: 2.2rem;
+            }
+            .section-card h2 {
+                font-size: 1.7rem;
+            }
+            .admin-tools-grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Adjusted min-width for mobile */
+                gap: 20px;
+            }
+            .admin-tool-card {
+                padding: 1.2rem;
+            }
+            .admin-tool-card i {
+                font-size: 3rem;
+            }
+            .admin-tool-card h3 {
+                font-size: 1.4rem;
+            }
+            .admin-tool-card p {
+                font-size: 0.9rem;
+            }
+            body {
+                padding-bottom: 20px;
+            }
+        }
+    </style>
+<style id="header-overflow-fix">/*header-overflow-fix*/header .header-content-wrapper{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap}header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0;justify-content:flex-end}#profileLink{display:inline-flex;align-items:center;column-gap:8px;row-gap:2px;flex-wrap:wrap;max-width:100%;min-width:0}#profileLink #headerDisplayName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;flex:0 1 auto}#headerProfilePic,#headerAvatarIcon{flex:0 0 auto}@media (max-width:600px){header .header-content-wrapper{gap:8px}#profileLink{column-gap:6px}}</style></head>
+<body class="theme-dark-mode">
+
+    <header>
+        <div class="header-content-wrapper">
+            <a href="/home.html" class="logo" style="display:flex;align-items:center;gap:10px"><img src="assets/security.png" alt="JCHAT Security" style="height:24px;width:auto" onerror="this.style.display='none'"><span>Nuvia</span></a>
+            <nav>
+                <ul>
+                    
+                </ul>
+            </nav>
+            <div class="user-profile-header">
+                <div class="notification-icon-wrapper">
+                    <a href="/notifications.html" aria-label="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationCount" style="display: none;">0</span>
+                    </a>
+                </div>
+                <button id="logoutButton" aria-label="Logout" disabled>
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+                <a href="/profile.html" id="profileLink">
+                    <img id="headerProfilePic" src="" alt="Profile Picture" style="display: none;">
+                    <i id="headerAvatarIcon" class="fas fa-user-circle"></i>
+                    <span id="headerDisplayName">Loading...</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="content-wrapper">
+            <div class="section-card">
+                <h1>JCHAT Main Admin Dashboard</h1>
+                <p style="color: var(--pink); font-weight: 600; margin-top: -1rem; margin-bottom: 1rem;">
+                    <i class="fas fa-user-shield"></i> Welcome to the administrative control panel.
+                </p>
+                <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 1.5rem;">
+                    Manage users, content, and system settings to ensure a smooth JCHAT experience.
+                </p>
+
+                <h2>Admin Tools</h2>
+                <div class="admin-tools-grid">
+                    <a href="/coin_requests_admin.html" class="admin-tool-card">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <h3>Coin Requests</h3>
+                        <p>Review and approve user JCoin purchase requests.</p>
+                        <span class="notification-badge" id="pendingCoinRequests" style="display: none;">0</span>
+                    
+                    </a>
+                    <a href="/developer.html" class="admin-tool-card">
+                        <i class="fas fa-user-circle"></i> <h3>DEVELOPER CENTER</h3>
+                        <p>Manage Gas (XP) for user progression.</p>
+                        </a>
+                    <a href="/admin_reports.html" class="admin-tool-card">
+                        <i class="fas fa-users-cog"></i> <h3>Report Center</h3>
+                        <p>See reports amd solve them</p>
+
+                    </a>
+                    <a href="/jg_link_management.html" class="admin-tool-card">
+                        <i class="fas fa-link"></i> 
+                        <h3>J_G Link</h3>
+                        <p>Manage the conversion rates between JCoins and Gas.</p>
+                    </a>
+                    <a href="/content_moderation.html" class="admin-tool-card">
+                        <i class="fas fa-shield-alt"></i>
+                        <h3>Content Moderation</h3>
+                        <p>Review and moderate user content.</p>
+                        <span class="notification-badge" id="reportedContentCount" style="display: none;">0</span>
+                    </a>
+                    <a href="/analytics.html" class="admin-tool-card">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>Analytics Dashboard</h3>
+                        <p>View app usage statistics and trends.</p>
+                    </a>
+                    <a href="/leaders_admin.html" class="admin-tool-card">
+                        <i class="fas fa-trophy"></i>
+                        <h3>Leaders Admin</h3>
+                        <p>Create and share leaderboard quick links.</p>
+                    </a>
+                    <a href="/system_settings.html" class="admin-tool-card">
+                        <i class="fas fa-cogs"></i>
+                        <h3>System Settings</h3>
+                        <p>Configure global application settings and maintenance.</p>
+                    </a>
+                    <a href="/admin_logs.html" class="admin-tool-card">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h3>Admin Activity Logs</h3>
+                        <p>Review all administrator actions.</p>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="messageBox"></div>
+
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // --- Firebase & Canvas Environment Configuration ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+            authDomain: "jchat-1.firebaseapp.com",
+            databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+            projectId: "jchat-1",
+            storageBucket: "jchat-1.firebasestorage.app",
+            messagingSenderId: "328479683167",
+            appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
+            measurementId: "G-S6Z9GG0R9P"
+        };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null; // Added initialAuthToken
+
+        // Cloudinary Configuration (needed for header profile pic)
+        const cloudinaryConfig = {
+            cloudName: "dxld01rcp", // Your Cloudinary Cloud Name
+            uploadPreset: "Storage_preset" // Your Cloudinary Upload Preset
+        };
+
+        // Initialize Firebase services
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- DOM Elements ---
+        const headerProfilePic = document.getElementById('headerProfilePic');
+        const headerAvatarIcon = document.getElementById('headerAvatarIcon');
+        const headerDisplayName = document.getElementById('headerDisplayName');
+        const logoutButton = document.getElementById('logoutButton');
+        const notificationCountElement = document.getElementById('notificationCount');
+        const messageBox = document.getElementById('messageBox');
+        const headerNavLinkProfile = document.getElementById('profileLink');
+        const pendingCoinRequestsBadge = document.getElementById('pendingCoinRequests');
+        const reportedContentCountBadge = document.getElementById('reportedContentCount');
+
+        // --- Global State ---
+        let isAuthReady = false; // Flag to indicate if auth state has been checked
+        let currentUser = null; // The currently authenticated user (Firebase Auth object)
+
+        // --- Admin Specific ID ---
+        const ADMIN_UID = 'cc96gdhCRPO72NFZtleRCujHvIq2';
+
+        // --- Tone.js Synths for Notification Sounds (reused) ---
+        const successSynth = new Tone.Synth().toDestination();
+        const errorSynth = new Tone.Synth().toDestination();
+        const infoSynth = new Tone.Synth().toDestination();
+
+        successSynth.oscillator.type = "sine";
+        successSynth.envelope.attack = 0.01;
+        successSynth.envelope.decay = 0.2;
+        successSynth.envelope.sustain = 0.0;
+        successSynth.envelope.release = 0.5;
+
+        errorSynth.oscillator.type = "sawtooth";
+        errorSynth.envelope.attack = 0.01;
+        errorSynth.envelope.decay = 0.3;
+        errorSynth.envelope.sustain = 0.0;
+        errorSynth.envelope.release = 0.5;
+
+        infoSynth.oscillator.type = "triangle";
+        infoSynth.envelope.attack = 0.01;
+        infoSynth.envelope.decay = 0.1;
+        infoSynth.envelope.sustain = 0.0;
+        infoSynth.envelope.release = 0.3;
+
+        function playNotificationSound(type) {
+            Tone.start();
+            if (type === 'success') {
+                successSynth.triggerAttackRelease("C5", "8n");
+            } else if (type === 'error') {
+                errorSynth.triggerAttackRelease("C3", "8n");
+            } else if (type === 'info') {
+                infoSynth.triggerAttackRelease("E4", "16n");
+            }
+        }
+
+        // --- Utility Functions ---
+
+        /**
+         * Displays a temporary message box with a given message and type.
+         * @param {string} message - The message to display.
+         * @param {string} type - The type of message ('success', 'error', 'info', 'loading', 'warning').
+         * @param {number} [durationMs=3000] - Duration in milliseconds for the message to display.
+         * @param {boolean} [isPersistent=false] - If true, message stays until explicitly cleared or replaced.
+         */
+        function showMessageBox(message, type, durationMs = 3000, isPersistent = false) {
+            if (messageBox.timeoutId) {
+                clearTimeout(messageBox.timeoutId);
+                messageBox.timeoutId = null;
+            }
+
+            messageBox.innerHTML = `<i id="messageBoxIcon"></i><span id="messageBoxText"></span>`;
+            const messageBoxIcon = document.getElementById('messageBoxIcon');
+            const messageBoxText = document.getElementById('messageBoxText');
+
+            messageBoxText.textContent = message;
+            messageBox.className = 'message-box show ' + type;
+
+            if (messageBoxIcon) {
+                messageBoxIcon.className = '';
+                if (type === 'success') { messageBoxIcon.classList.add('fas', 'fa-check-circle'); playNotificationSound('success'); }
+                else if (type === 'error') { messageBoxIcon.classList.add('fas', 'fa-times-circle'); playNotificationSound('error'); }
+                else if (type === 'info') { messageBoxIcon.classList.add('fas', 'fa-info-circle'); playNotificationSound('info'); }
+                else if (type === 'warning') { messageBoxIcon.classList.add('fas', 'fa-exclamation-triangle'); playNotificationSound('info'); }
+                else if (type === 'loading') { messageBoxIcon.classList.add('fas', 'fa-spinner', 'fa-spin'); }
+            }
+
+            if (type === 'loading') {
+                messageBox.classList.add('loading-pulse');
+            } else {
+                messageBox.classList.remove('loading-pulse');
+            }
+
+            messageBox.style.display = 'flex';
+            messageBox.style.opacity = '1';
+
+            if (!isPersistent) {
+                messageBox.timeoutId = setTimeout(() => {
+                    messageBox.style.opacity = '0';
+                    messageBox.addEventListener('transitionend', function handler() {
+                        messageBox.style.display = 'none';
+                        messageBox.removeEventListener('transitionend', handler);
+                        messageBox.classList.remove('loading-pulse');
+                    }, { once: true });
+                }, durationMs);
+            }
+        }
+
+        /**
+         * Toggles loading state for a button.
+         * @param {HTMLElement} buttonElement - The button to toggle.
+         * @param {boolean} isLoading - True to show loading, false to hide.
+         */
+        function toggleButtonLoading(buttonElement, isLoading) {
+            if (!buttonElement) return;
+            const loader = buttonElement.querySelector('.button-loader');
+            const text = buttonElement.querySelector('.button-text');
+
+            if (isLoading) {
+                buttonElement.disabled = true;
+                buttonElement.classList.add('loading');
+                if (loader) loader.classList.add('active');
+                if (text) text.style.display = 'none';
+            } else {
+                buttonElement.disabled = false;
+                buttonElement.classList.remove('loading');
+                if (loader) loader.classList.remove('active');
+                if (text) text.style.display = 'block';
+            }
+        }
+
+        /**
+         * Constructs a Cloudinary URL for an image/video.
+         * @param {string} urlOrPublicId - The full Cloudinary URL or the public ID of the image on Cloudinary.
+         * @param {string} transformations - Optional Cloudinary transformations.
+         * @returns {string|null} The full Cloudinary URL or null if urlOrPublicId is not provided.
+         */
+        function getCloudinaryImageUrl(urlOrPublicId, transformations = "w_auto,f_auto,q_auto") {
+            if (!urlOrPublicId) return null;
+            if (urlOrPublicId.startsWith('http://') || urlOrPublicId.startsWith('https://')) {
+                return urlOrPublicId;
+            }
+            return `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/${transformations}/${urlOrPublicId}`;
+        }
+
+        /**
+         * Displays the profile picture or a default icon.
+         * @param {HTMLElement} imgElement - The <img> element to update.
+         * @param {HTMLElement} iconElement - The <i> element to display if no image.
+         * @param {string|null} profilePicId - The Cloudinary public ID or URL, or null.
+         * @param {string} usernameInitial - Initial for placeholder.
+         * @param {string} transformations - Cloudinary transformations.
+         */
+        function displayProfilePicture(imgElement, iconElement, profilePicId, usernameInitial, transformations) {
+            if (imgElement) {
+                if (profilePicId) {
+                    const imageUrl = getCloudinaryImageUrl(profilePicId, transformations);
+                    imgElement.src = imageUrl;
+                    imgElement.style.display = 'block';
+                    if (iconElement) iconElement.style.display = 'none';
+                    imgElement.onerror = () => {
+                        console.error(`Failed to load profile picture: ${profilePicId}. Using placeholder.`);
+                        const bgColor = getComputedStyle(document.body).getPropertyValue('--card-background-color').trim();
+                        const textColor = getComputedStyle(document.body).getPropertyValue('--text-color-primary').trim();
+                        imgElement.src = `https://placehold.co/120x120/${bgColor.replace('#', '')}/${textColor.replace('#', '')}?text=${usernameInitial}`;
+                        imgElement.style.display = 'block';
+                        if (iconElement) iconElement.style.display = 'none';
+                    };
+                } else {
+                    imgElement.src = '';
+                    imgElement.style.display = 'none';
+                    if (iconElement) iconElement.style.display = 'block';
+                }
+            }
+        }
+
+        /**
+         * Fetches and displays the current user's profile data for the header.
+         * This function runs on every page to ensure header is consistent.
+         * Also updates the public profile summary.
+         * @param {firebase.User} user - The authenticated Firebase user object.
+         */
+        async function fetchAndDisplayHeaderProfile(user) {
+            try {
+                const privateProfileDocRef = doc(db, "artifacts", appId, "users", user.uid, "profiles", "user_profile");
+                const publicProfileDocRef = doc(db, "artifacts", appId, "public", "data", "users", user.uid);
+
+                const privateDocSnap = await getDoc(privateProfileDocRef);
+                let profileData = null;
+
+                if (privateDocSnap.exists()) {
+                    profileData = privateDocSnap.data();
+                } else {
+                    // Create a basic profile if it doesn't exist
+                    profileData = {
+                        username: user.displayName || `User_${user.uid.substring(0, 8)}`,
+                        email: user.email || "",
+                        profilePicId: user.photoURL || null,
+                        bio: "", location: "", school: "", work: "", interests: "", website: "", socialLinks: "",
+                        friendsCount: 0, followersCount: 0, followingCount: 0,
+                        createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+                        inspirationType: "motivational",
+                        visibility: {
+                            displayName: true, profilePic: true, bio: false, location: false,
+                            emailPublic: false, lastOnline: false, allowFriendRequests: true, allowMessages: true,
+                            school: false, work: false, interests: false, website: false, socialLinks: false
+                        },
+                        totalPosts: 0, jCoins: 0, gas: 0, totalGasEarned: 0, level: 1, walletUnlocked: false, unlockedBenefits: [],
+                        banned: false
+                    };
+                    await setDoc(privateProfileDocRef, profileData);
+                }
+
+                // Update public profile summary (ensure consistency)
+                const publicProfileSummary = {
+                    username: profileData.username,
+                    profilePicId: profileData.profilePicId,
+                    jCoins: profileData.jCoins,
+                    level: profileData.level,
+                    userId: user.uid,
+                    email: profileData.email,
+                    totalPosts: profileData.totalPosts,
+                    totalGasEarned: profileData.totalGasEarned,
+                    banned: profileData.banned
+                };
+                await setDoc(publicProfileDocRef, publicProfileSummary, { merge: true });
+
+                // Update header UI
+                const usernameInitial = (profileData.username || "J").charAt(0).toUpperCase();
+                displayProfilePicture(headerProfilePic, headerAvatarIcon, profileData?.profilePicId, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
+                headerDisplayName.textContent = profileData.username || "JCHAT User";
+                headerNavLinkProfile.href = `/profile.html?userId=${user.uid}`;
+
+                logoutButton.disabled = false;
+            } catch (error) {
+                console.error("Error fetching or creating profile for header:", error);
+                const usernameInitial = (user.displayName || "J").charAt(0).toUpperCase();
+                displayProfilePicture(headerProfilePic, headerAvatarIcon, user.photoURL, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
+                headerDisplayName.textContent = user.displayName || "JCHAT User";
+                showMessageBox(`Error loading header profile: ${error.message}`, 'error');
+                logoutButton.disabled = false;
+            }
+        }
+
+        /**
+         * Fetches and displays the notification count for the current user.
+         * @param {string} userId - The UID of the current user.
+         */
+        async function fetchNotificationCount(userId) {
+            try {
+                const notificationsCollectionRef = collection(db, "artifacts", appId, "users", userId, "notifications");
+                const q = query(notificationsCollectionRef, where("read", "==", false));
+                onSnapshot(q, (querySnapshot) => {
+                    const unreadCount = querySnapshot.size;
+                    if (unreadCount > 0) {
+                        notificationCountElement.textContent = unreadCount;
+                        notificationCountElement.style.display = 'flex';
+                    } else {
+                        notificationCountElement.style.display = 'none';
+                    }
+                }, (error) => {
+                    console.error("Error listening to notification count:", error);
+                    notificationCountElement.style.display = 'none';
+                });
+            } catch (error) {
+                console.error("Error setting up listener for notification count:", error);
+            }
+        }
+
+        /**
+         * Fetches the count of pending JCoin requests and updates the badge.
+         */
+        async function fetchPendingCoinRequestsCount() {
+            try {
+                const q = query(collection(db, "artifacts", appId, "public", "data", "jcoin_buy_requests"), where("status", "==", "pending"));
+                onSnapshot(q, (querySnapshot) => {
+                    const count = querySnapshot.size;
+                    if (count > 0) {
+                        pendingCoinRequestsBadge.textContent = count;
+                        pendingCoinRequestsBadge.style.display = 'flex';
+                    } else {
+                        pendingCoinRequestsBadge.style.display = 'none';
+                    }
+                }, (error) => {
+                    console.error("Error listening to pending coin requests count:", error);
+                    pendingCoinRequestsBadge.style.display = 'none';
+                });
+            } catch (error) {
+                console.error("Error setting up listener for pending coin requests count:", error);
+            }
+        }
+
+        /**
+         * Fetches the count of reported content and updates the badge.
+         */
+        async function fetchReportedContentCount() {
+            try {
+                const q = query(collection(db, "artifacts", appId, "public", "data", "reports"), where("status", "==", "pending"));
+                onSnapshot(q, (querySnapshot) => {
+                    const count = querySnapshot.size;
+                    if (count > 0) {
+                        reportedContentCountBadge.textContent = count;
+                        reportedContentCountBadge.style.display = 'flex';
+                    } else {
+                        reportedContentCountBadge.style.display = 'none';
+                    }
+                }, (error) => {
+                    console.error("Error listening to reported content count:", error);
+                    reportedContentCountBadge.style.display = 'none';
+                });
+            } catch (error) {
+                console.error("Error setting up listener for reported content count:", error);
+            }
+        }
+
+        /**
+         * Logs an admin action to Firestore.
+         * @param {string} adminUid - The UID of the admin performing the action.
+         * @param {string} actionType - The type of action (e.g., 'approve_coin_request', 'ban_user').
+         * @param {object} [details={}] - Optional additional details for the log entry.
+         */
+        async function logAdminAction(adminUid, actionType, details = {}) {
+            try {
+                const logsCollectionRef = collection(db, "artifacts", appId, "public", "data", "admin_logs"); // Store in public/data for easier access
+                await addDoc(logsCollectionRef, {
+                    adminUid: adminUid,
+                    actionType: actionType,
+                    details: details,
+                    timestamp: serverTimestamp()
+                });
+            } catch (error) {
+                console.error("Error logging admin action:", error);
+            }
+        }
+
+        // --- Authentication State Listener ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                // --- ADMIN AUTHORIZATION CHECK ---
+                if (currentUser.uid !== ADMIN_UID) {
+                    showMessageBox("Unauthorized access. Redirecting to home page.", 'error', 2000, true);
+                    isAuthReady = false;
+                    document.querySelectorAll('a, button').forEach(el => {
+                        if (el.id !== 'logoutButton') {
+                            el.classList.add('disabled-link');
+                            el.style.pointerEvents = 'none';
+                        }
+                    });
+                    logoutButton.disabled = true;
+                    setTimeout(() => {
+                        window.location.href = '/home.html';
+                    }, 2000);
+                    return;
+                }
+                // --- END ADMIN AUTHORIZATION CHECK ---
+
+                isAuthReady = true;
+                await fetchAndDisplayHeaderProfile(user);
+                fetchNotificationCount(user.uid);
+                fetchPendingCoinRequestsCount();
+                fetchReportedContentCount();
+
+                showMessageBox("Welcome Admin! You are logged in.", 'success', 5000);
+                // No need for a second message, the first one is sufficient.
+            } else {
+                isAuthReady = false;
+                logoutButton.disabled = true;
+                headerDisplayName.textContent = "Guest";
+                headerProfilePic.style.display = 'none';
+                headerAvatarIcon.style.display = 'block';
+                document.querySelector('main .content-wrapper').innerHTML = `
+                    <div class="section-card">
+                        <h1>Access Denied</h1>
+                        <p style="color: var(--pink); font-weight: 600;">
+                            <i class="fas fa-exclamation-triangle"></i> Please log in to access admin tools.
+                        </p>
+                        <p style="color: var(--text-light);">Redirecting to login page...</p>
+                    </div>
+                `;
+                showMessageBox("You must be logged in to access the Admin Dashboard.", 'error', 2000, true);
+                setTimeout(() => {
+                    // Attempt anonymous sign-in if no user and initialAuthToken is available
+                    if (initialAuthToken) {
+                        signInWithCustomToken(auth, initialAuthToken).catch(err => {
+                            console.error("Error signing in with custom token:", err);
+                            window.location.href = '/login.html'; // Fallback to login if custom token fails
+                        });
+                    } else {
+                        signInAnonymously(auth).catch(err => {
+                            console.error("Error signing in anonymously:", err);
+                            window.location.href = '/login.html'; // Fallback to login if anonymous fails
+                        });
+                    }
+                }, 2000);
+            }
+        });
+
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply saved theme
+            const savedTheme = localStorage.getItem('jchat-theme');
+            const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+            if (savedTheme && themes.includes(savedTheme)) {
+                document.body.classList.remove(...themes);
+                document.body.classList.add(savedTheme);
+            } else {
+                document.body.classList.add('theme-dark-mode'); // Default to dark mode
+            }
+        });
+
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'jchat-theme') {
+                const newTheme = event.newValue || 'theme-dark-mode';
+                const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+                if (themes.includes(newTheme)) {
+                    document.body.classList.remove(...themes);
+                    document.body.classList.add(newTheme);
+                }
+            }
+        });
+
+        logoutButton.addEventListener('click', async () => {
+            if (!isAuthReady) return;
+            toggleButtonLoading(logoutButton, true);
+            try {
+                if (currentUser) {
+                    await logAdminAction(currentUser.uid, 'admin_logout');
+                }
+                await signOut(auth);
+                showMessageBox("Logged out successfully! 👋", 'success');
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 1500);
+            } catch (error) {
+                console.error("Error logging out:", error);
+                showMessageBox("Failed to log out. Please try again.", 'error');
+                toggleButtonLoading(logoutButton, false);
+            }
+        });
+    </script>
+	
+    <script src="assets/js/lazy-images.js" defer></script>
+</body>
+</html>

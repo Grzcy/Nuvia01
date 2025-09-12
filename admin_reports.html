@@ -1,0 +1,2028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Last updated: 2025-08-21T18:19:29Z -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JCHAT - Admin Reports</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://*.firebaseio.com" crossorigin>
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        /* Universal box-sizing for consistent layout */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        /* Global CSS Variables for easy theme switching */
+        :root {
+            /* Core JCHAT Colors */
+            --pink: #ff2e92;
+            --blue: #00d5ff;
+            --radius: 20px;
+            --transition: .3s ease;
+
+            /* Default Dark Mode variables */
+            --white: #fff; /* Primary text color */
+            --text-light: rgba(255, 255, 255, .7); /* Secondary text color */
+            --background-main: rgba(10, 10, 10, .75); /* Main background color */
+            --background-gradient-1: #00d5ff; /* Gradient start */
+            --background-gradient-2: #ff2e92; /* Gradient end */
+            --card-background: linear-gradient(145deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01)); /* Card background with subtle gradient */
+            --header-background: linear-gradient(135deg, rgba(10, 10, 10, .85), rgba(10, 10, 10, .75)); /* Header background */
+            --border-light: rgba(255, 255, 255, .05); /* Light border color */
+            --input-background: rgba(255, 255, 255, 0.05); /* Input field background */
+            --button-background-gradient: linear-gradient(90deg, var(--blue), var(--pink)); /* Button gradient */
+            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink); /* Button shadow */
+
+            /* Semantic Colors (for consistency across themes) */
+            --background-color-primary: #1a1a2e; /* Deeper background for sections */
+            --background-color-secondary: #0f0f1f; /* Even deeper background */
+            --header-background-color: #2a2a4a; /* Header/footer solid background */
+            --footer-background-color: #2a2a4a;
+            --content-background-color: #20203a; /* Main content card background */
+            --card-background-color: #2a2a4a; /* General card background */
+            --text-color-primary: #e0e0e0; /* Primary text for content */
+            --text-color-secondary: #b0b0d0; /* Secondary text for content */
+            --notification-badge-color: #ff2e92; /* Pink for badges */
+            --status-online: #4CAF50; /* Green for online status */
+            --status-offline: #6c757d; /* Grey for offline status */
+            --status-away: #FFC107; /* Yellow for away status */
+            --delete-button-color: #dc3545; /* Red for destructive actions */
+            --warning-color: #ffc107; /* Orange for warnings */
+            --accent-color: #00d5ff; /* Main accent color (blue) */
+            --accent-color-dark: #00aaff; /* Darker accent color */
+            --border-color: #3a3a5a; /* General border color */
+        }
+
+        /* --- Theme Definitions (Light, Dark, Glass, Sunset) --- */
+        body.theme-light-mode {
+            --background-main: #f0f2f5;
+            background-image: none !important;
+            --white: #333;
+            --text-light: #666;
+            --card-background: rgba(255, 255, 255, 0.95);
+            --header-background: rgba(255, 255, 255, 0.98);
+            --border-light: rgba(0, 0, 0, 0.1);
+            --input-background: rgba(0, 0, 0, 0.05);
+            --button-background-gradient: linear-gradient(90deg, #6dd5ed, #2193b0);
+            --button-shadow: 0 4px 15px rgba(109, 213, 237, 0.4), 0 4px 15px rgba(33, 147, 176, 0.4);
+
+            --background-color-primary: #f0f2f5;
+            --background-color-secondary: #e0e2e5;
+            --header-background-color: #ffffff;
+            --footer-background-color: #ffffff;
+            --content-background-color: #f7f9fb;
+            --card-background-color: #ffffff;
+            --text-color-primary: #333333;
+            --text-color-secondary: #666666;
+            --accent-color: #007bff;
+            --accent-color-dark: #0056b3;
+            --border-color: #e0e0e0;
+            --input-background-color: #f0f0f0;
+            --button-background: #e9ecef;
+            --button-hover-background: #dee2e6;
+            --active-item-background: rgba(0, 123, 255, 0.1);
+            --notification-badge-color: #dc3545;
+            --status-online: #28a745;
+            --status-offline: #6c757d;
+            --status-away: #ffc107;
+            --delete-button-color: #dc3545;
+            --warning-color: #ffc107;
+        }
+
+        body.theme-dark-mode {
+            --background-main: #1a1a2e;
+            background-image: radial-gradient(circle at top left, #16213e, transparent 100px),
+                              radial-gradient(circle at bottom right, #0f3460, transparent 150px) !important;
+            --white: #e0e0e0;
+            --text-light: #a0a0a0;
+            --card-background: rgba(25, 25, 40, 0.7);
+            --header-background: linear-gradient(135deg, rgba(10, 10, 20, .85), rgba(10, 10, 20, .75));
+            --border-light: rgba(255, 255, 255, 0.08);
+            --input-background: rgba(255, 255, 255, 0.08);
+            --button-background-gradient: linear-gradient(90deg, #e94560, #ba2f49);
+            --button-shadow: 0 4px 15px rgba(233, 69, 96, 0.4), 0 4px 15px rgba(186, 47, 73, 0.4);
+
+            --background-color-primary: #121212;
+            --background-color-secondary: #1e1e1e;
+            --header-background-color: #2c2c2c;
+            --footer-background-color: #2c2c2c;
+            --content-background-color: #242424;
+            --card-background-color: #2c2c2c;
+            --text-color-primary: #ffffff;
+            --text-color-secondary: #bbbbbb;
+            --accent-color: #bb86fc;
+            --accent-color-dark: #9a67ea;
+            --border-color: #444444;
+            --input-background-color: #383838;
+            --button-background: #383838;
+            --button-hover-background: #505050;
+            --active-item-background: rgba(187, 134, 252, 0.2);
+            --notification-badge-color: #cf6679;
+            --delete-button-color: #f44336;
+            --warning-color: #ffeb3b;
+        }
+
+        body.theme-glass-mode {
+            --background-main: rgba(10, 10, 10, 0.75);
+            background-image: url('https://source.unsplash.com/random/1920x1080?abstract,blur') !important;
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            backdrop-filter: blur(10px);
+            --card-background: rgba(25, 25, 40, 0.7);
+            --white: #e0e0e0;
+            --text-light: rgba(255, 255, 255, 0.7);
+            --input-background: rgba(255, 255, 255, 0.05);
+            --border-light: rgba(255, 255, 255, 0.1);
+            --button-background-gradient: linear-gradient(90deg, var(--pink), var(--blue));
+            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5);
+
+            --background-color-primary: rgba(10, 10, 10, 0.75);
+            --background-color-secondary: rgba(10, 10, 10, 0.6);
+            --header-background-color: rgba(10, 10, 10, 0.85);
+            --footer-background-color: rgba(10, 10, 10, 0.85);
+            --content-background-color: rgba(10, 10, 10, 0.75);
+            --card-background-color: rgba(25, 25, 40, 0.7);
+            --text-color-primary: #e0e0e0;
+            --text-color-secondary: #b0b0d0;
+            --accent-color: #00d5ff;
+            --accent-color-dark: #00aaff;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --input-background-color: rgba(255, 255, 255, 0.05);
+            --button-background: rgba(0, 213, 255, 0.15);
+            --button-hover-background: rgba(0, 213, 255, 0.25);
+            --active-item-background: rgba(0, 213, 255, 0.1);
+        }
+
+        body.theme-sunset-mode {
+            background: linear-gradient(to top, #ff7e5f, #feb47b) !important;
+            --background-main: linear-gradient(to top, #ff7e5f, #feb47b);
+            --card-background: rgba(255, 255, 255, 0.15);
+            --white: #fff;
+            --text-light: rgba(255, 255, 255, 0.8);
+            --input-background: rgba(255, 255, 255, 0.1);
+            --border-light: rgba(255, 255, 255, 0.3);
+            --button-background-gradient: linear-gradient(90deg, #fd746c, #ff9068);
+            --button-shadow: 0 4-5px 15px rgba(253, 116, 108, 0.4), 0 4px 15px rgba(255, 144, 104, 0.4);
+
+            --background-color-primary: #ff7e5f;
+            --background-color-secondary: #feb47b;
+            --header-background-color: rgba(255, 126, 95, 0.9);
+            --footer-background-color: rgba(255, 126, 95, 0.9);
+            --content-background-color: rgba(255, 126, 95, 0.85);
+            --card-background-color: rgba(255, 255, 255, 0.15);
+            --text-color-primary: #fff;
+            --text-color-secondary: rgba(255, 255, 255, 0.8);
+            --accent-color: #ffd700;
+            --accent-color-dark: #ccaa00;
+            --border-color: rgba(255, 255, 255, 0.3);
+            --input-background-color: rgba(255, 255, 255, 0.1);
+            --button-background: rgba(255, 255, 255, 0.2);
+            --button-hover-background: rgba(255, 255, 255, 0.3);
+            --active-item-background: rgba(255, 215, 0, 0.1);
+        }
+
+        /* Always show scrollbar to prevent layout shifts */
+        html {
+            overflow-y: scroll;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            padding-bottom: 20px; /* Space for content at bottom */
+            background-color: var(--background-main);
+            background-image: radial-gradient(circle at top left, var(--background-gradient-1), transparent 100px),
+                              radial-gradient(circle at bottom right, var(--background-gradient-2), transparent 150px);
+            color: var(--white);
+            transition: background-color 0.5s ease, color 0.5s ease; /* Smooth theme transition */
+        }
+
+        /* Header Styling */
+        header {
+            background: var(--header-background);
+            border-bottom: 1px solid var(--border-light);
+            padding: 10px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 55px;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+        }
+
+        header .header-content-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 30px;
+        }
+
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            letter-spacing: -0.03em;
+            text-decoration: none;
+        }
+
+        /* Header Navigation */
+        header nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            gap: 25px;
+        }
+
+        header nav ul li a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 5px 0;
+            position: relative;
+            transition: color var(--transition);
+        }
+
+        header nav ul li a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0;
+            height: 3px;
+            background: var(--blue);
+            border-radius: 2px;
+            transition: width var(--transition);
+        }
+
+        header nav ul li a:hover {
+            color: var(--blue);
+        }
+
+        header nav ul li a:hover::after {
+            width: 100%;
+        }
+
+        /* Header Actions */
+        .header-right-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-action-icon {
+            font-size: 1.5rem;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .header-action-icon:hover {
+            color: var(--white);
+        }
+
+        .notification-icon-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--notification-badge-color);
+            color: var(--white);
+            border-radius: 50%;
+            padding: 3px 7px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            min-width: 20px;
+            text-align: center;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            display: none;
+        }
+
+        /* User Profile & Logout */
+        .user-profile-pic-header {
+            height: 40px;
+            width: 40px;
+            border-radius: 50%;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .user-profile-pic-header:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 213, 255, 0.5);
+        }
+
+        .user-profile-pic-header a {
+            display: block;
+            width: 100%;
+            height: 100%;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .user-profile-pic-header img,
+        .user-profile-pic-header i {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+        
+        .user-profile-pic-header i {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 25px;
+            color: var(--text-light);
+        }
+
+        #logoutButton {
+            background: var(--button-background-gradient);
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.3s ease;
+            opacity: 0.8;
+        }
+
+        #logoutButton:hover {
+            transform: scale(1.1);
+            box-shadow: var(--button-shadow);
+            opacity: 1;
+        }
+
+        #logoutButton i {
+            color: var(--white);
+            font-size: 0.9rem;
+        }
+        
+        /* Main Content Area */
+        main {
+            flex-grow: 1;
+            padding: 40px 0;
+            padding-top: 80px; /* Adjust for fixed header and some top margin */
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            text-align: center;
+        }
+        
+        .content-wrapper {
+            width: 100%;
+            max-width: 1000px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            align-items: center;
+        }
+
+        /* General Section Styling */
+        .section-card {
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px) saturate(180%);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, .3);
+            padding: 2.5rem;
+            width: 95%;
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .section-card h1, .section-card h2 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        .section-card h1 { font-size: 2.8rem; }
+        .section-card h2 { font-size: 2rem; margin-bottom: 1.2rem; }
+
+        .section-card p {
+            text-align: center;
+            line-height: 1.6;
+            color: var(--text-color-secondary);
+        }
+        
+        /* --- Admin Dashboard Specific Styles --- */
+        .access-denied-message {
+            color: var(--delete-button-color);
+            font-size: 1.5rem;
+            margin-top: 50px;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+        
+        .admin-id-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 500px;
+            margin-top: 20px;
+        }
+        
+        .admin-id-form input {
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--input-background);
+            color: var(--text-color-primary);
+            font-size: 1rem;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .admin-id-form button {
+            background: var(--button-background-gradient);
+            color: var(--white);
+            border: none;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .admin-id-form button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--button-shadow);
+        }
+
+        .dashboard-controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .dashboard-controls .search-input,
+        .dashboard-controls .filter-select {
+            flex: 1;
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--input-background);
+            color: var(--text-color-primary);
+            font-size: 1rem;
+            min-width: 200px;
+        }
+
+        .dashboard-controls .search-input::placeholder {
+            color: var(--text-color-secondary);
+        }
+
+        .dashboard-controls .filter-select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 30px;
+        }
+
+        .reports-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+        
+        .report-item {
+            background: var(--card-background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: left;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .report-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .report-item h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            margin: 0 0 10px;
+        }
+
+        .report-item p {
+            margin: 0;
+            color: var(--text-color-secondary);
+            font-size: 0.95rem;
+        }
+        
+        .report-item .status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--white);
+        }
+
+        .status.received { background-color: #6c757d; }
+        .status.in-review { background-color: #ffc107; }
+        .status.resolved { background-color: #28a745; }
+        .status.dismissed { background-color: #dc3545; }
+
+        .report-item .date {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            display: block;
+            margin-top: 10px;
+        }
+        
+        /* --- Report Detail Modal --- */
+        #reportDetailModal .modal-content {
+            max-width: 600px;
+            text-align: left;
+        }
+        #reportDetailModal h3 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        #reportDetailModal p {
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+        
+        .detail-info {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .detail-info strong {
+            color: var(--text-color-primary);
+        }
+        
+        .detail-info .status-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--white);
+        }
+
+        .detail-info .status-badge.received { background-color: #6c757d; }
+        .detail-info .status-badge.in-review { background-color: #ffc107; }
+        .detail-info .status-badge.resolved { background-color: #28a745; }
+        .detail-info .status-badge.dismissed { background-color: #dc3545; }
+        
+        #reportMediaContainer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        #reportMediaContainer img, #reportMediaContainer video {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 1px solid var(--border-color);
+        }
+
+        #adminNoteForm {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #adminNoteForm textarea {
+            width: 100%;
+            height: 100px;
+            background: var(--input-background);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px;
+            color: var(--text-color-primary);
+            resize: vertical;
+        }
+        
+        .modal-action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-action-buttons .modal-button {
+            padding: 10px 15px;
+            border-radius: 50px;
+            font-weight: 600;
+        }
+        
+        .modal-action-buttons .status-button {
+            background: var(--card-background-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color-primary);
+        }
+        .modal-action-buttons .status-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .modal-action-buttons .status-button.in-review {
+            color: var(--warning-color);
+        }
+        .modal-action-buttons .status-button.resolved {
+            color: var(--status-online);
+        }
+        .modal-action-buttons .status-button.dismissed {
+            color: var(--delete-button-color);
+        }
+
+        /* --- User Profile Modal --- */
+        #userProfileModal .modal-content {
+            max-width: 500px;
+            text-align: center;
+        }
+
+        #userProfilePicModal {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 15px;
+            border: 3px solid var(--accent-color);
+        }
+
+        #userProfileModal h3 {
+            font-size: 2rem;
+            margin: 0;
+        }
+
+        #userProfileModal p {
+            margin: 5px 0;
+            color: var(--text-color-secondary);
+        }
+
+        .user-actions {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .user-actions button {
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .user-actions .block-btn {
+            background: var(--warning-color);
+            color: var(--background-color-primary);
+            border: none;
+        }
+        .user-actions .suspend-btn {
+            background: #ff8c00; /* Darker orange for suspend */
+            color: white;
+            border: none;
+        }
+        .user-actions .ban-btn {
+            background: #cc0000; /* Intense red for ban */
+            color: white;
+            border: none;
+        }
+        .user-actions .delete-btn {
+            background: var(--delete-button-color);
+            color: white;
+            border: none;
+        }
+        .user-actions .close-btn {
+            background: var(--input-background);
+            color: var(--text-color-primary);
+            border: 1px solid var(--border-color);
+        }
+        .user-actions button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        /* --- Confirmation Modal --- */
+        #confirmationModal .modal-content {
+            max-width: 450px;
+        }
+        .confirmation-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .confirmation-buttons .modal-button {
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+        }
+        .confirmation-buttons .confirm-btn {
+            background: var(--delete-button-color);
+            color: white;
+            border: none;
+        }
+        .confirmation-buttons .cancel-btn {
+            background: var(--input-background);
+            color: var(--text-color-primary);
+            border: 1px solid var(--border-color);
+        }
+        
+        /* --- Suspend Modal --- */
+        #suspendUserModal .modal-content {
+            max-width: 450px;
+        }
+        .suspend-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+        .suspend-form label {
+            color: var(--text-color-primary);
+            font-weight: 600;
+        }
+        .suspend-form input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--input-background);
+            color: var(--text-color-primary);
+            text-align: center;
+        }
+        .suspend-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .suspend-buttons .confirm-btn {
+            background: #ff8c00;
+            color: white;
+        }
+        .suspend-buttons .cancel-btn {
+            background: var(--input-background);
+            color: var(--text-color-primary);
+        }
+
+
+        /* --- Modal for user confirmation --- */
+        .modal {
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--card-background-color);
+            padding: 30px;
+            border-radius: var(--radius);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content h3 {
+            font-family: 'Poppins', sans-serif;
+            margin-top: 0;
+            color: var(--accent-color);
+        }
+
+        .modal-content p {
+            color: var(--text-color-secondary);
+            margin-bottom: 25px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .modal-button {
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .modal-button.confirm {
+            background: var(--delete-button-color);
+            color: white;
+        }
+
+        .modal-button.cancel {
+            background: var(--input-background);
+            color: var(--text-color-primary);
+        }
+
+        .modal-button.confirm:hover {
+            opacity: 0.8;
+            transform: translateY(-2px);
+        }
+
+        .modal-button.cancel:hover {
+            background: var(--border-color);
+            transform: translateY(-2px);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Toast Message Box */
+        #messageBox {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(40, 40, 40, 0.9);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease, bottom 0.4s ease;
+            z-index: 1000;
+        }
+
+        #messageBox.show {
+            opacity: 1;
+            visibility: visible;
+            bottom: 30px;
+        }
+
+        #messageBox.success { background-color: #28a745; }
+        #messageBox.error { background-color: #dc3545; }
+        #messageBox.info { background-color: #007bff; }
+        #messageBox.warning { background-color: #ffc107; }
+
+        @media (max-width: 600px) {
+            header .header-content-wrapper {
+                padding: 0 20px;
+            }
+            .logo {
+                font-size: 1.6rem;
+            }
+            header nav ul {
+                gap: 15px;
+            }
+            header nav ul li a {
+                font-size: 1.1rem;
+            }
+            .user-profile-pic-header {
+                height: 35px;
+                width: 35px;
+            }
+            .user-profile-pic-header i {
+                font-size: 20px;
+            }
+            #logoutButton {
+                width: 25px;
+                height: 25px;
+                font-size: 0.8rem;
+                margin-left: 8px;
+            }
+            #logoutButton i {
+                font-size: 0.8rem;
+            }
+            .section-card {
+                padding: 1.5rem;
+            }
+            .section-card h1 {
+                font-size: 2.2rem;
+            }
+            .section-card h2 {
+                font-size: 1.7rem;
+            }
+            .dashboard-controls {
+                flex-direction: column;
+            }
+            .dashboard-controls .search-input,
+            .dashboard-controls .filter-select {
+                width: 100%;
+            }
+        }
+    </style>
+<style id="header-overflow-fix">/*header-overflow-fix*/header .header-content-wrapper{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap}header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0;justify-content:flex-end}#profileLink{display:inline-flex;align-items:center;column-gap:8px;row-gap:2px;flex-wrap:wrap;max-width:100%;min-width:0}#profileLink #headerDisplayName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;flex:0 1 auto}#headerProfilePic,#headerAvatarIcon{flex:0 0 auto}@media (max-width:600px){header .header-content-wrapper{gap:8px}#profileLink{column-gap:6px}}</style></head>
+<body class="theme-glass-mode">
+
+    <header>
+        <div class="header-content-wrapper">
+            <a href="/home.html" class="logo" style="display:flex;align-items:center;gap:10px"><img src="assets/security.png" alt="JCHAT Security" style="height:24px;width:auto" onerror="this.style.display='none'"><span>Nuvia</span></a>
+            <nav>
+                <ul>
+                    </ul>
+            </nav>
+            <div class="header-right-actions">
+                <div class="notification-icon-wrapper">
+                    <a href="/notifications.html" aria-label="Notifications">
+                        <i class="fas fa-bell header-action-icon"></i>
+                        <span class="notification-badge" id="notificationCount">0</span>
+                    </a>
+                </div>
+                <div class="user-profile-pic-header">
+                    <a href="/profile.html" id="profileLink">
+                        <img id="headerProfilePic" src="" alt="User Profile Picture" style="display: none;">
+                        <i id="headerAvatarIcon" class="fas fa-user-circle"></i>
+                    </a>
+                </div>
+                <button id="logoutButton" aria-label="Logout" disabled>
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="content-wrapper">
+            <div id="admin-id-prompt" class="section-card" style="display: none;">
+                <h1><i class="fas fa-user-shield"></i> Identify as Admin</h1>
+                <p>Please enter your user ID below to access the admin dashboard.</p>
+                <div class="admin-id-form">
+                    <input type="text" id="adminIdInput" placeholder="Enter your User ID here">
+                    <button id="saveAdminIdButton"><i class="fas fa-sign-in-alt"></i> Save and Access Dashboard</button>
+                </div>
+            </div>
+
+            <div id="admin-content-container" style="display: none;">
+                <div class="section-card">
+                    <h1><i class="fas fa-tachometer-alt"></i> Admin Reports Dashboard</h1>
+                    <p>Welcome, Administrator. This dashboard displays all user-submitted reports for review.</p>
+                    
+                    <div class="dashboard-controls">
+                        <input type="text" id="userSearchInput" class="search-input" placeholder="Search user by ID or username">
+                        <select id="reportFilterSelect" class="filter-select">
+                            <option value="all">All Reports</option>
+                            <option value="received">Received</option>
+                            <option value="in-review">In Review</option>
+                            <option value="resolved">Resolved</option>
+                            <option value="dismissed">Dismissed</option>
+                        </select>
+                    </div>
+
+                    <ul id="reportsList" class="reports-list">
+                        <li style="color: var(--text-light); text-align: center;">Loading reports...</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div id="accessDeniedMessage" class="section-card" style="display: none;">
+                <h1 style="color: var(--delete-button-color);"><i class="fas fa-exclamation-triangle"></i> Access Denied</h1>
+                <p>You do not have permission to view this page. If you believe this is an error, please contact support.</p>
+                <p>Your current User ID: <code id="currentUserIdCode"></code></p>
+                <p>The saved Admin ID is: <code id="savedAdminIdCode"></code></p>
+            </div>
+        </div>
+    </main>
+    
+    <div id="reportDetailModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalReportTitle"><i class="fas fa-file-alt"></i></h3>
+            <div class="detail-info">
+                <p><strong><i class="fas fa-user"></i> Reporter ID:</strong> <span id="modalReporterId" class="clickable-id"></span></p>
+                <p><strong><i class="fas fa-user-slash"></i> Reported ID:</strong> <span id="modalReportedId" class="clickable-id">N/A</span></p>
+                <p><strong><i class="fas fa-info-circle"></i> Status:</strong> <span id="modalStatusBadge" class="status-badge received">Received</span></p>
+                <p><strong><i class="fas fa-clock"></i> Submitted:</strong> <span id="modalTimestamp"></span></p>
+                <p><strong><i class="fas fa-comment-dots"></i> Description:</strong> <span id="modalDescription"></span></p>
+                <p id="modalAdminNoteWrapper"><strong><i class="fas fa-user-edit"></i> Admin Note:</strong> <span id="modalAdminNote">N/A</span></p>
+                <div id="reportMediaContainer"></div>
+            </div>
+            
+            <form id="adminNoteForm">
+                <label for="adminNote"><i class="fas fa-pen-alt"></i> Add/Update Admin Note</label>
+                <textarea id="adminNote" placeholder="Enter your notes here..."></textarea>
+                <div class="modal-action-buttons">
+                    <button type="button" id="updateStatusReview" class="modal-button status-button"><i class="fas fa-sync-alt"></i> In Review</button>
+                    <button type="button" id="updateStatusResolved" class="modal-button status-button"><i class="fas fa-check-circle"></i> Resolved</button>
+                    <button type="button" id="updateStatusDismissed" class="modal-button status-button"><i class="fas fa-times-circle"></i> Dismissed</button>
+                    <button type="button" id="saveNoteButton" class="modal-button"><i class="fas fa-save"></i> Save Note</button>
+                    <button type="button" id="closeDetailModal" class="modal-button cancel"><i class="fas fa-times"></i> Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="userProfileModal" class="modal">
+        <div class="modal-content">
+            <img id="userProfilePicModal" src="" alt="User Profile Picture">
+            <h3 id="userProfileNameModal"></h3>
+            <p><strong><i class="fas fa-id-badge"></i> User ID:</strong> <span id="userProfileIdModal"></span></p>
+            <p><strong><i class="fas fa-shield-alt"></i> Status:</strong> <span id="userProfileStatusModal"></span></p>
+            <div class="user-actions">
+                <button id="blockUserButton" class="block-btn"><i class="fas fa-ban"></i> Block User</button>
+                <button id="suspendUserButton" class="suspend-btn"><i class="fas fa-pause-circle"></i> Suspend User</button>
+                <button id="banUserButton" class="ban-btn"><i class="fas fa-gavel"></i> Ban User</button>
+                <button id="deleteUserButton" class="delete-btn"><i class="fas fa-user-slash"></i> Delete User</button>
+                <button id="closeProfileModalButton" class="close-btn"><i class="fas fa-times"></i> Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <h3 id="confirmationTitle"></h3>
+            <p id="confirmationMessage"></p>
+            <div class="confirmation-buttons">
+                <button id="confirmActionButton" class="modal-button confirm-btn">Confirm</button>
+                <button id="cancelActionButton" class="modal-button cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="suspendUserModal" class="modal">
+        <div class="modal-content">
+            <h3 id="suspendTitle">Suspend User</h3>
+            <p id="suspendMessage">Please enter the duration of the suspension.</p>
+            <div class="suspend-form">
+                <label for="suspendDurationInput">Duration (in days, e.g., 7 for one week):</label>
+                <input type="number" id="suspendDurationInput" value="7" min="1" step="1">
+            </div>
+            <div class="suspend-buttons">
+                <button id="confirmSuspendButton" class="modal-button confirm-btn">Suspend</button>
+                <button id="cancelSuspendButton" class="modal-button cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="messageBox"></div>
+
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc, 
+            setDoc, 
+            collection, 
+            query, 
+            onSnapshot, 
+            updateDoc, 
+            getDocs,
+            where,
+            deleteDoc
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getStorage, ref, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+        // --- Firebase & Canvas Environment Configuration ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+            authDomain: "jchat-1.firebaseapp.com",
+            databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+            projectId: "jchat-1",
+            storageBucket: "jchat-1.firebasestorage.app",
+            messagingSenderId: "328479683167",
+            appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
+            measurementId: "G-S6Z9GG0R9P"
+        };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        // Cloudinary Configuration
+        const cloudinaryConfig = {
+            cloudName: "dxld01rcp",
+            uploadPreset: "Storage_preset"
+        };
+        
+        // --- Initialize Firebase services ---
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // --- DOM Elements ---
+        const headerProfilePic = document.getElementById('headerProfilePic');
+        const headerAvatarIcon = document.getElementById('headerAvatarIcon');
+        const logoutButton = document.getElementById('logoutButton');
+        const notificationCountElement = document.getElementById('notificationCount');
+        const messageBox = document.getElementById('messageBox');
+        const headerNavLinkProfile = document.getElementById('profileLink');
+        const adminContentContainer = document.getElementById('admin-content-container');
+        const accessDeniedMessage = document.getElementById('accessDeniedMessage');
+        const adminIdPrompt = document.getElementById('admin-id-prompt');
+        const adminIdInput = document.getElementById('adminIdInput');
+        const saveAdminIdButton = document.getElementById('saveAdminIdButton');
+        const reportsList = document.getElementById('reportsList');
+        const userSearchInput = document.getElementById('userSearchInput');
+        const reportFilterSelect = document.getElementById('reportFilterSelect');
+        const currentUserIdCode = document.getElementById('currentUserIdCode');
+        const savedAdminIdCode = document.getElementById('savedAdminIdCode');
+        
+        // Report Detail Modal elements
+        const reportDetailModal = document.getElementById('reportDetailModal');
+        const modalReportTitle = document.getElementById('modalReportTitle');
+        const modalReporterId = document.getElementById('modalReporterId');
+        const modalReportedId = document.getElementById('modalReportedId');
+        const modalStatusBadge = document.getElementById('modalStatusBadge');
+        const modalTimestamp = document.getElementById('modalTimestamp');
+        const modalDescription = document.getElementById('modalDescription');
+        const modalAdminNoteWrapper = document.getElementById('modalAdminNoteWrapper');
+        const modalAdminNote = document.getElementById('modalAdminNote');
+        const reportMediaContainer = document.getElementById('reportMediaContainer');
+        const adminNoteInput = document.getElementById('adminNote');
+        const saveNoteButton = document.getElementById('saveNoteButton');
+        const updateStatusReviewBtn = document.getElementById('updateStatusReview');
+        const updateStatusResolvedBtn = document.getElementById('updateStatusResolved');
+        const updateStatusDismissedBtn = document.getElementById('updateStatusDismissed');
+        const closeDetailModalBtn = document.getElementById('closeDetailModal');
+
+        // User Profile Modal elements
+        const userProfileModal = document.getElementById('userProfileModal');
+        const userProfilePicModal = document.getElementById('userProfilePicModal');
+        const userProfileNameModal = document.getElementById('userProfileNameModal');
+        const userProfileIdModal = document.getElementById('userProfileIdModal');
+        const userProfileStatusModal = document.getElementById('userProfileStatusModal');
+        const blockUserButton = document.getElementById('blockUserButton');
+        const suspendUserButton = document.getElementById('suspendUserButton');
+        const banUserButton = document.getElementById('banUserButton');
+        const deleteUserButton = document.getElementById('deleteUserButton');
+        const closeProfileModalButton = document.getElementById('closeProfileModalButton');
+
+        // Confirmation Modal elements
+        const confirmationModal = document.getElementById('confirmationModal');
+        const confirmationTitle = document.getElementById('confirmationTitle');
+        const confirmationMessage = document.getElementById('confirmationMessage');
+        const confirmActionButton = document.getElementById('confirmActionButton');
+        const cancelActionButton = document.getElementById('cancelActionButton');
+        
+        // Suspend User Modal elements
+        const suspendUserModal = document.getElementById('suspendUserModal');
+        const suspendDurationInput = document.getElementById('suspendDurationInput');
+        const confirmSuspendButton = document.getElementById('confirmSuspendButton');
+        const cancelSuspendButton = document.getElementById('cancelSuspendButton');
+
+        // --- Global State ---
+        let isAuthReady = false;
+        let currentUser = null;
+        let allReports = [];
+        let currentReportId = null;
+        let currentUserIdToManage = null;
+
+        // --- Utility Functions ---
+
+        /**
+         * Displays a temporary message box with a given message and type.
+         */
+        function showMessageBox(message, type, durationMs = 3000) {
+            if (messageBox.timeoutId) {
+                clearTimeout(messageBox.timeoutId);
+            }
+            
+            messageBox.className = `message-box show ${type}`;
+            messageBox.innerHTML = `<i class="fas fa-info-circle" id="messageBoxIcon"></i><span id="messageBoxText">${message}</span>`;
+            
+            const messageBoxIcon = messageBox.querySelector('#messageBoxIcon');
+            if (type === 'success') { messageBoxIcon.className = 'fas fa-check-circle'; }
+            else if (type === 'error') { messageBoxIcon.className = 'fas fa-times-circle'; }
+            else if (type === 'warning') { messageBoxIcon.className = 'fas fa-exclamation-triangle'; }
+            else { messageBoxIcon.className = 'fas fa-info-circle'; }
+
+            messageBox.style.display = 'flex';
+            messageBox.timeoutId = setTimeout(() => {
+                messageBox.classList.remove('show');
+            }, durationMs);
+        }
+        
+        /**
+         * Constructs a Cloudinary URL for an image/video.
+         */
+        function getCloudinaryImageUrl(urlOrPublicId, transformations = "w_auto,f_auto,q_auto") {
+            if (!urlOrPublicId) return null;
+            if (urlOrPublicId.startsWith('http://') || urlOrPublicId.startsWith('https://')) {
+                return urlOrPublicId;
+            }
+            return `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/${transformations}/${urlOrPublicId}`;
+        }
+        
+        /**
+         * Displays the profile picture or a default icon.
+         */
+        function displayProfilePicture(imgElement, iconElement, profilePicId, usernameInitial, transformations) {
+            if (imgElement) {
+                if (profilePicId) {
+                    const imageUrl = getCloudinaryImageUrl(profilePicId, transformations);
+                    imgElement.src = imageUrl;
+                    imgElement.style.display = 'block';
+                    if (iconElement) iconElement.style.display = 'none';
+                    imgElement.onerror = () => {
+                        console.error(`Failed to load profile picture: ${profilePicId}. Using placeholder.`);
+                        const bgColor = getComputedStyle(document.body).getPropertyValue('--card-background-color').trim().replace('#', '');
+                        const textColor = getComputedStyle(document.body).getPropertyValue('--text-color-primary').trim().replace('#', '');
+                        imgElement.src = `https://placehold.co/120x120/${bgColor}/${textColor}?text=${usernameInitial}`;
+                        imgElement.style.display = 'block';
+                        if (iconElement) iconElement.style.display = 'none';
+                    };
+                } else {
+                    imgElement.src = '';
+                    imgElement.style.display = 'none';
+                    if (iconElement) iconElement.style.display = 'block';
+                }
+            }
+        }
+
+        /**
+         * Fetches and displays the current user's profile data for the header.
+         */
+        async function fetchAndDisplayHeaderProfile(user) {
+            try {
+                const privateProfileDocRef = doc(db, "artifacts", appId, "users", user.uid, "profiles", "user_profile");
+                const privateDocSnap = await getDoc(privateProfileDocRef);
+                let profileData = null;
+
+                if (privateDocSnap.exists()) {
+                    profileData = privateDocSnap.data();
+                }
+                const usernameInitial = (profileData?.username || "J").charAt(0).toUpperCase();
+                displayProfilePicture(headerProfilePic, headerAvatarIcon, profileData?.profilePicId, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
+                headerNavLinkProfile.href = `/profile.html?userId=${user.uid}`;
+                logoutButton.disabled = false;
+            } catch (error) {
+                console.error("Error fetching profile for header:", error);
+                const usernameInitial = (user.displayName || "J").charAt(0).toUpperCase();
+                displayProfilePicture(headerProfilePic, headerAvatarIcon, user.photoURL, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
+                showMessageBox(`Error loading header profile: ${error.message}`, 'error');
+                logoutButton.disabled = false;
+            }
+        }
+
+        /**
+         * Fetches and displays the notification count for the current user.
+         */
+        async function fetchNotificationCount(userId) {
+            try {
+                const notificationsCollectionRef = collection(db, "artifacts", appId, "users", userId, "notifications");
+                const q = query(notificationsCollectionRef, where("read", "==", false));
+                onSnapshot(q, (querySnapshot) => {
+                    const unreadCount = querySnapshot.size;
+                    if (unreadCount > 0) {
+                        notificationCountElement.textContent = unreadCount;
+                        notificationCountElement.style.display = 'flex';
+                    } else {
+                        notificationCountElement.style.display = 'none';
+                    }
+                }, (error) => {
+                    console.error("Error listening to notification count:", error);
+                    notificationCountElement.style.display = 'none';
+                });
+            } catch (error) {
+                console.error("Error setting up listener for notification count:", error);
+            }
+        }
+
+        /**
+         * Renders the list of reports in the UI based on the filter.
+         */
+        function renderReports(reports) {
+            reportsList.innerHTML = ''; // Clear existing list
+            
+            const filterValue = reportFilterSelect.value;
+            let filteredReports = reports;
+            if (filterValue !== 'all') {
+                filteredReports = reports.filter(report => report.status.toLowerCase().replace(' ', '-') === filterValue);
+            }
+
+            if (filteredReports.length === 0) {
+                reportsList.innerHTML = `<li style="color: var(--text-light); text-align: center;">No reports to display.</li>`;
+                return;
+            }
+
+            filteredReports.forEach(report => {
+                const statusClass = report.status.toLowerCase().replace(' ', '-');
+                const timestamp = report.timestamp ? report.timestamp.toDate().toLocaleString() : 'N/A';
+                
+                const li = document.createElement('li');
+                li.className = 'report-item';
+                li.dataset.reportId = report.id;
+                li.innerHTML = `
+                    <h3><i class="fas fa-flag"></i> ${report.reportCategory}</h3>
+                    <span class="status ${statusClass}">${report.status}</span>
+                    <p><strong><i class="fas fa-user"></i> Reporter:</strong> <span class="clickable-id">${report.reporterId}</span></p>
+                    <p><strong><i class="fas fa-user-slash"></i> Reported:</strong> <span class="clickable-id">${report.reportedUserId || 'N/A'}</span></p>
+                    <span class="date"><i class="fas fa-clock"></i> Submitted: ${timestamp}</span>
+                `;
+                reportsList.appendChild(li);
+
+                li.addEventListener('click', (e) => {
+                    if (!e.target.classList.contains('clickable-id')) {
+                        showReportDetailModal(report);
+                    }
+                });
+            });
+        }
+        
+        /**
+         * Displays the modal with detailed report information.
+         */
+        function showReportDetailModal(report) {
+            currentReportId = report.id;
+            modalReportTitle.innerHTML = `<i class="fas fa-file-alt"></i> ${report.reportCategory}`;
+            modalReporterId.textContent = report.reporterId;
+            modalReporterId.dataset.userId = report.reporterId;
+            modalReportedId.textContent = report.reportedUserId || 'N/A';
+            modalReportedId.dataset.userId = report.reportedUserId || '';
+            modalStatusBadge.textContent = report.status;
+            modalStatusBadge.className = `status-badge ${report.status.toLowerCase().replace(' ', '-')}`;
+            modalTimestamp.textContent = report.timestamp ? report.timestamp.toDate().toLocaleString() : 'N/A';
+            modalDescription.textContent = report.description;
+            adminNoteInput.value = report.adminNote || '';
+
+            // Render media attachments
+            reportMediaContainer.innerHTML = '';
+            if (report.mediaUrls && report.mediaUrls.length > 0) {
+                report.mediaUrls.forEach(url => {
+                    if (url.match(/\.(jpeg|jpg|gif|png)$/i)) {
+                        const img = document.createElement('img');
+                        img.src = url;
+                        reportMediaContainer.appendChild(img);
+                    } else if (url.match(/\.(mp4|webm|ogg)$/i)) {
+                        const video = document.createElement('video');
+                        video.src = url;
+                        video.controls = true;
+                        reportMediaContainer.appendChild(video);
+                    }
+                });
+            } else {
+                reportMediaContainer.textContent = 'No media attached.';
+            }
+            
+            modalAdminNoteWrapper.style.display = report.adminNote ? 'block' : 'none';
+            modalAdminNote.textContent = report.adminNote || 'N/A';
+            
+            reportDetailModal.style.display = 'flex';
+        }
+
+        /**
+         * Updates the status of a report in Firestore.
+         */
+        async function updateReportStatus(reportId, newStatus) {
+            try {
+                const reportDocRef = doc(db, "artifacts", appId, "public", "data", "reports", reportId);
+                await updateDoc(reportDocRef, {
+                    status: newStatus
+                });
+                await logAdminAction(currentUser.uid, 'report_status_change', { reportId, newStatus });
+                showMessageBox(`Report status updated to '${newStatus}'!`, 'success');
+                reportDetailModal.style.display = 'none';
+            } catch (error) {
+                console.error("Error updating report status:", error);
+                showMessageBox(`Failed to update report status: ${error.message}`, 'error');
+            }
+        }
+
+        /**
+         * Saves the admin note for a report.
+         */
+        async function saveAdminNote(reportId, note) {
+            try {
+                const reportDocRef = doc(db, "artifacts", appId, "public", "data", "reports", reportId);
+                await updateDoc(reportDocRef, {
+                    adminNote: note
+                });
+                await logAdminAction(currentUser.uid, 'report_note_update', { reportId, note });
+                showMessageBox('Admin note saved!', 'success');
+                reportDetailModal.style.display = 'none';
+            } catch (error) {
+                console.error("Error saving admin note:", error);
+                showMessageBox(`Failed to save admin note: ${error.message}`, 'error');
+            }
+        }
+
+        /**
+         * Searches for a user by ID or username.
+         */
+        async function searchUser(searchTerm) {
+            if (!searchTerm) {
+                showMessageBox('Please enter a user ID or username to search.', 'warning');
+                return;
+            }
+            showMessageBox('Searching for user...', 'info', 5000);
+
+            try {
+                // First, try to find a user by their ID
+                const userDocRef = doc(db, 'users', searchTerm);
+                const userDocSnap = await getDoc(userDocRef);
+
+                if (userDocSnap.exists()) {
+                    const userData = userDocSnap.data();
+                    const privateProfileDocRef = doc(db, "artifacts", appId, "users", searchTerm, "profiles", "user_profile");
+                    const privateProfileSnap = await getDoc(privateProfileDocRef);
+                    const privateProfileData = privateProfileSnap.exists() ? privateProfileSnap.data() : null;
+                    const combinedData = { ...userData, ...privateProfileData, uid: searchTerm };
+                    showUserProfileModal(combinedData);
+                    showMessageBox('User found!', 'success');
+                    return;
+                }
+
+                // If not found by ID, try to find by username
+                const usersCollectionRef = collection(db, 'users');
+                const usernameQuery = query(usersCollectionRef, where("displayName", "==", searchTerm));
+                const querySnapshot = await getDocs(usernameQuery);
+                
+                if (!querySnapshot.empty) {
+                    const userData = querySnapshot.docs[0].data();
+                    const userId = querySnapshot.docs[0].id;
+                    const privateProfileDocRef = doc(db, "artifacts", appId, "users", userId, "profiles", "user_profile");
+                    const privateProfileSnap = await getDoc(privateProfileDocRef);
+                    const privateProfileData = privateProfileSnap.exists() ? privateProfileSnap.data() : null;
+                    const combinedData = { ...userData, ...privateProfileData, uid: userId };
+                    showUserProfileModal(combinedData);
+                    showMessageBox('User found!', 'success');
+                } else {
+                    showMessageBox('No user found with that ID or username.', 'error');
+                }
+
+            } catch (error) {
+                console.error("Error searching for user:", error);
+                showMessageBox(`Error searching for user: ${error.message}`, 'error');
+            }
+        }
+
+        /**
+         * Displays the user profile modal with the provided data.
+         */
+        function showUserProfileModal(userData) {
+            if (!userData) {
+                showMessageBox('User data is missing.', 'error');
+                return;
+            }
+            
+            currentUserIdToManage = userData.uid;
+            
+            userProfileNameModal.innerHTML = `<i class="fas fa-user-circle"></i> ${userData.displayName || 'N/A'}`;
+            userProfileIdModal.textContent = userData.uid;
+            
+            // Set user status and button texts based on the highest level of restriction
+            let statusText = 'Active';
+            let statusColor = 'var(--status-online)';
+            
+            blockUserButton.style.display = 'block';
+            suspendUserButton.style.display = 'block';
+            banUserButton.style.display = 'block';
+            
+            if (userData.isBanned) {
+                statusText = 'Banned';
+                statusColor = 'var(--delete-button-color)';
+                banUserButton.innerHTML = '<i class="fas fa-undo"></i> Unban User';
+                blockUserButton.style.display = 'none';
+                suspendUserButton.style.display = 'none';
+            } else {
+                banUserButton.innerHTML = '<i class="fas fa-gavel"></i> Ban User';
+                if (userData.isSuspended) {
+                    const now = new Date();
+                    const suspensionEnd = userData.suspensionEndDate ? userData.suspensionEndDate.toDate() : null;
+                    if (suspensionEnd && suspensionEnd > now) {
+                        statusText = `Suspended until ${suspensionEnd.toLocaleDateString()}`;
+                        statusColor = '#ff8c00'; // Orange
+                        suspendUserButton.innerHTML = '<i class="fas fa-undo"></i> End Suspension';
+                    } else {
+                        // Suspension has expired
+                        statusText = 'Active';
+                        statusColor = 'var(--status-online)';
+                        suspendUserButton.innerHTML = '<i class="fas fa-pause-circle"></i> Suspend User';
+                        updateDoc(doc(db, 'users', userData.uid), { isSuspended: false, suspensionEndDate: null });
+                    }
+                    blockUserButton.style.display = 'none';
+                } else {
+                    suspendUserButton.innerHTML = '<i class="fas fa-pause-circle"></i> Suspend User';
+                    if (userData.isBlocked) {
+                        statusText = 'Blocked';
+                        statusColor = 'var(--warning-color)';
+                        blockUserButton.innerHTML = '<i class="fas fa-unlock"></i> Unblock User';
+                    } else {
+                        statusText = 'Active';
+                        statusColor = 'var(--status-online)';
+                        blockUserButton.innerHTML = '<i class="fas fa-ban"></i> Block User';
+                    }
+                }
+            }
+            
+            userProfileStatusModal.textContent = statusText;
+            userProfileStatusModal.style.color = statusColor;
+            
+            displayProfilePicture(userProfilePicModal, null, userData.profilePicId, (userData.displayName || 'J').charAt(0).toUpperCase(), "w_200,h_200,c_fill,g_face,r_max");
+
+            userProfileModal.style.display = 'flex';
+        }
+
+        /**
+         * Opens the confirmation modal for a given action.
+         */
+        function showConfirmationModal(actionType, userId) {
+            let title = '';
+            let message = '';
+            let confirmClass = 'confirm-btn';
+            
+            if (actionType === 'block') {
+                const isBlocked = blockUserButton.textContent.includes('Unblock');
+                title = isBlocked ? 'Unblock User' : 'Block User';
+                message = `Are you sure you want to ${isBlocked ? 'unblock' : 'block'} this user?`;
+            } else if (actionType === 'ban') {
+                const isBanned = banUserButton.textContent.includes('Unban');
+                title = isBanned ? 'Unban User' : 'Ban User';
+                message = `Are you sure you want to ${isBanned ? 'unban' : 'permanently ban'} this user? This action can be reversed.`;
+            } else if (actionType === 'delete') {
+                title = 'Delete User';
+                message = `Are you sure you want to PERMANENTLY delete this user? This action cannot be undone.`;
+                confirmClass = 'confirm-btn delete';
+            } else if (actionType === 'suspend_end') {
+                title = 'End Suspension';
+                message = 'Are you sure you want to end this user\'s suspension early?';
+                confirmClass = 'confirm-btn suspend';
+            }
+
+            confirmationTitle.textContent = title;
+            confirmationMessage.textContent = message;
+            confirmActionButton.className = `modal-button ${confirmClass}`;
+            confirmationModal.style.display = 'flex';
+
+            confirmActionButton.onclick = () => {
+                if (actionType === 'block') {
+                    toggleUserBlockStatus(userId);
+                } else if (actionType === 'ban') {
+                    toggleUserBanStatus(userId);
+                } else if (actionType === 'delete') {
+                    deleteUserAccount(userId);
+                } else if (actionType === 'suspend_end') {
+                    endUserSuspension(userId);
+                }
+                confirmationModal.style.display = 'none';
+            };
+            cancelActionButton.onclick = () => {
+                confirmationModal.style.display = 'none';
+            };
+        }
+        
+        /**
+         * Opens the suspend user modal.
+         */
+        function showSuspendUserModal(userId) {
+            suspendUserModal.style.display = 'flex';
+            confirmSuspendButton.onclick = () => {
+                const duration = parseInt(suspendDurationInput.value, 10);
+                if (duration > 0) {
+                    suspendUserAccount(userId, duration);
+                    suspendUserModal.style.display = 'none';
+                } else {
+                    showMessageBox('Please enter a valid duration in days.', 'warning');
+                }
+            };
+            cancelSuspendButton.onclick = () => {
+                suspendUserModal.style.display = 'none';
+            };
+        }
+
+        /**
+         * Toggles the block status of a user.
+         */
+        async function toggleUserBlockStatus(userId) {
+            try {
+                const userDocRef = doc(db, 'users', userId);
+                const userDocSnap = await getDoc(userDocRef);
+
+                if (!userDocSnap.exists()) {
+                    showMessageBox('User not found.', 'error');
+                    return;
+                }
+
+                const userData = userDocSnap.data();
+                const newBlockedStatus = !userData.isBlocked;
+                
+                await updateDoc(userDocRef, { isBlocked: newBlockedStatus });
+                await logAdminAction(currentUser.uid, newBlockedStatus ? 'user_blocked' : 'user_unblocked', { userId });
+                showMessageBox(`User ${newBlockedStatus ? 'blocked' : 'unblocked'} successfully.`, 'success');
+                userProfileModal.style.display = 'none'; // Close the modal
+            } catch (error) {
+                console.error("Error toggling user block status:", error);
+                showMessageBox(`Failed to toggle user block status: ${error.message}`, 'error');
+            }
+        }
+        
+        /**
+         * Toggles the ban status of a user.
+         */
+        async function toggleUserBanStatus(userId) {
+            try {
+                const userDocRef = doc(db, 'users', userId);
+                const userDocSnap = await getDoc(userDocRef);
+                if (!userDocSnap.exists()) {
+                    showMessageBox('User not found.', 'error');
+                    return;
+                }
+                const newBanStatus = !userDocSnap.data().isBanned;
+                await updateDoc(userDocRef, { isBanned: newBanStatus, isSuspended: false, isBlocked: false, suspensionEndDate: null });
+                await logAdminAction(currentUser.uid, newBanStatus ? 'user_banned' : 'user_unbanned', { userId });
+                showMessageBox(`User ${newBanStatus ? 'banned' : 'unbanned'} successfully.`, 'success');
+                userProfileModal.style.display = 'none';
+            } catch (error) {
+                console.error("Error toggling user ban status:", error);
+                showMessageBox(`Failed to toggle user ban status: ${error.message}`, 'error');
+            }
+        }
+        
+        /**
+         * Suspends a user for a specified duration.
+         */
+        async function suspendUserAccount(userId, durationInDays) {
+            try {
+                const userDocRef = doc(db, 'users', userId);
+                const suspensionEndDate = new Date();
+                suspensionEndDate.setDate(suspensionEndDate.getDate() + durationInDays);
+
+                await updateDoc(userDocRef, { 
+                    isSuspended: true, 
+                    suspensionEndDate: suspensionEndDate,
+                    isBlocked: false,
+                    isBanned: false
+                });
+                await logAdminAction(currentUser.uid, 'user_suspended', { userId, durationInDays });
+                showMessageBox(`User suspended for ${durationInDays} days.`, 'success');
+                userProfileModal.style.display = 'none';
+            } catch (error) {
+                console.error("Error suspending user:", error);
+                showMessageBox(`Failed to suspend user: ${error.message}`, 'error');
+            }
+        }
+        
+        /**
+         * Ends a user's suspension early.
+         */
+        async function endUserSuspension(userId) {
+            try {
+                const userDocRef = doc(db, 'users', userId);
+                await updateDoc(userDocRef, { 
+                    isSuspended: false, 
+                    suspensionEndDate: null
+                });
+                await logAdminAction(currentUser.uid, 'suspension_ended', { userId });
+                showMessageBox('User suspension ended.', 'success');
+                userProfileModal.style.display = 'none';
+            } catch (error) {
+                console.error("Error ending user suspension:", error);
+                showMessageBox(`Failed to end user suspension: ${error.message}`, 'error');
+            }
+        }
+        
+        /**
+         * Deletes a user account and their associated data.
+         * Note: This is a client-side deletion. A server-side function would be required for full deletion.
+         */
+        async function deleteUserAccount(userId) {
+            try {
+                showMessageBox('Deleting user account...', 'info', 5000);
+                
+                // 1. Delete user's profile data (public and private)
+                const publicProfileDocRef = doc(db, "artifacts", appId, "public", "data", "user_profiles", userId);
+                const privateProfileDocRef = doc(db, "artifacts", appId, "users", userId, "profiles", "user_profile");
+                await deleteDoc(publicProfileDocRef);
+                await deleteDoc(privateProfileDocRef);
+
+                // 2. Delete user's main document (the one that stores their `displayName`)
+                await deleteDoc(doc(db, 'users', userId));
+
+                // 3. Log the admin action
+                await logAdminAction(currentUser.uid, 'user_deleted', { userId });
+
+                // 4. Close modal and show success message
+                userProfileModal.style.display = 'none';
+                showMessageBox('User account deleted successfully.', 'success');
+            } catch (error) {
+                console.error("Error deleting user account:", error);
+                showMessageBox(`Failed to delete user account: ${error.message}`, 'error');
+            }
+        }
+
+        /**
+         * Logs an admin action to a new collection.
+         */
+        async function logAdminAction(adminId, action, details = {}) {
+            try {
+                const logsCollectionRef = collection(db, "artifacts", appId, "public", "data", "admin_logs");
+                await setDoc(doc(logsCollectionRef), {
+                    adminId,
+                    action,
+                    details: JSON.stringify(details),
+                    timestamp: new Date()
+                });
+            } catch (error) {
+                console.error("Error logging admin action:", error);
+            }
+        }
+        
+        /**
+         * Saves the admin ID to local storage.
+         */
+        function saveAdminId(userId) {
+            localStorage.setItem('jchat-admin-id', userId);
+        }
+
+        // --- Authentication State Listener ---
+        onAuthStateChanged(auth, async (user) => {
+            const savedAdminId = localStorage.getItem('jchat-admin-id');
+
+            if (user) {
+                currentUser = user;
+                isAuthReady = true;
+
+                // Check if the user ID matches the saved admin ID
+                if (user.uid === savedAdminId) {
+                    adminIdPrompt.style.display = 'none';
+                    adminContentContainer.style.display = 'block';
+                    accessDeniedMessage.style.display = 'none';
+                    fetchAndDisplayHeaderProfile(user);
+                    fetchNotificationCount(user.uid);
+
+                    // Setup real-time listener for reports
+                    const reportsCollectionRef = collection(db, "artifacts", appId, "public", "data", "reports");
+                    const q = query(reportsCollectionRef);
+
+                    onSnapshot(q, (querySnapshot) => {
+                        allReports = [];
+                        querySnapshot.forEach(doc => {
+                            allReports.push({ id: doc.id, ...doc.data() });
+                        });
+                        // Sort by timestamp, newest first
+                        allReports.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                        renderReports(allReports);
+                    }, (error) => {
+                        console.error("Error fetching reports:", error);
+                        reportsList.innerHTML = `<li style="color: var(--delete-button-color); text-align: center;">Error loading reports.</li>`;
+                    });
+
+                } else if (savedAdminId === null) {
+                    // No admin ID saved, show the input prompt
+                    adminIdInput.value = ''; // Clear any previous value
+                    adminIdPrompt.style.display = 'flex';
+                    adminContentContainer.style.display = 'none';
+                    accessDeniedMessage.style.display = 'none';
+                    logoutButton.disabled = false;
+                } else {
+                    // Saved ID exists but doesn't match current user
+                    adminIdPrompt.style.display = 'none';
+                    adminContentContainer.style.display = 'none';
+                    accessDeniedMessage.style.display = 'flex';
+                    logoutButton.disabled = false;
+                    currentUserIdCode.textContent = user.uid;
+                    savedAdminIdCode.textContent = savedAdminId;
+                }
+            } else {
+                // Not authenticated, show access denied
+                isAuthReady = false;
+                adminIdPrompt.style.display = 'none';
+                adminContentContainer.style.display = 'none';
+                accessDeniedMessage.style.display = 'flex';
+                logoutButton.disabled = true;
+                headerProfilePic.style.display = 'none';
+                headerAvatarIcon.style.display = 'block';
+                currentUserIdCode.textContent = "Not logged in.";
+                savedAdminIdCode.textContent = savedAdminId || "None saved.";
+            }
+        });
+
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply saved theme
+            const savedTheme = localStorage.getItem('jchat-theme');
+            const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+            if (savedTheme && themes.includes(savedTheme)) {
+                document.body.classList.remove(...themes);
+                document.body.classList.add(savedTheme);
+            } else {
+                document.body.classList.add('theme-dark-mode'); // Default to dark mode
+            }
+        });
+
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'jchat-theme') {
+                const newTheme = event.newValue || 'theme-dark-mode';
+                const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+                if (themes.includes(newTheme)) {
+                    document.body.classList.remove(...themes);
+                    document.body.classList.add(newTheme);
+                }
+            }
+        });
+
+        logoutButton.addEventListener('click', async () => {
+            if (!isAuthReady) return;
+            try {
+                await signOut(auth);
+                // Redirect will happen via auth listener
+            } catch (error) {
+                console.error("Error logging out:", error);
+                showMessageBox('Failed to log out. Please try again.', 'error');
+            }
+        });
+
+        saveAdminIdButton.addEventListener('click', () => {
+            const newAdminId = adminIdInput.value.trim();
+            if (newAdminId) {
+                saveAdminId(newAdminId);
+                // Force a reload to trigger the auth check with the new ID
+                window.location.reload();
+            } else {
+                showMessageBox('Please enter a valid User ID.', 'warning');
+            }
+        });
+
+        reportFilterSelect.addEventListener('change', () => {
+            renderReports(allReports);
+        });
+
+        userSearchInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                searchUser(userSearchInput.value.trim());
+            }
+        });
+        
+        document.addEventListener('click', (event) => {
+            if (event.target.classList.contains('clickable-id')) {
+                const userId = event.target.textContent;
+                if (userId && userId !== 'N/A') {
+                    searchUser(userId);
+                }
+            }
+        });
+
+        // Report Detail Modal buttons
+        closeDetailModalBtn.addEventListener('click', () => {
+            reportDetailModal.style.display = 'none';
+            currentReportId = null;
+        });
+
+        updateStatusReviewBtn.addEventListener('click', () => {
+            if (currentReportId) {
+                updateReportStatus(currentReportId, 'In Review');
+            }
+        });
+
+        updateStatusResolvedBtn.addEventListener('click', () => {
+            if (currentReportId) {
+                updateReportStatus(currentReportId, 'Resolved');
+            }
+        });
+        
+        updateStatusDismissedBtn.addEventListener('click', () => {
+            if (currentReportId) {
+                updateReportStatus(currentReportId, 'Dismissed');
+            }
+        });
+        
+        saveNoteButton.addEventListener('click', () => {
+            if (currentReportId) {
+                saveAdminNote(currentReportId, adminNoteInput.value);
+            }
+        });
+
+        // User Profile Modal buttons
+        closeProfileModalButton.addEventListener('click', () => {
+            userProfileModal.style.display = 'none';
+            currentUserIdToManage = null;
+        });
+
+        blockUserButton.addEventListener('click', () => {
+            if (currentUserIdToManage) {
+                const isBlocked = blockUserButton.textContent.includes('Unblock');
+                if (isBlocked) {
+                    toggleUserBlockStatus(currentUserIdToManage);
+                } else {
+                    showConfirmationModal('block', currentUserIdToManage);
+                }
+            }
+        });
+        
+        suspendUserButton.addEventListener('click', () => {
+            if (currentUserIdToManage) {
+                const isSuspended = suspendUserButton.textContent.includes('End');
+                if (isSuspended) {
+                    showConfirmationModal('suspend_end', currentUserIdToManage);
+                } else {
+                    showSuspendUserModal(currentUserIdToManage);
+                }
+            }
+        });
+
+        banUserButton.addEventListener('click', () => {
+            if (currentUserIdToManage) {
+                const isBanned = banUserButton.textContent.includes('Unban');
+                if (isBanned) {
+                    toggleUserBanStatus(currentUserIdToManage);
+                } else {
+                    showConfirmationModal('ban', currentUserIdToManage);
+                }
+            }
+        });
+
+        deleteUserButton.addEventListener('click', () => {
+            if (currentUserIdToManage) {
+                showConfirmationModal('delete', currentUserIdToManage);
+            }
+        });
+    </script>
+	
+</body>
+</html>

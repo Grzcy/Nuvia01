@@ -1,0 +1,1347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Last updated: 2025-08-21T18:19:29Z -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JCHAT - User Levels</title>
+
+    <!-- Google Fonts: Poppins for headings, Inter for body text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        /* Universal box-sizing for consistent layout */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        /* Global CSS Variables for easy theme switching */
+        :root {
+            --pink: #ff2e92;
+            --blue: #00d5ff;
+            --glass-black: rgba(10, 10, 10, .75);
+            --glass-blue: rgba(0, 213, 255, .15);
+            --radius: 20px;
+            --transition: .3s ease;
+
+            /* These variables will be overridden by theme classes */
+            --white: #fff;
+            --text-light: rgba(255, 255, 255, .7);
+            --background-main: rgba(10, 10, 10, .75);
+            --background-gradient-1: #00d5ff;
+            --background-gradient-2: #ff2e92;
+            --card-background: linear-gradient(145deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01));
+            --header-background: linear-gradient(135deg, rgba(10, 10, 10, .85), rgba(10, 10, 10, .75));
+            --border-light: rgba(255, 255, 255, .05);
+            --input-background: rgba(255, 255, 255, 0.05);
+            --button-background: linear-gradient(90deg, var(--blue), var(--pink));
+            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+
+            /* New variables for consistent theming (copied from Profile.html) */
+            --background-color-primary: #1a1a2e;
+            --background-color-secondary: #0f0f1f;
+            --header-background-color: #2a2a4a;
+            --footer-background-color: #2a2a4a;
+            --content-background-color: #20203a;
+            --card-background-color: #2a2a4a;
+            --text-color-primary: #e0e0e0;
+            --text-color-secondary: #b0b0d0;
+            --notification-badge-color: #ff2e92;
+            --status-online: #4CAF50;
+            --status-offline: #6c757d;
+            --status-away: #FFC107;
+            --delete-button-color: #dc3545;
+            --warning-color: #ffc107;
+            --accent-color: #00d5ff; /* A bright cyan */
+            --accent-color-dark: #00aaff;
+            --border-color: #3a3a5a;
+        }
+
+        /* --- Theme Definitions (Light and Dark Mode) --- */
+        /* Light Mode */
+        body.theme-light-mode {
+            --background-main: #f0f2f5; /* Light gray background */
+            --background-gradient-1: #e0e2e5; /* Subtle lighter gradient */
+            --background-gradient-2: #d0d2d5; /* Subtle darker gradient */
+            --white: #333; /* Dark text for readability */
+            --text-light: #666; /* Lighter dark text */
+            --card-background: rgba(255, 255, 255, 0.95); /* Near white cards */
+            --header-background: rgba(255, 255, 255, 0.98); /* Near white header */
+            --border-light: rgba(0, 0, 0, 0.1); /* Light borders */
+            --input-background: rgba(0, 0, 0, 0.05); /* Light input background */
+            --button-background: linear-gradient(90deg, #6dd5ed, #2193b0); /* Blue gradient */
+            --button-shadow: 0 4px 15px rgba(109, 213, 237, 0.4), 0 4px 15px rgba(33, 147, 176, 0.4);
+
+            /* New variables override for light mode */
+            --background-color-primary: #f0f2f5;
+            --background-color-secondary: #e0e2e5;
+            --header-background-color: #ffffff;
+            --footer-background-color: #ffffff;
+            --content-background-color: #f7f9fb;
+            --card-background-color: #ffffff;
+            --text-color-primary: #333333;
+            --text-color-secondary: #666666;
+            --text-color-light: #999999;
+            --accent-color: #007bff;
+            --accent-color-dark: #0056b3;
+            --border-color: #e0e0e0;
+            --input-background-color: #f0f0f0;
+            --button-background: #e9ecef;
+            --button-hover-background: #dee2e6;
+            --active-item-background: rgba(0, 123, 255, 0.1);
+            --notification-badge-color: #dc3545;
+            --status-online: #28a745;
+            --status-offline: #6c757d;
+            --status-away: #ffc107;
+            --delete-button-color: #dc3545;
+            --warning-color: #ffc107;
+        }
+
+        /* Dark Mode */
+        body.theme-dark-mode {
+            --background-main: #1a1a2e; /* Deep purple-dark blue */
+            --background-gradient-1: #16213e; /* Slightly lighter deep blue */
+            --background-gradient-2: #0f3460; /* Darker blue */
+            --white: #e0e0e0; /* Off-white text */
+            --text-light: #a0a0a0; /* Grayish text */
+            --card-background: rgba(25, 25, 40, 0.7); /* Darker, less transparent cards */
+            --header-background: linear-gradient(135deg, rgba(10, 10, 20, .85), rgba(10, 10, 20, .75)); /* Original dark header */
+            --border-light: rgba(255, 255, 255, 0.08); /* Subtle white borders */
+            --input-background: rgba(255, 255, 255, 0.08);
+            --button-background: linear-gradient(90deg, #e94560, #ba2f49); /* Reddish gradient */
+            --button-shadow: 0 4px 15px rgba(233, 69, 96, 0.4), 0 4px 15px rgba(186, 47, 73, 0.4);
+
+            /* New variables override for dark mode */
+            --background-color-primary: #121212;
+            --background-color-secondary: #1e1e1e;
+            --header-background-color: #2c2c2c;
+            --footer-background-color: #2c2c2c;
+            --content-background-color: #242424;
+            --card-background-color: #2c2c2c;
+            --text-color-primary: #ffffff;
+            --text-color-secondary: #bbbbbb;
+            --accent-color: #bb86fc;
+            --accent-color-dark: #9a67ea;
+            --border-color: #444444;
+            --input-background-color: #383838;
+            --button-background: #383838;
+            --button-hover-background: #505050;
+            --active-item-background: rgba(187, 134, 252, 0.2);
+            --notification-badge-color: #cf6679;
+            --delete-button-color: #f44336;
+            --warning-color: #ffeb3b;
+        }
+
+        /* Glass Mode specific variables (copied from Profile.html) */
+        body.theme-glass-mode {
+            --background-main: rgba(10, 10, 10, 0.75);
+            background-image: url('https://source.unsplash.com/random/1920x1080?abstract,blur') !important;
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            backdrop-filter: blur(10px);
+            --card-background: rgba(25, 25, 40, 0.7);
+            --white: #e0e0e0; /* text-color */
+            --text-light: rgba(255, 255, 255, 0.7);
+            --input-background: rgba(255, 255, 255, 0.05);
+            --border-light: rgba(255, 255, 255, 0.1); /* glass-border-color */
+            --button-background: linear-gradient(90deg, var(--pink), var(--blue));
+            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5); /* Inner shadow for glass effect */
+
+            /* New variables override for glass mode */
+            --background-color-primary: rgba(10, 10, 10, 0.75);
+            --background-color-secondary: rgba(10, 10, 10, 0.6);
+            --header-background-color: rgba(10, 10, 10, 0.85);
+            --footer-background-color: rgba(10, 10, 10, 0.85);
+            --content-background-color: rgba(10, 10, 10, 0.75);
+            --card-background-color: rgba(25, 25, 40, 0.7);
+            --text-color-primary: #e0e0e0;
+            --text-color-secondary: #b0b0d0;
+            --accent-color: #00d5ff;
+            --accent-color-dark: #00aaff;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --input-background-color: rgba(255, 255, 255, 0.05);
+            --button-background: rgba(0, 213, 255, 0.15); /* Glassy button */
+            --button-hover-background: rgba(0, 213, 255, 0.25);
+            --active-item-background: rgba(0, 213, 255, 0.1);
+        }
+
+        /* Sunset Theme (copied from Profile.html) */
+        body.theme-sunset-mode {
+            background: linear-gradient(to top, #ff7e5f, #feb47b) !important;
+            --background-main: linear-gradient(to top, #ff7e5f, #feb47b);
+            --card-background: rgba(255, 255, 255, 0.15); /* Slightly transparent white for contrast */
+            --white: #fff; /* White text for readability */
+            --text-light: rgba(255, 255, 255, 0.8);
+            --input-background: rgba(255, 255, 255, 0.1);
+            --border-light: rgba(255, 255, 255, 0.3);
+            --button-background: linear-gradient(90deg, #fd746c, #ff9068); /* Sunset gradient */
+            --button-shadow: 0 4px 15px rgba(253, 116, 108, 0.4), 0 4px 15px rgba(255, 144, 104, 0.4);
+
+            /* New variables override for sunset mode */
+            --background-color-primary: #ff7e5f;
+            --background-color-secondary: #feb47b;
+            --header-background-color: rgba(255, 126, 95, 0.9);
+            --footer-background-color: rgba(255, 126, 95, 0.9);
+            --content-background-color: rgba(255, 126, 95, 0.85);
+            --card-background-color: rgba(255, 255, 255, 0.15);
+            --text-color-primary: #fff;
+            --text-color-secondary: rgba(255, 255, 255, 0.8);
+            --accent-color: #ffd700;
+            --accent-color-dark: #ccaa00;
+            --border-color: rgba(255, 255, 255, 0.3);
+            --input-background-color: rgba(255, 255, 255, 0.2);
+            --button-background: rgba(255, 255, 255, 0.2);
+            --button-hover-background: rgba(255, 255, 255, 0.3);
+            --active-item-background: rgba(255, 215, 0, 0.1);
+        }
+
+        html {
+            overflow-y: scroll;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            padding-bottom: 120px; /* Space for nav bar (60px) + toggle button (60px) */
+            background-color: var(--background-main);
+            background-image: radial-gradient(circle at top left, var(--background-gradient-1), transparent 100px),
+                              radial-gradient(circle at bottom right, var(--background-gradient-2), transparent 150px);
+            color: var(--white);
+            transition: background-color 0.5s ease, color 0.5s ease; /* Smooth theme transition */
+        }
+
+        /* Header Styling */
+        header {
+            background: var(--header-background);
+            border-bottom: 1px solid var(--border-light);
+            padding: 10px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 55px;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+        }
+
+        header .header-content-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 30px;
+        }
+
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            letter-spacing: -0.03em;
+            text-decoration: none;
+        }
+
+        /* Header Navigation */
+        header nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            gap: 25px;
+        }
+
+        header nav ul li a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 5px 0;
+            position: relative;
+            transition: color var(--transition);
+        }
+
+        header nav ul li a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0;
+            height: 3px;
+            background: var(--blue);
+            border-radius: 2px;
+            transition: width var(--transition);
+        }
+
+        header nav ul li a:hover {
+            color: var(--blue);
+        }
+
+        header nav ul li a:hover::after {
+            width: 100%;
+        }
+
+        /* User Profile Header Styling */
+        .user-profile-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Notification Icon Styling */
+        .notification-icon-wrapper {
+            position: relative;
+            margin-right: 15px; /* Space between notification and profile */
+        }
+
+        .notification-icon-wrapper a {
+            text-decoration: none; /* Remove underline from link */
+            color: inherit; /* Inherit color from parent */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-icon-wrapper i {
+            font-size: 1.5rem; /* Adjust size as needed */
+            color: var(--text-light);
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .notification-icon-wrapper i:hover {
+            color: var(--white);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--pink); /* Use pink for notifications */
+            color: var(--white);
+            border-radius: 50%;
+            padding: 3px 7px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            min-width: 20px;
+            text-align: center;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Hide if no notifications */
+            display: none;
+        }
+
+        .user-profile-header #profileLink {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--white);
+            transition: opacity 0.3s ease, background-color 0.3s ease;
+            padding: 5px 10px;
+            border-radius: var(--radius);
+        }
+
+        .user-profile-header #profileLink:hover {
+            opacity: 0.8;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .user-profile-header img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--blue);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: opacity 0.3s ease;
+        }
+
+        .user-profile-header i {
+            font-size: 30px;
+            color: var(--text-light);
+        }
+
+        .user-profile-header span {
+            font-weight: 600;
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
+        }
+
+        /* Logout Button Styling */
+        #logoutButton {
+            background: linear-gradient(90deg, var(--pink), var(--blue));
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.3s ease;
+            opacity: 0.8;
+            margin-left: 10px;
+        }
+
+        #logoutButton:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px var(--pink), 0 4px 15px var(--blue);
+            opacity: 1;
+        }
+
+        #logoutButton i {
+            color: var(--white);
+            font-size: 0.9rem;
+        }
+
+        /* Main Content Area */
+        main {
+            flex-grow: 1;
+            padding: 40px 0;
+            padding-top: 55px; /* Adjust for fixed header */
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Align content to top */
+            text-align: center;
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 1000px; /* Adjust as needed */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+
+        /* Current progress widget */
+        .current-progress {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-background);
+            border: 1px solid var(--border-light);
+            border-radius: 14px;
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .current-progress .meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+        .current-progress .bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.12); /* grey base */
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        .current-progress .fill {
+            width: 0%;
+            height: 100%;
+            background-image: linear-gradient(90deg, var(--pink), var(--blue));
+            background-size: 200% 100%;
+            transition: width .35s ease;
+        }
+
+        /* Levels Section */
+        .levels-section {
+            background: var(--card-background);
+            border: 1px solid var(--glass-blue);
+            backdrop-filter: blur(10px) saturate(180%);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, .3);
+            padding: 2rem;
+            width: 90%;
+            max-width: 800px;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            text-align: center;
+        }
+
+        .levels-section h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            margin: 0;
+            margin-bottom: 1rem;
+        }
+
+        .levels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .level-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-light);
+            border-radius: 15px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .level-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .level-card .level-icon {
+            font-size: 2.5rem;
+            /* Apply gradient to icons */
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent; /* Fallback */
+        }
+
+        .level-card h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--white);
+            margin: 0;
+        }
+
+        .level-card p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        .level-card .gas-requirement { /* Renamed from xp-requirement */
+            font-weight: 600;
+            color: var(--pink);
+        }
+
+        .level-card .jcoin-reward {
+            font-weight: 600;
+            color: var(--blue);
+        }
+        .level-card .gas-reward { /* New style for Gas reward */
+            font-weight: 600;
+            color: var(--pink); /* Using pink for gas reward as well, or another distinct color */
+        }
+        .level-card .other-rewards { /* For other types of rewards */
+            font-size: 0.85rem;
+            color: var(--text-light);
+            text-align: center;
+        }
+
+
+        /* --- Bottom Navigation Bar --- */
+        #bottomNavBar {
+            position: fixed;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: var(--header-background);
+            border-top: 1px solid var(--border-light);
+            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 10px;
+            z-index: 50;
+            bottom: 60px; /* Positioned above the toggle button */
+            transition: bottom 0.3s ease-out; /* Smooth slide transition */
+        }
+
+        #bottomNavBar.nav-bar-hidden-full {
+            bottom: -60px; /* Move it completely off-screen below */
+        }
+
+        .nav-icon-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-light);
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: color 0.2s ease;
+            flex: 1;
+            max-width: 80px;
+        }
+
+        .nav-icon-item:hover {
+            color: var(--white);
+        }
+
+        .nav-icon-circle {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--blue), var(--pink));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .nav-icon-item:hover .nav-icon-circle {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px var(--blue), 0 4px 12px var(--pink);
+        }
+
+        .nav-icon-circle i {
+            color: var(--white);
+            font-size: 1.3rem;
+            transition: transform 0.2s ease;
+        }
+
+        .nav-icon-item.active .nav-icon-circle {
+            background: linear-gradient(45deg, var(--pink), var(--blue));
+            box-shadow: 0 4px 12px var(--pink), 0 4px 12px var(--blue);
+        }
+        .nav-icon-item.active {
+            color: var(--white);
+        }
+
+        /* New Toggle Button */
+        #navToggleBtn {
+            position: fixed;
+            bottom: 0px; /* Position at the very bottom */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px; /* Slightly larger button */
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--pink), var(--blue)); /* Pink to blue gradient */
+            color: var(--white);
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem; /* Larger icon */
+            cursor: pointer;
+            z-index: 60; /* Higher than nav bar */
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
+        }
+
+        #navToggleBtn:hover {
+            transform: translateX(-50%) scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(45deg, var(--blue), var(--pink)); /* Reverse gradient on hover */
+        }
+
+        #navToggleBtn i {
+            transition: transform 0.3s ease; /* Smooth icon rotation */
+        }
+
+        #navToggleBtn.rotated i {
+            transform: rotate(180deg); /* Rotate icon when nav is hidden */
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 600px) {
+            header .header-content-wrapper {
+                padding: 0 20px;
+            }
+            .logo {
+                font-size: 1.6rem;
+            }
+            header nav ul {
+                gap: 15px;
+            }
+            header nav ul li a {
+                font-size: 1.1rem;
+            }
+            .user-profile-header #profileLink {
+                padding: 5px;
+            }
+            .user-profile-header span {
+                max-width: 90px;
+            }
+            .user-profile-header img {
+                width: 30px;
+                height: 30px;
+            }
+            .user-profile-header i {
+                font-size: 25px;
+            }
+            #logoutButton {
+                width: 25px;
+                height: 25px;
+                font-size: 0.8rem;
+                margin-left: 8px;
+            }
+            #logoutButton i {
+                font-size: 0.8rem;
+            }
+            .levels-section {
+                padding: 1.5rem;
+            }
+            .levels-section h2 {
+                font-size: 1.8rem;
+            }
+            .levels-grid {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 15px;
+            }
+            .level-card {
+                padding: 0.8rem;
+            }
+            .level-card .level-icon {
+                font-size: 2rem;
+            }
+            .level-card h3 {
+                font-size: 1.1rem;
+            }
+            .level-card p {
+                font-size: 0.8rem;
+            }
+            #bottomNavBar {
+                height: 55px;
+                padding: 0 5px;
+                bottom: 55px; /* Adjust for smaller button height on mobile */
+            }
+            #bottomNavBar.nav-bar-hidden-full {
+                bottom: -55px; /* Adjust for smaller button height on mobile */
+            }
+            #navToggleBtn {
+                width: 55px;
+                height: 55px;
+                font-size: 1.5rem;
+            }
+            .nav-icon-circle {
+                width: 40px;
+                height: 40px;
+            }
+            .nav-icon-circle i {
+                font-size: 1.2rem;
+            }
+            .nav-icon-item {
+                font-size: 0.7rem;
+            }
+            body {
+                padding-bottom: 110px; /* 55px (nav) + 55px (toggle) */
+            }
+        }
+    </style>
+<style id="header-overflow-fix">/*header-overflow-fix*/header .header-content-wrapper{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap}header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0;justify-content:flex-end}#profileLink{display:inline-flex;align-items:center;column-gap:8px;row-gap:2px;flex-wrap:wrap;max-width:100%;min-width:0}#profileLink #headerDisplayName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;flex:0 1 auto}#headerProfilePic,#headerAvatarIcon{flex:0 0 auto}@media (max-width:600px){header .header-content-wrapper{gap:8px}#profileLink{column-gap:6px}}</style></head>
+<body class="theme-dark-mode">
+
+    <header>
+        <div class="header-content-wrapper">
+            <a href="/home.html" class="logo" style="display:flex;align-items:center;gap:10px"><img src="assets/security.png" alt="JCHAT Security" style="height:24px;width:auto" onerror="this.style.display='none'"><span>Nuvia</span></a>
+            <nav>
+                <ul>
+                    <li><a href="/home.html">Home</a></li>
+                    <li><a href="/levels.html" class="active">Levels</a></li>
+                </ul>
+            </nav>
+            <div class="user-profile-header">
+                <!-- Admin Icon Link (visible only to admin) -->
+                <a href="/Admin.html" id="adminIconLink" aria-label="Admin Dashboard" style="display: none;">
+                    <i class="fas fa-user-cog"></i>
+                </a>
+                <!-- Notification Icon with Badge -->
+                <div class="notification-icon-wrapper">
+                    <a href="/notifications.html" aria-label="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationCount" style="display: none;">0</span> <!-- Notification count, initially hidden -->
+                    </a>
+                </div>
+                <!-- Logout Button -->
+                <button id="logoutButton" aria-label="Logout" disabled>
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+                <a href="Profile.html" id="profileLink">
+                    <img id="headerProfilePic" src="" alt="Profile Picture" style="display: none;">
+                    <i id="headerAvatarIcon" class="fas fa-user-circle"></i>
+                    <span id="headerDisplayName">Loading...</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="content-wrapper">
+            <div id="yourProgress" class="current-progress" style="display:none;">
+                <i class="fas fa-star" id="yourProgressIcon" style="font-size:20px;background-image:linear-gradient(90deg, var(--blue), var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;"></i>
+                <div class="meta" style="flex:1;">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <div id="yourProgressName">Novice</div>
+                        <div id="yourProgressPercent" style="opacity:.85;font-size:.9rem;">0%</div>
+                    </div>
+                    <div class="bar"><div id="yourProgressFill" class="fill"></div></div>
+                </div>
+            </div>
+            <div class="levels-section">
+                <h2>User Levels Progression</h2>
+                <div class="levels-grid" id="levelsGrid">
+                    <!-- Level cards will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav id="bottomNavBar">
+        <a href="/home.html" class="nav-icon-item">
+            <div class="nav-icon-circle"><i class="fas fa-home"></i></div>
+            <span>Home</span>
+        </a>
+        <a href="/chat.html" class="nav-icon-item">
+            <div class="nav-icon-circle"><i class="fas fa-comment-dots"></i></div>
+            <span>Chat</span>
+        </a>
+        <a href="/find_friends.html" class="nav-icon-item">
+            <div class="nav-icon-circle"><i class="fas fa-users"></i></div>
+            <span>Users</span>
+        </a>
+        <a href="/friends.html" class="nav-icon-item">
+            <div class="nav-icon-circle"><i class="fas fa-user-friends"></i></div>
+            <span>Friends</span>
+        </a>
+        <!-- JCoin Shop Link -->
+        <a href="/jcoin_shop.html" class="nav-icon-item">
+            <div class="nav-icon-circle"><i class="fas fa-store"></i></div>
+            <span>Shop</span>
+        </a>
+        <a href="/settings.html" class="nav-icon-item">
+            <div class="nav-icon-circle"><i class="fas fa-cog"></i></div>
+            <span>Settings</span>
+        </a>
+    </nav>
+
+    <!-- Navigation Toggle Button -->
+    <button id="navToggleBtn" aria-label="Toggle Navigation">
+        <i class="fas fa-chevron-up"></i> <!-- Initial icon pointing up -->
+    </button>
+
+    <script type="module">
+        // Import Firebase modules (align with Home.html v11.8.0)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+
+        // --- Firebase & Canvas Environment Configuration ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+            authDomain: "jchat-1.firebaseapp.com",
+            databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+            projectId: "jchat-1",
+            storageBucket: "jchat-1.firebasestorage.app",
+            messagingSenderId: "328479683167",
+            appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
+            measurementId: "G-S6Z9GG0R9P"
+        };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Cloudinary Configuration (Placeholder, update if needed for profile pics)
+        const cloudinaryConfig = {
+            cloudName: "dxld01rcp", // Replace with your Cloudinary cloud name
+            uploadPreset: "Storage_preset" // Replace with your Cloudinary upload preset
+        };
+
+        // Initialize Firebase services
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- DOM Elements ---
+        const headerProfilePic = document.getElementById('headerProfilePic');
+        const headerAvatarIcon = document.getElementById('headerAvatarIcon');
+        const headerDisplayName = document.getElementById('headerDisplayName');
+        const logoutButton = document.getElementById('logoutButton');
+        const notificationCountElement = document.getElementById('notificationCount');
+        const levelsGrid = document.getElementById('levelsGrid');
+        const adminIconLink = document.getElementById('adminIconLink'); // Added for admin icon
+
+        // --- Global State ---
+        let currentUser = null;
+        let isAuthReady = false;
+        const ADMIN_UID = 'cc96gdhCRPO72NFZtleRCujHvIq2'; // Admin's User ID (copied from Profile.html)
+
+
+        // --- Utility Functions (Copied from Home.html for consistency) ---
+        function getCloudinaryImageUrl(urlOrPublicId, transformations = "w_auto,f_auto,q_auto") {
+            if (!urlOrPublicId) return null;
+            if (urlOrPublicId.startsWith('http://') || urlOrPublicId.startsWith('https://')) {
+                // If it's a direct URL to a Cloudinary asset, we can insert transformations
+                if (urlOrPublicId.includes('res.cloudinary.com')) {
+                    const parts = urlOrPublicId.split('/upload/');
+                    if (parts.length === 2) {
+                        return `${parts[0]}/upload/${transformations}/${parts[1]}`;
+                    }
+                }
+                return urlOrPublicId; // Return as is if it's a general URL not from Cloudinary or already transformed
+            }
+            return `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/${transformations}/${urlOrPublicId}`;
+        }
+
+        function displayProfilePicture(imgElement, iconElement, profilePicId, usernameInitial, transformations) {
+            if (!imgElement) return;
+            const placeholder = '/assets/User.png';
+            if (profilePicId) {
+                const imageUrl = getCloudinaryImageUrl(profilePicId, transformations);
+                imgElement.onerror = () => { imgElement.onerror = null; imgElement.src = placeholder; if (iconElement) iconElement.style.display = 'none'; };
+                imgElement.src = imageUrl || placeholder;
+                imgElement.style.display = 'block';
+                if (iconElement) iconElement.style.display = 'none';
+            } else {
+                imgElement.onerror = null;
+                imgElement.src = placeholder;
+                imgElement.style.display = 'block';
+                if (iconElement) iconElement.style.display = 'none';
+            }
+        }
+
+        async function fetchAndDisplayHeaderProfile(user) {
+            try {
+                const privateProfileDocRef = doc(db, "artifacts", appId, "users", user.uid, "profiles", "user_profile");
+                const privateDocSnap = await getDoc(privateProfileDocRef);
+                let profileData = privateDocSnap.exists() ? privateDocSnap.data() : null;
+
+                const usernameInitial = (profileData?.username || user.displayName || "J").charAt(0).toUpperCase();
+                displayProfilePicture(headerProfilePic, headerAvatarIcon, profileData?.profilePicId || user.photoURL, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
+                headerDisplayName.textContent = profileData?.username || user.displayName || "JCHAT User";
+
+                if (document.getElementById('profileLink')) document.getElementById('profileLink').href = `/profile.html?userId=${user.uid}`; // Null check
+                if (logoutButton) logoutButton.disabled = false; // Null check
+
+                // Show Admin Icon if current user is admin
+                if (adminIconLink) { // Null check
+                    if (user.uid === ADMIN_UID) {
+                        adminIconLink.style.display = 'block';
+                    } else {
+                        adminIconLink.style.display = 'none';
+                    }
+                }
+
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error fetching profile for header:", error);
+                const usernameInitial = (user.displayName || "J").charAt(0).toUpperCase();
+                displayProfilePicture(headerProfilePic, headerAvatarIcon, user.photoURL, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
+                headerDisplayName.textContent = user.displayName || "JCHAT User";
+                if (logoutButton) logoutButton.disabled = false; // Null check
+            }
+        }
+
+        async function fetchNotificationCount(userId) {
+            if (!isAuthReady) return;
+            try {
+                const notificationsCollectionRef = collection(db, "artifacts", appId, "users", userId, "notifications");
+                const q = query(notificationsCollectionRef, where("read", "==", false));
+                const querySnapshot = await getDocs(q);
+                const unreadCount = querySnapshot.size;
+
+                if (unreadCount > 0) {
+                    if (notificationCountElement) { // Null check
+                        notificationCountElement.textContent = unreadCount;
+                        notificationCountElement.style.display = 'flex';
+                    }
+                } else {
+                    if (notificationCountElement) { // Null check
+                        notificationCountElement.style.display = 'none';
+                    }
+                }
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error fetching notification count:", error);
+                if (notificationCountElement) notificationCountElement.style.display = 'none'; // Null check
+            }
+        }
+
+        async function handleLogout() {
+            try {
+                await signOut(auth);
+                window.location.href = '/login.html';
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error logging out:", error);
+                // Using alert for simplicity, replace with custom modal if needed
+                // Note: The original Home.html uses a custom message box, consider implementing that for consistency.
+                alert(`Failed to log out: ${error.message}`);
+            }
+        }
+
+        /**
+         * Calculates the total cumulative Gas required to reach a specific level N.
+         * Formula: Total_Gas_for_Level_N = 1500 * N * (N + 1) / 2
+         * @param {number} level - The target level N.
+         * @returns {number} The total cumulative Gas required to reach that level.
+         */
+        function getTotalGasRequiredToReachLevel(level) {
+            if (level <= 0) return 0;
+            return 1500 * level * (level + 1) / 2;
+        }
+
+        /**
+         * Defines level names, icons, and rewards for various levels.
+         * This is a client-side representation and should ideally match server-side logic.
+         * @param {number} level - The current level.
+         * @returns {{level: number, name: string, icon: string, jCoinReward: number, gasReward: number, otherRewards: string[]}} Level information.
+         */
+        function getLevelInfo(level) {
+            let jCoinReward = 0;
+            let gasReward = 0;
+            let name = `Level ${level}`;
+            let icon = "fas fa-question-circle";
+            let otherRewards = []; // Array to hold other reward descriptions
+
+            // Base JCoin and Gas rewards scale linearly
+            // Starting values and increments are adjusted to provide a smoother curve up to 500
+            if (level >= 1 && level <= 25) { // Tier 1: Early Explorer
+                jCoinReward = 10 + (level - 1) * 5; // Start 10, +5/level
+                gasReward = 5 + (level - 1) * 2;   // Start 5, +2/level
+                const levelNames = [
+                    "Novice", "Beginner", "Apprentice", "Explorer", "Pioneer",
+                    "Communicator", "Socialite", "Networker", "Influencer", "Trendsetter",
+                    "Innovator", "Creator", "Visionary", "Architect", "Maestro",
+                    "Strategist", "Guardian", "Champion", "Hero", "Legend",
+                    "Mythic", "Celestial", "Divine", "Transcendent", "Cosmic Being"
+                ];
+                const levelIcons = [
+                    "fas fa-leaf", "fas fa-seedling", "fas fa-user-graduate", "fas fa-map-marker-alt", "fas fa-compass",
+                    "fas fa-comments", "fas fa-users", "fas fa-share-alt", "fas fa-star", "fas fa-fire",
+                    "fas fa-lightbulb", "fas fa-paint-brush", "fas fa-eye", "fas fa-building", "fas fa-music",
+                    "fas fa-chess", "fas fa-shield-alt", "fas fa-trophy", "fas fa-mask", "fas fa-dragon",
+                    "fas fa-meteor", "fas fa-galaxy", "fas fa-hand-sparkles", "fas fa-infinity", "fas fa-atom"
+                ];
+                name = levelNames[level - 1] || `Level ${level}`;
+                icon = levelIcons[level - 1] || "fas fa-question-circle";
+
+                // Specific other rewards for Tier 1
+                if (level === 1) otherRewards.push("Badge: 'Newbie'");
+                if (level === 3) otherRewards.push("Unlock: 1-Hour XP Boost");
+                if (level === 5) otherRewards.push("Badge: 'Chat Starter'", "Unlock: Basic Profile Picture Frame");
+                if (level === 8) otherRewards.push("Unlock: Common Emote Pack (Set 1)");
+                if (level === 10) otherRewards.push("Title: 'Friendly Face'", "Increased Message Character Limit (+10)");
+                if (level === 13) otherRewards.push("Unlock: 3-Hour XP Boost");
+                if (level === 15) otherRewards.push("Badge: 'Community Contributor'", "Unlock: Basic Chat Bubble Style");
+                if (level === 18) otherRewards.push("Unlock: Common Emote Pack (Set 2)");
+                if (level === 20) otherRewards.push("Title: 'Early Explorer'", "Increased Message Character Limit (+15)");
+                if (level === 25) otherRewards.push("Badge: 'Veteran Chatter'", "Unlock: Gradient Profile Picture Frame");
+
+            } else if (level >= 26 && level <= 100) { // Tier 2: Active Member (Levels 26 - 100)
+                jCoinReward = 120 + (level - 26) * 8; // Starts higher, increases more
+                gasReward = 30 + (level - 26) * 3;
+                const tierNames = ["Active Member", "Group Enthusiast", "Social Butterfly", "Community Builder"];
+                const tierIcons = ["fas fa-user-check", "fas fa-users-cog", "fas fa-globe-europe", "fas fa-handshake"];
+                const tierIndex = Math.floor((level - 26) / 19); // Cycle every ~19 levels for 4 names
+                name = `${tierNames[tierIndex % tierNames.length]} Lv. ${level}`;
+                icon = tierIcons[tierIndex % tierIcons.length];
+
+                // Specific other rewards for Tier 2
+                if (level === 30) otherRewards.push("Badge: 'Active Member'", "Unlock: Uncommon Emote Pack (Set 1)");
+                if (level === 35) otherRewards.push("Increased Friend Limit (+10)");
+                if (level === 40) otherRewards.push("Unlock: New Chat Bubble Style (Set 2)");
+                if (level === 45) otherRewards.push("Unlock: 1-Day XP Boost");
+                if (level === 50) otherRewards.push("Title: 'Centurion'", "Permanent: 1% JCoin Shop Discount", "Badge: '50-Level Achiever'");
+                if (level === 55) otherRewards.push("Unlock: Uncommon Emote Pack (Set 3)");
+                if (level === 60) otherRewards.push("Increased Message Character Limit (+20)");
+                if (level === 65) otherRewards.push("Unlock: Basic Profile Theme (Solid Color)");
+                if (level === 70) otherRewards.push("Increased Friend Limit (+15)");
+                if (level === 75) otherRewards.push("Title: 'Dedicated User'", "Unlock: Rare Emote Pack (Set 1)");
+                if (level === 80) otherRewards.push("Unlock: New Chat Bubble Style (Set 3)");
+                if (level === 85) otherRewards.push("Unlock: 3-Day XP Boost");
+                if (level === 90) otherRewards.push("Increased Group Creation Limit (+1)");
+                if (level === 95) otherRewards.push("Unlock: Uncommon Profile Picture Frame");
+                if (level === 100) otherRewards.push("Title: 'Master Conversationalist'", "Badge: 'Century Mark'", "Permanent: 2% JCoin Shop Discount", "Unlock: Exclusive 'Golden' Profile Picture Frame");
+
+            } else if (level >= 101 && level <= 250) { // Tier 3: Dedicated User (Levels 101 - 250)
+                jCoinReward = 750 + (level - 101) * 12;
+                gasReward = 150 + (level - 101) * 5;
+                const tierNames = ["Dedicated User", "JCHAT Elite", "Master Communicator", "Community Architect"];
+                const tierIcons = ["fas fa-user-shield", "fas fa-gem", "fas fa-microphone-alt", "fas fa-sitemap"];
+                const tierIndex = Math.floor((level - 101) / 37); // Cycle every ~37 levels for 4 names
+                name = `${tierNames[tierIndex % tierNames.length]} Lv. ${level}`;
+                icon = tierIcons[tierIndex % tierIcons.length];
+
+                // Specific other rewards for Tier 3
+                if (level === 110) otherRewards.push("Unlock: Animated Emote Pack (Set 1)");
+                if (level === 120) otherRewards.push("Increased Media Upload Size (+5MB)");
+                if (level === 125) otherRewards.push("Title: 'Rising Star'", "Unlock: Custom Chat Font (Style 1)");
+                if (level === 130) otherRewards.push("Unlock: 7-Day XP Boost");
+                if (level === 140) otherRewards.push("Permanent: 3% JCoin Shop Discount");
+                if (level === 150) otherRewards.push("Badge: 'JCHAT Expert'", "Unlock: Premium Profile Theme (Animated 1)");
+                if (level === 160) otherRewards.push("Increased Group Member Capacity (+5)");
+                if (level === 170) otherRewards.push("Unlock: Animated Emote Pack (Set 2)");
+                if (level === 175) otherRewards.push("Title: 'Elite Communicator'", "Unlock: Custom Chat Font (Style 2)");
+                if (level === 180) otherRewards.push("Increased Message Character Limit (+25)");
+                if (level === 190) otherRewards.push("Permanent: 4% JCoin Shop Discount");
+                if (level === 200) otherRewards.push("Badge: 'Double Century'", "Title: 'JCHAT Champion'", "Unlock: Exclusive 'Diamond' Profile Picture Frame", "Voucher: 1-Day Free Group Promotion");
+                if (level === 210) otherRewards.push("Increased Media Upload Size (+10MB)");
+                if (level === 220) otherRewards.push("Unlock: Premium Profile Theme (Animated 2)");
+                if (level === 230) otherRewards.push("Unlock: Rare Emote Pack (Set 2)");
+                if (level === 240) otherRewards.push("Priority Support Access");
+                if (level === 250) otherRewards.push("Badge: 'Quarter-Millennium'", "Title: 'The Architect'", "Early Access: Next Major Feature Beta");
+
+            } else if (level >= 251 && level <= 400) { // Tier 4: JCHAT Legend (Levels 251 - 400)
+                jCoinReward = 2500 + (level - 251) * 20;
+                gasReward = 500 + (level - 251) * 10;
+                const tierNames = ["JCHAT Legend", "Grandmaster", "Cosmic Converser", "Eternal Speaker"];
+                const tierIcons = ["fas fa-star-half-alt", "fas fa-chess-king", "fas fa-galaxy", "fas fa-infinity"];
+                const tierIndex = Math.floor((level - 251) / 37); // Cycle every ~37 levels for 4 names
+                name = `${tierNames[tierIndex % tierNames.length]} Lv. ${level}`;
+                icon = tierIcons[tierIndex % tierIcons.length];
+
+                // Specific other rewards for Tier 4
+                if (level === 260) otherRewards.push("Permanent: 5% JCoin Shop Discount");
+                if (level === 275) otherRewards.push("Title: 'Grand Strategist'", "Unlock: Legendary Emote Pack (Set 1)");
+                if (level === 290) otherRewards.push("Increased Group Creation Limit (+2)");
+                if (level === 300) otherRewards.push("Badge: 'Triple Century'", "Title: 'JCHAT Grandmaster'", "Voucher: 3-Day Free Group Promotion", "Unlock: Exclusive VIP Chat Room Access");
+                if (level === 310) otherRewards.push("Increased Media Upload Size (+15MB)");
+                if (level === 325) otherRewards.push("Title: 'Cosmic Weaver'", "Unlock: Custom Chat Font (Style 3)");
+                if (level === 340) otherRewards.push("Permanent: 7% JCoin Shop Discount");
+                if (level === 350) otherRewards.push("Badge: 'JCHAT Luminary'", "Unlock: Personalized Emote Slot (1 custom upload)");
+                if (level === 360) otherRewards.push("Increased Group Member Capacity (+10)");
+                if (level === 375) otherRewards.push("Title: 'The Eternal Flame'", "Unlock: Legendary Emote Pack (Set 2)");
+                if (level === 390) otherRewards.push("Ad-Free Experience (1 Month)");
+                if (level === 400) otherRewards.push("Badge: 'Quad Century'", "Title: 'The Unrivaled'", "Permanent: 10% JCoin Shop Discount", "Unlock: Unique Profile Aura (Tier 1)");
+
+            } else if (level >= 401 && level <= 500) { // Tier 5: The Unrivaled (Levels 401 - 500)
+                jCoinReward = 5000 + (level - 401) * 30;
+                gasReward = 1000 + (level - 401) * 15;
+                const tierNames = ["The Unrivaled", "Cosmic Creator", "JCHAT Deity", "Apex Being"];
+                const tierIcons = ["fas fa-infinity", "fas fa-solar-system", "fas fa-hand-holding-heart", "fas fa-star-and-crescent"];
+                const tierIndex = Math.floor((level - 401) / 25); // Cycle every 25 levels for 4 names
+                name = `${tierNames[tierIndex % tierNames.length]} Lv. ${level}`;
+                icon = tierIcons[tierIndex % tierIcons.length];
+
+                // Specific other rewards for Tier 5
+                if (level === 410) otherRewards.push("Ad-Free Experience (3 Months)");
+                if (level === 425) otherRewards.push("Title: 'Pinnacle Performer'", "Unlock: Unique Profile Aura (Tier 2)");
+                if (level === 440) otherRewards.push("Increased Media Upload Size (+20MB)");
+                if (level === 450) otherRewards.push("Badge: 'Near-God'", "Unlock: Mythic Emote Pack (Set 1)");
+                if (level === 460) otherRewards.push("Permanent: 12% JCoin Shop Discount");
+                if (level === 475) otherRewards.push("Title: 'Cosmic Architect'", "Voucher: 7-Day Free Group Promotion");
+                if (level === 480) otherRewards.push("Ad-Free Experience (6 Months)");
+                if (level === 490) otherRewards.push("Unlock: Exclusive 'Cosmic' Animated Avatar Frame");
+                if (level === 500) {
+                    otherRewards.push(
+                        "Badge: 'JCHAT Deity'",
+                        "Title: 'The Absolute'",
+                        "Lifetime Premium Status (Ad-Free, All Cosmetics Unlocked)",
+                        "Personalized Group Creation Perk (Custom starting benefits for new groups)",
+                        "Acknowledgment on JCHAT Hall of Fame (Your name/ID listed on a special page)",
+                        "Exclusive Discord Role (if applicable)",
+                        "Voting Rights on Future Feature Development"
+                    );
+                }
+            } else if (level > 500) {
+                // Beyond level 500, continue scaling rewards and use a generic "Master" tier
+                jCoinReward = 5000 + (500 - 401) * 30 + (level - 500) * 50;
+                gasReward = 1000 + (500 - 401) * 8 + (level - 500) * 15;
+                name = `Master Lv. ${level}`;
+                icon = "fas fa-star";
+                otherRewards.push("Continued JCoin & Gas Rewards", "Exclusive Recognition (Tier 6)");
+                if (level % 100 === 0) otherRewards.push("Special Milestone Bonus");
+            }
+
+            return {
+                level: level,
+                name: name,
+                icon: icon,
+                jCoinReward: jCoinReward,
+                gasReward: gasReward,
+                otherRewards: otherRewards
+            };
+        }
+
+
+        function displayAllLevels() {
+            if (!levelsGrid) return; // Null check
+            levelsGrid.innerHTML = ''; // Clear existing content
+
+            // Display levels 1 to 500 explicitly
+            for (let i = 1; i <= 500; i++) {
+                const levelInfo = getLevelInfo(i);
+                const cumulativeGasRequired = getTotalGasRequiredToReachLevel(i); // Total Gas to reach this level
+
+                const levelCard = document.createElement('div');
+                levelCard.classList.add('level-card');
+                levelCard.innerHTML = `
+                    <i class="${levelInfo.icon} level-icon"></i>
+                    <h3>Level ${levelInfo.level}: ${levelInfo.name}</h3>
+                    <p>Total Gas to Reach: <span class="gas-requirement">${cumulativeGasRequired.toLocaleString()}</span></p>
+                    <p>Reward: <span class="jcoin-reward">${levelInfo.jCoinReward.toLocaleString()} JCoins</span>, <span class="gas-reward">${levelInfo.gasReward.toLocaleString()} Gas</span></p>
+                    ${levelInfo.otherRewards && levelInfo.otherRewards.length > 0 ?
+                        `<p class="other-rewards">Other: ${levelInfo.otherRewards.join(', ')}</p>` : ''
+                    }
+                `;
+                levelsGrid.appendChild(levelCard);
+            }
+
+            // Add a note for levels beyond 500
+            const noteCard = document.createElement('div');
+            noteCard.classList.add('level-card');
+            noteCard.style.gridColumn = '1 / -1'; // Span across all columns
+            noteCard.style.backgroundColor = 'transparent';
+            noteCard.style.border = 'none';
+            noteCard.style.boxShadow = 'none';
+            noteCard.style.padding = '0';
+            noteCard.innerHTML = `
+                <p style="font-size: 1.2rem; color: var(--text-light); margin: 20px 0;">...</p>
+                <p style="font-size: 1.2rem; color: var(--text-light); margin: 0;">Levels beyond 500 continue with increasing Gas requirements and rewards!</p>
+            `;
+            levelsGrid.appendChild(noteCard);
+        }
+
+        // --- Authentication State Listener ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                isAuthReady = true;
+                await fetchAndDisplayHeaderProfile(user);
+                fetchNotificationCount(user.uid);
+                if (logoutButton) logoutButton.disabled = false; // Null check
+
+                // Realtime current progress widget
+                const yourProgress = document.getElementById('yourProgress');
+                const yourProgressName = document.getElementById('yourProgressName');
+                const yourProgressPercent = document.getElementById('yourProgressPercent');
+                const yourProgressFill = document.getElementById('yourProgressFill');
+                if (yourProgress && yourProgressName && yourProgressPercent && yourProgressFill) {
+                    const userRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profiles', 'user_profile');
+                    onSnapshot(userRef, (snap) => {
+                        const data = snap.exists() ? snap.data() : null;
+                        if (!data) return;
+                        const totalGasEarned = data.gas ?? data.totalGasEarned ?? 0;
+                        let currentLevel = 1;
+                        for (let i = 1; i <= 500; i++) {
+                            const needed = getTotalGasRequiredToReachLevel(i);
+                            if (totalGasEarned >= needed) currentLevel = i; else break;
+                        }
+                        currentLevel = Math.max(1, currentLevel);
+                        const info = getLevelInfo(currentLevel);
+                        yourProgressName.textContent = info.name;
+                        const gasNeededCurr = getTotalGasRequiredToReachLevel(currentLevel);
+                        const gasNeededNext = getTotalGasRequiredToReachLevel(currentLevel + 1);
+                        const segSize = Math.max(1, gasNeededNext - gasNeededCurr);
+                        const inSeg = Math.max(0, Math.min(totalGasEarned, gasNeededNext) - gasNeededCurr);
+                        const progressPct = Math.floor((inSeg / segSize) * 100);
+                        yourProgressPercent.textContent = `${progressPct}%`;
+                        yourProgressFill.style.width = `${progressPct}%`;
+                        yourProgress.style.display = 'flex';
+                    });
+                }
+            } else {
+                console.log("JCHAT_DEBUG: No user signed in. Attempting anonymous sign-in or redirecting to login page.");
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        console.log("JCHAT_DEBUG: Signed in with custom token.");
+                    } else {
+                        await signInAnonymously(auth);
+                        console.log("JCHAT_DEBUG: Signed in anonymously.");
+                    }
+                } catch (error) {
+                    console.error("JCHAT_ERROR: Error during anonymous sign-in or custom token sign-in:", error);
+                    // Only redirect if there's still no current user after trying to sign in
+                    if (!auth.currentUser) {
+                        window.location.href = '/login.html';
+                    }
+                }
+                isAuthReady = false;
+                if (logoutButton) logoutButton.disabled = true; // Null check
+                if (headerDisplayName) headerDisplayName.textContent = "Guest"; // Null check
+                if (headerProfilePic) headerProfilePic.style.display = 'none'; // Null check
+                if (headerAvatarIcon) headerAvatarIcon.style.display = 'block'; // Null check
+                if (adminIconLink) adminIconLink.style.display = 'none'; // Null check
+            }
+        });
+
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('jchat-theme');
+            const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+            if (savedTheme && themes.includes(savedTheme)) {
+                document.body.classList.add(savedTheme);
+            } else {
+                document.body.classList.add('theme-dark-mode'); // Default theme
+            }
+            displayAllLevels(); // Display levels when DOM is ready
+        });
+
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'jchat-theme') {
+                const newTheme = event.newValue || 'theme-dark-mode';
+                const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+                if (themes.includes(newTheme)) {
+                    document.body.classList.remove(...themes);
+                    document.body.classList.add(newTheme);
+                }
+            }
+        });
+
+        if (logoutButton) logoutButton.addEventListener('click', handleLogout); // Null check
+
+        const bottomNavBar = document.getElementById('bottomNavBar');
+        const navToggleBtn = document.getElementById('navToggleBtn');
+
+        function toggleNavBarVisibility() {
+            const toggleIcon = navToggleBtn.querySelector('i');
+            const isHidden = bottomNavBar.classList.toggle('nav-bar-hidden-full');
+            if (navToggleBtn) navToggleBtn.classList.toggle('rotated', isHidden); // Null check
+
+            if (isHidden) {
+                if (toggleIcon) toggleIcon.classList.remove('fa-chevron-down'); // Null check
+                if (toggleIcon) toggleIcon.classList.add('fa-chevron-up'); // Null check
+            } else {
+                if (toggleIcon) toggleIcon.classList.remove('fa-chevron-up'); // Null check
+                if (toggleIcon) toggleIcon.classList.add('fa-chevron-down'); // Null check
+            }
+        }
+
+        // Ensure nav bar is visible and toggle button is in initial state on load
+        if (bottomNavBar) bottomNavBar.classList.remove('nav-bar-hidden-full'); // Null check
+        if (navToggleBtn && navToggleBtn.querySelector('i')) { // Null check
+            navToggleBtn.querySelector('i').classList.remove('fa-chevron-up');
+            navToggleBtn.querySelector('i').classList.add('fa-chevron-down');
+        }
+        if (navToggleBtn) navToggleBtn.classList.remove('rotated'); // Null check
+
+        if (navToggleBtn) navToggleBtn.addEventListener('click', toggleNavBarVisibility); // Null check
+    </script>
+	
+</body>
+</html>

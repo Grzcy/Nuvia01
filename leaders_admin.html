@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JCHAT - Leaders Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://*.firebaseio.com" crossorigin />
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box}
+    :root{--pink:#ff2e92;--blue:#00d5ff;--radius:20px;--transition:.3s ease;--white:#fff;--text-light:rgba(255,255,255,.7);--background-main:rgba(10,10,10,.75);--background-gradient-1:#00d5ff;--background-gradient-2:#ff2e92;--card-background:linear-gradient(145deg,rgba(255,255,255,.03),rgba(255,255,255,.01));--header-background:linear-gradient(135deg,rgba(10,10,10,.85),rgba(10,10,10,.75));--border-light:rgba(255,255,255,.05);--input-background:rgba(255,255,255,.05);--button-background-gradient:linear-gradient(90deg,var(--blue),var(--pink));--button-shadow:0 4px 15px var(--blue),0 4px 15px var(--pink);--card-background-color:#2a2a4a;--text-color-primary:#e0e0e0;--border-color:#3a3a5a;--notification-badge-color:#ff2e92}
+    html{overflow-y:scroll}
+    body{min-height:100vh;font-family:'Inter',sans-serif;margin:0;padding:0;display:flex;flex-direction:column;align-items:center;overflow-x:hidden;background-color:var(--background-main);background-image:radial-gradient(circle at top left,var(--background-gradient-1),transparent 100px),radial-gradient(circle at bottom right,var(--background-gradient-2),transparent 150px);color:var(--white)}
+    header{background:var(--header-background);border-bottom:1px solid var(--border-light);padding:10px 0;box-shadow:0 4px 15px rgba(0,0,0,.2);position:fixed;top:0;left:0;width:100%;height:55px;z-index:10;display:flex;justify-content:center}
+    .header-content{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:1200px;padding:0 30px}
+    .brand-link{font-family:'Poppins',sans-serif;font-size:1.8rem;font-weight:800;background-clip:text;color:transparent;background-image:linear-gradient(90deg,var(--blue),var(--pink));letter-spacing:-.03em;text-decoration:none;display:flex;align-items:center;gap:10px}
+    .user-strip{display:flex;align-items:center;gap:10px}
+    .notif{position:relative;margin-right:15px}
+    .notif i{font-size:1.5rem;color:var(--text-light)}
+    .badge{position:absolute;top:-5px;right:-5px;background-color:var(--notification-badge-color);color:var(--white);border-radius:50%;padding:3px 7px;font-size:.7rem;font-weight:700;min-width:20px;text-align:center;display:none}
+    #logoutBtn{background:var(--button-background-gradient);border:none;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3);transition:transform .2s ease,box-shadow .2s ease,opacity .3s ease;opacity:.8}
+    #logoutBtn i{color:var(--white);font-size:.9rem}
+    main{flex-grow:1;padding-top:70px;width:100%;display:flex;flex-direction:column;align-items:center}
+    .wrap{width:100%;max-width:960px;padding:20px;display:flex;flex-direction:column;gap:20px;align-items:center}
+    .card{background:var(--card-background);border:1px solid var(--border-color);backdrop-filter:blur(10px) saturate(180%);border-radius:var(--radius);box-shadow:0 8px 25px rgba(0,0,0,.3);padding:2rem;width:100%;display:flex;flex-direction:column;gap:1.2rem}
+    .title{font-family:'Poppins',sans-serif;font-size:2rem;font-weight:800;background-clip:text;color:transparent;background-image:linear-gradient(90deg,var(--blue),var(--pink));text-align:center;margin:0}
+    .sub{color:var(--text-light);text-align:center;margin:0}
+    .toolbar{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+    .field{display:flex;flex-direction:column;gap:6px}
+    .label{color:var(--text-light);font-weight:600;font-size:.95rem}
+    .input,.select{width:100%;padding:.8rem 1rem;border:1px solid var(--border-light);border-radius:15px;background:var(--input-background);color:var(--white);font-size:1rem;outline:none;transition:border-color .3s ease,box-shadow .3s ease}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .btn{background:var(--button-background-gradient);color:var(--white);border:none;border-radius:15px;padding:.8rem 1.5rem;font-size:.9rem;font-weight:700;cursor:pointer;box-shadow:var(--button-shadow);transition:transform .2s ease,box-shadow .2s ease;display:inline-flex;align-items:center;gap:8px}
+    .btn.secondary{background:rgba(255,255,255,.1);border:1px solid var(--border-light)}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px var(--blue),0 6px 20px var(--pink)}
+    .helpers{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .link-preview{word-break:break-all;color:var(--text-light);font-size:.9rem}
+    #messageBox{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background-color:var(--card-background-color);color:var(--text-color-primary);padding:20px 30px;border-radius:15px;box-shadow:0 8px 25px rgba(0,0,0,.4);z-index:1000;display:none;opacity:0;transition:opacity .3s ease-in-out,transform .3s ease-in-out;min-width:280px;max-width:90%;text-align:center;flex-direction:column;align-items:center;gap:15px}
+    #messageBox.show{opacity:1;display:flex}
+    #messageBox.success{background-image:linear-gradient(45deg,var(--pink),var(--blue));color:var(--white);border:none;box-shadow:0 8px 30px rgba(0,213,255,.5),0 8px 30px rgba(255,46,146,.5)}
+    #messageBox i{font-size:2.2rem;background-image:linear-gradient(90deg,var(--blue),var(--pink));background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+    .chipbar{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--border-light);background:rgba(255,255,255,.04);color:var(--white);text-decoration:none;white-space:nowrap}
+    @media (max-width:600px){.header-content{padding:0 20px}.title{font-size:1.6rem}.toolbar{grid-template-columns:1fr}.actions{justify-content:center}.btn{width:100%;justify-content:center}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/home.html" class="brand-link"><img src="assets/security.png" alt="JCHAT Security" style="height:24px;width:auto" onerror="this.style.display='none'"/><span>Nuvia</span></a>
+      <div class="user-strip">
+        <div class="notif"><a href="/notifications.html" aria-label="Notifications"><i class="fas fa-bell"></i><span class="badge" id="notificationCount">0</span></a></div>
+        <button id="logoutBtn" aria-label="Logout"><i class="fas fa-sign-out-alt"></i></button>
+        <a href="/profile.html" id="profileLink"><img id="headerProfilePic" src="" alt="Profile Picture" style="display:none"/><i id="headerAvatarIcon" class="fas fa-user-circle"></i><span id="headerDisplayName" style="margin-left:6px">Loading...</span></a>
+      </div>
+    </div>
+  </header>
+  <main>
+    <div class="wrap">
+      <div class="chipbar" aria-label="Quick Nav">
+        <a class="chip" href="/admin.html"><i class="fas fa-arrow-left"></i><span>Back to Admin</span></a>
+        <a class="chip" href="/leaderboard.html" target="_blank" rel="noopener"><i class="fas fa-trophy"></i><span>Open Leaderboard</span></a>
+      </div>
+      <section class="card">
+        <h1 class="title">Leaders Admin</h1>
+        <p class="sub">Build quick links to the public leaderboard. Choose a metric, timeframe, and optional search.</p>
+        <div class="toolbar">
+          <div class="field">
+            <label class="label" for="metricSelect">Metric</label>
+            <select id="metricSelect" class="select">
+              <option value="currentXp">XP</option>
+              <option value="jCoins">JCoins</option>
+              <option value="level">Level</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="label" for="tfSelect">Timeframe</label>
+            <select id="tfSelect" class="select">
+              <option value="daily">Daily</option>
+              <option value="weekly" selected>Weekly</option>
+              <option value="monthly">Monthly</option>
+              <option value="all">All Time</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="label" for="queryInput">Search (username)</label>
+            <input id="queryInput" class="input" type="text" placeholder="e.g. john" />
+          </div>
+        </div>
+        <div class="actions">
+          <button id="openBtn" class="btn"><i class="fas fa-external-link-alt"></i><span>Open Leaderboard</span></button>
+          <button id="copyBtn" class="btn secondary"><i class="fas fa-link"></i><span>Copy Link</span></button>
+        </div>
+        <div class="helpers">
+          <span class="label">Preview:</span>
+          <span id="linkPreview" class="link-preview"></span>
+        </div>
+      </section>
+    </div>
+  </main>
+  <div id="messageBox"></div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    // Cloudinary image utils and header avatar logic (matching Home)
+    const cloudinaryConfig = { cloudName: "dxld01rcp" };
+    function getCloudinaryImageUrl(urlOrPublicId, transformations = "w_auto,f_auto,q_auto") {
+      if (!urlOrPublicId) return null;
+      if (urlOrPublicId.startsWith('http://') || urlOrPublicId.startsWith('https://')) {
+        if (urlOrPublicId.includes('res.cloudinary.com')) {
+          const parts = urlOrPublicId.split('/upload/');
+          if (parts.length === 2) {
+            const currentTransformations = parts[1].split('/')[0];
+            if (currentTransformations.includes(transformations.split(',')[0])) {
+              return urlOrPublicId;
+            }
+            return `${parts[0]}/upload/${transformations}/${parts[1]}`;
+          }
+        }
+        return urlOrPublicId;
+      }
+      return `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/${transformations}/${urlOrPublicId}`;
+    }
+    function displayProfilePicture(imgElement, iconElement, profilePicId, usernameInitial, transformations) {
+      if (!imgElement || !iconElement) return;
+      const placeholder = '/assets/User.png';
+      if (profilePicId) {
+        const imageUrl = getCloudinaryImageUrl(profilePicId, transformations);
+        imgElement.onerror = () => { imgElement.onerror = null; imgElement.src = placeholder; };
+        imgElement.src = imageUrl || placeholder;
+        imgElement.style.display = 'block';
+        iconElement.style.display = 'none';
+      } else {
+        imgElement.onerror = null;
+        imgElement.src = placeholder;
+        imgElement.style.display = 'block';
+        iconElement.style.display = 'none';
+      }
+    }
+
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+      apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+      authDomain: "jchat-1.firebaseapp.com",
+      databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+      projectId: "jchat-1",
+      storageBucket: "jchat-1.firebasestorage.app",
+      messagingSenderId: "328479683167",
+      appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
+      measurementId: "G-S6Z9GG0R9P"
+    };
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const ADMIN_UID = 'cc96gdhCRPO72NFZtleRCujHvIq2';
+
+    const headerProfilePic = document.getElementById('headerProfilePic');
+    const headerAvatarIcon = document.getElementById('headerAvatarIcon');
+    const headerDisplayName = document.getElementById('headerDisplayName');
+    const profileLink = document.getElementById('profileLink');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const notifBadge = document.getElementById('notificationCount');
+
+    function showMessageBox(message, type = 'info', durationMs = 3000, isPersistent = false){
+      const el = document.getElementById('messageBox');
+      if (el.timeoutId) { clearTimeout(el.timeoutId); el.timeoutId = null; }
+      el.innerHTML = `<i id="messageBoxIcon"></i><span id="messageBoxText"></span>`;
+      const icon = document.getElementById('messageBoxIcon');
+      const text = document.getElementById('messageBoxText');
+      text.textContent = message; el.className = 'show ' + type;
+      if(icon){ icon.className='fas ' + (type==='success'?'fa-check-circle': type==='error'?'fa-times-circle': type==='warning'?'fa-exclamation-triangle':'fa-info-circle'); }
+      el.style.display='flex'; el.style.opacity='1';
+      if(!isPersistent){ el.timeoutId=setTimeout(()=>{ el.style.opacity='0'; el.addEventListener('transitionend', function handler(){ el.style.display='none'; el.removeEventListener('transitionend', handler); }, { once:true }); }, durationMs); }
+    }
+
+
+    async function fetchAndDisplayHeaderProfile(user){
+      try{
+        const privateRef = doc(db, "artifacts", appId, "users", user.uid, "profiles", "user_profile");
+        const publicRef = doc(db, "artifacts", appId, "public", "data", "users", user.uid);
+        const snap = await getDoc(privateRef);
+        let data = null;
+        if(snap.exists()) data = snap.data();
+        else { data = { username: user.displayName || `User_${user.uid.substring(0,8)}`, email: user.email || "", profilePicId: user.photoURL || null, createdAt: serverTimestamp(), updatedAt: serverTimestamp() }; await setDoc(privateRef, data); }
+        await setDoc(publicRef, { username: data.username, profilePicId: data.profilePicId, userId: user.uid }, { merge:true });
+        const usernameInitial = (data.username || "N").charAt(0).toUpperCase();
+        displayProfilePicture(headerProfilePic, headerAvatarIcon, data.profilePicId, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
+        headerDisplayName.textContent = data.username || 'Nuvia User';
+        if (profileLink) profileLink.href = `/profile.html?userId=${user.uid}`;
+        logoutBtn.disabled = false;
+      }catch(err){ console.error(err); headerDisplayName.textContent='Nuvia User'; logoutBtn.disabled=false; }
+    }
+
+    async function listenNotifications(userId){
+      try{
+        const q = query(collection(db, "artifacts", appId, "users", userId, "notifications"), where("read","==",false));
+        onSnapshot(q, (qs)=>{ const c=qs.size; if(c>0){ notifBadge.textContent=c; notifBadge.style.display='flex'; } else { notifBadge.style.display='none'; } });
+      }catch(e){ console.error(e); }
+    }
+
+    function buildLink(){
+      const metric = document.getElementById('metricSelect').value;
+      const tf = document.getElementById('tfSelect').value;
+      const q = encodeURIComponent(document.getElementById('queryInput').value.trim());
+      const url = `/leaderboard.html?metric=${metric}&tf=${tf}${q?`&q=${q}`:''}`;
+      document.getElementById('linkPreview').textContent = url;
+      return url;
+    }
+
+    document.getElementById('metricSelect').addEventListener('change', buildLink);
+    document.getElementById('tfSelect').addEventListener('change', buildLink);
+    document.getElementById('queryInput').addEventListener('input', buildLink);
+
+    document.getElementById('openBtn').addEventListener('click', ()=>{
+      const url = buildLink(); window.open(url, '_blank', 'noopener');
+    });
+    document.getElementById('copyBtn').addEventListener('click', async ()=>{
+      const url = buildLink();
+      try{ await navigator.clipboard.writeText(url); showMessageBox('Link copied!', 'success', 1500); }
+      catch{ showMessageBox('Copy failed. Select and copy manually.', 'warning', 2500); }
+    });
+
+    onAuthStateChanged(auth, async (user)=>{
+      if(user){
+        if(user.uid !== ADMIN_UID){ showMessageBox('Unauthorized. Redirecting...', 'error', 2000, true); setTimeout(()=>{ window.location.href='/home.html'; }, 1800); return; }
+        await fetchAndDisplayHeaderProfile(user);
+        listenNotifications(user.uid);
+        buildLink();
+      }else{
+        showMessageBox('Please log in. Redirecting...', 'error', 2000, true);
+        setTimeout(()=>{
+          if (initialAuthToken) { signInWithCustomToken(auth, initialAuthToken).catch(()=> window.location.href='/login.html'); }
+          else { signInAnonymously(auth).catch(()=> window.location.href='/login.html'); }
+        }, 1200);
+      }
+    });
+
+    logoutBtn.addEventListener('click', async ()=>{ try{ await signOut(auth); window.location.href='/login.html'; } catch(e){ console.error(e); } });
+  </script>
+</body>
+</html>

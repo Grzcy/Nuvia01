@@ -1,0 +1,2672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Last updated: 2025-08-21T18:19:29Z -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JCHAT - Group Settings</title>
+
+    <!-- Google Fonts: Poppins for headings, Inter for body text -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Preconnect to Firebase and Cloudinary domains for faster loading -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://*.firebaseio.com" crossorigin>
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        /* Universal box-sizing for consistent layout */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        /* Global CSS Variables (reused from other JCHAT pages for consistency) */
+        :root {
+            --pink: #ff2e92;
+            --blue: #00d5ff;
+            --radius: 20px;
+            --transition: .3s ease;
+
+            /* Default Dark Mode variables */
+            --white: #fff;
+            --text-light: rgba(255, 255, 255, .7);
+            --background-main: rgba(10, 10, 10, .75);
+            --background-gradient-1: #00d5ff;
+            --background-gradient-2: #ff2e92;
+            --card-background: linear-gradient(145deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01));
+            --header-background: linear-gradient(135deg, rgba(10, 10, 10, .85), rgba(10, 10, 10, .75));
+            --border-light: rgba(255, 255, 255, .05);
+            --input-background: rgba(255, 255, 255, 0.05);
+            --button-background-gradient: linear-gradient(90deg, var(--blue), var(--pink));
+            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+
+            /* Semantic Colors */
+            --background-color-primary: #1a1a2e;
+            --background-color-secondary: #0f0f1f;
+            --header-background-color: #2a2a4a;
+            --footer-background-color: #2a2a4a;
+            --content-background-color: #20203a;
+            --card-background-color: #2a2a4a;
+            --text-color-primary: #e0e0e0;
+            --text-color-secondary: #b0b0d0;
+            --notification-badge-color: #ff2e92;
+            --status-online: #4CAF50;
+            --status-offline: #6c757d;
+            --status-away: #FFC107;
+            --delete-button-color: #dc3545;
+            --warning-color: #ffc107;
+            --accent-color: #00d5ff;
+            --accent-color-dark: #00aaff;
+            --border-color: #3a3a5a;
+        }
+
+        /* Theme Definitions (Light, Dark, Glass, Sunset) */
+        body.theme-light-mode {
+            --background-main: #f0f2f5;
+            background-image: none !important;
+            --white: #333;
+            --text-light: #666;
+            --card-background: rgba(255, 255, 255, 0.95);
+            --header-background: rgba(255, 255, 255, 0.98);
+            --border-light: rgba(0, 0, 0, 0.1);
+            --input-background: rgba(0, 0, 0, 0.05);
+            --button-background-gradient: linear-gradient(90deg, #6dd5ed, #2193b0);
+            --button-shadow: 0 4px 15px rgba(109, 213, 237, 0.4), 0 4px 15px rgba(33, 147, 176, 0.4);
+
+            --background-color-primary: #f0f2f5;
+            --background-color-secondary: #e0e2e5;
+            --header-background-color: #ffffff;
+            --footer-background-color: #ffffff;
+            --content-background-color: #f7f9fb;
+            --card-background-color: #ffffff;
+            --text-color-primary: #333333;
+            --text-color-secondary: #666666;
+            --accent-color: #007bff;
+            --accent-color-dark: #0056b3;
+            --border-color: #e0e0e0;
+            --input-background-color: #f0f0f0;
+            --button-background: #e9ecef;
+            --button-hover-background: #dee2e6;
+            --active-item-background: rgba(0, 123, 255, 0.1);
+            --notification-badge-color: #dc3545;
+            --status-online: #28a745;
+            --status-offline: #6c757d;
+            --status-away: #ffc107;
+            --delete-button-color: #dc3545;
+            --warning-color: #ffc107;
+        }
+
+        body.theme-dark-mode {
+            --background-main: #1a1a2e;
+            background-image: radial-gradient(circle at top left, #16213e, transparent 100px),
+                              radial-gradient(circle at bottom right, #0f3460, transparent 150px) !important;
+            --white: #e0e0e0;
+            --text-light: #a0a0a0;
+            --card-background: rgba(25, 25, 40, 0.7);
+            --header-background: linear-gradient(135deg, rgba(10, 10, 20, .85), rgba(10, 10, 20, .75));
+            --border-light: rgba(255, 255, 255, 0.08);
+            --input-background: rgba(255, 255, 255, 0.08);
+            --button-background-gradient: linear-gradient(90deg, #e94560, #ba2f49);
+            --button-shadow: 0 4px 15px rgba(233, 69, 96, 0.4), 0 4px 15px rgba(186, 47, 73, 0.4);
+
+            --background-color-primary: #121212;
+            --background-color-secondary: #1e1e1e;
+            --header-background-color: #2c2c2c;
+            --footer-background-color: #2c2c2c;
+            --content-background-color: #242424;
+            --card-background-color: #2c2c2c;
+            --text-color-primary: #ffffff;
+            --text-color-secondary: #bbbbbb;
+            --accent-color: #bb86fc;
+            --accent-color-dark: #9a67ea;
+            --border-color: #444444;
+            --input-background-color: #383838;
+            --button-background: #383838;
+            --button-hover-background: #505050;
+            --active-item-background: rgba(187, 134, 252, 0.2);
+            --notification-badge-color: #cf6679;
+            --delete-button-color: #f44336;
+            --warning-color: #ffeb3b;
+        }
+
+        body.theme-glass-mode {
+            --background-main: rgba(10, 10, 10, 0.75);
+            background-image: url('https://source.unsplash.com/random/1920x1080?abstract,blur') !important;
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            backdrop-filter: blur(10px);
+            --card-background: rgba(25, 25, 40, 0.7);
+            --white: #e0e0e0;
+            --text-light: rgba(255, 255, 255, 0.7);
+            --input-background: rgba(255, 255, 255, 0.05);
+            --border-light: rgba(255, 255, 255, 0.1);
+            --button-background-gradient: linear-gradient(90deg, var(--pink), var(--blue));
+            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5);
+
+            --background-color-primary: rgba(10, 10, 10, 0.75);
+            --background-color-secondary: rgba(10, 10, 10, 0.6);
+            --header-background-color: rgba(10, 10, 10, 0.85);
+            --footer-background-color: rgba(10, 10, 10, 0.85);
+            --content-background-color: rgba(10, 10, 10, 0.75);
+            --card-background-color: rgba(25, 25, 40, 0.7);
+            --text-color-primary: #e0e0e0;
+            --text-color-secondary: #b0b0d0;
+            --accent-color: #00d5ff;
+            --accent-color-dark: #00aaff;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --input-background-color: rgba(255, 255, 255, 0.05);
+            --button-background: rgba(0, 213, 255, 0.15);
+            --button-hover-background: rgba(0, 213, 255, 0.25);
+            --active-item-background: rgba(0, 213, 255, 0.1);
+        }
+
+        body.theme-sunset-mode {
+            background: linear-gradient(to top, #ff7e5f, #feb47b) !important;
+            --background-main: linear-gradient(to top, #ff7e5f, #feb47b);
+            --card-background: rgba(255, 255, 255, 0.15);
+            --white: #fff;
+            --text-light: rgba(255, 255, 255, 0.8);
+            --input-background: rgba(255, 255, 255, 0.1);
+            --border-light: rgba(255, 255, 255, 0.3);
+            --button-background-gradient: linear-gradient(90deg, #fd746c, #ff9068);
+            --button-shadow: 0 4px 15px rgba(253, 116, 108, 0.4), 0 4px 15px rgba(255, 144, 104, 0.4);
+
+            --background-color-primary: #ff7e5f;
+            --background-color-secondary: #feb47b;
+            --header-background-color: rgba(255, 126, 95, 0.9);
+            --footer-background-color: rgba(255, 126, 95, 0.9);
+            --content-background-color: rgba(255, 126, 95, 0.85);
+            --card-background-color: rgba(255, 255, 255, 0.15);
+            --text-color-primary: #fff;
+            --text-color-secondary: rgba(255, 255, 255, 0.8);
+            --accent-color: #ffd700;
+            --accent-color-dark: #ccaa00;
+            --border-color: rgba(255, 255, 255, 0.3);
+            --input-background-color: rgba(255, 255, 255, 0.2);
+            --button-background: rgba(255, 255, 255, 0.2);
+            --button-hover-background: rgba(255, 255, 255, 0.3);
+            --active-item-background: rgba(255, 215, 0, 0.1);
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Align to top for scrollable content */
+            background-color: var(--background-main);
+            background-image: radial-gradient(circle at top left, var(--background-gradient-1), transparent 100px),
+                              radial-gradient(circle at bottom right, var(--background-gradient-2), transparent 150px);
+            color: var(--white);
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        /* Header Styling (reused from Admin.html) */
+        header {
+            background: var(--header-background);
+            border-bottom: 1px solid var(--border-light);
+            padding: 10px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 55px;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+        }
+
+        header .header-content-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 30px;
+        }
+
+        .logo {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            letter-spacing: -0.03em;
+            text-decoration: none;
+        }
+
+        header nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            gap: 25px;
+        }
+
+        header nav ul li a {
+            color: var(--white);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding: 5px 0;
+            position: relative;
+            transition: color var(--transition);
+        }
+
+        header nav ul li a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            width: 0;
+            height: 3px;
+            background: var(--blue);
+            border-radius: 2px;
+            transition: width var(--transition);
+        }
+
+        header nav ul li a:hover {
+            color: var(--blue);
+        }
+
+        header nav ul li a:hover::after {
+            width: 100%;
+        }
+
+        .user-profile-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .notification-icon-wrapper {
+            position: relative;
+            margin-right: 15px;
+        }
+
+        .notification-icon-wrapper a {
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .notification-icon-wrapper i {
+            font-size: 1.5rem;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .notification-icon-wrapper i:hover {
+            color: var(--white);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--notification-badge-color);
+            color: var(--white);
+            border-radius: 50%;
+            padding: 3px 7px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            min-width: 20px;
+            text-align: center;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            display: none;
+        }
+
+        .user-profile-header #profileLink {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--white);
+            transition: opacity 0.3s ease, background-color 0.3s ease;
+            padding: 5px 10px;
+            border-radius: var(--radius);
+        }
+
+        .user-profile-header #profileLink:hover {
+            opacity: 0.8;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .user-profile-header img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent-color);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: opacity 0.3s ease;
+        }
+
+        .user-profile-header i {
+            font-size: 30px;
+            color: var(--text-light);
+        }
+
+        .user-profile-header span {
+            font-weight: 600;
+            font-size: 1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 120px;
+        }
+
+        .jcoin-gas-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: 15px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-color-primary);
+        }
+        .jcoin-gas-display .jcoin-icon, .jcoin-gas-display .gas-icon {
+            color: var(--pink); /* JCoin color */
+            font-size: 1.1rem;
+        }
+        .jcoin-gas-display .gas-icon {
+            color: var(--blue); /* Gas color */
+        }
+
+
+        #logoutButton {
+            background: var(--button-background-gradient);
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.3s ease;
+            opacity: 0.8;
+            margin-left: 10px;
+        }
+
+        #logoutButton:hover {
+            transform: scale(1.1);
+            box-shadow: var(--button-shadow);
+            opacity: 1;
+        }
+
+        #logoutButton i {
+            color: var(--white);
+            font-size: 0.9rem;
+        }
+
+        /* Main Content Area */
+        main {
+            flex-grow: 1;
+            padding: 40px 0;
+            padding-top: 80px; /* Adjust for fixed header and some top margin */
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; /* Align to top for scrollable content */
+            text-align: center;
+            overflow-y: auto; /* Allow main content to scroll */
+            min-height: calc(100vh - 55px); /* Make main content take full height minus header */
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 1000px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .section-card {
+            background: var(--card-background);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px) saturate(180%);
+            border-radius: var(--radius);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, .3);
+            padding: 2.5rem;
+            width: 95%;
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            text-align: center;
+        }
+
+        .section-card h1, .section-card h2 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            margin-bottom: 1.5rem;
+        }
+        .section-card h1 { font-size: 2.8rem; }
+        .section-card h2 { font-size: 2rem; margin-bottom: 1.2rem; }
+
+        .section-description {
+            color: var(--text-color-secondary);
+            font-size: 1rem;
+            margin-top: -1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Group Settings Specific Styles */
+        .group-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .group-header img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--accent-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        .group-header i {
+            font-size: 5rem;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            border: 4px solid var(--accent-color);
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .group-header h1 {
+            margin: 0;
+            font-size: 3rem;
+        }
+        .group-header p {
+            color: var(--text-color-secondary);
+            font-size: 1.1rem;
+            margin-top: -10px;
+        }
+
+        .settings-section {
+            width: 100%;
+            background: var(--input-background);
+            border: 1px solid var(--border-light);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .settings-section h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-color-primary);
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-color-secondary);
+        }
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group textarea,
+        .form-group select {
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--input-background);
+            color: var(--text-color-primary);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(0, 213, 255, 0.2);
+        }
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .action-button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            background: linear-gradient(90deg, var(--blue), var(--pink));
+            color: var(--white);
+            box-shadow: 0 4px 10px rgba(0, 213, 255, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .action-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+        .action-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .action-button.secondary {
+            background: var(--input-background);
+            color: var(--text-light);
+            border: 1px solid var(--border-light);
+            box-shadow: none;
+        }
+        .action-button.secondary:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: none;
+        }
+        .action-button.danger {
+            background: var(--delete-button-color);
+            box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3);
+        }
+        .action-button.danger:hover:not(:disabled) {
+            box-shadow: 0 6px 15px rgba(220, 53, 69, 0.4);
+        }
+
+        /* Member List */
+        .member-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        .member-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        .member-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        .member-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, var(--blue), var(--pink));
+            border-radius: 10px;
+        }
+        .member-list::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, var(--pink), var(--blue));
+        }
+
+        .member-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 10px 15px;
+            border: 1px solid var(--border-light);
+        }
+        .member-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .member-info img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent-color);
+        }
+        .member-info i {
+            font-size: 2rem;
+            color: var(--text-light);
+        }
+        .member-info span {
+            font-weight: 600;
+            color: var(--text-color-primary);
+        }
+        .member-item .member-actions button {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            background: var(--delete-button-color);
+            color: var(--white);
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .member-item .member-actions button:hover:not(:disabled) {
+            background: #c82333;
+        }
+        .member-item .member-actions button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Group Vault Display */
+        .group-vault-display {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 10px;
+            border: 1px solid var(--border-light);
+        }
+        .group-vault-display p {
+            margin: 0;
+            font-size: 1rem;
+            color: var(--text-color-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .group-vault-display p strong {
+            font-size: 1.2rem;
+            background-clip: text;
+            color: transparent;
+            background-image: linear-gradient(90deg, var(--pink), var(--blue));
+        }
+        .group-vault-display i {
+            font-size: 1.2rem;
+        }
+        .group-vault-display .jcoin-icon { color: var(--pink); }
+        .group-vault-display .gas-icon { color: var(--blue); }
+
+
+        /* Loader styles for buttons (reused from previous) */
+        .button-loader {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid var(--white);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        .button-loader.active { display: block; }
+        .button-text { display: block; }
+        .loading .button-text { display: none; }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Custom Message Box Styles (reused from previous) */
+        #messageBox {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--card-background-color);
+            color: var(--text-color-primary);
+            padding: 20px 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            min-width: 280px;
+            max-width: 90%;
+            text-align: center;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        #messageBox.show {
+            opacity: 1;
+            display: flex;
+        }
+        #messageBox.success {
+            background-image: linear-gradient(45deg, var(--pink), var(--blue));
+            color: var(--white);
+            border: none;
+            box-shadow: 0 8px 30px rgba(0, 213, 255, 0.5), 0 8px 30px rgba(255, 46, 146, 0.5);
+        }
+        #messageBox.error { border-left: 5px solid var(--delete-button-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+        #messageBox.info { border-left: 5px solid var(--accent-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+        #messageBox.warning { border-left: 5px solid var(--warning-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+
+        #messageBox i {
+            font-size: 2.5rem;
+            margin-bottom: 5px;
+            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
+        }
+        #messageBox.success i { color: var(--white); }
+        #messageBox.error i { color: var(--delete-button-color); }
+        #messageBox.info i { color: var(--accent-color); }
+        #messageBox.warning i { color: var(--warning-color); }
+
+        #messageBox span {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        @keyframes pulse-bg {
+            0% { background-color: var(--accent-color); }
+            50% { background-color: rgba(0, 213, 255, 0.7); }
+            100% { background-color: var(--accent-color); }
+        }
+        #messageBox.loading-pulse { animation: pulse-bg 1.5s infinite ease-in-out; }
+
+        /* Custom Confirmation Modal */
+        .confirm-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+        }
+        .confirm-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .confirm-modal-content {
+            background: var(--card-background);
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .confirm-modal-overlay.active .confirm-modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .confirm-modal-content h3 {
+            color: var(--white);
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .confirm-modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        .confirm-modal-buttons button {
+            padding: 10px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .confirm-modal-buttons button.confirm-btn {
+            background: linear-gradient(90deg, var(--pink), var(--blue));
+            color: var(--white);
+            box-shadow: 0 4px 10px rgba(0, 213, 255, 0.3);
+        }
+        .confirm-modal-buttons button.confirm-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 213, 255, 0.4);
+        }
+        .confirm-modal-buttons button.cancel-btn {
+            background: var(--input-background);
+            color: var(--text-light);
+            border: 1px solid var(--border-light);
+        }
+        .confirm-modal-buttons button.cancel-btn:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 600px) {
+            header .header-content-wrapper {
+                padding: 0 20px;
+            }
+            .logo {
+                font-size: 1.6rem;
+            }
+            header nav ul {
+                gap: 15px;
+            }
+            header nav ul li a {
+                font-size: 1.1rem;
+            }
+            .user-profile-header #profileLink {
+                padding: 5px;
+            }
+            .user-profile-header span {
+                max-width: 90px;
+            }
+            .user-profile-header img {
+                width: 30px;
+                height: 30px;
+            }
+            .user-profile-header i {
+                font-size: 25px;
+            }
+            #logoutButton {
+                width: 25px;
+                height: 25px;
+                font-size: 0.8rem;
+                margin-left: 8px;
+            }
+            #logoutButton i {
+                font-size: 0.8rem;
+            }
+            .jcoin-gas-display {
+                font-size: 0.8rem;
+                gap: 5px;
+                margin-left: 10px;
+            }
+            .jcoin-gas-display .jcoin-icon, .jcoin-gas-display .gas-icon {
+                font-size: 1rem;
+            }
+            .section-card {
+                padding: 1.5rem;
+            }
+            .section-card h1 {
+                font-size: 2.2rem;
+            }
+            .section-card h2 {
+                font-size: 1.7rem;
+            }
+            .group-header img, .group-header i {
+                width: 90px;
+                height: 90px;
+                font-size: 4rem;
+            }
+            .group-header h1 {
+                font-size: 2.5rem;
+            }
+            .group-header p {
+                font-size: 1rem;
+            }
+            .settings-section {
+                padding: 15px;
+            }
+            .settings-section h3 {
+                font-size: 1.4rem;
+            }
+            .form-group input, .form-group textarea, .form-group select {
+                font-size: 0.9rem;
+                padding: 10px 12px;
+            }
+            .action-button {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            .member-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            .member-item .member-actions {
+                width: 100%;
+                display: flex;
+                justify-content: flex-end;
+            }
+            .member-item .member-actions button {
+                width: auto;
+                flex-grow: 1;
+            }
+            .group-vault-display p {
+                font-size: 0.9rem;
+            }
+            .group-vault-display p strong {
+                font-size: 1.1rem;
+            }
+            .group-vault-display i {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+<style id="header-overflow-fix">/*header-overflow-fix*/header .header-content-wrapper{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0;justify-content:flex-end}#profileLink{display:inline-flex;align-items:center;column-gap:8px;row-gap:2px;flex-wrap:wrap;max-width:100%;min-width:0}#profileLink #headerDisplayName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;flex:0 1 auto}#headerProfilePic,#headerAvatarIcon{flex:0 0 auto}.drawer__ft .btn{min-width:44px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.action-button,.btn{box-sizing:border-box}@media (max-width:600px){header .header-content-wrapper{gap:8px}#profileLink{column-gap:6px}}</style></head>
+<body class="theme-dark-mode">
+
+    <header>
+        <div class="header-content-wrapper">
+            <a href="/home.html" class="logo" style="display:flex;align-items:center;gap:10px"><img src="assets/security.png" alt="JCHAT Security" style="height:24px;width:auto" onerror="this.style.display='none'"><span>Nuvia</span></a>
+            <nav>
+                <ul>
+                    <li><a href="/Groups.html">Groups</a></li>
+                </ul>
+            </nav>
+            <div class="user-profile-header">
+                <!-- Notification Icon with Badge -->
+                <div class="notification-icon-wrapper">
+                    <a href="/notifications.html" aria-label="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationCount" style="display: none;">0</span>
+                    </a>
+                </div>
+                <!-- JCoin and Gas Display -->
+                <div class="jcoin-gas-display">
+                    <span id="jCoinsDisplay"><i class="fas fa-coins jcoin-icon"></i> 0</span>
+                    <span id="gasDisplay"><i class="fas fa-gas-pump gas-icon"></i> 0</span>
+                </div>
+                <!-- Logout Button -->
+                <button id="logoutButton" aria-label="Logout" disabled>
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+                <a href="/profile.html" id="profileLink">
+                    <img id="headerProfilePic" src="" alt="Profile Picture" style="display: none;">
+                    <i id="headerAvatarIcon" class="fas fa-user-circle"></i>
+                    <span id="headerDisplayName">Loading...</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="content-wrapper">
+            <div class="section-card">
+                <div class="group-header">
+                    <img id="groupPicDisplay" src="" alt="Group Picture" style="display: none;">
+                    <i id="groupIconDisplay" class="fas fa-users"></i>
+                    <h1 id="groupNameDisplay">Loading Group...</h1>
+                    <p id="groupDescriptionDisplay">Loading description...</p>
+                    <p id="groupAdminDisplay" style="font-size: 0.9rem; color: var(--text-light);">Admin: <span id="adminUsername">Loading...</span></p>
+                </div>
+
+                <p id="accessDeniedMessage" style="color: var(--delete-button-color); font-weight: 600; display: none;">
+                    Access Denied: You are not the administrator of this group.
+                </p>
+
+                <div id="groupSettingsContent" style="display: none; width: 100%;">
+                    <!-- Edit Group Info Section -->
+                    <div class="settings-section">
+                        <h3>Edit Group Information</h3>
+                        <div class="form-group">
+                            <label for="editGroupNameInput">Group Name:</label>
+                            <input type="text" id="editGroupNameInput" maxlength="50" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editGroupDescriptionInput">Description:</label>
+                            <textarea id="editGroupDescriptionInput" maxlength="200"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="editGroupPicInput">Group Picture (URL or upload):</label>
+                            <input type="text" id="editGroupPicInput" placeholder="Enter new image URL or leave blank">
+                            <input type="file" id="editGroupPicFile" accept="image/*" style="margin-top:8px">
+                            <div id="editGroupPicPreview" style="margin-top:8px"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="editGroupVisibility">Visibility:</label>
+                            <select id="editGroupVisibility">
+                                <option value="public">Public</option>
+                                <option value="private">Private</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editGroupTagsInput">Tags (comma separated):</label>
+                            <input type="text" id="editGroupTagsInput" placeholder="e.g. music, tech, gaming">
+                        </div>
+                        <button id="saveGroupInfoBtn" class="action-button">
+                            <span class="button-text"><i class="fas fa-save"></i> Save Changes</span>
+                            <div class="button-loader"></div>
+                        </button>
+                    </div>
+
+                    <!-- Manage Members Section -->
+                    <div class="settings-section">
+                        <h3>Manage Members (<span id="memberCountDisplay">0</span>)</h3>
+                        <div id="memberList" class="member-list">
+                            <p style="text-align: center; color: var(--text-light);">Loading members...</p>
+                            <!-- Members will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Join Requests -->
+                    <div class="settings-section">
+                        <h3>Join Requests</h3>
+                        <div id="requestList" class="member-list">
+                            <p style="text-align:center;color:var(--text-light)">Loading requests...</p>
+                        </div>
+                    </div>
+
+                    <!-- Ownership & Roles -->
+                    <div class="settings-section">
+                        <h3>Ownership & Roles</h3>
+                        <div class="form-group">
+                            <label for="transferOwnerSelect">Transfer Ownership To:</label>
+                            <select id="transferOwnerSelect"></select>
+                        </div>
+                        <button id="transferOwnerBtn" class="action-button">
+                            <span class="button-text"><i class="fas fa-exchange-alt"></i> Transfer Ownership</span>
+                            <div class="button-loader"></div>
+                        </button>
+                        <p class="section-description">Use role selectors in Members to promote/demote moderators.</p>
+                    </div>
+
+                    <!-- Emoji Management -->
+                    <div class="settings-section">
+                        <h3>Custom Emojis</h3>
+                        <p class="muted text-sm">Upload custom emojis for this group (owners only). Small PNG/SVG files recommended.</p>
+                        <div style="display:flex;gap:8px;align-items:center">
+                            <input type="file" id="emojiUploadFile" accept="image/*">
+                            <button id="emojiUploadBtn" class="btn">Upload Emoji</button>
+                        </div>
+                        <div id="emojiList" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"></div>
+                    </div>
+
+                    <!-- Pinned Announcement Scheduler -->
+                    <div class="settings-section">
+                        <h3>Pinned Announcement</h3>
+                        <p class="muted text-sm">Pin an announcement to the group header for a limited time.</p>
+                        <div class="form-group">
+                            <label for="pinAnnouncementInput">Announcement Text</label>
+                            <textarea id="pinAnnouncementInput" maxlength="300" placeholder="Announcement to pin"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="pinUntilInput">Pin Until (optional)</label>
+                            <input type="datetime-local" id="pinUntilInput">
+                        </div>
+                        <div style="display:flex;gap:8px">
+                            <button id="savePinBtn" class="action-button"><span class="button-text">Save Pin</span><div class="button-loader"></div></button>
+                            <button id="clearPinBtn" class="btn">Clear Pin</button>
+                        </div>
+                    </div>
+
+                    <!-- Group Vault Management Section -->
+                    <div class="settings-section">
+                        <h3>Group Vault Management</h3>
+                        <p class="group-vault-display">
+                            Group JCoins: <strong id="groupVaultJCoins">0</strong> <i class="fas fa-coins jcoin-icon"></i><br>
+                            Group Gas: <strong id="groupVaultGas">0</strong> <i class="fas fa-gas-pump gas-icon"></i>
+                        </p>
+                        <div class="form-group">
+                            <label for="withdrawAmountInput">Amount to Withdraw:</label>
+                            <input type="number" id="withdrawAmountInput" min="1" placeholder="Enter amount">
+                        </div>
+                        <div class="form-group">
+                            <label for="withdrawTypeSelect">Withdraw Type:</label>
+                            <select id="withdrawTypeSelect">
+                                <option value="jcoins">JCoins</option>
+                                <option value="gas">Gas (XP)</option>
+                            </select>
+                        </div>
+                        <button id="withdrawFromVaultBtn" class="action-button">
+                            <span class="button-text"><i class="fas fa-hand-holding-usd"></i> Withdraw from Vault</span>
+                            <div class="button-loader"></div>
+                        </button>
+                    </div>
+
+                    <!-- Promote/Boost Group Section (Re-integrated from Groups page) -->
+                    <div class="settings-section">
+                        <h3>Promote & Boost Group</h3>
+                        <p style="color: var(--text-color-secondary); font-size: 0.95rem; margin-bottom: 15px;">
+                            Increase your group's visibility or activate temporary XP/JCoin boosts for members.
+                        </p>
+                        <div style="display: flex; flex-direction: column; gap: 15px;">
+                            <button id="promoteGroupBtn" class="action-button">
+                                <span class="button-text"><i class="fas fa-bullhorn"></i> Promote Group</span>
+                                <div class="button-loader"></div>
+                            </button>
+                            <button id="activateGroupBoostBtn" class="action-button">
+                                <span class="button-text"><i class="fas fa-rocket"></i> Activate Boost</span>
+                                <div class="button-loader"></div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Danger Zone Section -->
+                    <div class="settings-section" style="border-color: var(--delete-button-color); background: rgba(220, 53, 69, 0.1);">
+                        <h3 style="color: var(--delete-button-color); border-color: rgba(220, 53, 69, 0.3);">Danger Zone</h3>
+                        <p style="color: var(--text-color-secondary);">
+                            This action cannot be undone. Please be careful.
+                        </p>
+                        <div class="form-group">
+                            <label for="confirmDeleteGroupName">Type group name to confirm deletion:</label>
+                            <input type="text" id="confirmDeleteGroupName" placeholder="Enter group name exactly">
+                        </div>
+                        <button id="deleteGroupBtn" class="action-button danger" disabled>
+                            <span class="button-text"><i class="fas fa-trash-alt"></i> Delete Group</span>
+                            <div class="button-loader"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Custom Message Box (from Admin.html or local) -->
+    <div id="messageBox"></div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="customConfirmModal" class="confirm-modal-overlay">
+        <div class="confirm-modal-content">
+            <h3 id="confirmModalMessage"></h3>
+            <div class="confirm-modal-buttons">
+                <button id="confirmYesBtn" class="confirm-btn">Yes</button>
+                <button id="confirmNoBtn" class="cancel-btn">No</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Promote Group Modal (reused from Groups.html) -->
+    <div id="promoteGroupModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Promote Group</h3>
+            <p>Choose the duration for group promotion.</p>
+            <div class="form-group">
+                <label for="promotionDuration">Promotion Duration:</label>
+                <select id="promotionDuration">
+                    <option value="1" data-cost="100">1 Day (100 JCoins)</option>
+                    <option value="3" data-cost="250">3 Days (250 JCoins)</option>
+                    <option value="7" data-cost="500">7 Days (500 JCoins)</option>
+                </select>
+            </div>
+            <p class="jcoin-cost">Cost: <span id="promotionCostDisplay">100</span> <i class="fas fa-coins"></i></p>
+            <div class="modal-buttons">
+                <button id="submitPromoteGroupBtn" class="primary-btn">
+                    <span class="button-text"><i class="fas fa-bullhorn"></i> Promote</span>
+                    <div class="button-loader"></div>
+                </button>
+                <button id="cancelPromoteGroupBtn" class="cancel-btn">
+                    <span class="button-text"><i class="fas fa-times"></i> Cancel</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Activate Group Boost Modal (reused from Groups.html) -->
+    <div id="activateGroupBoostModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Activate Group Boost</h3>
+            <p>Select the type of boost and duration.</p>
+            <div class="form-group">
+                <label for="boostType">Boost Type:</label>
+                <select id="boostType">
+                    <option value="xp" data-cost="200">XP Boost (200 JCoins)</option>
+                    <option value="jcoin" data-cost="500">JCoin Boost (500 JCoins)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="boostDuration">Duration (Hours):</label>
+                <input type="number" id="boostDuration" value="24" min="1" max="72">
+            </div>
+            <p class="jcoin-cost">Cost: <span id="boostCostDisplay">200</span> <i class="fas fa-coins"></i></p>
+            <div class="modal-buttons">
+                <button id="submitActivateBoostBtn" class="primary-btn">
+                    <span class="button-text"><i class="fas fa-rocket"></i> Activate</span>
+                    <div class="button-loader"></div>
+                </button>
+                <button id="cancelActivateBoostBtn" class="cancel-btn">
+                    <span class="button-text"><i class="fas fa-times"></i> Cancel</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, addDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, runTransaction, getDocs, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // --- Firebase & Canvas Environment Configuration ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+            authDomain: "jchat-1.firebaseapp.com",
+            databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+            projectId: "jchat-1",
+            storageBucket: "jchat-1.firebasestorage.app",
+            messagingSenderId: "328479683167",
+            appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
+            measurementId: "G-S6Z9GG0R9P"
+        };
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+
+        // Initialize Firebase services
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // --- DOM Elements ---
+        const headerProfilePic = document.getElementById('headerProfilePic');
+        const headerAvatarIcon = document.getElementById('headerAvatarIcon');
+        const headerDisplayName = document.getElementById('headerDisplayName');
+        const logoutButton = document.getElementById('logoutButton');
+        const notificationCountElement = document.getElementById('notificationCount');
+        const messageBox = document.getElementById('messageBox');
+        const headerNavLinkProfile = document.getElementById('profileLink');
+        const jCoinsDisplay = document.getElementById('jCoinsDisplay');
+        const gasDisplay = document.getElementById('gasDisplay');
+
+        // Group Display Elements
+        const groupPicDisplay = document.getElementById('groupPicDisplay');
+        const groupIconDisplay = document.getElementById('groupIconDisplay');
+        const groupNameDisplay = document.getElementById('groupNameDisplay');
+        const groupDescriptionDisplay = document.getElementById('groupDescriptionDisplay');
+        const groupAdminDisplay = document.getElementById('groupAdminDisplay');
+        const adminUsernameSpan = document.getElementById('adminUsername');
+        // Emoji & Pinned Announcement Elements
+        const emojiUploadFile = document.getElementById('emojiUploadFile');
+        const emojiUploadBtn = document.getElementById('emojiUploadBtn');
+        const emojiListEl = document.getElementById('emojiList');
+        const pinAnnouncementInput = document.getElementById('pinAnnouncementInput');
+        const pinUntilInput = document.getElementById('pinUntilInput');
+        const savePinBtn = document.getElementById('savePinBtn');
+        const clearPinBtn = document.getElementById('clearPinBtn');
+
+        // Access Control Elements
+        const accessDeniedMessage = document.getElementById('accessDeniedMessage');
+        const groupSettingsContent = document.getElementById('groupSettingsContent');
+
+        // Edit Group Info Elements
+        const editGroupNameInput = document.getElementById('editGroupNameInput');
+        const editGroupDescriptionInput = document.getElementById('editGroupDescriptionInput');
+        const editGroupPicInput = document.getElementById('editGroupPicInput');
+        const editGroupPicFile = document.getElementById('editGroupPicFile');
+        const editGroupPicPreview = document.getElementById('editGroupPicPreview');
+        const saveGroupInfoBtn = document.getElementById('saveGroupInfoBtn');
+        let uploadedGroupPicPublicId = null;
+
+        // Manage Members Elements
+        const memberCountDisplay = document.getElementById('memberCountDisplay');
+        const memberList = document.getElementById('memberList');
+        // Requests & Roles Elements
+        const requestList = document.getElementById('requestList');
+        const transferOwnerSelect = document.getElementById('transferOwnerSelect');
+        const transferOwnerBtn = document.getElementById('transferOwnerBtn');
+        // Extra Edit Group fields
+        const editGroupVisibility = document.getElementById('editGroupVisibility');
+        const editGroupTagsInput = document.getElementById('editGroupTagsInput');
+
+        // Group Vault Management Elements
+        const groupVaultJCoins = document.getElementById('groupVaultJCoins');
+        const groupVaultGas = document.getElementById('groupVaultGas');
+        const withdrawAmountInput = document.getElementById('withdrawAmountInput');
+        const withdrawTypeSelect = document.getElementById('withdrawTypeSelect');
+        const withdrawFromVaultBtn = document.getElementById('withdrawFromVaultBtn');
+
+        // Promote/Boost Group Buttons (reused from Groups.html structure)
+        const promoteGroupBtn = document.getElementById('promoteGroupBtn');
+        const activateGroupBoostBtn = document.getElementById('activateGroupBoostBtn');
+
+        // Delete Group Elements
+        const confirmDeleteGroupName = document.getElementById('confirmDeleteGroupName');
+        const deleteGroupBtn = document.getElementById('deleteGroupBtn');
+
+        // Promote Group Modal (reused from Groups.html)
+        const promoteGroupModal = document.getElementById('promoteGroupModal');
+        const promotionDuration = document.getElementById('promotionDuration');
+        const promotionCostDisplay = document.getElementById('promotionCostDisplay');
+        const submitPromoteGroupBtn = document.getElementById('submitPromoteGroupBtn');
+        const cancelPromoteGroupBtn = document.getElementById('cancelPromoteGroupBtn');
+
+        // Activate Group Boost Modal (reused from Groups.html)
+        const activateGroupBoostModal = document.getElementById('activateGroupBoostModal');
+        const boostType = document.getElementById('boostType');
+        const boostDuration = document.getElementById('boostDuration');
+        const boostCostDisplay = document.getElementById('boostCostDisplay');
+        const submitActivateBoostBtn = document.getElementById('submitActivateBoostBtn');
+        const cancelActivateBoostBtn = document.getElementById('cancelActivateBoostBtn');
+
+        // Custom Confirmation Modal elements
+        const customConfirmModal = document.getElementById('customConfirmModal');
+        const confirmModalMessage = document.getElementById('confirmModalMessage');
+        const confirmYesBtn = document.getElementById('confirmYesBtn');
+        const confirmNoBtn = document.getElementById('confirmNoBtn');
+
+        // --- Global State ---
+        let isAuthReady = false;
+        let currentUser = null;
+        let currentUserProfileData = null;
+        let currentGroupData = null; // Stores the group data being managed
+        let groupId = null; // Group ID from URL
+        let unsubscribeGroupListener = null;
+        // No need for unsubscribeMembersListener as members are fetched once per group data update
+
+        // Cloudinary Configuration
+        const cloudinaryConfig = {
+            cloudName: "dxld01rcp", // Your Cloudinary Cloud Name
+            uploadPreset: "Storage_preset" // Your Cloudinary Upload Preset
+        };
+
+        // --- Utility Functions (reused from other pages) ---
+
+        /**
+         * Plays a short notification sound.
+         */
+        function playNotificationSound() {
+            // Tone.js might not be loaded on this page, or browser autoplay policy might block it.
+            // For now, keep it simple or remove if causing issues.
+            // const audio = new Audio('/assets/sounds/success_notification.mp3');
+            // audio.play().catch(e => console.error("Error playing sound:", e));
+        }
+
+        /**
+         * Displays a temporary message box with a given message and type.
+         * @param {string} message - The message to display.
+         * @param {string} type - The type of message ('success', 'error', 'info', 'loading', 'warning').
+         * @param {number} [durationMs=3000] - Duration in milliseconds for the message to display.
+         * @param {boolean} [isPersistent=false] - If true, message stays until explicitly cleared or replaced.
+         */
+        function showMessageBox(message, type, durationMs = 3000, isPersistent = false) {
+            if (messageBox.timeoutId) {
+                clearTimeout(messageBox.timeoutId);
+                messageBox.timeoutId = null;
+            }
+
+            messageBox.innerHTML = `<i id="messageBoxIcon"></i><span id="messageBoxText"></span>`;
+            const messageBoxIcon = messageBox.querySelector('#messageBoxIcon');
+            const messageBoxText = messageBox.querySelector('#messageBoxText');
+
+            messageBoxText.textContent = message;
+            messageBox.className = 'message-box show ' + type;
+
+            if (messageBoxIcon) {
+                if (type === 'success') {
+                    messageBoxIcon.classList.add('fas', 'fa-check-circle');
+                } else if (type === 'error') {
+                    messageBoxIcon.classList.add('fas', 'fa-times-circle');
+                } else if (type === 'info') {
+                    messageBoxIcon.classList.add('fas', 'fa-info-circle');
+                } else if (type === 'warning') {
+                    messageBoxIcon.classList.add('fas', 'fa-exclamation-triangle');
+                } else if (type === 'loading') {
+                    messageBoxIcon.classList.add('fas', 'fa-spinner', 'fa-spin');
+                }
+            }
+
+            if (type === 'loading') {
+                messageBox.classList.add('loading-pulse');
+            } else {
+                messageBox.classList.remove('loading-pulse');
+            }
+
+            messageBox.style.display = 'flex';
+            messageBox.style.opacity = '1';
+
+            if (!isPersistent) {
+                messageBox.timeoutId = setTimeout(() => {
+                    messageBox.style.opacity = '0';
+                    messageBox.addEventListener('transitionend', function handler() {
+                        messageBox.style.display = 'none';
+                        messageBox.removeEventListener('transitionend', handler);
+                        messageBox.classList.remove('loading-pulse');
+                    }, { once: true });
+                }, durationMs);
+            }
+        }
+
+        /**
+         * Displays a custom confirmation modal.
+         * @param {string} message - The message to display in the modal.
+         * @returns {Promise<boolean>} Resolves with true if 'Yes' is clicked, false if 'No'.
+         */
+        function showCustomConfirm(message) {
+            return new Promise((resolve) => {
+                confirmModalMessage.textContent = message;
+                customConfirmModal.classList.add('active');
+
+                const handleYes = () => {
+                    customConfirmModal.classList.remove('active');
+                    confirmYesBtn.removeEventListener('click', handleYes);
+                    confirmNoBtn.removeEventListener('click', handleNo);
+                    resolve(true);
+                };
+
+                const handleNo = () => {
+                    customConfirmModal.classList.remove('active');
+                    confirmYesBtn.removeEventListener('click', handleYes);
+                    confirmNoBtn.removeEventListener('click', handleNo);
+                    resolve(false);
+                };
+
+                confirmYesBtn.addEventListener('click', handleYes);
+                confirmNoBtn.addEventListener('click', handleNo);
+            });
+        }
+
+        /**
+         * Toggles loading state for a button.
+         * @param {HTMLElement} buttonElement - The button to toggle.
+         * @param {boolean} isLoading - True to show loading, false to hide.
+         */
+        function toggleButtonLoading(buttonElement, isLoading) {
+            if (!buttonElement) return;
+            const loader = buttonElement.querySelector('.button-loader');
+            const text = buttonElement.querySelector('.button-text');
+
+            if (isLoading) {
+                buttonElement.disabled = true;
+                buttonElement.classList.add('loading');
+                if (loader) loader.classList.add('active');
+                if (text) text.style.display = 'none';
+            } else {
+                buttonElement.disabled = false;
+                buttonElement.classList.remove('loading');
+                if (loader) loader.classList.remove('active');
+                if (text) text.style.display = 'block';
+            }
+        }
+
+        /**
+         * Constructs a Cloudinary URL for an image/video.
+         * @param {string} urlOrPublicId - The full Cloudinary URL or the public ID of the image on Cloudinary.
+         * @param {string} transformations - Optional Cloudinary transformations.
+         * @returns {string|null} The full Cloudinary URL or null if urlOrPublicId is not provided.
+         */
+        function getCloudinaryImageUrl(urlOrPublicId, transformations = "w_auto,f_auto,q_auto") {
+            if (!urlOrPublicId) return null;
+            if (urlOrPublicId.startsWith('http://') || urlOrPublicId.startsWith('https://')) {
+                return urlOrPublicId;
+            }
+            return `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/${transformations}/${urlOrPublicId}`;
+        }
+
+        /**
+         * Displays the profile picture or a default icon for a user/group.
+         * @param {HTMLElement} imgElement - The <img> element to update.
+         * @param {HTMLElement} iconElement - The <i> element to display if no image.
+         * @param {string|null} picId - The Cloudinary public ID or URL, or null.
+         * @param {string} initial - Initial for placeholder (e.g., username initial or group name initial).
+         * @param {string} transformations - Cloudinary transformations.
+         */
+        function displayPicture(imgElement, iconElement, picId, initial, transformations) {
+            if (imgElement) {
+                if (picId) {
+                    const imageUrl = getCloudinaryImageUrl(picId, transformations);
+                    imgElement.src = imageUrl;
+                    imgElement.style.display = 'block';
+                    if (iconElement) iconElement.style.display = 'none';
+                    imgElement.onerror = () => {
+                        console.error(`Failed to load picture: ${picId}. Using placeholder.`);
+                        imgElement.src = `https://placehold.co/80x80/CCCCCC/000000?text=${initial}`;
+                        imgElement.style.display = 'block';
+                        if (iconElement) iconElement.style.display = 'none';
+                    };
+                } else {
+                    imgElement.src = '';
+                    imgElement.style.display = 'none';
+                    if (iconElement) iconElement.style.display = 'block';
+                }
+            }
+        }
+
+        // Upload handler for owner to set group picture
+        try {
+            if (typeof editGroupPicFile !== 'undefined' && editGroupPicFile) {
+                editGroupPicFile.addEventListener('change', async (e) => {
+                    const file = e.target.files && e.target.files[0];
+                    if (!file) return;
+                    // Local preview
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        if (editGroupPicPreview) editGroupPicPreview.innerHTML = `<img src="${reader.result}" alt="Preview" style="max-width:160px;border-radius:12px;object-fit:cover;border:1px solid var(--border-light)">`;
+                    };
+                    reader.readAsDataURL(file);
+
+                    // Upload to Cloudinary
+                    try {
+                        showMessageBox('Uploading image...', 'loading', true);
+                        const fd = new FormData();
+                        fd.append('file', file);
+                        if (cloudinaryConfig.uploadPreset) fd.append('upload_preset', cloudinaryConfig.uploadPreset);
+                        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/auto/upload`, { method: 'POST', body: fd });
+                        const data = await res.json();
+                        if (!res.ok) {
+                            console.error('Cloudinary upload failed', data);
+                            showMessageBox('Image upload failed', 'error');
+                            return;
+                        }
+                        uploadedGroupPicPublicId = data.public_id || data.secure_url || null;
+                        const publicUrl = getCloudinaryImageUrl(uploadedGroupPicPublicId, 'w_240,h_240,c_fill,g_auto,r_max');
+                        if (editGroupPicPreview) editGroupPicPreview.innerHTML = `<img src="${publicUrl}" alt="Uploaded" style="max-width:160px;border-radius:12px;object-fit:cover;border:1px solid var(--border-light)">`;
+                        if (editGroupPicInput) editGroupPicInput.value = uploadedGroupPicPublicId || '';
+                        showMessageBox('Image uploaded', 'success');
+                    } catch (err) {
+                        console.error('Upload error', err);
+                        showMessageBox('Image upload failed', 'error');
+                    }
+                });
+            }
+        } catch (e) { console.error('setup upload handler failed', e); }
+
+        /**
+         * Fetches and displays the current user's profile data for the header.
+         * @param {firebase.User} user - The authenticated Firebase user object.
+         */
+        async function fetchAndDisplayHeaderProfile(user) {
+            try {
+                const privateProfileDocRef = doc(db, "artifacts", appId, "users", user.uid, "profiles", "user_profile");
+                const privateDocSnap = await getDoc(privateProfileDocRef);
+
+                let profileData = null;
+                if (privateDocSnap.exists()) {
+                    profileData = privateDocSnap.data();
+                } else {
+                    // Create a basic profile if it doesn't exist
+                    profileData = {
+                        username: user.displayName || `User_${user.uid.substring(0, 8)}`,
+                        email: user.email || "",
+                        profilePicId: user.photoURL || null,
+                        bio: "", location: "", friendsCount: 0, followersCount: 0, followingCount: 0,
+                        createdAt: Date.now(), updatedAt: Date.now(), // Use Date.now() for immediate client-side use
+                        inspirationType: "motivational",
+                        visibility: {
+                            displayName: true, profilePic: true, bio: false, location: false,
+                            emailPublic: false, lastOnline: false, allowFriendRequests: true, allowMessages: true,
+                        },
+                        totalPosts: 0, jCoins: 0, level: 1, currentXp: 0, xpToNextLevel: 100,
+                        gas: 0,
+                        messagesSentCount: 0,
+                        lastGroupCheckIn: null,
+                        completedQuests: [],
+                        questProgress: {},
+                        referralCode: generateReferralCode(),
+                        successfulReferrals: 0
+                    };
+                    await setDoc(privateProfileDocRef, profileData);
+                }
+                currentUserProfileData = profileData; // Store profile data globally
+
+                const usernameInitial = (profileData.username || "J").charAt(0).toUpperCase();
+                displayPicture(headerProfilePic, headerAvatarIcon, profileData?.profilePicId, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
+                headerDisplayName.textContent = profileData.username || "JCHAT User";
+                headerNavLinkProfile.href = `/profile.html?userId=${user.uid}`;
+
+                // Update JCoin and Gas display in header
+                jCoinsDisplay.innerHTML = `<i class="fas fa-coins jcoin-icon"></i> ${currentUserProfileData.jCoins || 0}`;
+                gasDisplay.innerHTML = `<i class="fas fa-gas-pump gas-icon"></i> ${currentUserProfileData.gas || 0}`;
+
+                logoutButton.disabled = false;
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error fetching or creating profile for header:", error);
+                const usernameInitial = (user.displayName || "J").charAt(0).toUpperCase();
+                displayPicture(headerProfilePic, headerAvatarIcon, user.photoURL, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
+                headerDisplayName.textContent = user.displayName || "JCHAT User";
+                showMessageBox(`Error loading header profile: ${error.message}`, 'error');
+                logoutButton.disabled = false;
+            }
+        }
+
+        /**
+         * Fetches and displays the notification count for the current user.
+         * (Placeholder for future functionality)
+         * @param {string} userId - The UID of the current user.
+         */
+        async function fetchNotificationCount(userId) {
+            notificationCountElement.style.display = 'none';
+        }
+
+        /**
+         * Generates a random alphanumeric referral code.
+         * @param {number} length - The desired length of the referral code.
+         * @returns {string} The generated referral code.
+         */
+        function generateReferralCode(length = 8) {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return result;
+        }
+
+        /**
+         * Creates a pending activity reward for admin review.
+         * @param {string} userId - The ID of the user whose JCoins/XP/Gas are affected.
+         * @param {string} username - The username of the user.
+         * @param {string} activityType - Type of activity.
+         * @param {number} suggestedJCoinAmount - Suggested JCoin amount.
+         * @param {number} suggestedXpAmount - Suggested XP amount.
+         * @param {number} suggestedGasAmount - Suggested Gas amount.
+         * @param {string|null} groupId - The ID of the group involved, if any.
+         * @param {string|null} relatedEntityId - ID of related entity.
+         */
+        async function createPendingActivityReward(userId, username, activityType, suggestedJCoinAmount, suggestedXpAmount, suggestedGasAmount, groupId = null, relatedEntityId = null) {
+            try {
+                const pendingRewardsCollectionRef = collection(db, "artifacts", appId, "public", "data", "pending_activity_rewards");
+                await addDoc(pendingRewardsCollectionRef, {
+                    userId: userId,
+                    username: username,
+                    activityType: activityType,
+                    suggestedJCoinAmount: suggestedJCoinAmount,
+                    suggestedXpAmount: suggestedXpAmount,
+                    suggestedGasAmount: suggestedGasAmount,
+                    status: 'pending',
+                    timestamp: serverTimestamp(),
+                    groupId: groupId,
+                    relatedEntityId: relatedEntityId,
+                    reviewerId: null,
+                    reviewTimestamp: null,
+                    notes: ''
+                });
+                console.log(`JCHAT_DEBUG: Pending activity reward created for ${activityType}.`);
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error creating pending activity reward:", error);
+            }
+        }
+
+        /**
+         * Deducts JCoins from the current user's profile.
+         * @param {number} amount - The amount of JCoins to deduct.
+         * @param {string} activityType - The type of activity for the deduction.
+         * @param {string|null} groupId - The ID of the group involved.
+         * @param {string|null} relatedEntityId - ID of related entity.
+         * @returns {Promise<boolean>} True if deduction initiated successfully, false otherwise.
+         */
+        async function deductJCoins(amount, activityType, groupId = null, relatedEntityId = null) {
+            if (!currentUser || !currentUserProfileData) {
+                showMessageBox("User not logged in or profile not loaded.", "error");
+                return false;
+            }
+            if (currentUserProfileData.jCoins < amount) {
+                showMessageBox("Insufficient JCoins.", "warning");
+                return false;
+            }
+
+            const userProfileRef = doc(db, "artifacts", appId, "users", currentUser.uid, "profiles", "user_profile");
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const docSnap = await transaction.get(userProfileRef);
+                    if (!docSnap.exists()) {
+                        throw new Error("User profile not found!");
+                    }
+                    const currentJCoins = docSnap.data().jCoins || 0;
+                    const newJCoins = currentJCoins - amount;
+                    if (newJCoins < 0) {
+                        throw new Error("Insufficient JCoins for this transaction.");
+                    }
+                    transaction.update(userProfileRef, { jCoins: newJCoins, updatedAt: serverTimestamp() });
+                });
+
+                await createPendingActivityReward(
+                    currentUser.uid,
+                    currentUserProfileData.username,
+                    activityType,
+                    -amount,
+                    0, 0,
+                    groupId,
+                    relatedEntityId
+                );
+                await fetchAndDisplayHeaderProfile(currentUser);
+                return true;
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error deducting JCoins:", error);
+                showMessageBox(`Failed to deduct JCoins: ${error.message}`, "error");
+                return false;
+            }
+        }
+
+        /**
+         * Adds JCoins/Gas to a user's profile.
+         * @param {string} userId - The ID of the user to add JCoins/Gas to.
+         * @param {string} username - The username of the user.
+         * @param {number} jCoinsAmount - The amount of JCoins to add.
+         * @param {number} gasAmount - The amount of Gas to add.
+         * @param {string} activityType - The type of activity for the addition.
+         * @param {string|null} groupId - The ID of the group involved.
+         * @param {string|null} relatedEntityId - ID of related entity.
+         * @returns {Promise<boolean>} True if addition initiated successfully, false otherwise.
+         */
+        async function addJCoinsAndGas(userId, username, jCoinsAmount, gasAmount, activityType, groupId = null, relatedEntityId = null) {
+            const userProfileRef = doc(db, "artifacts", appId, "users", userId, "profiles", "user_profile");
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const docSnap = await transaction.get(userProfileRef);
+                    if (!docSnap.exists()) {
+                        throw new Error("Recipient user profile not found!");
+                    }
+                    const currentJCoins = docSnap.data().jCoins || 0;
+                    const currentGas = docSnap.data().gas || 0;
+
+                    transaction.update(userProfileRef, {
+                        jCoins: currentJCoins + jCoinsAmount,
+                        gas: currentGas + gasAmount,
+                        updatedAt: serverTimestamp()
+                    });
+                });
+
+                await createPendingActivityReward(
+                    userId,
+                    username,
+                    activityType,
+                    jCoinsAmount,
+                    0,
+                    gasAmount,
+                    groupId,
+                    relatedEntityId
+                );
+                if (userId === currentUser.uid) {
+                    await fetchAndDisplayHeaderProfile(currentUser);
+                }
+                return true;
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error adding JCoins/Gas:", error);
+                showMessageBox(`Failed to add JCoins/Gas to recipient: ${error.message}`, "error");
+                return false;
+            }
+        }
+
+        // --- Group Settings Specific Functions ---
+
+        /**
+         * Parses the group ID from the URL.
+         */
+        function getGroupIdFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('groupId');
+        }
+
+        /**
+         * Fetches and displays the current group's data.
+         */
+        function fetchGroupData() {
+            if (!groupId) {
+                console.error("JCHAT_ERROR: No group ID provided in URL.");
+                showMessageBox("No group ID provided in URL. Redirecting...", "error", 3000, true);
+                setTimeout(() => { window.location.href = '/Groups.html'; }, 3000);
+                return;
+            }
+            if (!currentUser) {
+                console.log("JCHAT_DEBUG: fetchGroupData called but currentUser is null. Waiting for auth.");
+                return; // Wait for authentication
+            }
+
+            const groupRef = doc(db, "artifacts", appId, "public", "data", "groups", groupId);
+
+            if (unsubscribeGroupListener) unsubscribeGroupListener(); // Unsubscribe previous listener
+
+            unsubscribeGroupListener = onSnapshot(groupRef, async (docSnap) => {
+                try {
+                    if (!docSnap.exists()) {
+                        showMessageBox("Group not found or has been deleted. Redirecting...", "error", 3000, true);
+                        setTimeout(() => { window.location.href = '/Groups.html'; }, 3000);
+                        return;
+                    }
+
+                    currentGroupData = { id: docSnap.id, ...docSnap.data() };
+                    console.log("JCHAT_DEBUG: Fetched group data:", currentGroupData);
+
+                    // Check if current user is the admin
+                    if (currentUser && currentGroupData.admin === currentUser.uid) {
+                        accessDeniedMessage.style.display = 'none';
+                        groupSettingsContent.style.display = 'block';
+                        populateGroupDetails();
+                        fetchGroupMembers(); // Start fetching members
+                        fetchJoinRequests();
+                        populateTransferOwnerOptions();
+                    } else {
+                        accessDeniedMessage.textContent = "Access Denied: You are not the administrator of this group.";
+                        accessDeniedMessage.style.display = 'block';
+                        groupSettingsContent.style.display = 'none';
+                        showMessageBox("Access Denied: You are not the administrator of this group.", "error", 5000, true);
+                    }
+                } catch (error) {
+                    console.error("JCHAT_ERROR: Error processing group data snapshot:", error);
+                    showMessageBox(`Error loading group data: ${error.message}`, "error", 5000, true);
+                    accessDeniedMessage.textContent = `Error loading group data: ${error.message}`;
+                    accessDeniedMessage.style.display = 'block';
+                    groupSettingsContent.style.display = 'none';
+                }
+            }, (error) => {
+                console.error("JCHAT_ERROR: Error fetching group data with onSnapshot:", error);
+                showMessageBox(`Error loading group data: ${error.message}`, "error", 5000, true);
+                accessDeniedMessage.textContent = `Error loading group data: ${error.message}`;
+                accessDeniedMessage.style.display = 'block';
+                groupSettingsContent.style.display = 'none';
+            });
+        }
+
+        /**
+         * Populates the group details in the UI.
+         */
+        async function populateGroupDetails() {
+            if (!currentGroupData) return;
+
+            const groupInitial = (currentGroupData.name || "G").charAt(0).toUpperCase();
+            displayPicture(groupPicDisplay, groupIconDisplay, currentGroupData.groupPicId, groupInitial, "w_240,h_240,c_fill,g_auto,r_max");
+
+            groupNameDisplay.textContent = currentGroupData.name || 'Unnamed Group';
+            groupDescriptionDisplay.textContent = currentGroupData.description || 'No description provided.';
+
+            editGroupNameInput.value = currentGroupData.name || '';
+            editGroupDescriptionInput.value = currentGroupData.description || '';
+            editGroupPicInput.value = currentGroupData.groupPicId || '';
+            if (editGroupVisibility) editGroupVisibility.value = (currentGroupData.visibility||'public');
+            if (editGroupTagsInput) editGroupTagsInput.value = (currentGroupData.tags||[]).join(', ');
+
+            // Render emojis
+            if(emojiListEl){ emojiListEl.innerHTML = ''; const emojis = currentGroupData.emojis || []; emojis.forEach(eid=>{ const img = document.createElement('img'); img.src = getCloudinaryImageUrl(eid,'w_40,h_40,c_fill'); img.style.width='40px'; img.style.height='40px'; img.style.objectFit='cover'; img.style.borderRadius='6px'; img.title = eid; emojiListEl.appendChild(img); }); }
+
+            // Pinned announcement
+            if(pinAnnouncementInput) pinAnnouncementInput.value = currentGroupData.pinnedAnnouncement || '';
+            if(pinUntilInput){ if(currentGroupData.pinnedUntil){ try{ const d = currentGroupData.pinnedUntil.toDate ? currentGroupData.pinnedUntil.toDate() : new Date(currentGroupData.pinnedUntil); pinUntilInput.value = new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,16); }catch(e){ pinUntilInput.value = ''; } } else pinUntilInput.value = ''; }
+
+            groupVaultJCoins.textContent = (currentGroupData.groupJCoinBalance || 0).toFixed(1);
+            groupVaultGas.textContent = (currentGroupData.groupGasBalance || 0).toFixed(1);
+
+            // Fetch admin's username
+            const adminProfileRef = doc(db, "artifacts", appId, "public", "data", "users", currentGroupData.admin);
+            try {
+                const adminDocSnap = await getDoc(adminProfileRef);
+                if (adminDocSnap.exists()) {
+                    adminUsernameSpan.textContent = adminDocSnap.data().username || currentGroupData.admin.substring(0, 8);
+                } else {
+                    adminUsernameSpan.textContent = currentGroupData.admin.substring(0, 8);
+                }
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error fetching admin username:", error);
+                adminUsernameSpan.textContent = currentGroupData.admin.substring(0, 8); // Fallback to ID
+            }
+
+
+            // Enable delete button only if confirm name matches
+            confirmDeleteGroupName.addEventListener('input', () => {
+                deleteGroupBtn.disabled = confirmDeleteGroupName.value !== currentGroupData.name;
+            });
+        }
+
+        /**
+         * Fetches and displays group members.
+         */
+        async function fetchGroupMembers() {
+            if (!currentGroupData || !currentGroupData.members) {
+                memberList.innerHTML = '<p style="text-align: center; color: var(--text-light);">No members found.</p>';
+                memberCountDisplay.textContent = '0';
+                return;
+            }
+
+            memberList.innerHTML = '<p style="text-align: center; color: var(--text-light);">Loading members...</p>';
+            memberCountDisplay.textContent = currentGroupData.members.length;
+
+            try {
+                const memberPromises = currentGroupData.members.map(async (memberId) => {
+                    const userPublicProfileRef = doc(db, "artifacts", appId, "public", "data", "users", memberId);
+                    const docSnap = await getDoc(userPublicProfileRef);
+                    if (docSnap.exists()) {
+                        return { id: docSnap.id, username: docSnap.data().username || `User_${docSnap.id.substring(0, 8)}`, profilePicId: docSnap.data().profilePicId || null };
+                    }
+                    return null;
+                });
+
+                const members = (await Promise.all(memberPromises)).filter(m => m !== null);
+
+                memberList.innerHTML = ''; // Clear loading message
+                if (members.length === 0) {
+                    memberList.innerHTML = '<p style="text-align: center; color: var(--text-light);">No members found.</p>';
+                    return;
+                }
+
+                members.forEach(member => {
+                    const memberItem = document.createElement('div');
+                    memberItem.classList.add('member-item');
+
+                    const avatarHtml = member.profilePicId ?
+                        `<img src="${getCloudinaryImageUrl(member.profilePicId, 'w_80,h_80,c_fill,g_face,r_max')}" alt="Member Avatar">` :
+                        `<i class="fas fa-user-circle"></i>`;
+
+                    const isCurrentUser = member.id === currentUser.uid;
+                    const isGroupAdmin = member.id === currentGroupData.admin;
+                    const role = (currentGroupData.roles && currentGroupData.roles[member.id]) || (isGroupAdmin ? 'owner' : 'member');
+
+                    memberItem.innerHTML = `
+                        <div class="member-info">
+                            ${avatarHtml}
+                            <span>${member.username} ${isGroupAdmin ? '(Admin)' : ''} ${isCurrentUser ? '(You)' : ''}</span>
+                        </div>
+                        <div class="member-actions" style="display:flex;gap:8px;align-items:center">
+                            <select class="role-select" data-member-id="${member.id}" ${isGroupAdmin ? 'disabled' : ''}>
+                                <option value="member" ${role==='member'?'selected':''}>Member</option>
+                                <option value="mod" ${role==='mod'?'selected':''}>Mod</option>
+                            </select>
+                            <button class="remove-member-btn" data-member-id="${member.id}" ${isGroupAdmin || isCurrentUser ? 'disabled' : ''}>Remove</button>
+                            <button class="ban-member-btn" data-member-id="${member.id}" ${isGroupAdmin || isCurrentUser ? 'disabled' : ''}>Ban</button>
+                        </div>
+                    `;
+                    memberList.appendChild(memberItem);
+                });
+
+                memberList.querySelectorAll('.remove-member-btn').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const memberIdToRemove = e.target.dataset.memberId;
+                        const memberName = e.target.closest('.member-item').querySelector('.member-info span').textContent.replace('(Admin)', '').replace('(You)', '').trim();
+                        handleRemoveMember(memberIdToRemove, memberName, e.target);
+                    });
+                });
+                memberList.querySelectorAll('.ban-member-btn').forEach(button => {
+                    button.addEventListener('click', async (e)=>{
+                        const id = e.target.dataset.memberId;
+                        const name = e.target.closest('.member-item').querySelector('.member-info span').textContent.replace('(Admin)','').replace('(You)','').trim();
+                        await handleBanMember(id, name, e.target);
+                    });
+                });
+                memberList.querySelectorAll('.role-select').forEach(sel => {
+                    sel.addEventListener('change', (e)=>{
+                        const id = e.target.dataset.memberId; const role = e.target.value; handleRoleChange(id, role);
+                    });
+                });
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error fetching group members:", error);
+                memberList.innerHTML = `<p style="text-align: center; color: var(--text-light);">Error loading members: ${error.message}</p>`;
+                showMessageBox(`Error loading members: ${error.message}`, 'error');
+            }
+        }
+
+        /**
+         * Handles saving changes to group information.
+         */
+        async function handleSaveGroupInfo() {
+            if (!currentGroupData || !currentUser || currentGroupData.admin !== currentUser.uid) {
+                showMessageBox("You are not authorized to edit this group.", "error");
+                return;
+            }
+
+            const newName = editGroupNameInput.value.trim();
+            const newDescription = editGroupDescriptionInput.value.trim();
+            const newPicUrl = editGroupPicInput.value.trim();
+            const newVisibility = editGroupVisibility ? (editGroupVisibility.value || 'public') : (currentGroupData.visibility || 'public');
+            const newTags = editGroupTagsInput ? editGroupTagsInput.value.split(',').map(s=>s.trim()).filter(Boolean).slice(0,5) : (currentGroupData.tags||[]);
+
+            if (!newName) {
+                showMessageBox("Group Name cannot be empty.", "warning");
+                return;
+            }
+
+            toggleButtonLoading(saveGroupInfoBtn, true);
+            showMessageBox("Saving group info...", "loading", true);
+
+            try {
+                const groupRef = doc(db, "artifacts", appId, "public", "data", "groups", groupId);
+                await updateDoc(groupRef, {
+                    name: newName,
+                    description: newDescription,
+                    groupPicId: newPicUrl || null,
+                    visibility: newVisibility,
+                    tags: newTags,
+                    updatedAt: serverTimestamp()
+                });
+                showMessageBox("Group information updated successfully!", "success");
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error saving group info:", error);
+                showMessageBox(`Failed to save group info: ${error.message}`, "error");
+            } finally {
+                toggleButtonLoading(saveGroupInfoBtn, false);
+            }
+        }
+
+        /**
+         * Handles removing a member from the group.
+         * @param {string} memberId - The ID of the member to remove.
+         * @param {string} memberName - The name of the member.
+         * @param {HTMLElement} buttonElement - The button element that triggered the action.
+         */
+        async function handleRemoveMember(memberId, memberName, buttonElement) {
+            if (!currentGroupData || !currentUser || currentGroupData.admin !== currentUser.uid) {
+                showMessageBox("You are not authorized to remove members.", "error");
+                return;
+            }
+            if (memberId === currentGroupData.admin) {
+                showMessageBox("You cannot remove the group admin.", "warning");
+                return;
+            }
+            if (memberId === currentUser.uid) {
+                showMessageBox("You cannot remove yourself from the group from here. Use 'Leave Group' on the main groups page.", "warning");
+                return;
+            }
+
+            const confirmed = await showCustomConfirm(`Are you sure you want to remove "${memberName}" from the group?`);
+            if (!confirmed) return;
+
+            toggleButtonLoading(buttonElement, true);
+            showMessageBox(`Removing ${memberName}...`, "loading", true);
+
+            try {
+                const groupRef = doc(db, "artifacts", appId, "public", "data", "groups", groupId);
+                const userProfileRef = doc(db, "artifacts", appId, "users", memberId, "profiles", "user_profile");
+
+                await runTransaction(db, async (transaction) => {
+                    // Remove member from group's members array
+                    transaction.update(groupRef, {
+                        members: arrayRemove(memberId)
+                    });
+
+                    // Remove group ID from user's memberOfGroups array
+                    const memberProfileDoc = await transaction.get(userProfileRef);
+                    if (memberProfileDoc.exists()) {
+                        transaction.update(userProfileRef, {
+                            memberOfGroups: arrayRemove(groupId)
+                        });
+                    }
+                });
+
+                showMessageBox(`${memberName} removed from the group.`, "success");
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error removing member:", error);
+                showMessageBox(`Failed to remove member: ${error.message}`, "error");
+            } finally {
+                toggleButtonLoading(buttonElement, false);
+            }
+        }
+
+        /**
+         * Handles withdrawing JCoins/Gas from the group vault.
+         */
+        async function handleBanMember(memberId, memberName, buttonElement){
+            if (!currentGroupData || !currentUser || currentGroupData.admin !== currentUser.uid) {
+                showMessageBox("You are not authorized to ban members.", "error");
+                return;
+            }
+            if (memberId === currentGroupData.admin || memberId === currentUser.uid) return;
+            const confirmed = await showCustomConfirm(`Ban "${memberName}" from this group?`);
+            if (!confirmed) return;
+            toggleButtonLoading(buttonElement, true);
+            try{
+                const groupRef = doc(db, "artifacts", appId, "public", "data", "groups", groupId);
+                await runTransaction(db, async (tx)=>{
+                    const snap = await tx.get(groupRef);
+                    if(!snap.exists()) throw new Error('Group not found');
+                    const data = snap.data();
+                    const members = new Set([...(data.members||[])]);
+                    const banned = new Set([...(data.banned||[])]);
+                    members.delete(memberId);
+                    banned.add(memberId);
+                    tx.update(groupRef, { members: Array.from(members), banned: Array.from(banned), updatedAt: serverTimestamp() });
+                });
+                showMessageBox(`${memberName} banned.`, 'success');
+            }catch(e){ console.error(e); showMessageBox(`Ban failed: ${e.message}`, 'error'); }
+            finally{ toggleButtonLoading(buttonElement, false); }
+        }
+
+        function populateTransferOwnerOptions(){
+            if (!transferOwnerSelect) return;
+            transferOwnerSelect.innerHTML = '';
+            const opts = (currentGroupData?.members||[]).filter(uid=>uid!==currentGroupData.admin);
+            if (opts.length===0){ const o=document.createElement('option'); o.value=''; o.textContent='No eligible members'; transferOwnerSelect.appendChild(o); return; }
+            opts.forEach(uid=>{ const o=document.createElement('option'); o.value=uid; o.textContent=uid; transferOwnerSelect.appendChild(o); });
+        }
+
+        async function handleTransferOwnership(){
+            const newOwner = transferOwnerSelect?.value;
+            if (!newOwner){ showMessageBox('Select a member','warning'); return; }
+            if (!currentGroupData || !currentUser || currentGroupData.admin !== currentUser.uid){ showMessageBox('Not authorized','error'); return; }
+            const confirmed = await showCustomConfirm('Transfer ownership?');
+            if (!confirmed) return;
+            toggleButtonLoading(transferOwnerBtn, true);
+            try{
+                const groupRef = doc(db, 'artifacts', appId, 'public', 'data', 'groups', groupId);
+                await updateDoc(groupRef, { admin: newOwner, updatedAt: serverTimestamp() });
+                showMessageBox('Ownership transferred','success');
+            }catch(e){ console.error(e); showMessageBox(`Transfer failed: ${e.message}`,'error'); }
+            finally{ toggleButtonLoading(transferOwnerBtn, false); }
+        }
+
+        function handleRoleChange(memberId, role){ setMemberRole(memberId, role).catch(e=>{ console.error(e); showMessageBox('Role update failed','error'); }); }
+        async function setMemberRole(memberId, role){
+            if (!currentGroupData || !currentUser || currentGroupData.admin !== currentUser.uid) throw new Error('Not authorized');
+            if (memberId === currentGroupData.admin) return;
+            const roles = Object.assign({}, currentGroupData.roles||{}); roles[memberId] = role;
+            const groupRef = doc(db, 'artifacts', appId, 'public', 'data', 'groups', groupId);
+            await updateDoc(groupRef, { roles, updatedAt: serverTimestamp() });
+            currentGroupData.roles = roles;
+            showMessageBox('Role updated','success');
+        }
+
+        async function fetchJoinRequests(){
+            if (!requestList) return;
+            requestList.innerHTML = '<p style="text-align:center;color:var(--text-light)">Loading requests...</p>';
+            try{
+                const reqCol = collection(db, 'artifacts', appId, 'public', 'data', 'groups', groupId, 'requests');
+                const qSnap = await getDocs(query(reqCol, where('status','==','pending')));
+                const items = qSnap.docs.map(d=>({ id:d.id, ...d.data() }));
+                requestList.innerHTML = '';
+                if(items.length===0){ requestList.innerHTML = '<p style="text-align:center;color:var(--text-light)">No pending requests.</p>'; return; }
+                items.forEach(r=>{
+                    const li = document.createElement('div'); li.className='member-item';
+                    li.innerHTML = `<div class="member-info"><i class=\"fas fa-user\"></i><span>${r.uid||r.id}</span></div><div class=\"member-actions\" style=\"display:flex;gap:8px\"><button class=\"approve-btn\" data-uid=\"${r.uid||r.id}\">Approve</button><button class=\"deny-btn\" data-uid=\"${r.uid||r.id}\">Deny</button></div>`;
+                    requestList.appendChild(li);
+                });
+                requestList.querySelectorAll('.approve-btn').forEach(b=> b.addEventListener('click', (e)=> handleApproveRequest(e.target.dataset.uid, e.target)));
+                requestList.querySelectorAll('.deny-btn').forEach(b=> b.addEventListener('click', (e)=> handleDenyRequest(e.target.dataset.uid, e.target)));
+            }catch(e){ console.error(e); requestList.innerHTML = `<p style=\"text-align:center;color:var(--text-light)\">Failed to load requests: ${e.message}</p>`; }
+        }
+
+        async function handleApproveRequest(uid, btn){
+            if (!currentGroupData || !currentUser || currentGroupData.admin !== currentUser.uid){ showMessageBox('Not authorized','error'); return; }
+            toggleButtonLoading(btn, true);
+            try{
+                const groupRef = doc(db,'artifacts',appId,'public','data','groups',groupId);
+                const reqRef = doc(db,'artifacts',appId,'public','data','groups',groupId,'requests',uid);
+                await runTransaction(db, async (tx)=>{
+                    const gSnap = await tx.get(groupRef);
+                    if(!gSnap.exists()) throw new Error('Group missing');
+                    const data = gSnap.data();
+                    const members = new Set([...(data.members||[])]);
+                    const banned = new Set([...(data.banned||[])]);
+                    if (banned.has(uid)) throw new Error('User is banned');
+                    const wasMember = members.has(uid);
+                    if (!wasMember) members.add(uid);
+                    const update = { members: Array.from(members), updatedAt: serverTimestamp() };
+                    if (!wasMember) update.memberCount = (data.memberCount||0)+1;
+                    tx.update(groupRef, update);
+                    tx.delete(reqRef);
+                });
+                showMessageBox('Request approved','success');
+                fetchJoinRequests(); fetchGroupMembers();
+            }catch(e){ console.error(e); showMessageBox(`Approve failed: ${e.message}`,'error'); }
+            finally{ toggleButtonLoading(btn, false); }
+        }
+
+        async function handleDenyRequest(uid, btn){
+            if (!currentGroupData || !currentUser || currentGroupData.admin !== currentUser.uid){ showMessageBox('Not authorized','error'); return; }
+            toggleButtonLoading(btn, true);
+            try{
+                const reqRef = doc(db,'artifacts',appId,'public','data','groups',groupId,'requests',uid);
+                await deleteDoc(reqRef);
+                showMessageBox('Request denied','success');
+                fetchJoinRequests();
+            }catch(e){ console.error(e); showMessageBox(`Deny failed: ${e.message}`,'error'); }
+            finally{ toggleButtonLoading(btn, false); }
+        }
+
+        async function handleWithdrawFromVault() {
+            if (!currentGroupData || !currentUser || currentGroupData.admin !== currentUser.uid) {
+                showMessageBox("You are not authorized to withdraw from the vault.", "error");
+                return;
+            }
+
+            const amount = parseInt(withdrawAmountInput.value);
+            const type = withdrawTypeSelect.value; // 'jcoins' or 'gas'
+
+            if (isNaN(amount) || amount <= 0) {
+                showMessageBox("Please enter a valid positive amount to withdraw.", "warning");
+                return;
+            }
+
+            let currentVaultBalance = 0;
+            if (type === 'jcoins') {
+                currentVaultBalance = currentGroupData.groupJCoinBalance || 0;
+            } else if (type === 'gas') {
+                currentVaultBalance = currentGroupData.groupGasBalance || 0;
+            }
+
+            if (amount > currentVaultBalance) {
+                showMessageBox(`Insufficient ${type.toUpperCase()} in group vault. Available: ${currentVaultBalance}.`, "error");
+                return;
+            }
+
+            const confirmed = await showCustomConfirm(`Withdraw ${amount} ${type.toUpperCase()} from group vault?`);
+            if (!confirmed) return;
+
+            toggleButtonLoading(withdrawFromVaultBtn, true);
+            showMessageBox(`Withdrawing ${amount} ${type.toUpperCase()}...`, "loading", true);
+
+            try {
+                const groupRef = doc(db, "artifacts", appId, "public", "data", "groups", groupId);
+                const adminProfileRef = doc(db, "artifacts", appId, "users", currentUser.uid, "profiles", "user_profile");
+
+                await runTransaction(db, async (transaction) => {
+                    const groupDoc = await transaction.get(groupRef);
+                    const adminDoc = await transaction.get(adminProfileRef);
+
+                    if (!groupDoc.exists()) throw new Error("Group not found!");
+                    if (!adminDoc.exists()) throw new Error("Admin profile not found!");
+
+                    let groupUpdateData = {};
+                    let adminUpdateData = {};
+                    let currentAdminJCoins = adminDoc.data().jCoins || 0;
+                    let currentAdminGas = adminDoc.data().gas || 0;
+
+                    if (type === 'jcoins') {
+                        groupUpdateData.groupJCoinBalance = (groupDoc.data().groupJCoinBalance || 0) - amount;
+                        adminUpdateData.jCoins = currentAdminJCoins + amount;
+                    } else if (type === 'gas') {
+                        groupUpdateData.groupGasBalance = (groupDoc.data().groupGasBalance || 0) - amount;
+                        adminUpdateData.gas = currentAdminGas + amount;
+                    }
+
+                    transaction.update(groupRef, groupUpdateData);
+                    transaction.update(adminProfileRef, adminUpdateData);
+                });
+
+                await fetchAndDisplayHeaderProfile(currentUser); // Update header JCoins/Gas display for the admin
+
+                await createPendingActivityReward(
+                    currentUser.uid,
+                    currentUserProfileData.username,
+                    `group_vault_withdraw_${type}`,
+                    type === 'jcoins' ? amount : 0,
+                    0,
+                    type === 'gas' ? amount : 0,
+                    groupId,
+                    null
+                );
+
+                showMessageBox(`Successfully withdrew ${amount} ${type.toUpperCase()} from vault!`, "success");
+                withdrawAmountInput.value = ''; // Clear input
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error withdrawing from vault:", error);
+                showMessageBox(`Failed to withdraw: ${error.message}`, "error");
+            } finally {
+                toggleButtonLoading(withdrawFromVaultBtn, false);
+            }
+        }
+
+        /**
+         * Handles deleting the group.
+         */
+        async function handleDeleteGroup() {
+            if (!currentGroupData || !currentUser || currentGroupData.admin !== currentUser.uid) {
+                showMessageBox("You are not authorized to delete this group.", "error");
+                return;
+            }
+
+            const enteredName = confirmDeleteGroupName.value.trim();
+            if (enteredName !== currentGroupData.name) {
+                showMessageBox("Group name does not match. Please type it exactly to confirm.", "warning");
+                return;
+            }
+
+            const confirmed = await showCustomConfirm(`Are you absolutely sure you want to delete "${currentGroupData.name}"? This action is irreversible and will remove the group for all members.`);
+            if (!confirmed) return;
+
+            toggleButtonLoading(deleteGroupBtn, true);
+            showMessageBox(`Deleting group "${currentGroupData.name}"...`, "loading", true);
+
+            try {
+                const groupRef = doc(db, "artifacts", appId, "public", "data", "groups", groupId);
+                const members = currentGroupData.members || [];
+
+                // Use a batch to update all members' profiles
+                const batch = writeBatch(db);
+                for (const memberId of members) {
+                    const memberProfileRef = doc(db, "artifacts", appId, "users", memberId, "profiles", "user_profile");
+                    batch.update(memberProfileRef, {
+                        memberOfGroups: arrayRemove(groupId)
+                    });
+                }
+                await batch.commit(); // Commit member updates first
+
+                // Then delete the group document
+                await deleteDoc(groupRef);
+
+                showMessageBox(`Group "${currentGroupData.name}" deleted successfully! Redirecting...`, "success", 3000, true);
+                setTimeout(() => {
+                    window.location.href = '/Groups.html'; // Redirect back to groups page
+                }, 3000);
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error deleting group:", error);
+                showMessageBox(`Failed to delete group: ${error.message}`, "error");
+            } finally {
+                toggleButtonLoading(deleteGroupBtn, false);
+            }
+        }
+
+        // --- Promote/Boost Modals Logic (reused from Groups.html, adapted) ---
+
+        /**
+         * Handles Group Promotion from modal.
+         */
+        async function handlePromoteGroupFromModal() {
+            const durationDays = parseInt(promotionDuration.value);
+            const cost = parseInt(promotionDuration.selectedOptions[0].dataset.cost);
+
+            if (!currentGroupData) {
+                showMessageBox("No group selected for promotion.", "warning");
+                return;
+            }
+            if (!currentUserProfileData || currentUserProfileData.jCoins < cost) {
+                showMessageBox("Insufficient JCoins to promote this group.", "error");
+                return;
+            }
+
+            const confirmed = await showCustomConfirm(`Promote "${currentGroupData.name}" for ${durationDays} days for ${cost} JCoins?`);
+            if (!confirmed) return;
+
+            toggleButtonLoading(submitPromoteGroupBtn, true);
+            showMessageBox(`Promoting group for ${cost} JCoins...`, "loading", true);
+
+            try {
+                const userProfileRef = doc(db, "artifacts", appId, "users", currentUser.uid, "profiles", "user_profile");
+                const groupRef = doc(db, "artifacts", appId, "public", "data", "groups", groupId); // Use current groupId
+
+                await runTransaction(db, async (transaction) => {
+                    const userDoc = await transaction.get(userProfileRef);
+                    const groupDoc = await transaction.get(groupRef);
+
+                    if (!userDoc.exists()) throw new Error("User profile not found!");
+                    if (!groupDoc.exists()) throw new Error("Group not found!");
+
+                    const currentJCoins = userDoc.data().jCoins || 0;
+                    if (currentJCoins < cost) {
+                        throw new Error("Insufficient JCoins for this transaction.");
+                    }
+
+                    const newJCoins = currentJCoins - cost;
+                    const promotionEndDate = new Date();
+                    promotionEndDate.setDate(promotionEndDate.getDate() + durationDays);
+
+                    transaction.update(userProfileRef, { jCoins: newJCoins, updatedAt: serverTimestamp() });
+                    transaction.update(groupRef, {
+                        isPromoted: true,
+                        promotionEndDate: promotionEndDate,
+                        updatedAt: serverTimestamp()
+                    });
+                });
+
+                await fetchAndDisplayHeaderProfile(currentUser); // Update header after deduction
+
+                await createPendingActivityReward(
+                    currentUser.uid,
+                    currentUserProfileData.username,
+                    'group_promotion_purchase',
+                    -cost,
+                    0, 0,
+                    groupId,
+                    `duration_${durationDays}d`
+                );
+
+                showMessageBox(`Group "${currentGroupData.name}" promoted successfully for ${durationDays} days!`, "success");
+                promoteGroupModal.classList.remove('active');
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error promoting group:", error);
+                showMessageBox(`Failed to promote group: ${error.message}`, "error");
+            } finally {
+                toggleButtonLoading(submitPromoteGroupBtn, false);
+            }
+        }
+
+        /**
+         * Handles Activating Group Boost from modal.
+         */
+        async function handleActivateGroupBoostFromModal() {
+            const type = boostType.value;
+            const durationHours = parseInt(boostDuration.value);
+            const cost = parseInt(boostType.selectedOptions[0].dataset.cost);
+
+            if (!currentGroupData) {
+                showMessageBox("No group selected for boost.", "warning");
+                return;
+            }
+            if (!currentUserProfileData || currentUserProfileData.jCoins < cost) {
+                showMessageBox("Insufficient JCoins to activate this boost.", "error");
+                return;
+            }
+
+            const confirmed = await showCustomConfirm(`Activate ${type.toUpperCase()} Boost for ${durationHours} hours for ${cost} JCoins for "${currentGroupData.name}"?`);
+            if (!confirmed) return;
+
+            toggleButtonLoading(submitActivateBoostBtn, true);
+            showMessageBox(`Activating ${type.toUpperCase()} Boost for ${cost} JCoins...`, "loading", true);
+
+            try {
+                const userProfileRef = doc(db, "artifacts", appId, "users", currentUser.uid, "profiles", "user_profile");
+                const groupRef = doc(db, "artifacts", appId, "public", "data", "groups", groupId); // Use current groupId
+
+                await runTransaction(db, async (transaction) => {
+                    const userDoc = await transaction.get(userProfileRef);
+                    if (!userDoc.exists()) throw new Error("User profile not found!");
+
+                    const currentJCoins = userDoc.data().jCoins || 0;
+                    if (currentJCoins < cost) {
+                        throw new Error("Insufficient JCoins for this transaction.");
+                    }
+
+                    const newJCoins = currentJCoins - cost;
+                    const boostEndTime = new Date(Date.now() + durationHours * 60 * 60 * 1000); // Current time + duration in ms
+
+                    transaction.update(userProfileRef, { jCoins: newJCoins, updatedAt: serverTimestamp() });
+
+                    const updateData = { updatedAt: serverTimestamp() };
+                    if (type === 'xp') {
+                        updateData.xpBoostEndTime = boostEndTime;
+                    } else if (type === 'jcoin') {
+                        updateData.jcoinBoostEndTime = boostEndTime;
+                    }
+                    transaction.update(groupRef, updateData);
+                });
+
+                await fetchAndDisplayHeaderProfile(currentUser); // Update header after deduction
+
+                await createPendingActivityReward(
+                    currentUser.uid,
+                    currentUserProfileData.username,
+                    `group_${type}_boost_purchase`,
+                    -cost,
+                    0, 0,
+                    groupId,
+                    `duration_${durationHours}h`
+                );
+
+                showMessageBox(`${type.toUpperCase()} Boost activated for ${durationHours} hours for "${currentGroupData.name}"!`, "success");
+                activateGroupBoostModal.classList.remove('active');
+            } catch (error) {
+                console.error("JCHAT_ERROR: Error activating boost:", error);
+                showMessageBox(`Failed to activate boost: ${error.message}`, "error");
+            } finally {
+                toggleButtonLoading(submitActivateBoostBtn, false);
+            }
+        }
+
+
+        // --- Authentication State Listener ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                console.log("JCHAT_DEBUG: User authenticated in Group Settings Page:", user.uid);
+                await fetchAndDisplayHeaderProfile(user); // Fetch profile for header and global state
+                fetchNotificationCount(user.uid);
+
+                groupId = getGroupIdFromUrl(); // Get group ID from URL
+                if (groupId) {
+                    isAuthReady = true; // Set auth ready after current user is established
+                    fetchGroupData(); // Fetch group data and check admin status
+                } else {
+                    console.error("JCHAT_ERROR: No group ID provided in URL.");
+                    showMessageBox("No group ID provided in URL. Redirecting to Groups page...", "error", 3000, true);
+                    setTimeout(() => {
+                        window.location.href = '/Groups.html';
+                    }, 3000);
+                }
+
+            } else {
+                console.log("JCHAT_DEBUG: No user signed in. Attempting anonymous sign-in or redirecting to login page.");
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        console.log("JCHAT_DEBUG: Signed in with custom token.");
+                        // onAuthStateChanged will be triggered again with the new user
+                    } else {
+                        await signInAnonymously(auth);
+                        console.log("JCHAT_DEBUG: Signed in anonymously.");
+                        // onAuthStateChanged will be triggered again with the new user
+                    }
+                } catch (error) {
+                    console.error("JCHAT_ERROR: Error during anonymous sign-in or custom token sign-in:", error);
+                    // If anonymous sign-in also fails, redirect to login
+                    if (!auth.currentUser) {
+                        isAuthReady = false;
+                        currentUser = null;
+                        logoutButton.disabled = true;
+                        headerDisplayName.textContent = "Guest";
+                        headerProfilePic.style.display = 'none';
+                        headerAvatarIcon.style.display = 'block';
+                        jCoinsDisplay.innerHTML = `<i class="fas fa-coins jcoin-icon"></i> 0`;
+                        gasDisplay.innerHTML = `<i class="fas fa-gas-pump gas-icon"></i> 0`;
+                        accessDeniedMessage.textContent = "Please log in to manage groups.";
+                        accessDeniedMessage.style.display = 'block';
+                        groupSettingsContent.style.display = 'none';
+
+                        showMessageBox("You must be logged in to manage groups.", 'error', 2000, true);
+                        setTimeout(() => {
+                            window.location.href = '/login.html';
+                        }, 2000);
+                    }
+                }
+            }
+        });
+
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Apply saved theme
+            const savedTheme = localStorage.getItem('jchat-theme');
+            const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+            if (savedTheme && themes.includes(savedTheme)) {
+                document.body.classList.remove(...themes);
+                document.body.classList.add(savedTheme);
+            } else {
+                document.body.classList.add('theme-dark-mode'); // Default to dark mode
+            }
+
+            // Edit Group Info
+            saveGroupInfoBtn.addEventListener('click', handleSaveGroupInfo);
+
+            // Emoji upload and pinned announcement handlers
+            if(emojiUploadBtn){
+                emojiUploadBtn.addEventListener('click', async ()=>{
+                    const f = emojiUploadFile.files && emojiUploadFile.files[0]; if(!f) return showMessageBox('Select an emoji first','warning');
+                    try{ showMessageBox('Uploading emoji...','loading',true);
+                        const fd = new FormData(); fd.append('file', f); if(cloudinaryConfig.uploadPreset) fd.append('upload_preset', cloudinaryConfig.uploadPreset);
+                        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/auto/upload`, { method:'POST', body: fd }); const data = await res.json(); if(!res.ok){ console.error('emoji upload', data); showMessageBox('Emoji upload failed','error'); return; }
+                        const publicId = data.public_id || data.secure_url;
+                        await updateDoc(doc(db,'artifacts',appId,'public','data','groups',groupId), { emojis: arrayUnion(publicId), updatedAt: serverTimestamp() });
+                        currentGroupData.emojis = Array.from(new Set([...(currentGroupData.emojis||[]), publicId]));
+                        if(emojiListEl){ const img = document.createElement('img'); img.src = getCloudinaryImageUrl(publicId,'w_40,h_40,c_fill'); img.style.width='40px'; img.style.height='40px'; img.style.objectFit='cover'; img.style.borderRadius='6px'; img.title = publicId; emojiListEl.appendChild(img); }
+                        showMessageBox('Emoji added','success');
+                    }catch(e){ console.error('emoji upload',e); showMessageBox('Emoji upload failed','error'); }
+                });
+            }
+            if(savePinBtn){ savePinBtn.addEventListener('click', async ()=>{ try{ const text = pinAnnouncementInput.value.trim(); const until = pinUntilInput.value ? new Date(pinUntilInput.value) : null; await updateDoc(doc(db,'artifacts',appId,'public','data','groups',groupId), { pinnedAnnouncement: text || null, pinnedUntil: until || null, updatedAt: serverTimestamp() }); currentGroupData.pinnedAnnouncement = text || null; currentGroupData.pinnedUntil = until || null; showMessageBox('Pinned announcement saved','success'); }catch(e){ console.error(e); showMessageBox('Save failed','error'); } }); }
+            if(clearPinBtn){ clearPinBtn.addEventListener('click', async ()=>{ try{ await updateDoc(doc(db,'artifacts',appId,'public','data','groups',groupId), { pinnedAnnouncement: null, pinnedUntil: null, updatedAt: serverTimestamp() }); currentGroupData.pinnedAnnouncement = null; currentGroupData.pinnedUntil = null; pinAnnouncementInput.value=''; pinUntilInput.value=''; showMessageBox('Pinned announcement cleared','success'); }catch(e){ console.error(e); showMessageBox('Clear failed','error'); } }); }
+
+            // Group Vault Management
+            withdrawFromVaultBtn.addEventListener('click', handleWithdrawFromVault);
+
+            // Ownership transfer
+            if(transferOwnerBtn) transferOwnerBtn.addEventListener('click', handleTransferOwnership);
+
+            // Delete Group
+            deleteGroupBtn.addEventListener('click', handleDeleteGroup);
+
+            // Promote Group Modal Listeners
+            promoteGroupBtn.addEventListener('click', () => { // Trigger modal from main page button
+                if (!currentUser || !currentGroupData || currentGroupData.admin !== currentUser.uid) {
+                    showMessageBox("You are not authorized to promote this group.", "warning");
+                    return;
+                }
+                promotionDuration.value = "1"; // Reset selection
+                promotionCostDisplay.textContent = promotionDuration.selectedOptions[0].dataset.cost; // Reset cost
+                promoteGroupModal.classList.add('active');
+            });
+            cancelPromoteGroupBtn.addEventListener('click', () => promoteGroupModal.classList.remove('active'));
+            submitPromoteGroupBtn.addEventListener('click', handlePromoteGroupFromModal); // Use the new function
+            promotionDuration.addEventListener('change', () => {
+                promotionCostDisplay.textContent = promotionDuration.selectedOptions[0].dataset.cost;
+            });
+            promoteGroupModal.addEventListener('click', (e) => { if (e.target === promoteGroupModal) promoteGroupModal.classList.remove('active'); });
+
+            // Activate Group Boost Modal Listeners
+            activateGroupBoostBtn.addEventListener('click', () => { // Trigger modal from main page button
+                if (!currentUser || !currentGroupData || currentGroupData.admin !== currentUser.uid) {
+                    showMessageBox("You are not authorized to activate boosts for this group.", "warning");
+                    return;
+                }
+                boostType.value = "xp"; // Default to XP
+                boostDuration.value = "24"; // Default duration
+                boostCostDisplay.textContent = boostType.selectedOptions[0].dataset.cost; // Reset cost
+                activateGroupBoostModal.classList.add('active');
+            });
+            cancelActivateBoostBtn.addEventListener('click', () => activateGroupBoostModal.classList.remove('active'));
+            submitActivateBoostBtn.addEventListener('click', handleActivateGroupBoostFromModal); // Use the new function
+            boostType.addEventListener('change', () => {
+                boostCostDisplay.textContent = boostType.selectedOptions[0].dataset.cost;
+            });
+            activateGroupBoostModal.addEventListener('click', (e) => { if (e.target === activateGroupBoostModal) activateGroupBoostModal.classList.remove('active'); });
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (unsubscribeGroupListener) unsubscribeGroupListener();
+        });
+
+        logoutButton.addEventListener('click', async () => {
+            if (!isAuthReady) return;
+            toggleButtonLoading(logoutButton, true);
+            try {
+                await signOut(auth);
+                showMessageBox("Logged out successfully! 👋", 'success');
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 1500);
+            } catch (error) {
+                console.error("Error logging out:", error);
+                showMessageBox("Failed to log out. Please try again.", 'error');
+                toggleButtonLoading(logoutButton, false);
+            }
+        });
+        // Requests, Roles, Ownership handlers injected above
+    </script>
+	
+</body>
+</html>
