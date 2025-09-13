@@ -7004,7 +7004,7 @@ function generateProceduralQuote(type) { const t = quoteTemplates[type] || quote
          * @param {number} level - The current level of the user.
          * @returns {object} An object containing level details.
          */
-        // Global cumulative Gas helper matching Profile.html
+        // Global cumulative Gas helper matching profile.html
         function getTotalGasRequiredToReachLevel(level) {
             if (level <= 0) return 0;
             return 1500 * level * (level + 1) / 2;
@@ -8276,7 +8276,7 @@ async function checkAndStartDailyBonusTimer() {
                 }
 
                 // Ensure profile link is correct.
-                if (profileLink) profileLink.href = `./Profile.html?userId=${user.uid}`;
+                if (profileLink) profileLink.href = `./profile.html?userId=${user.uid}`;
 
                 // If profile picture has changed, update all posts by this user.
                 if (oldProfilePicId !== profileData.profilePicId) {
@@ -9610,7 +9610,7 @@ async function checkAndStartDailyBonusTimer() {
             // Construct the inner HTML for the post card.
             postElement.innerHTML = `
                 <div class="post-header">
-                    <a href="/Profile.html?userId=${post.authorId}" aria-label="View ${post.username || 'Anonymous'}'s Profile">
+                    <a href="/profile.html?userId=${post.authorId}" aria-label="View ${post.username || 'Anonymous'}'s Profile">
                         <div class="author-pic-wrapper">
                             ${post.profilePhoto ?
                                 `<img src="${getCloudinaryImageUrl(post.profilePhoto, 'w_80,h_80,c_fill,g_face,r_max')}" srcset="${getCloudinaryImageUrl(post.profilePhoto, 'w_80,h_80,c_fill,g_face,r_max')} 80w, ${getCloudinaryImageUrl(post.profilePhoto, 'w_160,h_160,c_fill,g_face,r_max')} 160w, ${getCloudinaryImageUrl(post.profilePhoto, 'w_320,h_320,c_fill,g_face,r_max')} 320w" sizes="(max-width:600px) 48px, 80px" alt="Author Pic" class="author-pic" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='https://placehold.co/80x80/CCCCCC/000000?text=${authorInitial}';">` :
@@ -9619,7 +9619,7 @@ async function checkAndStartDailyBonusTimer() {
                         </div>
                     </a>
                     <div class="author-info">
-                        <a href="/Profile.html?userId=${post.authorId}" class="author-name">${post.username || 'Anonymous'}</a>
+                        <a href="/profile.html?userId=${post.authorId}" class="author-name">${post.username || 'Anonymous'}</a>
                         <p class="post-timestamp">${post.timestamp ? new Date(post.timestamp.toDate()).toLocaleString() : 'N/A'} ${post.isEdited ? '(Edited)' : ''}</p>
                     </div>
                     <div class="post-visibility-badge" title="${post.visibility || 'public'}">${(post.visibility||'public')==='public' ? '<i class=\'fas fa-globe\'></i> Public' : (post.visibility==='friends' ? '<i class=\'fas fa-user-friends\'></i> Friends' : '<i class=\'fas fa-lock\'></i> Only me')}</div>
@@ -9724,7 +9724,7 @@ async function checkAndStartDailyBonusTimer() {
             displayedContent = escapeHtml(displayedContent).replace(/\n/g, '<br>');
 
             commentElement.innerHTML = `
-                <a href="./Profile.html?userId=${comment.userId}" aria-label="View ${comment.username || 'Anonymous'}'s Profile">
+                <a href="./profile.html?userId=${comment.userId}" aria-label="View ${comment.username || 'Anonymous'}'s Profile">
                     <div class="comment-author-avatar">
                         ${comment.profilePhoto ?
                             `<img src="${getCloudinaryImageUrl(comment.profilePhoto, 'w_60,h_60,c_fill,g_face,r_max')}" srcset="${getCloudinaryImageUrl(comment.profilePhoto, 'w_60,h_60,c_fill,g_face,r_max')} 60w, ${getCloudinaryImageUrl(comment.profilePhoto, 'w_120,h_120,c_fill,g_face,r_max')} 120w, ${getCloudinaryImageUrl(comment.profilePhoto, 'w_240,h_240,c_fill,g_face,r_max')} 240w" sizes="(max-width:600px) 30px, 60px" alt="Author Pic" class="comment-author-pic" loading="lazy" decoding="async" onerror="this.onerror=null; this.src='https://placehold.co/60x60/CCCCCC/000000?text=${commentAuthorInitial}';">` :
@@ -9733,7 +9733,7 @@ async function checkAndStartDailyBonusTimer() {
                     </div>
                 </a>
                 <div class="comment-content-wrapper">
-                    <a href="./Profile.html?userId=${comment.userId}" class="comment-author-name">${escapeHtml(comment.username || 'Anonymous')}</a>
+                    <a href="./profile.html?userId=${comment.userId}" class="comment-author-name">${escapeHtml(comment.username || 'Anonymous')}</a>
                     <div class="comment-text">${displayedContent}</div>
                     <div class="comment-meta">
                         <span class="comment-timestamp">${comment.timestamp ? new Date(comment.timestamp.toDate()).toLocaleString() : 'N/A'}</span>
@@ -10983,7 +10983,7 @@ async function fetchAndDisplayPosts() {
                             snap.forEach(d => {
                                 const h = d.data();
                                 const card = document.createElement('a');
-                                card.href = `/Profile.html?userId=${currentUser.uid}&tab=highlights`;
+                                card.href = `/profile.html?userId=${currentUser.uid}&tab=highlights`;
                                 card.className = 'highlight-card';
                                 const cover = h.coverPicId ? getCloudinaryImageUrl(h.coverPicId,'w_600,h_240,c_fill,q_auto') : '';
                                 card.innerHTML = cover ? `<img src="${cover}" alt="cover">` : `<div style="height:100px;display:flex;align-items:center;justify-content:center;opacity:.8;">${h.title||'Highlight'}</div>`;
@@ -11847,7 +11847,7 @@ async function fetchAndDisplayPosts() {
         // Link @mentions to Profile
         function linkMentions(text) {
             if (!text) return '';
-            return text.replace(/(^|\s)@(\w{2,30})/g, (m, p1, handle) => `${p1}<a href="/Profile.html?handle=${handle}" class="mention-link" data-handle="${handle}">@${handle}</a>`);
+            return text.replace(/(^|\s)@(\w{2,30})/g, (m, p1, handle) => `${p1}<a href="/profile.html?handle=${handle}" class="mention-link" data-handle="${handle}">@${handle}</a>`);
         }
 
         // Track hashtags for trending display
