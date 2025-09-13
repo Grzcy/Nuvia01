@@ -51,7 +51,7 @@ status = 301
 
 [[redirects]]
 from = "/"
-to = "/home.html"
+to = "/index.html"
 status = 200
 force = true
 

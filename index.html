@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Nuvia - Home</title>
-    <link rel="canonical" href="https://nuvia.app/home.html">
+    <link rel="canonical" href="https://nuvia.app/index.html">
     <link rel="manifest" href="/manifest.webmanifest">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -4390,7 +4390,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             <button id="sidebarToggleFab" aria-label="Toggle Navigation">
                 <i class="fas fa-bars"></i>
             </button>
-            <a href="/home.html" class="logo">
+            <a href="/index.html" class="logo">
                 <span>Nuvia</span>
             </a>
             <div id="nuvia3dArea" aria-hidden="true"></div>
@@ -4996,7 +4996,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             </button>
         </div>
         <div class="sidebar-links">
-            <a href="/home.html" class="sidebar-nav-item active" aria-current="page">
+            <a href="/index.html" class="sidebar-nav-item active" aria-current="page">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
@@ -11011,7 +11011,7 @@ async function fetchAndDisplayPosts() {
                                 items.slice(0,10).forEach(p => {
                                     const a = document.createElement('a');
                                     a.className='saved-card';
-                                    a.href=`/home.html#post-${p.id}`;
+                                    a.href=`/index.html#post-${p.id}`;
                                     const cover = p.mediaType==='image'? p.mediaUrl : '';
                                     a.innerHTML = `${cover?`<img src=\"${cover}\" alt=\"saved\">`:''}<div style=\"padding:8px;opacity:.85;\">${(p.content||'').slice(0,60)}</div>`;
                                     savedWidget.appendChild(a);
@@ -13171,7 +13171,7 @@ async function fetchAndDisplayPosts() {
         // Share a post and award small coins
         async function sharePost(postId){
             try{
-                const url = `${location.origin}/home.html#post-${postId}`;
+                const url = `${location.origin}/index.html#post-${postId}`;
                 if (navigator.share) await navigator.share({ title: 'Check this post', url });
                 else { await navigator.clipboard.writeText(url); showMessageBox('Post link copied to clipboard.', 'info'); }
                 if (typeof computeActivityReward==='function' && currentUser && currentUserProfileData){

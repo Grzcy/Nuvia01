@@ -54,7 +54,7 @@
 <body>
   <header>
     <div class="header-content">
-      <a href="/home.html" class="brand-link"><img src="assets/security.png" alt="JCHAT Security" style="height:24px;width:auto" onerror="this.style.display='none'"/><span>Nuvia</span></a>
+      <a href="/index.html" class="brand-link"><img src="assets/security.png" alt="JCHAT Security" style="height:24px;width:auto" onerror="this.style.display='none'"/><span>Nuvia</span></a>
       <div class="user-strip">
         <div class="notif"><a href="/notifications.html" aria-label="Notifications"><i class="fas fa-bell"></i><span class="badge" id="notificationCount">0</span></a></div>
         <button id="logoutBtn" aria-label="Logout"><i class="fas fa-sign-out-alt"></i></button>
@@ -233,7 +233,7 @@
 
     onAuthStateChanged(auth, async (user)=>{
       if(user){
-        if(user.uid !== ADMIN_UID){ showMessageBox('Unauthorized. Redirecting...', 'error', 2000, true); setTimeout(()=>{ window.location.href="/home.html"; }, 1800); return; }
+        if(user.uid !== ADMIN_UID){ showMessageBox('Unauthorized. Redirecting...', 'error', 2000, true); setTimeout(()=>{ window.location.href="/index.html"; }, 1800); return; }
         await fetchAndDisplayHeaderProfile(user);
         listenNotifications(user.uid);
         buildLink();

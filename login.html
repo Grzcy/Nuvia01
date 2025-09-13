@@ -1503,7 +1503,7 @@
                     localStorage.setItem('nuvia_auth_status', 'authenticated');
                 } catch (_) {}
                 showSuccessModal(`Welcome back, ${user.displayName || user.email}!`, () => {
-                    window.location.href = 'home.html';
+                    window.location.href = 'index.html';
                 });
 
             } catch (error) {
@@ -1801,7 +1801,7 @@
                 console.log('User already authenticated:', user.email);
                 showSmartLoader('Welcome Back!', 'Taking you to your account...');
                 setTimeout(() => {
-                    window.location.href = 'home.html';
+                    window.location.href = 'index.html';
                 }, 1000);
             }
         });
