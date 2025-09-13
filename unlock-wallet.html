@@ -1,0 +1,228 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unlock Wallet</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --pink: #ff2e92;
+            --blue: #00d5ff;
+            --yellow: #ffd400;
+            --glass-black: rgba(10, 10, 10, .75);
+            --glass-blue: rgba(0, 213, 255, .15);
+            --radius: 20px;
+            --transition: .3s ease;
+            --white: #fff;
+            --text-light: rgba(255, 255, 255, .7);
+            --background-main: #1a1a2e;
+            --card-background: linear-gradient(145deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01));
+            --header-background: linear-gradient(135deg, rgba(10, 10, 10, .85), rgba(10, 10, 10, .75));
+            --border-light: rgba(255, 255, 255, .05);
+            --input-background: rgba(255, 255, 255, 0.05);
+            --button-background: linear-gradient(90deg, var(--pink), var(--yellow));
+            --button-shadow: 0 4px 15px var(--pink), 0 4px 15px var(--yellow);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: var(--background-main);
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .unlock-container {
+            background: var(--card-background);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius);
+            padding: 2rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            background: linear-gradient(90deg, var(--pink), var(--yellow));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        p {
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+        .bank-details {
+            margin: 2rem 0;
+        }
+        .bank-details h3 {
+            border-bottom: 1px solid var(--border-light);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .account-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .account-info div {
+            background: var(--input-background);
+            padding: 1rem;
+            border-radius: 10px;
+        }
+        .file-upload-wrapper {
+            margin: 2rem 0;
+            text-align: center;
+        }
+        .file-upload-label {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: var(--button-background);
+            color: #111;
+            font-weight: 700;
+            border-radius: var(--radius);
+            cursor: pointer;
+            box-shadow: var(--button-shadow);
+            transition: var(--transition);
+        }
+        .file-upload-label:hover {
+            transform: translateY(-2px);
+        }
+        #paymentProof {
+            display: none;
+        }
+        #fileName {
+            margin-top: 1rem;
+            color: var(--text-light);
+            font-style: italic;
+        }
+        #submitRequestBtn {
+            width: 100%;
+            padding: 1rem;
+            border: none;
+            border-radius: var(--radius);
+            background: linear-gradient(90deg, var(--pink), var(--yellow));
+            color: #111;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: var(--button-shadow);
+            transition: var(--transition);
+        }
+        #submitRequestBtn:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="unlock-container">
+        <h1>Unlock Your Wallet</h1>
+        <p>Your wallet is currently locked. To unlock it and gain access to all features, please make a payment of <strong>₦5,000</strong> to one of the following bank accounts:</p>
+        
+        <div class="bank-details">
+            <h3>Bank Details</h3>
+            <div id="bank-details-container"></div>
+        </div>
+
+        <p>After making the payment, please upload a screenshot of your payment receipt below. Your wallet will be unlocked as soon as our team verifies the payment.</p>
+
+        <div class="file-upload-wrapper">
+            <label for="paymentProof" class="file-upload-label">
+                <i class="fas fa-upload"></i> Upload Payment Proof
+            </label>
+            <input type="file" id="paymentProof" accept="image/*">
+            <p id="fileName"></p>
+        </div>
+
+        <button id="submitRequestBtn">Pay ₦5000 & Submit</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js";
+        import { BANK_DETAILS, renderBankDetails } from "./bank-details.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+            authDomain: "jchat-1.firebaseapp.com",
+            databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+            projectId: "jchat-1",
+            storageBucket: "jchat-1.firebasestorage.app",
+            messagingSenderId: "328479683167",
+            appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
+            measurementId: "G-S6Z9GG0R9P"
+        };
+        const appId = 'default-app-id';
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        renderBankDetails("bank-details-container", { layout: 'cards' });
+
+        const paymentProofInput = document.getElementById("paymentProof");
+        const fileNameDisplay = document.getElementById("fileName");
+        const submitRequestBtn = document.getElementById("submitRequestBtn");
+
+        let paymentProofFile = null;
+
+        paymentProofInput.addEventListener("change", (e) => {
+            paymentProofFile = e.target.files[0];
+            if (paymentProofFile) {
+                fileNameDisplay.textContent = `File: ${paymentProofFile.name}`;
+            }
+        });
+
+        submitRequestBtn.addEventListener("click", async () => {
+            if (!auth.currentUser) {
+                alert("You must be logged in to submit a request.");
+                return;
+            }
+
+            if (!paymentProofFile) {
+                alert("Please upload a payment proof screenshot.");
+                return;
+            }
+
+            submitRequestBtn.disabled = true;
+            submitRequestBtn.textContent = "Submitting...";
+
+            try {
+                const storageRef = ref(storage, `wallet-unlock-proofs/${auth.currentUser.uid}/${paymentProofFile.name}`);
+                const uploadTask = await uploadBytes(storageRef, paymentProofFile);
+                const downloadURL = await getDownloadURL(uploadTask.ref);
+
+                const requestRef = doc(db, "artifacts", appId, "public", "data", "wallet_unlock_requests", auth.currentUser.uid);
+                await setDoc(requestRef, {
+                    userId: auth.currentUser.uid,
+                    username: auth.currentUser.displayName || "Anonymous",
+                    paymentProof: downloadURL,
+                    status: "pending",
+                    timestamp: serverTimestamp(),
+                    amountNaira: 5000
+                });
+
+                alert("Your request has been submitted. You will be notified once your wallet is unlocked.");
+                window.location.href = "index.html";
+
+            } catch (error) {
+                console.error("Error submitting wallet unlock request:", error);
+                alert("An error occurred while submitting your request. Please try again.");
+                submitRequestBtn.disabled = false;
+                submitRequestBtn.textContent = "Pay ₦5000 & Submit";
+            }
+        });
+
+    </script>
+    <script src="bank-details.js"></script>
+</body>
+</html>
