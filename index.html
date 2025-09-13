@@ -13252,7 +13252,7 @@ async function fetchAndDisplayPosts() {
     <script src="assets/js/lazy-images.js" defer></script>
     <script>
     // --- JCoin currency rate logic (copied from wallet.html) ---
-    let currentSystemSettings = { jcoinNairaRate: 0.0005 };
+    let currentSystemSettings = { jcoinNairaRate: 0.005 };
     const jcoinBalanceSpan = document.getElementById('jcoin-balance');
     const nairaEquivalentSpan = document.getElementById('naira-equivalent');
 
@@ -13278,17 +13278,17 @@ async function fetchAndDisplayPosts() {
                             jCoins = docSnap.data().jCoins || 0;
                         }
                         jcoinBalanceSpan.textContent = jCoins;
-                        nairaEquivalentSpan.textContent = (jCoins * currentSystemSettings.jcoinNairaRate).toFixed(4);
+                        nairaEquivalentSpan.textContent = (jCoins * currentSystemSettings.jcoinNairaRate).toFixed(3);
                     } else {
                         jcoinBalanceSpan.textContent = 0;
-                        nairaEquivalentSpan.textContent = (0).toFixed(4);
+                        nairaEquivalentSpan.textContent = (0).toFixed(3);
                     }
                 });
             }
         } else {
             // Fallback for demo
             jcoinBalanceSpan.textContent = jCoins;
-            nairaEquivalentSpan.textContent = (jCoins * currentSystemSettings.jcoinNairaRate).toFixed(4);
+            nairaEquivalentSpan.textContent = (jCoins * currentSystemSettings.jcoinNairaRate).toFixed(3);
         }
     }
 
