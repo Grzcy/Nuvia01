@@ -26,7 +26,7 @@
       try {
         var nav = (performance.getEntriesByType && performance.getEntriesByType('navigation') || [])[0];
         var fast = !!(nav && nav.type === 'back_forward');
-        if (fast) {
+        if (true) {
           var lastAuth = '0';
           try { lastAuth = sessionStorage.getItem('nuvia_last_auth') || '0'; } catch(_){}
           if (lastAuth === '1') { document.documentElement.classList.add('pre-authenticated'); }
