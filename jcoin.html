@@ -33,20 +33,73 @@
             </a>
             <nav>
                 <a href="/wallet.html" style="color:var(--white);text-decoration:none">Wallet</a>
-            </nav>
-        </div>
-    </header>
+            <main>
+                <section class="card">
+                    <h1>About JCoin</h1>
+                    <p class="subtitle">JCoin is JCHAT's in-app currency used for themes, premium features, and tips.</p>
+                    <ul>
+                        <li>Earn by engaging with the community</li>
+                        <li>Buy securely via the Shop</li>
+                        <li>Spend on themes and premium perks</li>
+                        <li>Transfer to friends in your Wallet</li>
+                    </ul>
+                </section>
+                <section class="card" style="margin-top:24px;">
+                    <h2>Your JCoin Balance</h2>
+                    <p>JCoins: <span id="jcoin-balance">...</span></p>
+                    <p>Naira Equivalent: ₦<span id="naira-equivalent">...</span></p>
+                </section>
+            </main>
 
-    <main>
-        <section class="card">
-            <h1>About JCoin</h1>
-            <p class="subtitle">JCoin is JCHAT's in-app currency used for themes, premium features, and tips.</p>
-            <ul>
-                <li>Earn by engaging with the community</li>
-                <li>Buy securely via the Shop</li>
-                <li>Spend on themes and premium perks</li>
-                <li>Transfer to friends in your Wallet</li>
-            </ul>
+            <script src="assets/js/lazy-images.js" defer></script>
+            <script>
+            // --- JCoin currency rate logic (copied from wallet.html) ---
+            // NOTE: You must have Firebase SDK loaded for this to work
+            let currentSystemSettings = { jcoinNairaRate: 0.0005 };
+            const jcoinBalanceSpan = document.getElementById('jcoin-balance');
+            const nairaEquivalentSpan = document.getElementById('naira-equivalent');
+
+            async function fetchSystemSettings() {
+                // SYSTEM_SETTINGS_DOC_REF must be defined as in wallet.html
+                if (typeof getDoc === 'function' && typeof SYSTEM_SETTINGS_DOC_REF !== 'undefined') {
+                    const docSnap = await getDoc(SYSTEM_SETTINGS_DOC_REF);
+                    if (docSnap.exists()) {
+                        currentSystemSettings = docSnap.data();
+                    }
+                }
+            }
+
+            async function fetchJCoinBalance() {
+                // Replace with actual user/profile logic as in wallet.html
+                let jCoins = 0;
+                if (typeof getDoc === 'function' && typeof doc === 'function' && typeof db !== 'undefined' && typeof appId !== 'undefined' && typeof auth !== 'undefined') {
+                    // Example: get current user
+                    if (typeof onAuthStateChanged === 'function') {
+                        onAuthStateChanged(auth, async (user) => {
+                            if (user) {
+                                await fetchSystemSettings();
+                                const userProfileDocRef = doc(db, "artifacts", appId, "users", user.uid, "profiles", "user_profile");
+                                const docSnap = await getDoc(userProfileDocRef);
+                                if (docSnap.exists()) {
+                                    jCoins = docSnap.data().jCoins || 0;
+                                }
+                                jcoinBalanceSpan.textContent = jCoins;
+                                nairaEquivalentSpan.textContent = (jCoins * currentSystemSettings.jcoinNairaRate).toFixed(4);
+                            } else {
+                                jcoinBalanceSpan.textContent = 0;
+                                nairaEquivalentSpan.textContent = (0).toFixed(4);
+                            }
+                        });
+                    }
+                } else {
+                    // Fallback for demo
+                    jcoinBalanceSpan.textContent = jCoins;
+                    nairaEquivalentSpan.textContent = (jCoins * currentSystemSettings.jcoinNairaRate).toFixed(4);
+                }
+            }
+
+            fetchJCoinBalance();
+            </script>
         </section>
     </main>
 
