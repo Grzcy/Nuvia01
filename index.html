@@ -5,22 +5,97 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Nuvia - Home</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
+        /* Basic styles from wallet.html */
+        :root {
+            --pink: #ff2e92;
+            --blue: #00d5ff;
+            --yellow: #ffc107;
+            --white: #fff;
+            --text-light: rgba(255, 255, 255, .7);
+            --card-background: linear-gradient(145deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01));
+            --border-light: rgba(255, 255, 255, .05);
+            --radius: 20px;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #1a1a2e;
+            color: var(--white);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .jcoin-balance-card {
+            background: var(--card-background);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius);
+            padding: 2rem;
+            width: 100%;
+            max-width: 800px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .jcoin-balance-card h2 {
+            margin-top: 0;
+        }
+        /* Modal styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        .modal-content {
+            background: #2a2a4a;
+            border-radius: var(--radius);
+            padding: 2rem;
+            width: 90%;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        .modal-content h3 { margin: 0; }
+        .button-group { display: flex; justify-content: flex-end; gap: 0.8rem; }
+        .modal-button { padding: 10px 20px; border: none; border-radius: 15px; cursor: pointer; }
+        .confirm-button { background: var(--pink); color: var(--white); }
+        .cancel-button { background: #444; color: var(--white); }
+        .input-group { display: flex; flex-direction: column; gap: 8px; }
+        .input-group label { font-weight: 600; }
+        .input-group input { padding: 10px; border-radius: 8px; border: 1px solid var(--border-light); background: #333; color: var(--white); }
+
         /* Pink and yellow background for the payment panel */
-        #paymentPanel {
+        #paymentPanel .modal-content {
             background: linear-gradient(135deg, var(--pink), var(--yellow));
         }
     </style>
 </head>
 <body>
+    <!-- JCoin Balance Display -->
+    <div id="jcoinBalanceCard" class="jcoin-balance-card">
+        <h2>JCoin Balance</h2>
+        <p>JCoins: <span id="walletChipAmount">0</span></p>
+        <p>Naira Equivalent: ₦<span id="jcoinRateSpan">0.00</span></p>
+        <small>(Click to manage wallet)</small>
+    </div>
+
     <!-- Wallet Locked Modal -->
     <div id="walletLockedModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="walletLockedTitle" style="display:none;">
         <div class="modal-content">
-            <h3 id="walletLockedTitle"><i class="fas fa-lock"></i> Wallet Locked</h3>
-            <p style="color:var(--text-light);">Your wallet is locked. Pay ₦5000 to request unlock. A developer will unlock it after confirming your payment.</p>
+            <h3 id="walletLockedTitle"><i class="fas fa-unlock-alt"></i> Unlock Your Wallet & Access Premium Features!</h3>
+            <p style="color:var(--text-light); line-height: 1.6;">Your wallet is currently locked, limiting your access to exclusive features. For a <strong>one-time fee of ₦5000</strong>, you can <strong>permanently unlock</strong> your wallet and enjoy the full Nuvia experience, including premium content, special rewards, and unlimited transactions. A developer will activate your wallet as soon as your payment is confirmed.</p>
             <div class="button-group" style="display:flex;gap:10px;justify-content:flex-end;">
-                <button id="closeWalletLockedBtn" class="modal-button cancel-button">Close</button>
-                <button id="walletPayBtn" class="modal-button confirm-button">Pay ₦5000</button>
+                <button id="closeWalletLockedBtn" class="modal-button cancel-button">Maybe Later</button>
+                <button id="walletPayBtn" class="modal-button confirm-button">Unlock Now for ₦5000</button>
             </div>
         </div>
     </div>
@@ -49,16 +124,6 @@
         </div>
     </div>
 
-    <!-- Sidebar Navigation -->
-    <aside id="sidebarNav" class="sidebar-hidden" role="navigation" aria-label="Main Navigation">
-        <div class="sidebar-links">
-            <a href="/wallet.html" class="sidebar-nav-item">
-                <i class="fas fa-wallet"></i>
-                <span>Wallet</span>
-            </a>
-        </div>
-    </aside>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
@@ -80,27 +145,34 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // --- DOM Elements ---
         const walletPayBtn = document.getElementById('walletPayBtn');
         const paymentPanel = document.getElementById('paymentPanel');
         const cancelPaymentBtn = document.getElementById('cancelPaymentBtn');
         const submitPaymentBtn = document.getElementById('submitPaymentBtn');
         const closeWalletLockedBtn = document.getElementById('closeWalletLockedBtn');
         const walletLockedModal = document.getElementById('walletLockedModal');
-        const jcoinRateSpan = document.getElementById('jcoinRate');
+        const jcoinBalanceCard = document.getElementById('jcoinBalanceCard');
+
+        // These elements are now in the HTML
+        const jcoinRateSpan = document.getElementById('jcoinRateSpan');
         const walletChipAmount = document.getElementById('walletChipAmount');
 
         let currentSystemSettings = {};
-
         const SYSTEM_SETTINGS_DOC_REF = doc(db, "artifacts", appId, "public", "data", "settings", "system_settings");
 
         async function fetchSystemSettings() {
-            const docSnap = await getDoc(SYSTEM_SETTINGS_DOC_REF);
-            if (docSnap.exists()) {
-                currentSystemSettings = docSnap.data();
-            } else {
-                currentSystemSettings = {
-                    jcoinNairaRate: 0.0005, 
-                };
+            try {
+                const docSnap = await getDoc(SYSTEM_SETTINGS_DOC_REF);
+                if (docSnap.exists()) {
+                    currentSystemSettings = docSnap.data();
+                } else {
+                    // Default settings if not found
+                    currentSystemSettings = { jcoinNairaRate: 0.0005 };
+                }
+            } catch (error) {
+                console.error("Error fetching system settings:", error);
+                currentSystemSettings = { jcoinNairaRate: 0.0005 }; // Fallback
             }
         }
 
@@ -108,19 +180,51 @@
             if (user) {
                 await fetchSystemSettings();
                 const userProfileDocRef = doc(db, "artifacts", appId, "users", user.uid, "profiles", "user_profile");
-                const docSnap = await getDoc(userProfileDocRef);
-                if (docSnap.exists()) {
-                    const jCoins = docSnap.data().jCoins || 0;
-                    walletChipAmount.textContent = jCoins;
-                    jcoinRateSpan.textContent = (jCoins * currentSystemSettings.jcoinNairaRate).toFixed(4);
-                } else {
-                     walletChipAmount.textContent = 0;
-                    jcoinRateSpan.textContent = (0).toFixed(4);
+                
+                try {
+                    const docSnap = await getDoc(userProfileDocRef);
+                    if (docSnap.exists()) {
+                        const userData = docSnap.data();
+                        const jCoins = userData.jCoins || 0;
+                        const walletUnlocked = userData.walletUnlocked || false;
+
+                        walletChipAmount.textContent = jCoins;
+                        jcoinRateSpan.textContent = (jCoins * (currentSystemSettings.jcoinNairaRate || 0)).toFixed(4);
+
+                        // If wallet is locked, clicking the card should show the modal
+                        if (!walletUnlocked) {
+                             jcoinBalanceCard.addEventListener('click', () => {
+                                walletLockedModal.style.display = 'flex';
+                            });
+                        } else {
+                            // Optional: handle case where wallet is already unlocked
+                            jcoinBalanceCard.title = "Your wallet is unlocked.";
+                            jcoinBalanceCard.style.cursor = "default";
+                        }
+                    } else {
+                         walletChipAmount.textContent = 0;
+                         jcoinRateSpan.textContent = (0).toFixed(4);
+                         // Wallet is effectively locked if profile doesn't exist
+                         jcoinBalanceCard.addEventListener('click', () => {
+                            walletLockedModal.style.display = 'flex';
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error fetching user profile:", error);
+                    walletChipAmount.textContent = 'Error';
+                    jcoinRateSpan.textContent = 'Error';
                 }
 
+            } else {
+                // Handle signed out state
+                walletChipAmount.textContent = 'N/A';
+                jcoinRateSpan.textContent = 'N/A';
+                // Redirect to login or show a message
+                window.location.href = 'login.html';
             }
         });
-
+        
+        // --- Modal Logic ---
         walletPayBtn.addEventListener('click', () => {
             walletLockedModal.style.display = 'none';
             paymentPanel.style.display = 'flex';
@@ -142,22 +246,24 @@
                 const paymentProof = document.getElementById('paymentProof').files[0];
 
                 if (paymentName && paymentEmail && paymentProof) {
-                    // Simulate file upload and get URL
+                    // NOTE: This is a placeholder for file upload.
+                    // In a real application, you would upload the file to a storage service
+                    // and get the URL. For now, we'll use a sample URL as the original code did.
+                    alert("Submitting your request... Please note file upload is a placeholder.");
+                    
                     const paymentProofUrl = 'https://res.cloudinary.com/demo/image/upload/sample.jpg';
 
-                    const unlockRequest = {
-                        userId: user.uid,
-                        username: user.displayName,
-                        email: paymentEmail,
-                        name: paymentName,
-                        paymentProof: paymentProofUrl,
-                        amountNaira: 5000,
-                        timestamp: serverTimestamp(),
-                        status: 'pending'
-                    };
-
                     try {
-                        await addDoc(collection(db, "artifacts", appId, "wallet_unlock_requests"), unlockRequest);
+                        await addDoc(collection(db, "artifacts", appId, "wallet_unlock_requests"), {
+                            userId: user.uid,
+                            username: user.displayName || 'N/A',
+                            email: paymentEmail,
+                            name: paymentName,
+                            paymentProof: paymentProofUrl,
+                            amountNaira: 5000,
+                            timestamp: serverTimestamp(),
+                            status: 'pending'
+                        });
                         paymentPanel.style.display = 'none';
                         alert("Your request has been submitted. The developer will review it shortly.");
                     } catch (error) {
