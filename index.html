@@ -11113,9 +11113,11 @@ async function fetchAndDisplayPosts() {
                         if (headerDisplayName) headerDisplayName.textContent = 'Guest';
                         if (headerProfilePic) headerProfilePic.style.display = 'none';
                         if (headerAvatarIcon) headerAvatarIcon.style.display = 'block';
-                        try { updateGuestHeaderKeysVisibility(true); } catch(e){}
-                        if (postsFeed) postsFeed.innerHTML = '<p style="text-align: center; color: var(--text-light);">Please log in to see posts and interact.</p>';
-                        if (loadingPostsMessage) loadingPostsMessage.style.display = 'none';
+                        if (!(window.__nuviaSuppressGuest && (sessionStorage.getItem('nuvia_last_auth') === '1'))) {
+                            try { updateGuestHeaderKeysVisibility(true); } catch(e){}
+                            if (postsFeed) postsFeed.innerHTML = '<p style="text-align: center; color: var(--text-light);">Please log in to see posts and interact.</p>';
+                            if (loadingPostsMessage) loadingPostsMessage.style.display = 'none';
+                        }
                         return;
                     }
 
@@ -11199,8 +11201,10 @@ async function fetchAndDisplayPosts() {
 
                         // As guest, skip loading Firestore content to avoid permissions issues.
                         if (!navigator.onLine) { showOfflineBanner(); }
-                        if (postsFeed) postsFeed.innerHTML = '<p style="text-align: center; color: var(--text-light);">Please log in to see posts and interact.</p>';
-                        if (loadingPostsMessage) loadingPostsMessage.style.display = 'none';
+                        if (!(window.__nuviaSuppressGuest && (sessionStorage.getItem('nuvia_last_auth') === '1'))) {
+                            if (postsFeed) postsFeed.innerHTML = '<p style="text-align: center; color: var(--text-light);">Please log in to see posts and interact.</p>';
+                            if (loadingPostsMessage) loadingPostsMessage.style.display = 'none';
+                        }
 
                         return;
                     }
@@ -11238,16 +11242,20 @@ async function fetchAndDisplayPosts() {
                 } else {
                     // This case should ideally not be reached if the above logic is correct,
                     // but as a fallback, ensure UI is for logged out state.
-                    isAuthReady = true;
-                    toggleInteractiveElements(false, false); // Disable all elements for unauthenticated non-admin.
-                    if (headerDisplayName) headerDisplayName.textContent = "Guest";
-                    if (headerProfilePic) headerProfilePic.style.display = 'none';
-                    if (headerAvatarIcon) headerAvatarIcon.style.display = 'block';
-                    try { updateGuestHeaderKeysVisibility(true); } catch(e){}
-                    if (adminIconLink) adminIconLink.style.display = 'none'; // Ensure admin icon is hidden for guests.
+                    if (window.__nuviaSuppressGuest && (sessionStorage.getItem('nuvia_last_auth') === '1')) {
+                        console.log('Nuvia_DEBUG: Suppressing guest UI due to restore');
+                    } else {
+                        isAuthReady = true;
+                        toggleInteractiveElements(false, false); // Disable all elements for unauthenticated non-admin.
+                        if (headerDisplayName) headerDisplayName.textContent = "Guest";
+                        if (headerProfilePic) headerProfilePic.style.display = 'none';
+                        if (headerAvatarIcon) headerAvatarIcon.style.display = 'block';
+                        try { updateGuestHeaderKeysVisibility(true); } catch(e){}
+                        if (adminIconLink) adminIconLink.style.display = 'none'; // Ensure admin icon is hidden for guests.
 
-                    if (postsFeed) postsFeed.innerHTML = '<p style="text-align: center; color: var(--text-light);">Please log in to see posts and interact.</p>';
-                    if (loadingPostsMessage) loadingPostsMessage.style.display = 'none';
+                        if (postsFeed) postsFeed.innerHTML = '<p style="text-align: center; color: var(--text-light);">Please log in to see posts and interact.</p>';
+                        if (loadingPostsMessage) loadingPostsMessage.style.display = 'none';
+                    }
                     // Show deterministic inspiration even for guests
                     displayInspiration();
 
@@ -12518,6 +12526,12 @@ async function fetchAndDisplayPosts() {
             }
             function restoreIndexStateIfNeeded(){
                 try{
+                    const lastAuthIs1 = (sessionStorage.getItem('nuvia_last_auth') === '1');
+                    if (lastAuthIs1) {
+                        window.__nuviaSuppressGuest = true;
+                        try { document.documentElement.classList.add('pre-authenticated'); } catch(_){ }
+                        try { document.body.classList.add('authenticated'); } catch(_){ }
+                    }
                     const guestKeys = document.getElementById('guestHeaderKeys');
                     if (guestKeys) guestKeys.style.display = 'none';
                     const ob = document.getElementById('offlineStatusBanner');
