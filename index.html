@@ -4806,10 +4806,69 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             <div id="walletLockedModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="walletLockedTitle" style="display:none;">
                 <div class="modal-content">
                     <h3 id="walletLockedTitle"><i class="fas fa-lock"></i> Wallet Locked</h3>
-                    <p style="color:var(--text-light);">Your wallet is locked. Pay ₦5000 to request unlock. A developer will unlock it after confirming your payment.</p>
+                    <p class="wallet-locked-message">Unlock your wallet now and get back to full power. A one‑time ₦5,000 verification keeps payments secure and lets a developer unlock your wallet fast after review.</p>
+                    <ul class="wallet-locked-message" style="margin:8px 0 0 18px;">
+                        <li>Priority review by a developer</li>
+                        <li>Faster access to JCoins and features</li>
+                        <li>Secure, one‑time verification fee</li>
+                    </ul>
                     <div class="button-group" style="display:flex;gap:10px;justify-content:flex-end;">
                         <button id="closeWalletLockedBtn" class="modal-button cancel-button">Close</button>
                         <a id="walletPayBtn" href="/Wallet.html?unlock=1&amount=5000" class="modal-button confirm-button">Pay ₦5000</a>
+                    </div>
+                </div>
+            </div>
+
+            <style>
+                .wallet-locked-message { color: var(--text-light); }
+                #walletPayBtn { background: linear-gradient(135deg, #ff2aa3, #ffd43b); border-color: transparent; color: #fff; }
+                #walletPayBtn:hover { transform: translateY(-1px); filter: brightness(1.05); }
+                #walletPaymentDetailsModal .modal-content { max-width: 520px; }
+                #walletPaymentDetailsModal .input-group { display:flex; flex-direction:column; gap:6px; margin:10px 0; }
+                #walletPaymentDetailsModal input[type="text"],
+                #walletPaymentDetailsModal input[type="number"],
+                #walletPaymentDetailsModal input[type="datetime-local"],
+                #walletPaymentDetailsModal textarea {
+                    padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border-light);
+                    background: var(--input-background); color: var(--white);
+                }
+                #walletPaymentDetailsModal textarea { min-height: 80px; resize: vertical; }
+            </style>
+
+            <!-- Wallet Payment Details Modal -->
+            <div id="walletPaymentDetailsModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="walletPaymentDetailsTitle" style="display:none;">
+                <div class="modal-content">
+                    <h3 id="walletPaymentDetailsTitle"><i class="fas fa-receipt"></i> Submit Payment Details</h3>
+                    <p class="wallet-locked-message">Upload your bank transfer proof and fill in the details below. A developer will verify and unlock your wallet shortly.</p>
+
+                    <div class="input-group">
+                        <label for="walletPayAmountInput">Amount (NGN)</label>
+                        <input type="number" id="walletPayAmountInput" value="5000" readonly>
+                    </div>
+                    <div class="input-group">
+                        <label for="walletBankNameInput">Bank Name</label>
+                        <input type="text" id="walletBankNameInput" placeholder="e.g., GTBank, Access Bank">
+                    </div>
+                    <div class="input-group">
+                        <label for="walletTxRefInput">Transaction Reference</label>
+                        <input type="text" id="walletTxRefInput" placeholder="e.g., REF123456 or narration">
+                    </div>
+                    <div class="input-group">
+                        <label for="walletPaidAtInput">Payment Date & Time</label>
+                        <input type="datetime-local" id="walletPaidAtInput">
+                    </div>
+                    <div class="input-group">
+                        <label for="walletNoteInput">Additional Notes (optional)</label>
+                        <textarea id="walletNoteInput" placeholder="Anything else we should know"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label for="walletReceiptInput">Upload Receipt/Screenshot</label>
+                        <input type="file" id="walletReceiptInput" accept="image/*">
+                    </div>
+
+                    <div class="button-group" style="display:flex;gap:10px;justify-content:flex-end;">
+                        <button id="cancelWalletPaymentBtn" class="modal-button cancel-button">Cancel</button>
+                        <button id="submitWalletPaymentBtn" class="modal-button confirm-button"><i class="fas fa-paper-plane"></i> Submit</button>
                     </div>
                 </div>
             </div>
@@ -4873,7 +4932,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                         
                         <div class="premium-tier-option" data-tier="elite">
                             <div class="tier-header">
-                                <span class="tier-badge">👑 Elite</span>
+                                <span class="tier-badge">�� Elite</span>
                                 <span class="tier-price">$39.99/month</span>
                             </div>
                             <ul class="tier-features">
@@ -12419,6 +12478,67 @@ async function fetchAndDisplayPosts() {
                     };
                     window.jcoinRateSpan.addEventListener('click', openWalletLockedPanel);
                     if (window.jcoinRateSpan.parentElement) window.jcoinRateSpan.parentElement.addEventListener('click', openWalletLockedPanel);
+                }
+            } catch (_) {}
+
+            // Open payment details panel when clicking "Pay ₦5000"
+            try {
+                const walletPayBtn = document.getElementById('walletPayBtn');
+                const payModal = document.getElementById('walletPaymentDetailsModal');
+                const closeLockedBtn = document.getElementById('closeWalletLockedBtn');
+                const cancelPayBtn = document.getElementById('cancelWalletPaymentBtn');
+                const submitPayBtn = document.getElementById('submitWalletPaymentBtn');
+
+                const openPayPanel = (ev) => {
+                    ev.preventDefault(); ev.stopPropagation();
+                    const locked = document.getElementById('walletLockedModal');
+                    if (locked) { locked.classList.remove('active'); setTimeout(()=>{ locked.style.display='none'; }, 150); }
+                    if (payModal) { payModal.style.display='block'; setTimeout(()=>payModal.classList.add('active'),0); }
+                };
+                const closePayPanel = () => { if (payModal) { payModal.classList.remove('active'); setTimeout(()=>{ payModal.style.display='none'; }, 200); } };
+
+                if (walletPayBtn && !walletPayBtn.dataset.bound) { walletPayBtn.addEventListener('click', openPayPanel); walletPayBtn.dataset.bound = '1'; }
+                if (cancelPayBtn && !cancelPayBtn.dataset.bound) { cancelPayBtn.addEventListener('click', (e)=>{ e.preventDefault(); closePayPanel(); }); cancelPayBtn.dataset.bound='1'; }
+                if (payModal && !payModal.dataset.boundOutside) { payModal.addEventListener('click', (e)=>{ if (e.target === payModal) closePayPanel(); }); payModal.dataset.boundOutside='1'; }
+
+                if (submitPayBtn && !submitPayBtn.dataset.bound) {
+                    submitPayBtn.addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        try {
+                            if (!currentUser || !appId) { showMessageBox('Please sign in to continue.', 'error'); return; }
+                            const amount = 5000;
+                            const bankName = (document.getElementById('walletBankNameInput')?.value || '').trim();
+                            const txRef = (document.getElementById('walletTxRefInput')?.value || '').trim();
+                            const paidAt = (document.getElementById('walletPaidAtInput')?.value || '').trim();
+                            const note = (document.getElementById('walletNoteInput')?.value || '').trim();
+                            const fileInput = document.getElementById('walletReceiptInput');
+                            let receiptUrl = null;
+                            if (fileInput && fileInput.files && fileInput.files[0]) {
+                                showMessageBox('Uploading receipt...', 'loading', true);
+                                const uploaded = await uploadMediaToCloudinary(fileInput.files[0]);
+                                if (!uploaded) { showMessageBox('Receipt upload failed. You can submit without image.', 'warning'); }
+                                else { receiptUrl = uploaded; }
+                            }
+                            const payload = {
+                                userId: currentUser.uid,
+                                amountNaira: amount,
+                                bankName: bankName || null,
+                                transactionRef: txRef || null,
+                                paidAt: paidAt || null,
+                                note: note || null,
+                                receiptUrl: receiptUrl || null,
+                                status: 'pending',
+                                createdAt: serverTimestamp()
+                            };
+                            await addDoc(collection(db, 'artifacts', appId, 'wallet_unlock_requests'), payload);
+                            closePayPanel();
+                            showMessageBox('Payment details sent. A developer will verify and unlock your wallet shortly.', 'success');
+                        } catch (err) {
+                            console.error('Nuvia_ERROR: submit wallet payment', err);
+                            showMessageBox('Failed to send details. Please try again.', 'error');
+                        }
+                    });
+                    submitPayBtn.dataset.bound='1';
                 }
             } catch (_) {}
 
