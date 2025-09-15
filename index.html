@@ -4200,6 +4200,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         .chip-progress > div { height:100%; width:100%; background: linear-gradient(90deg, #ff2e63 0%, #ff874d 50%, #ffd400 100%); background-size:200% 100%; transition: width 0.6s ease, background-position 0.6s ease; }
         #levelChipName, #levelChipPercent { color: #fff !important; font-weight:700; }
         #levelChipPercent { opacity: 0.95; font-size:0.9rem; }
+        #walletChipAmount { font-weight:800; font-size:1.05rem; color:#fff !important; }
         #jcoinRate { color:#fff !important; font-weight:700; }
         .wallet-chip .chip-sub { color: rgba(255,255,255,0.9) !important; font-size:0.85rem; }
         /* Ensure hover states remain visible */
@@ -4528,7 +4529,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                                 <li><strong>Deterministic inspiration</strong> — time-seeded algorithms deliver consistent, non-repetitive daily prompts.</li>
                                 <li><strong>Scripture indexing</strong> ��� fast chapter and verse lookup with offline resume and reading progress persistence.</li>
                                 <li><strong>Privacy-first profiles</strong> — local-first defaults with optional cloud sync for registered users.</li>
-                                <li><strong>Content safety</strong> ��� layered moderation combining heuristics and community signals.</li>
+                                <li><strong>Content safety</strong> ���� layered moderation combining heuristics and community signals.</li>
                             </ul>
                         </div>
 
@@ -4602,6 +4603,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 <a href="#" id="walletChipLink" class="chip wallet-chip">
                     <i class="fas fa-wallet"></i>
                     <div class="chip-text">
+                        <div><span id="walletChipAmount">0</span> JCoins</div>
                         <div class="chip-sub">Rate: ₦<span id="jcoinRate">0</span>/J</div>
                     </div>
                 </a>
@@ -10936,7 +10938,8 @@ async function fetchAndDisplayPosts() {
                             hideGlobalAnnouncement();
                         }
                                         // Update wallet chip
-                if (homeChipsRow && jcoinRateSpan) {
+                if (homeChipsRow && walletChipAmount && jcoinRateSpan) {
+                    walletChipAmount.textContent = String(currentUserProfileData?.jCoins || 0);
                     jcoinRateSpan.textContent = String(currentSystemSettings?.jcoinNairaRate || 0);
                 // Also update wallet.html oneJcoinRateDisplay if opened in same session/window (best-effort)
                 try { if (window.parent && window.parent.document) { const oneEl = window.parent.document.getElementById('oneJcoinRateDisplay'); if (oneEl && currentSystemSettings?.jcoinNairaRate) oneEl.textContent = `₦${(1/currentSystemSettings.jcoinNairaRate).toFixed(2)} NGN`; } } catch(e) {}
@@ -13373,58 +13376,6 @@ async function fetchAndDisplayPosts() {
   window.addEventListener('beforeunload', ()=>{ if(window.__nuvia3dInterval) clearInterval(window.__nuvia3dInterval); });
 })();
 </script>
-    <main>
-        <section class="card" style="margin:24px auto; max-width:500px;">
-            <h2>Your JCoin Balance</h2>
-            <p>JCoins: <span id="jcoin-balance">...</span></p>
-            <p>Naira Equivalent: ₦<span id="naira-equivalent">...</span></p>
-        </section>
-    </main>
-    <script src="assets/js/lazy-images.js" defer></script>
-    <script>
-    // --- JCoin currency rate logic (copied from wallet.html) ---
-    let currentSystemSettings = { jcoinNairaRate: 0.005 };
-    const jcoinBalanceSpan = document.getElementById('jcoin-balance');
-    const nairaEquivalentSpan = document.getElementById('naira-equivalent');
-
-    async function fetchSystemSettings() {
-        if (typeof getDoc === 'function' && typeof SYSTEM_SETTINGS_DOC_REF !== 'undefined') {
-            const docSnap = await getDoc(SYSTEM_SETTINGS_DOC_REF);
-            if (docSnap.exists()) {
-                currentSystemSettings = docSnap.data();
-            }
-        }
-    }
-
-    async function fetchJCoinBalance() {
-        let jCoins = 0;
-        if (typeof getDoc === 'function' && typeof doc === 'function' && typeof db !== 'undefined' && typeof appId !== 'undefined' && typeof auth !== 'undefined') {
-            if (typeof onAuthStateChanged === 'function') {
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        await fetchSystemSettings();
-                        const userProfileDocRef = doc(db, "artifacts", appId, "users", user.uid, "profiles", "user_profile");
-                        const docSnap = await getDoc(userProfileDocRef);
-                        if (docSnap.exists()) {
-                            jCoins = docSnap.data().jCoins || 0;
-                        }
-                        jcoinBalanceSpan.textContent = jCoins;
-                        nairaEquivalentSpan.textContent = (jCoins * currentSystemSettings.jcoinNairaRate).toFixed(3);
-                    } else {
-                        jcoinBalanceSpan.textContent = 0;
-                        nairaEquivalentSpan.textContent = (0).toFixed(3);
-                    }
-                });
-            }
-        } else {
-            // Fallback for demo
-            jcoinBalanceSpan.textContent = jCoins;
-            nairaEquivalentSpan.textContent = (jCoins * currentSystemSettings.jcoinNairaRate).toFixed(3);
-        }
-    }
-
-    fetchJCoinBalance();
-    </script>
 <div id="mediaViewer" class="media-viewer-overlay" role="dialog" aria-modal="true" aria-label="Image preview" style="display:none;">
   <div class="media-viewer-content">
     <button id="mediaViewerClose" class="media-viewer-close" aria-label="Close">&times;</button>
