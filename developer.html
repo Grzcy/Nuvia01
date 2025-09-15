@@ -5106,7 +5106,7 @@
 
         function subscribeWalletUnlockRequests() {
             if (unsubscribeWalletUnlockListener) { unsubscribeWalletUnlockListener(); unsubscribeWalletUnlockListener = null; }
-            let qRef = collection(db, 'artifacts', appId, 'wallet_unlock_requests');
+            let qRef = collection(db, 'artifacts', appId, 'public', 'data', 'wallet_unlock_requests');
             const status = walletUnlockStatusFilter?.value || 'pending';
             const userQ = (walletUnlockUserSearch?.value || '').trim();
             const constraints = [];
@@ -5138,7 +5138,7 @@
                 if (!requestId) { showMessageBox('Invalid request.', 'error'); return; }
                 toggleButtonLoading(buttonEl, true);
 
-                const reqRef = doc(db, 'artifacts', appId, 'wallet_unlock_requests', requestId);
+                const reqRef = doc(db, 'artifacts', appId, 'public', 'data', 'wallet_unlock_requests', requestId);
                 await runTransaction(db, async (tx) => {
                     const reqSnap = await tx.get(reqRef);
                     if (!reqSnap.exists()) { throw new Error('Request not found'); }
@@ -5177,7 +5177,7 @@
                 if (!requestId) { showMessageBox('Invalid request.', 'error'); return; }
                 toggleButtonLoading(buttonEl, true);
 
-                const reqRef = doc(db, 'artifacts', appId, 'wallet_unlock_requests', requestId);
+                const reqRef = doc(db, 'artifacts', appId, 'public', 'data', 'wallet_unlock_requests', requestId);
                 await runTransaction(db, async (tx) => {
                     const reqSnap = await tx.get(reqRef);
                     if (!reqSnap.exists()) { throw new Error('Request not found'); }
