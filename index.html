@@ -12488,6 +12488,52 @@ async function fetchAndDisplayPosts() {
                 }
             } catch (_) {}
 
+            // Preserve and restore where the user left on index.html when navigating back
+            try {
+                if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+            } catch(_) {}
+            const INDEX_SCROLL_KEY = 'nuvia_idx_scroll';
+            const INDEX_RESTORE_FLAG = 'nuvia_idx_restore';
+            function saveIndexState(){
+                try{
+                    sessionStorage.setItem(INDEX_SCROLL_KEY, String(window.scrollY || window.pageYOffset || 0));
+                    sessionStorage.setItem(INDEX_RESTORE_FLAG, '1');
+                    const authed = document.body.classList.contains('authenticated') || !!(window.currentUser && window.currentUser.uid);
+                    sessionStorage.setItem('nuvia_last_auth', authed ? '1' : (sessionStorage.getItem('nuvia_last_auth') || '0'));
+                }catch(_){}
+            }
+            function restoreIndexStateIfNeeded(){
+                try{
+                    const guestKeys = document.getElementById('guestHeaderKeys');
+                    if (guestKeys) guestKeys.style.display = 'none';
+                    const ob = document.getElementById('offlineStatusBanner');
+                    if (navigator.onLine && ob) ob.style.display = 'none';
+                    const flag = sessionStorage.getItem(INDEX_RESTORE_FLAG) === '1';
+                    const y = parseInt(sessionStorage.getItem(INDEX_SCROLL_KEY) || '0', 10);
+                    if (!flag || isNaN(y)) return;
+                    const scrollToY = Math.max(0, y);
+                    const doScroll = () => { window.scrollTo(0, scrollToY); };
+                    requestAnimationFrame(() => { doScroll(); setTimeout(doScroll, 0); setTimeout(doScroll, 60); setTimeout(doScroll, 180); });
+                    sessionStorage.setItem(INDEX_RESTORE_FLAG, '0');
+                }catch(_){ }
+            }
+            // Save position when navigating away from index via links
+            document.addEventListener('click', (ev) => {
+                const a = ev.target && ev.target.closest ? ev.target.closest('a[href]') : null;
+                if (!a) return;
+                const href = a.getAttribute('href') || '';
+                if (href && !href.includes('index.html') && !href.startsWith('#') && !/^javascript:/i.test(href)) {
+                    saveIndexState();
+                }
+            }, true);
+            window.addEventListener('pagehide', saveIndexState);
+            window.addEventListener('pageshow', (e) => {
+                const navs = (performance.getEntriesByType && performance.getEntriesByType('navigation')) || [];
+                const isBF = e.persisted || (navs[0] && navs[0].type === 'back_forward');
+                if (isBF) restoreIndexStateIfNeeded();
+            });
+            restoreIndexStateIfNeeded();
+
             // Open payment details panel when clicking "Pay ₦5000"
             try {
                 const walletPayBtn = document.getElementById('walletPayBtn');
