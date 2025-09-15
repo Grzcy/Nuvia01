@@ -4814,7 +4814,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                     </ul>
                     <div class="button-group" style="display:flex;gap:10px;justify-content:flex-end;">
                         <button id="closeWalletLockedBtn" class="modal-button cancel-button">Close</button>
-                        <a id="walletPayBtn" href="/Wallet.html?unlock=1&amount=5000" class="modal-button confirm-button">Pay ₦5000</a>
+                        <a id="walletPayBtn" href="/Wallet.html?unlock=1&amount=5000" class="modal-button confirm-button">Pay ���5000</a>
                     </div>
                 </div>
             </div>
@@ -10938,8 +10938,7 @@ async function fetchAndDisplayPosts() {
                             hideGlobalAnnouncement();
                         }
                                         // Update wallet chip
-                if (homeChipsRow && walletChipAmount && jcoinRateSpan) {
-                    walletChipAmount.textContent = String(currentUserProfileData?.jCoins || 0);
+                if (homeChipsRow && jcoinRateSpan) {
                     jcoinRateSpan.textContent = String(currentSystemSettings?.jcoinNairaRate || 0);
                 // Also update wallet.html oneJcoinRateDisplay if opened in same session/window (best-effort)
                 try { if (window.parent && window.parent.document) { const oneEl = window.parent.document.getElementById('oneJcoinRateDisplay'); if (oneEl && currentSystemSettings?.jcoinNairaRate) oneEl.textContent = `₦${(1/currentSystemSettings.jcoinNairaRate).toFixed(2)} NGN`; } } catch(e) {}
