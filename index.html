@@ -4814,7 +4814,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                     </ul>
                     <div class="button-group" style="display:flex;gap:10px;justify-content:flex-end;">
                         <button id="closeWalletLockedBtn" class="modal-button cancel-button">Close</button>
-                        <a id="walletPayBtn" href="/Wallet.html?unlock=1&amount=5000" class="modal-button confirm-button">Pay ₦5000</a>
+                        <a id="walletPayBtn" href="/wallet.html?unlock=1&amount=5000" class="modal-button confirm-button">Pay ₦5000</a>
                     </div>
                 </div>
             </div>
@@ -10967,7 +10967,7 @@ async function fetchAndDisplayPosts() {
                         e.preventDefault();
                         const unlocked = !!currentUserProfileData?.walletUnlocked;
                         if (unlocked) {
-                            window.location.href = '/Wallet.html';
+                            window.location.href = '/wallet.html';
                         } else {
                             const m = document.getElementById('walletLockedModal');
                             if (m) { m.style.display='block'; setTimeout(()=>m.classList.add('active'),0); }
@@ -12198,16 +12198,19 @@ async function fetchAndDisplayPosts() {
                 fetchAndDisplayPosts();
                 return;
             }
-            const walletAnchor = ev.target.closest('a[href*="/Wallet.html"]');
+            const walletAnchor = ev.target.closest('a[href]');
             if (walletAnchor) {
                 const href = walletAnchor.getAttribute('href') || '';
-                const allowUnlockFlow = /[?&]unlock=1(\b|&|$)/.test(href);
-                const unlocked = !!(currentUserProfileData && currentUserProfileData.walletUnlocked);
-                if (!unlocked && !allowUnlockFlow) {
-                    ev.preventDefault();
-                    const m = document.getElementById('walletLockedModal');
-                    if (m) { m.style.display='block'; setTimeout(()=>m.classList.add('active'),0); }
-                    return;
+                const isWalletLink = /\/wallet\.html(\b|[?#]|$)/i.test(href);
+                if (isWalletLink) {
+                    const allowUnlockFlow = /[?&]unlock=1(\b|&|$)/.test(href);
+                    const unlocked = !!(currentUserProfileData && currentUserProfileData.walletUnlocked);
+                    if (!unlocked && !allowUnlockFlow) {
+                        ev.preventDefault();
+                        const m = document.getElementById('walletLockedModal');
+                        if (m) { m.style.display='block'; setTimeout(()=>m.classList.add('active'),0); }
+                        return;
+                    }
                 }
             }
             const followBtn = ev.target.closest('.follow-tag-btn');
@@ -12499,7 +12502,7 @@ async function fetchAndDisplayPosts() {
                         ev.stopPropagation();
                         const unlocked = !!(window.currentUserProfileData && window.currentUserProfileData.walletUnlocked);
                         if (unlocked) {
-                            window.location.href = '/Wallet.html';
+                            window.location.href = '/wallet.html';
                         } else {
                             const m = document.getElementById('walletLockedModal');
                             if (m) { m.style.display = 'block'; setTimeout(() => m.classList.add('active'), 0); }
