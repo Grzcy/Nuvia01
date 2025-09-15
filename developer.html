@@ -1458,7 +1458,17 @@
             .admin-section { width: 100vw; max-width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw); }
         }
     </style>
-<style id="header-overflow-fix">/*header-overflow-fix*/header .header-content-wrapper{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap}header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0;justify-content:flex-end}#profileLink{display:inline-flex;align-items:center;column-gap:8px;row-gap:2px;flex-wrap:wrap;max-width:100%;min-width:0}#profileLink #headerDisplayName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;flex:0 1 auto}#headerProfilePic,#headerAvatarIcon{flex:0 0 auto}@media (max-width:600px){header .header-content-wrapper{gap:8px}#profileLink{column-gap:6px}}</style></head>
+<style id="header-overflow-fix">/*header-overflow-fix*/header .header-content-wrapper{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap}header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0;justify-content:flex-end}#profileLink{display:inline-flex;align-items:center;column-gap:8px;row-gap:2px;flex-wrap:wrap;max-width:100%;min-width:0}#profileLink #headerDisplayName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;flex:0 1 auto}#headerProfilePic,#headerAvatarIcon{flex:0 0 auto}@media (max-width:600px){header .header-content-wrapper{gap:8px}#profileLink{column-gap:6px}}</style>
+<style id="collapsible-admin-sections">
+  /* Collapsible admin sections and scrollable large lists */
+  .section-toggle-row { display:flex; justify-content:flex-end; margin:-6px 0 10px 0; }
+  .section-toggle { background: var(--button-background); color: var(--white); border: none; border-radius: 12px; padding: 6px 12px; font-weight: 700; cursor: pointer; box-shadow: var(--button-shadow); }
+  .section-toggle[aria-expanded="true"] { filter: brightness(1.05); }
+  /* Keep big tables within viewport, vertical scroll inside container */
+  .users-table-container, .rewards-table-container, .reports-table-container, .posts-table-container { max-height: 60vh; overflow: auto; }
+  /* Ensure containers keep rounded corners and borders */
+  .users-table-container, .rewards-table-container, .reports-table-container, .posts-table-container { border-radius: 10px; }
+</style></head>
 <body class="theme-dark-mode">
 
     <header>
@@ -5749,6 +5759,43 @@
                     }
                 });
             }
+
+            // Collapsible admin sections (keeps heavy lists hidden until expanded)
+            try {
+                function installCollapsibleByTitle(title, storageKey, defaultCollapsed = true){
+                    const headers = Array.from(document.querySelectorAll('.admin-section h3'));
+                    const header = headers.find(h => (h.textContent||'').trim().toLowerCase().startsWith(title.toLowerCase()));
+                    if (!header) return;
+                    const row = document.createElement('div');
+                    row.className = 'section-toggle-row';
+                    const btn = document.createElement('button');
+                    btn.className = 'section-toggle';
+                    btn.type = 'button';
+                    btn.textContent = 'Show';
+                    btn.setAttribute('aria-expanded', 'false');
+                    row.appendChild(btn);
+                    header.insertAdjacentElement('afterend', row);
+                    // Collect siblings until next h3
+                    const nodes = [];
+                    let n = row.nextElementSibling;
+                    while (n && n.tagName !== 'H3') { nodes.push(n); n = n.nextElementSibling; }
+                    const apply = (collapsed)=>{
+                        nodes.forEach(el=>{ if (el) el.style.display = collapsed ? 'none' : ''; });
+                        btn.textContent = collapsed ? 'Show' : 'Hide';
+                        btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+                        try { localStorage.setItem(storageKey, collapsed ? '1' : '0'); } catch(_){ }
+                    };
+                    let collapsed = defaultCollapsed;
+                    try { const v = localStorage.getItem(storageKey); if (v === '0') collapsed = false; if (v === '1') collapsed = true; } catch(_){ }
+                    apply(collapsed);
+                    btn.addEventListener('click', ()=>{ collapsed = !collapsed; apply(collapsed); });
+                }
+                installCollapsibleByTitle('Global User Management', 'dev_collapsed_global_users', true);
+                installCollapsibleByTitle('Pending JCoin Requests', 'dev_collapsed_jcoin_requests', true);
+                installCollapsibleByTitle('Pending Activity Rewards', 'dev_collapsed_activity_rewards', true);
+                installCollapsibleByTitle('Reported Content & Users', 'dev_collapsed_reports', true);
+                installCollapsibleByTitle('Public Posts Overview', 'dev_collapsed_public_posts', true);
+            } catch(e) { console.warn('Collapsible setup failed', e); }
 
         });
 
