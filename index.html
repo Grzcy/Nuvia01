@@ -4956,6 +4956,20 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 </div>
             </div>
 
+            <style id="edit-post-modal-fix">
+                /* Responsive Edit Post modal: prevent content/media overflow */
+                #editPostModal .modal-content { max-height: 86vh; overflow: auto; overscroll-behavior: contain; }
+                #editPostModal .input-group { margin: 0; }
+                #editPostContent { max-height: 40vh; overflow: auto; }
+                #editPostModal .media-upload-area { display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
+                #editPostModal .media-preview { width: 100%; max-width: 100%; height: auto; max-height: 50vh; object-fit: contain; border-radius: 12px; border: 1px solid var(--border-light); background: rgba(0,0,0,0.15); }
+                #editPostModal video.media-preview { background: #000; }
+                #removeEditMedia { align-self: flex-end; }
+                @media (max-width: 520px) {
+                  #editPostModal .modal-content { width: 95%; padding: 1.2rem; }
+                  #editPostContent { min-height: 100px; }
+                }
+            </style>
             <!-- Edit Post Modal -->
             <div id="editPostModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="editPostModalTitle">
                 <div class="modal-content">
