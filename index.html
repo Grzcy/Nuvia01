@@ -4529,7 +4529,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                                 <li><strong>Deterministic inspiration</strong> — time-seeded algorithms deliver consistent, non-repetitive daily prompts.</li>
                                 <li><strong>Scripture indexing</strong> ��� fast chapter and verse lookup with offline resume and reading progress persistence.</li>
                                 <li><strong>Privacy-first profiles</strong> — local-first defaults with optional cloud sync for registered users.</li>
-                                <li><strong>Content safety</strong> ���� layered moderation combining heuristics and community signals.</li>
+                                <li><strong>Content safety</strong> ��� layered moderation combining heuristics and community signals.</li>
                             </ul>
                         </div>
 
@@ -10939,8 +10939,10 @@ async function fetchAndDisplayPosts() {
                         }
                                         // Update wallet chip
                 if (homeChipsRow && walletChipAmount && jcoinRateSpan) {
-                    walletChipAmount.textContent = String(currentUserProfileData?.jCoins || 0);
-                    jcoinRateSpan.textContent = String(currentSystemSettings?.jcoinNairaRate || 0);
+                    const jCoinsBal = Number(currentUserProfileData?.jCoins || 0);
+                    walletChipAmount.textContent = String(jCoinsBal);
+                    const computedRate = (jCoinsBal * 0.005).toFixed(3);
+                    jcoinRateSpan.textContent = computedRate;
                 // Also update wallet.html oneJcoinRateDisplay if opened in same session/window (best-effort)
                 try { if (window.parent && window.parent.document) { const oneEl = window.parent.document.getElementById('oneJcoinRateDisplay'); if (oneEl && currentSystemSettings?.jcoinNairaRate) oneEl.textContent = `₦${(1/currentSystemSettings.jcoinNairaRate).toFixed(2)} NGN`; } } catch(e) {}
                     homeChipsRow.style.display = 'flex';
