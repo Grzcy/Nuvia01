@@ -45,26 +45,46 @@ export async function registerSession(auth, db, appId){
         lastSeen: serverTimestamp()
       }, { merge: true });
     });
-  }catch(e){ console.error('registerSession: txn failed', e); }
+  }catch(e){
+    console.error('registerSession: txn failed', e);
+    // If permission denied, bail out silently to avoid noisy errors
+    if(e && (e.code === 'permission-denied' || (e.message && e.message.toLowerCase().includes('permission')))) return null;
+  }
 
   // Listen for remote changes - if another session claims ownership, sign out
-  const unsub = onSnapshot(sessionDocRef, (snap)=>{
-    if(!snap.exists()) return;
-    const data = snap.data();
-    if(!data) return;
-    const remoteId = data.sessionId;
-    if(remoteId && remoteId !== mySessionId){
-      // Another session claimed this account -> force sign out
-      console.warn('Session replaced by remote:', remoteId, 'local:', mySessionId);
-      try{ signOut(auth); showSessionReplacedMessage(); }catch(e){ console.error(e); }
-    }
-  });
+  let unsub = null;
+  try{
+    unsub = onSnapshot(sessionDocRef, (snap)=>{
+      if(!snap.exists()) return;
+      const data = snap.data();
+      if(!data) return;
+      const remoteId = data.sessionId;
+      if(remoteId && remoteId !== mySessionId){
+        // Another session claimed this account -> force sign out
+        console.warn('Session replaced by remote:', remoteId, 'local:', mySessionId);
+        try{ signOut(auth); showSessionReplacedMessage(); }catch(e){ console.error(e); }
+      }
+    }, (err)=>{
+      console.error('session-manager: onSnapshot error', err);
+      // Stop heartbeat and unsubscribe to avoid repeated permission-denied errors
+      try{ if(unsub) unsub(); }catch(e){}
+    });
+  }catch(err){
+    console.error('session-manager: failed to attach onSnapshot', err);
+  }
 
   // Heartbeat: update lastSeen periodically
-  const hb = setInterval(()=>{ updateDoc(sessionDocRef, { lastSeen: serverTimestamp() }).catch(()=>{}); }, 60000);
+  const hb = setInterval(()=>{
+    updateDoc(sessionDocRef, { lastSeen: serverTimestamp() }).catch((err)=>{
+      if(err && (err.code === 'permission-denied' || (err.message && err.message.toLowerCase().includes('permission')))){
+        console.warn('session-manager: heartbeat permission denied, stopping heartbeat');
+        try{ clearInterval(hb); if(unsub) unsub(); }catch(e){}
+      }
+    });
+  }, 60000);
 
   // Return unregister function
-  return function unregister(){ try{ unsub(); clearInterval(hb); }catch(e){} };
+  return function unregister(){ try{ if(unsub) unsub(); clearInterval(hb); }catch(e){} };
 }
 
 function showSessionReplacedMessage(){
