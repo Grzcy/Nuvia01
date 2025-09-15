@@ -12408,6 +12408,20 @@ async function fetchAndDisplayPosts() {
             // Initialize DOM elements first
             initializeDOMElements();
 
+            // Open wallet unlock panel when clicking JCoin rate
+            try {
+                if (window.jcoinRateSpan) {
+                    const openWalletLockedPanel = (ev) => {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        const m = document.getElementById('walletLockedModal');
+                        if (m) { m.style.display = 'block'; setTimeout(() => m.classList.add('active'), 0); }
+                    };
+                    window.jcoinRateSpan.addEventListener('click', openWalletLockedPanel);
+                    if (window.jcoinRateSpan.parentElement) window.jcoinRateSpan.parentElement.addEventListener('click', openWalletLockedPanel);
+                }
+            } catch (_) {}
+
             // Wire post composer listeners after DOM is ready
             if (postMediaUpload) {
                 postMediaUpload.addEventListener('change', (event) => {
