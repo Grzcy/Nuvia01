@@ -590,6 +590,53 @@
       quizContent.innerHTML = html;
     }
 
+    function openHardQuiz(){ if (hardQuizModal) hardQuizModal.classList.remove('hidden'); renderHardQuizStep(); }
+    function closeHardQuiz(){ if (hardQuizModal) hardQuizModal.classList.add('hidden'); }
+    function renderHardQuizStep(){
+      if (!hardQuizContent) return;
+      const q = hardQuizQuestions[hardQuizIndex];
+      let html = `<div style="font-weight:800; margin-bottom:8px;">Q${hardQuizIndex+1}/5: ${q.q}</div>`;
+      html += '<div class="quiz-options">';
+      q.a.forEach((opt, i)=>{
+        html += `<label class="quiz-option">
+          <input type="radio" name="hardQuizOpt" value="${i}"> <span>${opt}</span>
+        </label>`;
+      });
+      html += '</div>';
+      hardQuizContent.innerHTML = html;
+    }
+
+    async function nextHardQuizStep(){
+      const sel = hardQuizContent.querySelector('input[name="hardQuizOpt"]:checked');
+      if (!sel) { showToast('Choose an answer'); return; }
+      const val = Number(sel.value);
+      if (val === hardQuizQuestions[hardQuizIndex].c) hardQuizCorrect++;
+      hardQuizIndex++;
+      if (hardQuizIndex >= hardQuizQuestions.length){
+        closeHardQuiz();
+        if (!currentUser){ showToast('Login to play.'); return; }
+        const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'engagement', 'daily_hard_quiz');
+        const snap = await getDoc(ref);
+        const now = new Date();
+        if (snap.exists()){
+          const last = snap.data().lastAt?.toDate();
+          if (last && (now - last) < 24*60*60*1000){ hardQuizStatus.textContent = 'Come back tomorrow.'; hardQuizIndex = 0; hardQuizCorrect = 0; return; }
+        }
+        if (hardQuizCorrect >= 4){
+          const okJ = await awardJCoins(25, 'hard_quiz', { correct: hardQuizCorrect });
+          const okG = await awardGas(40, 'hard_quiz', { correct: hardQuizCorrect });
+          if (okJ && okG){ hardQuizStatus.textContent = `Passed ${hardQuizCorrect}/5. +25 J, +40 Gas`; await setDoc(ref, { lastAt: serverTimestamp() }, { merge: true }); }
+          await loadEarningsHistory();
+        } else {
+          hardQuizStatus.textContent = `Score ${hardQuizCorrect}/5. Try again tomorrow.`;
+          await setDoc(ref, { lastAt: serverTimestamp() }, { merge: true });
+        }
+        hardQuizIndex = 0; hardQuizCorrect = 0;
+        return;
+      }
+      renderHardQuizStep();
+    }
+
     async function nextQuizStep(){
       const sel = quizContent.querySelector('input[name="quizOpt"]:checked');
       if (!sel) { showToast('Choose an answer'); return; }
@@ -680,9 +727,11 @@
       rushTimer = setTimeout(async ()=>{
         stopRush();
         closeRush();
-        let reward = 5; if (rushClicks >= 30) reward = 20; else if (rushClicks >= 15) reward = 10;
-        const ok = await awardJCoins(reward, 'daily_rush', { clicks: rushClicks });
-        if (ok){ rushStatus.textContent = `Score ${rushClicks}. +${reward} JCoins`; await setDoc(ref, { lastAt: serverTimestamp() }, { merge: true }); }
+        let jReward = 5; if (rushClicks >= 30) jReward = 20; else if (rushClicks >= 15) jReward = 10;
+        let gReward = 5; if (rushClicks >= 30) gReward = 20; else if (rushClicks >= 15) gReward = 10;
+        const okJ = await awardJCoins(jReward, 'daily_rush', { clicks: rushClicks });
+        const okG = await awardGas(gReward, 'daily_rush', { clicks: rushClicks });
+        if (okJ && okG){ rushStatus.textContent = `Score ${rushClicks}. +${jReward} J, +${gReward} Gas`; await setDoc(ref, { lastAt: serverTimestamp() }, { merge: true }); }
         await loadEarningsHistory();
       }, 10000);
     }
@@ -714,9 +763,98 @@
       const cs = await getDoc(checkinRef);
       const streak = cs.exists()? (cs.data().streakCount||0) : 0;
       if (streak < 7){ weeklyStreakStatus.textContent = 'Keep streak 7+ to claim.'; return; }
-      const ok = await awardJCoins(20, 'weekly_streak_bonus', { week: weekStr, streak });
-      if (ok){ await setDoc(bonusRef, { lastWeekStr: weekStr, lastAt: serverTimestamp() }, { merge: true }); weeklyStreakStatus.textContent = 'Weekly bonus claimed! +20 JCoins'; }
+      const okJ = await awardJCoins(20, 'weekly_streak_bonus', { week: weekStr, streak });
+      const okG = await awardGas(30, 'weekly_streak_bonus', { week: weekStr, streak });
+      if (okJ && okG){ await setDoc(bonusRef, { lastWeekStr: weekStr, lastAt: serverTimestamp() }, { merge: true }); weeklyStreakStatus.textContent = 'Weekly bonus claimed! +20 J, +30 Gas'; }
       await loadEarningsHistory();
+    }
+
+    function openFocus(){ if (focusModal) focusModal.classList.remove('hidden'); }
+    function closeFocus(){ if (focusModal) focusModal.classList.add('hidden'); if (focusTimer){ clearInterval(focusTimer); focusTimer=null; } document.removeEventListener('visibilitychange', onVisChange); window.removeEventListener('blur', onBlur); }
+    function onVisChange(){ if (document.hidden){ focusFailed = true; focusContent.innerHTML = '<div class="muted">Focus lost. Challenge failed.</div>'; } }
+    function onBlur(){ focusFailed = true; focusContent.innerHTML = '<div class="muted">Window blurred. Challenge failed.</div>'; }
+
+    async function startFocusTimer(){
+      if (!currentUser){ showToast('Login first.'); return; }
+      const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'engagement', 'daily_focus');
+      const snap = await getDoc(ref);
+      const now = new Date();
+      if (snap.exists()){
+        const last = snap.data().lastAt?.toDate();
+        if (last && (now - last) < 24*60*60*1000){ focusStatus.textContent = 'Come back tomorrow.'; return; }
+      }
+      focusRemaining = 120; // seconds
+      focusFailed = false;
+      openFocus();
+      focusContent.innerHTML = `<div><strong>${focusRemaining}s</strong> remaining. Stay focused…</div>`;
+      document.addEventListener('visibilitychange', onVisChange);
+      window.addEventListener('blur', onBlur);
+      if (focusTimer) clearInterval(focusTimer);
+      focusTimer = setInterval(async ()=>{
+        focusRemaining--; if (focusRemaining < 0) focusRemaining = 0;
+        if (!focusFailed){ focusContent.innerHTML = `<div><strong>${focusRemaining}s</strong> remaining. Stay focused…</div>`; }
+        if (focusRemaining <= 0){
+          clearInterval(focusTimer); focusTimer=null; closeFocus();
+          if (focusFailed){ focusStatus.textContent = 'Failed. Try again tomorrow.'; await setDoc(ref, { lastAt: serverTimestamp() }, { merge: true }); return; }
+          const okJ = await awardJCoins(20, 'daily_focus');
+          const okG = await awardGas(35, 'daily_focus');
+          if (okJ && okG){ focusStatus.textContent = 'Completed! +20 J, +35 Gas'; await setDoc(ref, { lastAt: serverTimestamp() }, { merge: true }); }
+          await loadEarningsHistory();
+        }
+      }, 1000);
+    }
+
+    function openTyping(){ if (typingModal) typingModal.classList.remove('hidden'); }
+    function closeTyping(){ if (typingModal) typingModal.classList.add('hidden'); }
+
+    function startTypingChallenge(){
+      if (!currentUser){ showToast('Login first.'); return; }
+      (async ()=>{
+        const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'engagement', 'daily_typing');
+        const snap = await getDoc(ref);
+        const now = new Date();
+        if (snap.exists()){
+          const last = snap.data().lastAt?.toDate();
+          if (last && (now - last) < 24*60*60*1000){ typingStatus.textContent = 'Come back tomorrow.'; return; }
+        }
+        typingTarget = verses[Math.floor(Math.random()*verses.length)] + ' Keep your focus and type carefully.';
+        typingStartAt = Date.now();
+        openTyping();
+        typingContent.innerHTML = `<div style="margin-bottom:8px; font-weight:800;">Type within 60s with 95%+ accuracy</div>
+          <div class="muted" style="margin-bottom:8px;">Passage:</div>
+          <div style="background:var(--input-background); padding:8px; border-radius:8px;">${typingTarget}</div>
+          <textarea id="typingInput" rows="5" style="width:100%; margin-top:8px; background:var(--input-background); color:var(--white); border:1px solid var(--border-light); border-radius:8px; padding:8px;"></textarea>
+          <div id="typingTimer" class="muted mt-8">60s left</div>`;
+        let secs = 60;
+        const timer = setInterval(()=>{
+          secs--; const t = document.getElementById('typingTimer'); if (t) t.textContent = `${secs}s left`;
+          if (secs <= 0){ clearInterval(timer); }
+        },1000);
+        typingSubmitButton.onclick = async ()=>{
+          clearInterval(timer);
+          const ref2 = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'engagement', 'daily_typing');
+          const input = (document.getElementById('typingInput')||{}).value || '';
+          const elapsed = (Date.now() - typingStartAt)/1000;
+          const acc = computeAccuracy(typingTarget, input);
+          closeTyping();
+          if (elapsed <= 60 && acc >= 0.95){
+            const okJ = await awardJCoins(30, 'daily_typing', { accuracy: acc });
+            const okG = await awardGas(50, 'daily_typing', { accuracy: acc });
+            if (okJ && okG){ typingStatus.textContent = `Great! ${(acc*100).toFixed(1)}% acc. +30 J, +50 Gas`; await setDoc(ref2, { lastAt: serverTimestamp() }, { merge: true }); }
+            await loadEarningsHistory();
+          } else {
+            typingStatus.textContent = `Failed (${Math.min(100,(acc*100)).toFixed(1)}% in ${Math.round(elapsed)}s). Try tomorrow.`;
+            await setDoc(ref2, { lastAt: serverTimestamp() }, { merge: true });
+          }
+        };
+      })();
+    }
+
+    function computeAccuracy(a,b){
+      const s1 = a.trim(); const s2 = b.trim();
+      const len = Math.max(s1.length, s2.length) || 1;
+      let match = 0; for (let i=0;i<Math.min(s1.length,s2.length);i++){ if (s1[i]===s2[i]) match++; }
+      return match/len;
     }
 
     onAuthStateChanged(auth, async (user)=>{
@@ -747,6 +885,16 @@
     if (rushStartButton) rushStartButton.addEventListener('click', startRush);
     if (rushCloseButton) rushCloseButton.addEventListener('click', closeRush);
     if (claimWeeklyStreakButton) claimWeeklyStreakButton.addEventListener('click', claimWeeklyStreak);
+
+    if (startHardQuizButton) startHardQuizButton.addEventListener('click', ()=>{ hardQuizIndex=0; hardQuizCorrect=0; openHardQuiz(); });
+    if (hardQuizNextButton) hardQuizNextButton.addEventListener('click', nextHardQuizStep);
+    if (hardQuizCloseButton) hardQuizCloseButton.addEventListener('click', closeHardQuiz);
+
+    if (startFocusButton) startFocusButton.addEventListener('click', startFocusTimer);
+    if (focusCloseButton) focusCloseButton.addEventListener('click', closeFocus);
+
+    if (startTypingButton) startTypingButton.addEventListener('click', startTypingChallenge);
+    if (typingCloseButton) typingCloseButton.addEventListener('click', closeTyping);
   </script>
 </body>
 </html>
