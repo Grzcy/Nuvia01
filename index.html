@@ -7353,7 +7353,7 @@ function generateProceduralQuote(type) { const t = quoteTemplates[type] || quote
          * Checks the daily bonus status and starts/stops the countdown timer.
          * This is called on auth state change and after claiming a bonus.
          */
-        // Compute daily bonus (Hard mode): only if checklist met AND streak ≥ 3; small 1���3 J
+        // Compute daily bonus (Hard mode): only if checklist met AND streak ≥ 3; small 1–3 J
         function computeDailyBonusFromStreak(streakCount, userId) {
             const baseXp = 3; // tiny XP
             const jc = Math.max(0, Math.min(3, streakCount >= 3 ? 1 + Math.floor(Math.sqrt(streakCount)) : 0));
@@ -12515,7 +12515,7 @@ async function fetchAndDisplayPosts() {
                     const handleRateClick = (ev) => {
                         ev.preventDefault();
                         ev.stopPropagation();
-                        const unlocked = !!(window.currentUserProfileData && window.currentUserProfileData.walletUnlocked);
+                        const unlocked = !!(currentUserProfileData && currentUserProfileData.walletUnlocked);
                         if (unlocked) {
                             window.location.href = '/wallet.html';
                         } else {
