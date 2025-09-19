@@ -6755,6 +6755,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         // --- Global State Variables ---
         let currentUser = null; // Stores the Firebase authenticated user object.
         let currentUserProfileData = null; // Stores the authenticated user's own profile data from Firestore.
+        let _prevWalletUnlockedState = null; // Tracks last known wallet lock state to update UI
         let inspirationIntervalId = null; // Interval ID for refreshing daily inspiration.
         let dailyBonusCountdownInterval = null; // Interval for daily bonus cooldown countdown.
         let currentMediaFile = null; // Stores the file object for new post media.
@@ -7352,7 +7353,7 @@ function generateProceduralQuote(type) { const t = quoteTemplates[type] || quote
          * Checks the daily bonus status and starts/stops the countdown timer.
          * This is called on auth state change and after claiming a bonus.
          */
-        // Compute daily bonus (Hard mode): only if checklist met AND streak ≥ 3; small 1–3 J
+        // Compute daily bonus (Hard mode): only if checklist met AND streak ≥ 3; small 1���3 J
         function computeDailyBonusFromStreak(streakCount, userId) {
             const baseXp = 3; // tiny XP
             const jc = Math.max(0, Math.min(3, streakCount >= 3 ? 1 + Math.floor(Math.sqrt(streakCount)) : 0));
@@ -11045,6 +11046,20 @@ async function fetchAndDisplayPosts() {
                         const backgroundPosition = 100 - progressPct;
                         levelChipProgressFill.style.backgroundPosition = `${backgroundPosition}% 0`;
                         homeChipsRow.style.display = 'flex';
+                        try {
+                            if (typeof currentUserProfileData !== 'object' || !currentUserProfileData) currentUserProfileData = {};
+                            currentUserProfileData.walletUnlocked = !!data.walletUnlocked;
+                            const isUnlocked = currentUserProfileData.walletUnlocked === true;
+                            if (_prevWalletUnlockedState !== isUnlocked) {
+                                _prevWalletUnlockedState = isUnlocked;
+                                const lockedModal = document.getElementById('walletLockedModal');
+                                if (lockedModal) {
+                                    if (isUnlocked) { lockedModal.classList.remove('active'); lockedModal.style.display = 'none'; }
+                                }
+                                const payBtn = document.getElementById('walletPayBtn');
+                                if (payBtn) { payBtn.href = isUnlocked ? '/wallet.html' : '/wallet.html?unlock=1&amount=5000'; }
+                            }
+                        } catch(_) {}
                     });
                 } catch(e) { console.warn('level chip realtime', e); }
                 // Highlights (best-effort)
