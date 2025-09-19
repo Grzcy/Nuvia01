@@ -67,6 +67,14 @@
     .earnings-footer { text-align:center; color: var(--text-light); margin-top: 16px; }
     .section-title { font-weight:800; font-size:1.2rem; margin: 16px 0 8px; }
     .hidden { display:none !important; }
+    .align-start { align-items:flex-start; }
+    .mt-4 { margin-top:4px; }
+    .mt-8 { margin-top:8px; }
+    .justify-end { justify-content:flex-end; }
+    .modal-backdrop { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; backdrop-filter: blur(4px); background: rgba(0,0,0,0.35); z-index:1000; }
+    .modal-card { width:min(520px, 92vw); }
+    .quiz-options { display:grid; gap:8px; }
+    .quiz-option { display:flex; align-items:center; gap:8px; cursor:pointer; }
   </style>
 </head>
 <body>
@@ -98,7 +106,7 @@
           <button id="checkInButton" class="primary-btn"><i class="fa-solid fa-calendar-check"></i> Check‑in</button>
           <div>
             <div id="checkInStatus" class="muted">Claim once per day.</div>
-            <div id="streakLabel" class="muted" style="margin-top:4px;">Streak: 0 days</div>
+            <div id="streakLabel" class="muted mt-4">Streak: 0 days</div>
           </div>
         </div>
       </div>
@@ -123,10 +131,10 @@
       </div>
       <div class="engage-card">
         <div class="engage-title">Scripture Memory</div>
-        <div class="row" style="align-items:flex-start;">
+        <div class="row align-start">
           <div style="flex:1;">
             <div id="memoryVerse" class="muted">Tap “Show Verse” to begin.</div>
-            <div class="tile-actions" style="margin-top:8px;">
+            <div class="tile-actions mt-8">
               <button id="showVerseButton" class="ghost-btn"><i class="fa-solid fa-book-open"></i> Show Verse</button>
               <button id="markMemorizedButton" class="primary-btn"><i class="fa-solid fa-check-double"></i> Mark Memorized</button>
             </div>
@@ -162,7 +170,9 @@
         <div class="tile-actions">
           <a class="action-link" href="/find_friends.html"><i class="fa-solid fa-user-plus"></i> Find Friends</a>
           <a class="action-link ghost" href="/friends.html"><i class="fa-solid fa-users"></i> Friends</a>
+          <button id="copyInviteLinkButton" class="primary-btn"><i class="fa-solid fa-link"></i> Copy Invite Link</button>
         </div>
+        <div id="inviteStatus" class="muted mt-8"></div>
       </div>
       <div class="engage-card">
         <div class="engage-title">Group Challenges</div>
@@ -180,6 +190,30 @@
           <a class="action-link ghost" href="/profile.html"><i class="fa-solid fa-id-badge"></i> My Profile</a>
         </div>
       </div>
+      <div class="engage-card">
+        <div class="engage-title">Scripture Reading</div>
+        <p class="muted">Read a passage and reflect.</p>
+        <div class="row">
+          <button id="markReadButton" class="primary-btn"><i class="fa-solid fa-book"></i> Mark Read Today</button>
+          <div id="readStatus" class="muted"></div>
+        </div>
+      </div>
+      <div class="engage-card">
+        <div class="engage-title">Reaction Rush</div>
+        <p class="muted">10‑second tap challenge. Higher score, higher rewards.</p>
+        <div class="row">
+          <button id="playRushButton" class="primary-btn"><i class="fa-solid fa-bolt"></i> Play 10s Rush</button>
+          <div id="rushStatus" class="muted"></div>
+        </div>
+      </div>
+      <div class="engage-card">
+        <div class="engage-title">Weekly Streak Bonus</div>
+        <p class="muted">Maintain 7‑day check‑in streak to claim weekly bonus.</p>
+        <div class="row">
+          <button id="claimWeeklyStreakButton" class="primary-btn"><i class="fa-solid fa-calendar-week"></i> Claim Weekly</button>
+          <div id="weeklyStreakStatus" class="muted"></div>
+        </div>
+      </div>
     </div>
 
     <div class="earnings-footer">
@@ -193,13 +227,23 @@
 
   <div id="toast" class="hidden" style="position:fixed; bottom:16px; left:50%; transform:translateX(-50%); background:var(--card-background); border:1px solid var(--border-light); color:var(--white); padding:10px 12px; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.35); z-index:9999;"></div>
 
-  <div id="quizModal" class="hidden" style="position:fixed; inset:0; display:flex; align-items:center; justify-content:center; backdrop-filter: blur(4px); background: rgba(0,0,0,0.35); z-index:1000;">
-    <div class="engage-card" style="width:min(520px, 92vw);">
+  <div id="quizModal" class="hidden modal-backdrop">
+    <div class="engage-card modal-card">
       <div class="engage-title">Daily Trivia</div>
       <div id="quizContent" class="muted"></div>
-      <div class="tile-actions" style="margin-top:10px; justify-content:flex-end;">
+      <div class="tile-actions mt-8 justify-end">
         <button id="quizNextButton" class="primary-btn"><i class="fa-solid fa-arrow-right"></i> Next</button>
         <button id="quizCloseButton" class="ghost-btn"><i class="fa-solid fa-xmark"></i> Close</button>
+      </div>
+    </div>
+  </div>
+  <div id="rushModal" class="hidden modal-backdrop">
+    <div class="engage-card modal-card">
+      <div class="engage-title">Reaction Rush</div>
+      <div id="rushContent" class="muted"></div>
+      <div class="tile-actions mt-8 justify-end">
+        <button id="rushStartButton" class="primary-btn"><i class="fa-solid fa-play"></i> Start</button>
+        <button id="rushCloseButton" class="ghost-btn"><i class="fa-solid fa-xmark"></i> Close</button>
       </div>
     </div>
   </div>
@@ -242,11 +286,25 @@
     const markMemorizedButton = document.getElementById('markMemorizedButton');
     const memoryVerseEl = document.getElementById('memoryVerse');
     const earningsList = document.getElementById('earningsList');
+    const copyInviteLinkButton = document.getElementById('copyInviteLinkButton');
+    const inviteStatus = document.getElementById('inviteStatus');
+    const markReadButton = document.getElementById('markReadButton');
+    const readStatus = document.getElementById('readStatus');
+    const playRushButton = document.getElementById('playRushButton');
+    const rushStatus = document.getElementById('rushStatus');
+    const rushModal = document.getElementById('rushModal');
+    const rushContent = document.getElementById('rushContent');
+    const rushStartButton = document.getElementById('rushStartButton');
+    const rushCloseButton = document.getElementById('rushCloseButton');
+    const claimWeeklyStreakButton = document.getElementById('claimWeeklyStreakButton');
+    const weeklyStreakStatus = document.getElementById('weeklyStreakStatus');
 
     let currentUser = null;
     let currentUserProfileData = null;
     let quizIndex = 0;
     let quizCorrect = 0;
+    let rushClicks = 0;
+    let rushTimer = null;
     const quizQuestions = [
       { q: 'Which book comes first?', a: ['Genesis','Exodus','Leviticus','Numbers'], c: 0 },
       { q: 'How many surahs are in the Quran?', a: ['100','102','112','114'], c: 3 },
@@ -410,9 +468,11 @@
       if (!quizContent) return;
       const q = quizQuestions[quizIndex];
       let html = `<div style="font-weight:800; margin-bottom:8px;">Q${quizIndex+1}/3: ${q.q}</div>`;
-      html += '<div style="display:grid; gap:8px;">';
+      html += '<div class="quiz-options">';
       q.a.forEach((opt, i)=>{
-        html += `<label style=\"display:flex; align-items:center; gap:8px; cursor:pointer;\">\n          <input type=\"radio\" name=\"quizOpt\" value=\"${i}\"> <span>${opt}</span>\n        </label>`;
+        html += `<label class="quiz-option">
+          <input type="radio" name="quizOpt" value="${i}"> <span>${opt}</span>
+        </label>`;
       });
       html += '</div>';
       quizContent.innerHTML = html;
@@ -456,6 +516,22 @@
       if (memoryVerseEl) memoryVerseEl.textContent = v;
     }
 
+    async function copyInviteLink(){
+      if (!currentUser){ showToast('Login first.'); return; }
+      const link = `${location.origin}/index.html?ref=${currentUser.uid}`;
+      try{ await navigator.clipboard.writeText(link); }catch(e){ console.error(e); }
+      const todayStr = fmtDateUTC(new Date());
+      const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'engagement', 'daily_invite');
+      const snap = await getDoc(ref);
+      let count = 0; let lastDateStr = null;
+      if (snap.exists()){ count = snap.data().count||0; lastDateStr = snap.data().dateStr||null; }
+      if (lastDateStr === todayStr && count >= 3){ if (inviteStatus) inviteStatus.textContent = 'Daily limit reached.'; return; }
+      const newCount = (lastDateStr === todayStr ? count : 0) + 1;
+      const ok = await awardJCoins(2, 'invite_share');
+      if (ok){ await setDoc(ref, { dateStr: todayStr, count: newCount, lastAt: serverTimestamp() }, { merge: true }); if (inviteStatus) inviteStatus.textContent = `Shared! ${newCount}/3 today (+2 JCoins)`; }
+      await loadEarningsHistory();
+    }
+
     async function markMemorized(){
       if (!currentUser) { showToast('Login first.'); return; }
       const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'engagement', 'daily_memory');
@@ -467,6 +543,67 @@
       }
       const ok = await awardJCoins(10, 'daily_memory');
       if (ok){ await setDoc(ref, { lastAt: serverTimestamp() }, { merge: true }); showToast('Nice! +10 JCoins'); }
+      await loadEarningsHistory();
+    }
+
+    function openRush(){ if (rushModal) rushModal.classList.remove('hidden'); rushContent.innerHTML = '<div class="muted">Tap Start, then tap as fast as you can!</div>'; }
+    function closeRush(){ if (rushModal) rushModal.classList.add('hidden'); stopRush(); }
+    function stopRush(){ if (rushTimer){ clearTimeout(rushTimer); rushTimer=null; } document.removeEventListener('click', rushTapHandler, true); }
+    function rushTapHandler(e){ if (!rushTimer) return; if (e.target && e.target.id === 'rushTapButton'){ rushClicks++; const c = document.getElementById('rushCount'); if (c) c.textContent = String(rushClicks); } }
+
+    async function startRush(){
+      if (!currentUser){ showToast('Login first.'); return; }
+      // daily gate
+      const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'engagement', 'daily_rush');
+      const snap = await getDoc(ref);
+      const now = new Date();
+      if (snap.exists()){
+        const last = snap.data().lastAt?.toDate();
+        if (last && (now - last) < 24*60*60*1000){ rushStatus.textContent = 'Come back tomorrow.'; return; }
+      }
+      rushClicks = 0;
+      rushContent.innerHTML = '<div style="font-weight:800;">10s Rush</div><div class="muted">Taps: <span id="rushCount">0</span></div><div class="tile-actions mt-8"><button id="rushTapButton" class="primary-btn"><i class="fa-solid fa-hand-pointer"></i> Tap!</button></div>';
+      document.addEventListener('click', rushTapHandler, true);
+      if (rushTimer) clearTimeout(rushTimer);
+      rushTimer = setTimeout(async ()=>{
+        stopRush();
+        closeRush();
+        let reward = 5; if (rushClicks >= 30) reward = 20; else if (rushClicks >= 15) reward = 10;
+        const ok = await awardJCoins(reward, 'daily_rush', { clicks: rushClicks });
+        if (ok){ rushStatus.textContent = `Score ${rushClicks}. +${reward} JCoins`; await setDoc(ref, { lastAt: serverTimestamp() }, { merge: true }); }
+        await loadEarningsHistory();
+      }, 10000);
+    }
+
+    async function markReadToday(){
+      if (!currentUser){ showToast('Login first.'); return; }
+      const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'engagement', 'daily_read');
+      const snap = await getDoc(ref);
+      const now = new Date();
+      if (snap.exists()){
+        const last = snap.data().lastAt?.toDate();
+        if (last && (now - last) < 24*60*60*1000){ if (readStatus) readStatus.textContent = 'Already marked today.'; return; }
+      }
+      const ok = await awardJCoins(5, 'daily_read');
+      if (ok){ await setDoc(ref, { lastAt: serverTimestamp() }, { merge: true }); if (readStatus) readStatus.textContent = 'Nice! +5 JCoins'; }
+      await loadEarningsHistory();
+    }
+
+    function getISOWeek(d){ const date=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())); const dayNum=(date.getUTCDay()||7); date.setUTCDate(date.getUTCDate()+4-dayNum); const yearStart=new Date(Date.UTC(date.getUTCFullYear(),0,1)); const weekNo=Math.ceil((((date-yearStart)/86400000)+1)/7); return `${date.getUTCFullYear()}-W${String(weekNo).padStart(2,'0')}`; }
+
+    async function claimWeeklyStreak(){
+      if (!currentUser){ showToast('Login first.'); return; }
+      const weekStr = getISOWeek(new Date());
+      const bonusRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'engagement', 'weekly_streak_bonus');
+      const bonusSnap = await getDoc(bonusRef);
+      if (bonusSnap.exists() && bonusSnap.data().lastWeekStr === weekStr){ weeklyStreakStatus.textContent = 'Already claimed this week.'; return; }
+      // need streak >= 7
+      const checkinRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'engagement', 'daily_checkin');
+      const cs = await getDoc(checkinRef);
+      const streak = cs.exists()? (cs.data().streakCount||0) : 0;
+      if (streak < 7){ weeklyStreakStatus.textContent = 'Keep streak 7+ to claim.'; return; }
+      const ok = await awardJCoins(20, 'weekly_streak_bonus', { week: weekStr, streak });
+      if (ok){ await setDoc(bonusRef, { lastWeekStr: weekStr, lastAt: serverTimestamp() }, { merge: true }); weeklyStreakStatus.textContent = 'Weekly bonus claimed! +20 JCoins'; }
       await loadEarningsHistory();
     }
 
@@ -492,6 +629,12 @@
     if (quizCloseButton) quizCloseButton.addEventListener('click', closeQuiz);
     if (showVerseButton) showVerseButton.addEventListener('click', showRandomVerse);
     if (markMemorizedButton) markMemorizedButton.addEventListener('click', markMemorized);
+    if (copyInviteLinkButton) copyInviteLinkButton.addEventListener('click', copyInviteLink);
+    if (markReadButton) markReadButton.addEventListener('click', markReadToday);
+    if (playRushButton) playRushButton.addEventListener('click', openRush);
+    if (rushStartButton) rushStartButton.addEventListener('click', startRush);
+    if (rushCloseButton) rushCloseButton.addEventListener('click', closeRush);
+    if (claimWeeklyStreakButton) claimWeeklyStreakButton.addEventListener('click', claimWeeklyStreak);
   </script>
 </body>
 </html>
