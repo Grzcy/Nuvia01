@@ -241,6 +241,33 @@
           <div id="typingStatus" class="muted"></div>
         </div>
       </div>
+
+      <div class="engage-card">
+        <div class="engage-title">Math Blitz</div>
+        <p class="muted">30s. Answer 10 rapid questions. Get 8+ correct to win.</p>
+        <div class="row">
+          <button id="startMathBlitzButton" class="primary-btn"><i class="fa-solid fa-calculator"></i> Start Blitz</button>
+          <div id="mathBlitzStatus" class="muted"></div>
+        </div>
+      </div>
+
+      <div class="engage-card">
+        <div class="engage-title">Word Unscramble</div>
+        <p class="muted">45s. Unscramble the word correctly.</p>
+        <div class="row">
+          <button id="startScrambleButton" class="primary-btn"><i class="fa-solid fa-font"></i> Start</button>
+          <div id="scrambleStatus" class="muted"></div>
+        </div>
+      </div>
+
+      <div class="engage-card">
+        <div class="engage-title">Memory Match</div>
+        <p class="muted">Match all pairs within 60s.</p>
+        <div class="row">
+          <button id="startMemoryButton" class="primary-btn"><i class="fa-solid fa-brain"></i> Play</button>
+          <div id="memoryStatus" class="muted"></div>
+        </div>
+      </div>
     </div>
 
     <div class="earnings-footer">
@@ -300,6 +327,38 @@
       <div class="tile-actions mt-8 justify-end">
         <button id="typingSubmitButton" class="primary-btn"><i class="fa-solid fa-paper-plane"></i> Submit</button>
         <button id="typingCloseButton" class="ghost-btn"><i class="fa-solid fa-xmark"></i> Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="mathBlitzModal" class="hidden modal-backdrop">
+    <div class="engage-card modal-card">
+      <div class="engage-title">Math Blitz</div>
+      <div id="mathBlitzContent" class="muted"></div>
+      <div class="tile-actions mt-8 justify-end">
+        <button id="mathBlitzNextButton" class="primary-btn"><i class="fa-solid fa-arrow-right"></i> Next</button>
+        <button id="mathBlitzCloseButton" class="ghost-btn"><i class="fa-solid fa-xmark"></i> Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="scrambleModal" class="hidden modal-backdrop">
+    <div class="engage-card modal-card">
+      <div class="engage-title">Word Unscramble</div>
+      <div id="scrambleContent" class="muted"></div>
+      <div class="tile-actions mt-8 justify-end">
+        <button id="scrambleSubmitButton" class="primary-btn"><i class="fa-solid fa-paper-plane"></i> Submit</button>
+        <button id="scrambleCloseButton" class="ghost-btn"><i class="fa-solid fa-xmark"></i> Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="memoryModal" class="hidden modal-backdrop">
+    <div class="engage-card modal-card">
+      <div class="engage-title">Memory Match</div>
+      <div id="memoryContent" class="muted"></div>
+      <div class="tile-actions mt-8 justify-end">
+        <button id="memoryCloseButton" class="ghost-btn"><i class="fa-solid fa-xmark"></i> Close</button>
       </div>
     </div>
   </div>
@@ -376,6 +435,29 @@
     const typingSubmitButton = document.getElementById('typingSubmitButton');
     const typingCloseButton = document.getElementById('typingCloseButton');
 
+    // Math Blitz
+    const startMathBlitzButton = document.getElementById('startMathBlitzButton');
+    const mathBlitzStatus = document.getElementById('mathBlitzStatus');
+    const mathBlitzModal = document.getElementById('mathBlitzModal');
+    const mathBlitzContent = document.getElementById('mathBlitzContent');
+    const mathBlitzNextButton = document.getElementById('mathBlitzNextButton');
+    const mathBlitzCloseButton = document.getElementById('mathBlitzCloseButton');
+
+    // Word Scramble
+    const startScrambleButton = document.getElementById('startScrambleButton');
+    const scrambleStatus = document.getElementById('scrambleStatus');
+    const scrambleModal = document.getElementById('scrambleModal');
+    const scrambleContent = document.getElementById('scrambleContent');
+    const scrambleSubmitButton = document.getElementById('scrambleSubmitButton');
+    const scrambleCloseButton = document.getElementById('scrambleCloseButton');
+
+    // Memory Match
+    const startMemoryButton = document.getElementById('startMemoryButton');
+    const memoryStatus = document.getElementById('memoryStatus');
+    const memoryModal = document.getElementById('memoryModal');
+    const memoryContent = document.getElementById('memoryContent');
+    const memoryCloseButton = document.getElementById('memoryCloseButton');
+
     let currentUser = null;
     let currentUserProfileData = null;
     let quizIndex = 0;
@@ -392,6 +474,12 @@
     // Typing challenge state
     let typingStartAt = 0;
     let typingTarget = '';
+    // Math Blitz state
+    let blitzTimer = null; let blitzTimeLeft = 0; let blitzIndex = 0; let blitzCorrect = 0; let blitzStartedAt = 0;
+    // Scramble state
+    let scrambleWord = ''; let scrambleTimer = null; let scrambleTimeLeft = 0;
+    // Memory match state
+    let memoryCards = []; let memoryFlipped = []; let memoryMatched = 0; let memoryTimer = null; let memoryTimeLeft = 0; let memoryLocked = false;
 
     const quizQuestions = [
       { q: 'Which book comes first?', a: ['Genesis','Exodus','Leviticus','Numbers'], c: 0 },
@@ -807,6 +895,165 @@
     function openTyping(){ if (typingModal) typingModal.classList.remove('hidden'); }
     function closeTyping(){ if (typingModal) typingModal.classList.add('hidden'); }
 
+    // Math Blitz helpers
+    function openMathBlitz(){ if (mathBlitzModal) mathBlitzModal.classList.remove('hidden'); }
+    function closeMathBlitz(){ if (mathBlitzModal) mathBlitzModal.classList.add('hidden'); if (blitzTimer){ clearInterval(blitzTimer); blitzTimer=null; } }
+    function newMathQuestion(){
+      const a = Math.floor(Math.random()*12)+1; const b = Math.floor(Math.random()*12)+1; const ops = ['+','-','×'];
+      const op = ops[Math.floor(Math.random()*ops.length)];
+      let ans = 0; if (op==='+') ans=a+b; else if (op==='-') ans=a-b; else ans=a*b;
+      return { text: `${a} ${op} ${b} = ?`, ans };
+    }
+
+    async function startMathBlitz(){
+      if (!currentUser){ showToast('Login first.'); return; }
+      const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'engagement', 'daily_math_blitz');
+      const snap = await getDoc(ref);
+      const now = new Date();
+      if (snap.exists()){
+        const last = snap.data().lastAt?.toDate();
+        if (last && (now - last) < 24*60*60*1000){ mathBlitzStatus.textContent = 'Come back tomorrow.'; return; }
+      }
+      blitzIndex = 0; blitzCorrect = 0; blitzTimeLeft = 30; blitzStartedAt = Date.now();
+      openMathBlitz();
+      const q = newMathQuestion();
+      mathBlitzContent.innerHTML = `<div style="font-weight:800;">Q${blitzIndex+1}/10</div><div class="mt-8">${q.text}</div><input id="blitzAnswer" type="number" style="width:100%; margin-top:8px; background:var(--input-background); color:var(--white); border:1px solid var(--border-light); border-radius:8px; padding:8px;" />
+        <div class="muted mt-8">${blitzTimeLeft}s left</div>`;
+      mathBlitzContent._cur = q;
+      if (blitzTimer) clearInterval(blitzTimer);
+      blitzTimer = setInterval(async ()=>{
+        blitzTimeLeft--; const info = mathBlitzContent.querySelector('.muted'); if (info) info.textContent = `${blitzTimeLeft}s left`;
+        if (blitzTimeLeft <= 0){ clearInterval(blitzTimer); blitzTimer=null; closeMathBlitz();
+          await finalizeMathBlitz(ref);
+        }
+      }, 1000);
+    }
+
+    async function nextMathBlitzStep(){
+      const input = document.getElementById('blitzAnswer');
+      const val = Number((input && input.value) || '');
+      if (val === mathBlitzContent._cur.ans) blitzCorrect++;
+      blitzIndex++;
+      if (blitzIndex >= 10){ closeMathBlitz(); if (blitzTimer){ clearInterval(blitzTimer); blitzTimer=null; } const ref = doc(db,'artifacts',appId,'users',currentUser.uid,'engagement','daily_math_blitz'); await finalizeMathBlitz(ref); return; }
+      const q = newMathQuestion(); mathBlitzContent._cur = q;
+      mathBlitzContent.innerHTML = `<div style="font-weight:800;">Q${blitzIndex+1}/10</div><div class="mt-8">${q.text}</div><input id="blitzAnswer" type="number" style="width:100%; margin-top:8px; background:var(--input-background); color:var(--white); border:1px solid var(--border-light); border-radius:8px; padding:8px;" />
+        <div class="muted mt-8">${blitzTimeLeft}s left</div>`;
+    }
+
+    async function finalizeMathBlitz(ref){
+      const passed = blitzCorrect >= 8;
+      if (passed){ const okJ = await awardJCoins(20,'daily_math_blitz',{correct:blitzCorrect}); const okG = await awardGas(35,'daily_math_blitz',{correct:blitzCorrect}); if (okJ && okG){ mathBlitzStatus.textContent = `Passed ${blitzCorrect}/10. +20 J, +35 Gas`; await setDoc(ref,{lastAt:serverTimestamp()},{merge:true}); } }
+      else { mathBlitzStatus.textContent = `Score ${blitzCorrect}/10. Try again tomorrow.`; await setDoc(ref,{lastAt:serverTimestamp()},{merge:true}); }
+      await loadEarningsHistory();
+    }
+
+    // Word Scramble helpers
+    function openScramble(){ if (scrambleModal) scrambleModal.classList.remove('hidden'); }
+    function closeScramble(){ if (scrambleModal) scrambleModal.classList.add('hidden'); if (scrambleTimer){ clearInterval(scrambleTimer); scrambleTimer=null; } }
+    function shuffleLetters(s){ return s.split('').sort(()=>Math.random()-0.5).join(''); }
+
+    async function startScramble(){
+      if (!currentUser){ showToast('Login first.'); return; }
+      const ref = doc(db,'artifacts',appId,'users',currentUser.uid,'engagement','daily_scramble');
+      const snap = await getDoc(ref); const now = new Date();
+      if (snap.exists()){
+        const last = snap.data().lastAt?.toDate();
+        if (last && (now - last) < 24*60*60*1000){ scrambleStatus.textContent = 'Come back tomorrow.'; return; }
+      }
+      const words = ['community','scripture','gratitude','compassion','integrity','patience','wisdom','forgiveness'];
+      scrambleWord = words[Math.floor(Math.random()*words.length)];
+      const jumbled = shuffleLetters(scrambleWord);
+      scrambleTimeLeft = 45;
+      openScramble();
+      scrambleContent.innerHTML = `<div style="font-weight:800;">Unscramble:</div><div style="margin-top:8px; font-size:1.1rem;">${jumbled}</div>
+        <input id="scrambleInput" type="text" style="width:100%; margin-top:8px; background:var(--input-background); color:var(--white); border:1px solid var(--border-light); border-radius:8px; padding:8px;" />
+        <div class="muted mt-8">${scrambleTimeLeft}s left</div>`;
+      if (scrambleTimer) clearInterval(scrambleTimer);
+      scrambleTimer = setInterval(async ()=>{
+        scrambleTimeLeft--; const info = scrambleContent.querySelector('.muted'); if (info) info.textContent = `${scrambleTimeLeft}s left`;
+        if (scrambleTimeLeft <= 0){ clearInterval(scrambleTimer); scrambleTimer=null; await submitScramble(); }
+      },1000);
+      scrambleSubmitButton.onclick = submitScramble;
+      async function submitScramble(){
+        closeScramble();
+        const ref2 = ref;
+        const input = (document.getElementById('scrambleInput')||{}).value || '';
+        if (input.trim().toLowerCase() === scrambleWord){
+          const okJ = await awardJCoins(15,'daily_scramble'); const okG = await awardGas(25,'daily_scramble');
+          if (okJ && okG){ scrambleStatus.textContent = 'Correct! +15 J, +25 Gas'; await setDoc(ref2,{lastAt:serverTimestamp()},{merge:true}); }
+          await loadEarningsHistory();
+        } else {
+          scrambleStatus.textContent = 'Incorrect. Try tomorrow.'; await setDoc(ref2,{lastAt:serverTimestamp()},{merge:true});
+        }
+      }
+    }
+
+    // Memory Match helpers
+    function openMemory(){ if (memoryModal) memoryModal.classList.remove('hidden'); }
+    function closeMemory(){ if (memoryModal) memoryModal.classList.add('hidden'); if (memoryTimer){ clearInterval(memoryTimer); memoryTimer=null; } }
+
+    function makeMemoryCards(){
+      const icons = ['🔥','🌙','⭐','💧']; // 4 pairs
+      const pairs = icons.concat(icons);
+      const shuffled = pairs.sort(()=>Math.random()-0.5);
+      return shuffled.map((v,idx)=>({ id: idx, val: v, matched:false }));
+    }
+
+    async function startMemoryMatch(){
+      if (!currentUser){ showToast('Login first.'); return; }
+      const ref = doc(db,'artifacts',appId,'users',currentUser.uid,'engagement','daily_memory_match');
+      const snap = await getDoc(ref); const now = new Date();
+      if (snap.exists()){
+        const last = snap.data().lastAt?.toDate();
+        if (last && (now - last) < 24*60*60*1000){ memoryStatus.textContent = 'Come back tomorrow.'; return; }
+      }
+      memoryCards = makeMemoryCards(); memoryFlipped = []; memoryMatched = 0; memoryLocked = false; memoryTimeLeft = 60;
+      openMemory();
+      renderMemoryGrid();
+      if (memoryTimer) clearInterval(memoryTimer);
+      memoryTimer = setInterval(async ()=>{
+        memoryTimeLeft--; const t = document.getElementById('memoryTimer'); if (t) t.textContent = `${memoryTimeLeft}s left`;
+        if (memoryTimeLeft <= 0){ clearInterval(memoryTimer); memoryTimer=null; closeMemory(); memoryStatus.textContent = 'Time up. Try tomorrow.'; const ref2=ref; await setDoc(ref2,{lastAt:serverTimestamp()},{merge:true}); }
+      },1000);
+    }
+
+    function renderMemoryGrid(){
+      const grid = document.createElement('div'); grid.style.display='grid'; grid.style.gridTemplateColumns='repeat(4,1fr)'; grid.style.gap='8px';
+      memoryCards.forEach(card=>{
+        const b = document.createElement('button');
+        b.className = 'primary-btn'; b.setAttribute('data-id', String(card.id)); b.style.height='48px';
+        b.textContent = (card.matched || memoryFlipped.includes(card.id)) ? card.val : '❓';
+        b.addEventListener('click', ()=> onMemoryCardClick(card.id));
+        grid.appendChild(b);
+      });
+      memoryContent.innerHTML = `<div class="muted" id="memoryTimer">${memoryTimeLeft}s left</div>`;
+      memoryContent.appendChild(grid);
+    }
+
+    async function onMemoryCardClick(id){
+      if (memoryLocked) return;
+      const card = memoryCards.find(c=>c.id===id); if (!card || card.matched) return;
+      if (memoryFlipped.includes(id)) return;
+      memoryFlipped.push(id);
+      renderMemoryGrid();
+      if (memoryFlipped.length === 2){
+        memoryLocked = true;
+        const [aId,bId] = memoryFlipped; const a = memoryCards.find(c=>c.id===aId); const b = memoryCards.find(c=>c.id===bId);
+        setTimeout(async ()=>{
+          if (a && b && a.val === b.val){ a.matched=true; b.matched=true; memoryMatched+=2; }
+          memoryFlipped = []; memoryLocked = false; renderMemoryGrid();
+          if (memoryMatched >= memoryCards.length){
+            if (memoryTimer){ clearInterval(memoryTimer); memoryTimer=null; }
+            closeMemory();
+            const ref = doc(db,'artifacts',appId,'users',currentUser.uid,'engagement','daily_memory_match');
+            const okJ = await awardJCoins(25,'daily_memory_match'); const okG = await awardGas(40,'daily_memory_match');
+            if (okJ && okG){ memoryStatus.textContent = 'Completed! +25 J, +40 Gas'; await setDoc(ref,{lastAt:serverTimestamp()},{merge:true}); }
+            await loadEarningsHistory();
+          }
+        }, 500);
+      }
+    }
+
     function startTypingChallenge(){
       if (!currentUser){ showToast('Login first.'); return; }
       (async ()=>{
@@ -895,6 +1142,16 @@
 
     if (startTypingButton) startTypingButton.addEventListener('click', startTypingChallenge);
     if (typingCloseButton) typingCloseButton.addEventListener('click', closeTyping);
+
+    if (startMathBlitzButton) startMathBlitzButton.addEventListener('click', startMathBlitz);
+    if (mathBlitzNextButton) mathBlitzNextButton.addEventListener('click', nextMathBlitzStep);
+    if (mathBlitzCloseButton) mathBlitzCloseButton.addEventListener('click', closeMathBlitz);
+
+    if (startScrambleButton) startScrambleButton.addEventListener('click', startScramble);
+    if (scrambleCloseButton) scrambleCloseButton.addEventListener('click', closeScramble);
+
+    if (startMemoryButton) startMemoryButton.addEventListener('click', startMemoryMatch);
+    if (memoryCloseButton) memoryCloseButton.addEventListener('click', closeMemory);
   </script>
 </body>
 </html>
