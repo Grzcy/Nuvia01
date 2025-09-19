@@ -96,7 +96,10 @@
         <div class="engage-title">Daily Check‑in</div>
         <div class="row">
           <button id="checkInButton" class="primary-btn"><i class="fa-solid fa-calendar-check"></i> Check‑in</button>
-          <div id="checkInStatus" class="muted">Claim once per day.</div>
+          <div>
+            <div id="checkInStatus" class="muted">Claim once per day.</div>
+            <div id="streakLabel" class="muted" style="margin-top:4px;">Streak: 0 days</div>
+          </div>
         </div>
       </div>
       <div class="engage-card">
@@ -109,6 +112,26 @@
       <div class="engage-card">
         <div class="engage-title">Weekly Quests</div>
         <div class="quests-list" id="questsList"></div>
+      </div>
+      <div class="engage-card">
+        <div class="engage-title">Daily Trivia</div>
+        <p class="muted">Answer 3 quick questions. Score 2+ to earn JCoins.</p>
+        <div class="row">
+          <button id="startQuizButton" class="primary-btn"><i class="fa-solid fa-circle-question"></i> Start Quiz</button>
+          <div id="quizStatus" class="muted"></div>
+        </div>
+      </div>
+      <div class="engage-card">
+        <div class="engage-title">Scripture Memory</div>
+        <div class="row" style="align-items:flex-start;">
+          <div style="flex:1;">
+            <div id="memoryVerse" class="muted">Tap “Show Verse” to begin.</div>
+            <div class="tile-actions" style="margin-top:8px;">
+              <button id="showVerseButton" class="ghost-btn"><i class="fa-solid fa-book-open"></i> Show Verse</button>
+              <button id="markMemorizedButton" class="primary-btn"><i class="fa-solid fa-check-double"></i> Mark Memorized</button>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="engage-card">
         <div class="engage-title">Share Inspiration</div>
@@ -162,9 +185,24 @@
     <div class="earnings-footer">
       View balances and history in <a href="/wallet.html" style="color:var(--blue); font-weight:800; text-decoration:none;">Wallet</a>.
     </div>
+    <h2 class="section-title">Recent Earnings</h2>
+    <div class="engage-card" id="earningsCard">
+      <div id="earningsList" class="quests-list"></div>
+    </div>
   </main>
 
   <div id="toast" class="hidden" style="position:fixed; bottom:16px; left:50%; transform:translateX(-50%); background:var(--card-background); border:1px solid var(--border-light); color:var(--white); padding:10px 12px; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.35); z-index:9999;"></div>
+
+  <div id="quizModal" class="hidden" style="position:fixed; inset:0; display:flex; align-items:center; justify-content:center; backdrop-filter: blur(4px); background: rgba(0,0,0,0.35); z-index:1000;">
+    <div class="engage-card" style="width:min(520px, 92vw);">
+      <div class="engage-title">Daily Trivia</div>
+      <div id="quizContent" class="muted"></div>
+      <div class="tile-actions" style="margin-top:10px; justify-content:flex-end;">
+        <button id="quizNextButton" class="primary-btn"><i class="fa-solid fa-arrow-right"></i> Next</button>
+        <button id="quizCloseButton" class="ghost-btn"><i class="fa-solid fa-xmark"></i> Close</button>
+      </div>
+    </div>
+  </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
@@ -193,9 +231,33 @@
     const spinNowButton = document.getElementById('spinNowButton');
     const spinStatus = document.getElementById('spinStatus');
     const questsList = document.getElementById('questsList');
+    const streakLabel = document.getElementById('streakLabel');
+    const startQuizButton = document.getElementById('startQuizButton');
+    const quizStatus = document.getElementById('quizStatus');
+    const quizModal = document.getElementById('quizModal');
+    const quizContent = document.getElementById('quizContent');
+    const quizNextButton = document.getElementById('quizNextButton');
+    const quizCloseButton = document.getElementById('quizCloseButton');
+    const showVerseButton = document.getElementById('showVerseButton');
+    const markMemorizedButton = document.getElementById('markMemorizedButton');
+    const memoryVerseEl = document.getElementById('memoryVerse');
+    const earningsList = document.getElementById('earningsList');
 
     let currentUser = null;
     let currentUserProfileData = null;
+    let quizIndex = 0;
+    let quizCorrect = 0;
+    const quizQuestions = [
+      { q: 'Which book comes first?', a: ['Genesis','Exodus','Leviticus','Numbers'], c: 0 },
+      { q: 'How many surahs are in the Quran?', a: ['100','102','112','114'], c: 3 },
+      { q: 'Which is a gospel writer?', a: ['Paul','David','Luke','Moses'], c: 2 }
+    ];
+    const verses = [
+      '“The Lord is my shepherd; I shall not want.” — Psalm 23:1',
+      '“Indeed, with hardship [will be] ease.” — Quran 94:6',
+      '“Be still, and know that I am God.” — Psalm 46:10',
+      '“And whoever relies upon Allah — then He is sufficient for him.” — Quran 65:3'
+    ];
 
     function showToast(msg){ const t = document.getElementById('toast'); if(!t) return; t.textContent = msg; t.classList.remove('hidden'); clearTimeout(t._h); t._h = setTimeout(()=> t.classList.add('hidden'), 2200); }
 
@@ -211,6 +273,44 @@
           if (jcoinRateSpan) jcoinRateSpan.textContent = computedRate;
         }
       } catch(e){ console.error(e); }
+    }
+
+    function fmtDateUTC(d){ const y=d.getUTCFullYear(); const m=String(d.getUTCMonth()+1).padStart(2,'0'); const dd=String(d.getUTCDate()).padStart(2,'0'); return `${y}-${m}-${dd}`; }
+
+    async function awardJCoins(amount, reason, meta={}){
+      if (!currentUser) return false;
+      const profileRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profiles', 'user_profile');
+      const logRef = doc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'earnings'));
+      try{
+        await runTransaction(db, async (trx)=>{
+          const ps = await trx.get(profileRef);
+          const cur = ps.exists()? (ps.data().jCoins||0):0;
+          if (!ps.exists()) trx.set(profileRef, { jCoins: 0 }, { merge: true });
+          trx.update(profileRef, { jCoins: cur + amount, lifetimeEarned: (ps.data()?.lifetimeEarned||0) + amount, updatedAt: serverTimestamp() });
+        });
+        await setDoc(logRef, { type: reason, amount, ts: serverTimestamp(), ...meta });
+        await loadProfileAndWallet(currentUser.uid);
+        return true;
+      }catch(e){ console.error(e); return false; }
+    }
+
+    async function loadEarningsHistory(){
+      if (!currentUser || !earningsList) return;
+      earningsList.innerHTML = '';
+      try{
+        const qy = query(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'earnings'), orderBy('ts','desc'));
+        const snap = await getDocs(qy);
+        if (snap.empty){ earningsList.innerHTML = '<div class="muted">No earnings yet.</div>'; return; }
+        snap.docs.slice(0,10).forEach(d=>{
+          const it = d.data();
+          const row = document.createElement('div');
+          row.className = 'quest-item';
+          const amt = typeof it.amount==='number' ? `+${it.amount} J` : '';
+          const when = it.ts?.toDate ? it.ts.toDate() : new Date();
+          row.innerHTML = `<span>${it.type||'Earning'}</span><span class="muted">${when.toLocaleString()}</span><span style="font-weight:800;">${amt}</span>`;
+          earningsList.appendChild(row);
+        });
+      }catch(e){ console.error(e); }
     }
 
     function renderQuests(){
@@ -230,32 +330,49 @@
       });
     }
 
+    async function refreshStreakUI(){
+      if (!currentUser || !streakLabel) return;
+      try{
+        const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'engagement', 'daily_checkin');
+        const snap = await getDoc(ref);
+        if (snap.exists()){
+          const data = snap.data();
+          const sc = data.streakCount || 0;
+          streakLabel.textContent = `Streak: ${sc} day${sc===1?'':'s'}`;
+        }
+      }catch(e){ console.error(e); }
+    }
+
     async function handleCheckIn(){
       if (!currentUser) { showToast('Login to check‑in.'); return; }
       const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'engagement', 'daily_checkin');
       const snap = await getDoc(ref);
       const now = new Date();
+      const todayStr = fmtDateUTC(now);
+      let prevStr = null; let streak = 0; let lastDate = null;
       if (snap.exists()) {
-        const last = snap.data().lastAt?.toDate();
-        if (last) {
-          const since = now - last;
+        const data = snap.data();
+        lastDate = data.lastAt?.toDate() || null;
+        prevStr = data.lastDateStr || null;
+        if (lastDate) {
+          const since = now - lastDate;
           if (since < 24*60*60*1000) {
             const hrs = Math.ceil((24*60*60*1000 - since)/3600000);
             if (checkInStatus) checkInStatus.textContent = `Come back in ~${hrs}h.`;
             return;
           }
         }
+        streak = data.streakCount || 0;
       }
       try {
-        const profileRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profiles', 'user_profile');
-        await runTransaction(db, async (trx) => {
-          const ps = await trx.get(profileRef);
-          const cur = ps.exists()? (ps.data().jCoins||0):0;
-          trx.update(profileRef, { jCoins: cur + 10, updatedAt: serverTimestamp() });
-        });
-        await setDoc(ref, { lastAt: serverTimestamp() }, { merge: true });
+        const yesterday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()-1));
+        const yStr = fmtDateUTC(yesterday);
+        const newStreak = prevStr === yStr ? (streak+1) : 1;
+        const ok = await awardJCoins(10, 'daily_checkin');
+        if (!ok) throw new Error('award failed');
+        await setDoc(ref, { lastAt: serverTimestamp(), lastDateStr: todayStr, streakCount: newStreak }, { merge: true });
         if (checkInStatus) checkInStatus.textContent = `Checked‑in! +10 JCoins`;
-        await loadProfileAndWallet(currentUser.uid);
+        if (streakLabel) streakLabel.textContent = `Streak: ${newStreak} day${newStreak===1?'':'s'}`;
       } catch(e){ console.error(e); showToast('Check‑in failed.'); }
     }
 
@@ -280,31 +397,101 @@
       let r = Math.random()*totalW, pick = rewards[0];
       for (const it of rewards) { if (r < it.w) { pick = it; break; } r -= it.w; }
       try {
-        const profileRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profiles', 'user_profile');
-        await runTransaction(db, async (trx) => {
-          const ps = await trx.get(profileRef);
-          const cur = ps.exists()? (ps.data().jCoins||0):0;
-          trx.update(profileRef, { jCoins: cur + pick.j, updatedAt: serverTimestamp() });
-        });
+        const ok = await awardJCoins(pick.j, 'daily_spin', { prize: pick.j });
+        if (!ok) throw new Error('award failed');
         await setDoc(spinRef, { lastSpinAt: serverTimestamp() }, { merge: true });
         if (spinStatus) spinStatus.textContent = `You won ${pick.j} JCoins!`;
-        await loadProfileAndWallet(currentUser.uid);
       } catch(e){ console.error(e); showToast('Spin failed.'); }
+    }
+
+    function openQuiz(){ if (quizModal) quizModal.classList.remove('hidden'); renderQuizStep(); }
+    function closeQuiz(){ if (quizModal) quizModal.classList.add('hidden'); }
+    function renderQuizStep(){
+      if (!quizContent) return;
+      const q = quizQuestions[quizIndex];
+      let html = `<div style="font-weight:800; margin-bottom:8px;">Q${quizIndex+1}/3: ${q.q}</div>`;
+      html += '<div style="display:grid; gap:8px;">';
+      q.a.forEach((opt, i)=>{
+        html += `<label style=\"display:flex; align-items:center; gap:8px; cursor:pointer;\">\n          <input type=\"radio\" name=\"quizOpt\" value=\"${i}\"> <span>${opt}</span>\n        </label>`;
+      });
+      html += '</div>';
+      quizContent.innerHTML = html;
+    }
+
+    async function nextQuizStep(){
+      const sel = quizContent.querySelector('input[name="quizOpt"]:checked');
+      if (!sel) { showToast('Choose an answer'); return; }
+      const val = Number(sel.value);
+      if (val === quizQuestions[quizIndex].c) quizCorrect++;
+      quizIndex++;
+      if (quizIndex >= quizQuestions.length){
+        closeQuiz();
+        // gate daily
+        if (!currentUser) { showToast('Login to play.'); return; }
+        const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'engagement', 'daily_quiz');
+        const snap = await getDoc(ref);
+        const now = new Date();
+        if (snap.exists()){
+          const last = snap.data().lastAt?.toDate();
+          if (last && (now - last) < 24*60*60*1000){ quizStatus.textContent = 'Come back tomorrow.'; return; }
+        }
+        const passed = quizCorrect >= 2;
+        if (passed){
+          const ok = await awardJCoins(15, 'daily_quiz', { correct: quizCorrect });
+          if (ok){ quizStatus.textContent = `Great! +15 JCoins (Score ${quizCorrect}/3)`; await setDoc(ref, { lastAt: serverTimestamp() }, { merge: true }); }
+          else { showToast('Could not award.'); }
+        } else {
+          quizStatus.textContent = `Score ${quizCorrect}/3. Try again tomorrow.`;
+          await setDoc(ref, { lastAt: serverTimestamp() }, { merge: true });
+        }
+        quizIndex = 0; quizCorrect = 0;
+        await loadEarningsHistory();
+        return;
+      }
+      renderQuizStep();
+    }
+
+    function showRandomVerse(){
+      const v = verses[Math.floor(Math.random()*verses.length)];
+      if (memoryVerseEl) memoryVerseEl.textContent = v;
+    }
+
+    async function markMemorized(){
+      if (!currentUser) { showToast('Login first.'); return; }
+      const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'engagement', 'daily_memory');
+      const snap = await getDoc(ref);
+      const now = new Date();
+      if (snap.exists()){
+        const last = snap.data().lastAt?.toDate();
+        if (last && (now - last) < 24*60*60*1000){ showToast('Come back tomorrow.'); return; }
+      }
+      const ok = await awardJCoins(10, 'daily_memory');
+      if (ok){ await setDoc(ref, { lastAt: serverTimestamp() }, { merge: true }); showToast('Nice! +10 JCoins'); }
+      await loadEarningsHistory();
     }
 
     onAuthStateChanged(auth, async (user)=>{
       currentUser = user || null;
       if (currentUser) {
         await loadProfileAndWallet(currentUser.uid);
+        await refreshStreakUI();
+        await loadEarningsHistory();
       } else {
         if (walletChipAmount) walletChipAmount.textContent = '0';
         if (jcoinRateSpan) jcoinRateSpan.textContent = '0';
+        if (streakLabel) streakLabel.textContent = 'Streak: 0 days';
+        if (earningsList) earningsList.innerHTML = '<div class="muted">Log in to see earnings history.</div>';
       }
       renderQuests();
     });
 
     if (checkInButton) checkInButton.addEventListener('click', handleCheckIn);
     if (spinNowButton) spinNowButton.addEventListener('click', handleSpin);
+    if (startQuizButton) startQuizButton.addEventListener('click', ()=>{ quizIndex=0; quizCorrect=0; openQuiz(); });
+    if (quizNextButton) quizNextButton.addEventListener('click', nextQuizStep);
+    if (quizCloseButton) quizCloseButton.addEventListener('click', closeQuiz);
+    if (showVerseButton) showVerseButton.addEventListener('click', showRandomVerse);
+    if (markMemorizedButton) markMemorizedButton.addEventListener('click', markMemorized);
   </script>
 </body>
 </html>
