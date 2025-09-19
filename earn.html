@@ -440,6 +440,23 @@
       }catch(e){ console.error(e); return false; }
     }
 
+    async function awardGas(amount, reason, meta={}){
+      if (!currentUser) return false;
+      const profileRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profiles', 'user_profile');
+      const xpLogRef = doc(collection(db, 'artifacts', appId, 'users', currentUser.uid, 'xp_logs'));
+      try{
+        await runTransaction(db, async (trx)=>{
+          const ps = await trx.get(profileRef);
+          const curGas = ps.exists()? (ps.data().gas||0):0;
+          const totalGas = ps.exists()? (ps.data().totalGasEarned||0):0;
+          if (!ps.exists()) trx.set(profileRef, { gas: 0, totalGasEarned: 0 }, { merge: true });
+          trx.update(profileRef, { gas: curGas + amount, totalGasEarned: totalGas + amount, updatedAt: serverTimestamp() });
+        });
+        await setDoc(xpLogRef, { type: reason, amount, ts: serverTimestamp(), ...meta });
+        return true;
+      }catch(e){ console.error(e); return false; }
+    }
+
     async function loadEarningsHistory(){
       if (!currentUser || !earningsList) return;
       earningsList.innerHTML = '';
