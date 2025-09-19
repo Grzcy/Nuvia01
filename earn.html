@@ -355,12 +355,44 @@
     const claimWeeklyStreakButton = document.getElementById('claimWeeklyStreakButton');
     const weeklyStreakStatus = document.getElementById('weeklyStreakStatus');
 
+    // New DOM refs for challenging activities
+    const startHardQuizButton = document.getElementById('startHardQuizButton');
+    const hardQuizStatus = document.getElementById('hardQuizStatus');
+    const hardQuizModal = document.getElementById('hardQuizModal');
+    const hardQuizContent = document.getElementById('hardQuizContent');
+    const hardQuizNextButton = document.getElementById('hardQuizNextButton');
+    const hardQuizCloseButton = document.getElementById('hardQuizCloseButton');
+
+    const startFocusButton = document.getElementById('startFocusButton');
+    const focusStatus = document.getElementById('focusStatus');
+    const focusModal = document.getElementById('focusModal');
+    const focusContent = document.getElementById('focusContent');
+    const focusCloseButton = document.getElementById('focusCloseButton');
+
+    const startTypingButton = document.getElementById('startTypingButton');
+    const typingStatus = document.getElementById('typingStatus');
+    const typingModal = document.getElementById('typingModal');
+    const typingContent = document.getElementById('typingContent');
+    const typingSubmitButton = document.getElementById('typingSubmitButton');
+    const typingCloseButton = document.getElementById('typingCloseButton');
+
     let currentUser = null;
     let currentUserProfileData = null;
     let quizIndex = 0;
     let quizCorrect = 0;
     let rushClicks = 0;
     let rushTimer = null;
+    // Hard quiz state
+    let hardQuizIndex = 0;
+    let hardQuizCorrect = 0;
+    // Focus timer state
+    let focusTimer = null;
+    let focusRemaining = 0;
+    let focusFailed = false;
+    // Typing challenge state
+    let typingStartAt = 0;
+    let typingTarget = '';
+
     const quizQuestions = [
       { q: 'Which book comes first?', a: ['Genesis','Exodus','Leviticus','Numbers'], c: 0 },
       { q: 'How many surahs are in the Quran?', a: ['100','102','112','114'], c: 3 },
