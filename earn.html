@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Nuvia - Fun & Earn Arcade</title>
+  <link rel="canonical" href="https://nuvia.app/earn.html">
+  <meta name="theme-color" content="#1a1a2e">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <style>
+    :root {
+      --pink: #ff2e92;
+      --blue: #00d5ff;
+      --glass-black: rgba(10, 10, 10, .75);
+      --glass-blue: rgba(0, 213, 255, .15);
+      --radius: 20px;
+      --transition: .3s ease;
+      --white: #fff;
+      --text-light: rgba(255, 255, 255, .7);
+      --background-main: rgba(10, 10, 10, .75);
+      --background-gradient-1: #00d5ff;
+      --background-gradient-2: #ff2e92;
+      --card-background: linear-gradient(145deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01));
+      --header-background: linear-gradient(135deg, rgba(10, 10, 10, .85), rgba(10, 10, 10, .75));
+      --border-light: rgba(255, 255, 255, .05);
+      --input-background: rgba(255, 255, 255, 0.05);
+      --button-background: linear-gradient(90deg, var(--blue), var(--pink));
+      --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+      --background-color-primary: #1a1a2e;
+      --background-color-secondary: #0f0f1f;
+      --text-color-primary: #e0e0e0;
+      --text-color-secondary: #b0b0d0;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin:0; font-family:'Inter', sans-serif; color: var(--white); background: radial-gradient(circle at top left, var(--background-gradient-1), transparent 100px), radial-gradient(circle at bottom right, var(--background-gradient-2), transparent 150px), linear-gradient(135deg, var(--background-color-primary), var(--background-color-secondary)); background-attachment: fixed; }
+    header { background: var(--header-background); border-bottom: 1px solid var(--border-light); padding: 10px 0; position: sticky; top: 0; z-index: 10; }
+    .header-content-wrapper { display:flex; align-items:center; justify-content:space-between; max-width:1200px; margin:0 auto; padding:0 20px; }
+    .logo { font-family:'Poppins', sans-serif; font-weight:800; font-size:1.6rem; background-image: linear-gradient(90deg, var(--blue), var(--pink)); -webkit-background-clip: text; background-clip:text; color: transparent; text-decoration:none; }
+    .home-chips-row { display:flex; gap:12px; align-items:center; }
+    .chip { display:flex; gap:12px; align-items:center; min-width:180px; background: linear-gradient(180deg, rgba(19,20,40,0.9), rgba(19,20,40,0.8)); color:#fff !important; border-radius: 14px; padding: 12px 14px; border: 1px solid rgba(255,255,255,0.04); box-shadow: 0 8px 24px rgba(0,0,0,0.35); text-decoration:none; }
+    .chip i { color: rgba(255,255,255,0.9); }
+    .chip-text { display:flex; flex-direction:column; gap:6px; color:#fff !important; }
+    #walletChipAmount { font-weight:800; font-size:1.05rem; color:#fff !important; }
+    #jcoinRate { color:#fff !important; font-weight:700; }
+    main { max-width:1200px; margin: 18px auto; padding: 0 20px 40px; }
+    .noncash-banner { background: var(--card-background); border:1px solid var(--border-light); border-radius: 16px; padding: 12px 14px; color: var(--text-color-primary); display:flex; align-items:center; gap:10px; margin-bottom: 16px; }
+    .noncash-banner i { color: var(--pink); }
+    .grid { display:grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+    @media (max-width: 1024px){ .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 640px){ .grid{ grid-template-columns: 1fr; } }
+    .engage-card { background: var(--card-background); border:1px solid var(--glass-blue); border-radius: 15px; padding: 12px; }
+    .engage-title { font-weight:800; margin: 2px 0 8px; }
+    .spin-button, .primary-btn, .ghost-btn { background: var(--button-background); color:#fff; border:none; border-radius:10px; padding:8px 12px; cursor:pointer; box-shadow: var(--button-shadow); font-weight:700; }
+    .ghost-btn { background: transparent; border:1px solid var(--border-light); box-shadow:none; color: var(--white); }
+    .muted { color: var(--text-light); font-size: .92rem; }
+    .row { display:flex; align-items:center; justify-content:space-between; gap: 10px; }
+    .quests-list { display:flex; flex-direction:column; gap:8px; }
+    .quest-item { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+    .quest-progress { flex:1; height:8px; background:rgba(255,255,255,0.1); border-radius:6px; overflow:hidden; margin:0 8px; }
+    .quest-progress > div { height:100%; background: var(--blue); }
+    .tile-actions { display:flex; gap:10px; flex-wrap:wrap; }
+    .action-link { display:inline-flex; align-items:center; gap:8px; text-decoration:none; font-weight:700; color:#fff; background: var(--button-background); border-radius:10px; padding:8px 12px; }
+    .action-link.ghost { background: transparent; border:1px solid var(--border-light); }
+    .earnings-footer { text-align:center; color: var(--text-light); margin-top: 16px; }
+    .section-title { font-weight:800; font-size:1.2rem; margin: 16px 0 8px; }
+    .hidden { display:none !important; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content-wrapper">
+      <a class="logo" href="/index.html">Nuvia</a>
+      <div class="home-chips-row">
+        <a href="/wallet.html" id="walletChipLink" class="chip wallet-chip" aria-label="Open Wallet">
+          <i class="fas fa-wallet"></i>
+          <div class="chip-text">
+            <div><span id="walletChipAmount">0</span> JCoins</div>
+            <div class="chip-sub">Rate: ₦<span id="jcoinRate">0</span>/J</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </header>
+  <main>
+    <div class="noncash-banner" role="note" aria-live="polite">
+      <i class="fa-solid fa-heart" aria-hidden="true"></i>
+      <div><strong>JCoin is not money.</strong> It can never be converted to real money. Earn for fun, and spend in groups on boosts, tickets, stickers, frames, and more.</div>
+    </div>
+
+    <h1 class="section-title">Fun & Earn Arcade</h1>
+    <div class="grid" id="earnTiles">
+      <div class="engage-card">
+        <div class="engage-title">Daily Check‑in</div>
+        <div class="row">
+          <button id="checkInButton" class="primary-btn"><i class="fa-solid fa-calendar-check"></i> Check‑in</button>
+          <div id="checkInStatus" class="muted">Claim once per day.</div>
+        </div>
+      </div>
+      <div class="engage-card">
+        <div class="engage-title">Daily Spin</div>
+        <div class="row">
+          <button class="spin-button" id="spinNowButton"><i class="fas fa-sync"></i> Spin Now</button>
+          <div id="spinStatus" class="muted"></div>
+        </div>
+      </div>
+      <div class="engage-card">
+        <div class="engage-title">Weekly Quests</div>
+        <div class="quests-list" id="questsList"></div>
+      </div>
+      <div class="engage-card">
+        <div class="engage-title">Share Inspiration</div>
+        <p class="muted">Post today’s quote or your custom message.</p>
+        <div class="tile-actions">
+          <a class="action-link" href="/index.html#inspiration"><i class="fa-solid fa-share"></i> Share / Post</a>
+          <a class="action-link ghost" href="/index.html#inspiration"><i class="fa-solid fa-sliders"></i> Customize</a>
+        </div>
+      </div>
+      <div class="engage-card">
+        <div class="engage-title">Create a Post</div>
+        <p class="muted">Write, add media or polls. Quality posts help your streaks and quests.</p>
+        <div class="tile-actions">
+          <a class="action-link" href="/index.html#postCreationSection"><i class="fa-solid fa-paper-plane"></i> Create Post</a>
+        </div>
+      </div>
+      <div class="engage-card">
+        <div class="engage-title">Bible/Quran Trivia</div>
+        <p class="muted">Play short quizzes with friends and groups.</p>
+        <div class="tile-actions">
+          <a class="action-link" href="/bible.html"><i class="fa-solid fa-book-bible"></i> Bible Quiz</a>
+          <a class="action-link ghost" href="/quran.html"><i class="fa-solid fa-moon"></i> Quran Quiz</a>
+        </div>
+      </div>
+      <div class="engage-card">
+        <div class="engage-title">Invite Friends</div>
+        <p class="muted">Grow your circle. More friends, more fun.</p>
+        <div class="tile-actions">
+          <a class="action-link" href="/find_friends.html"><i class="fa-solid fa-user-plus"></i> Find Friends</a>
+          <a class="action-link ghost" href="/friends.html"><i class="fa-solid fa-users"></i> Friends</a>
+        </div>
+      </div>
+      <div class="engage-card">
+        <div class="engage-title">Group Challenges</div>
+        <p class="muted">Join group events and spend JCoins on boosts.</p>
+        <div class="tile-actions">
+          <a class="action-link" href="/groups.html"><i class="fa-solid fa-people-group"></i> Explore Groups</a>
+          <a class="action-link ghost" href="/leaders_admin.html"><i class="fa-solid fa-ranking-star"></i> Leaderboards</a>
+        </div>
+      </div>
+      <div class="engage-card">
+        <div class="engage-title">Themes & Frames</div>
+        <p class="muted">Spend JCoins on profile frames and premium looks.</p>
+        <div class="tile-actions">
+          <a class="action-link" href="/premium_themes.html"><i class="fa-solid fa-wand-magic-sparkles"></i> Themes</a>
+          <a class="action-link ghost" href="/profile.html"><i class="fa-solid fa-id-badge"></i> My Profile</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="earnings-footer">
+      View balances and history in <a href="/wallet.html" style="color:var(--blue); font-weight:800; text-decoration:none;">Wallet</a>.
+    </div>
+  </main>
+
+  <div id="toast" class="hidden" style="position:fixed; bottom:16px; left:50%; transform:translateX(-50%); background:var(--card-background); border:1px solid var(--border-light); color:var(--white); padding:10px 12px; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,0.35); z-index:9999;"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
+    import { initializeFirestore, doc, getDoc, setDoc, updateDoc, runTransaction, serverTimestamp, collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+
+    const firebaseConfig = typeof window.__firebase_config !== 'undefined' ? JSON.parse(window.__firebase_config) : {
+      apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+      authDomain: "jchat-1.firebaseapp.com",
+      databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+      projectId: "jchat-1",
+      storageBucket: "jchat-1.firebasestorage.app",
+      messagingSenderId: "328479683167",
+      appId: "1:328479683167:web:demo"
+    };
+    const appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'default-app-id';
+
+    const app = initializeApp(firebaseConfig);
+    const db = initializeFirestore(app, {});
+    const auth = getAuth(app);
+
+    const walletChipAmount = document.getElementById('walletChipAmount');
+    const jcoinRateSpan = document.getElementById('jcoinRate');
+    const checkInButton = document.getElementById('checkInButton');
+    const checkInStatus = document.getElementById('checkInStatus');
+    const spinNowButton = document.getElementById('spinNowButton');
+    const spinStatus = document.getElementById('spinStatus');
+    const questsList = document.getElementById('questsList');
+
+    let currentUser = null;
+    let currentUserProfileData = null;
+
+    function showToast(msg){ const t = document.getElementById('toast'); if(!t) return; t.textContent = msg; t.classList.remove('hidden'); clearTimeout(t._h); t._h = setTimeout(()=> t.classList.add('hidden'), 2200); }
+
+    async function loadProfileAndWallet(uid){
+      try {
+        const profileRef = doc(db, 'artifacts', appId, 'users', uid, 'profiles', 'user_profile');
+        const snap = await getDoc(profileRef);
+        if (snap.exists()) {
+          currentUserProfileData = snap.data();
+          const j = Number(currentUserProfileData?.jCoins || 0);
+          if (walletChipAmount) walletChipAmount.textContent = String(j);
+          const computedRate = (j * 0.005).toFixed(3);
+          if (jcoinRateSpan) jcoinRateSpan.textContent = computedRate;
+        }
+      } catch(e){ console.error(e); }
+    }
+
+    function renderQuests(){
+      if (!questsList) return;
+      questsList.innerHTML = '';
+      const weekQuests = [
+        { id:'q1', title:'React 10 times', target:10, progress:0 },
+        { id:'q2', title:'Comment 5 times', target:5, progress:0 },
+        { id:'q3', title:'Create 2 posts', target:2, progress:0 }
+      ];
+      weekQuests.forEach(q=>{
+        const pct = Math.min(100, Math.round((q.progress/q.target)*100));
+        const row = document.createElement('div');
+        row.className = 'quest-item';
+        row.innerHTML = `<span>${q.title}</span><div class="quest-progress"><div style="width:${pct}%"></div></div><span>${q.progress}/${q.target}</span>`;
+        questsList.appendChild(row);
+      });
+    }
+
+    async function handleCheckIn(){
+      if (!currentUser) { showToast('Login to check‑in.'); return; }
+      const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'engagement', 'daily_checkin');
+      const snap = await getDoc(ref);
+      const now = new Date();
+      if (snap.exists()) {
+        const last = snap.data().lastAt?.toDate();
+        if (last) {
+          const since = now - last;
+          if (since < 24*60*60*1000) {
+            const hrs = Math.ceil((24*60*60*1000 - since)/3600000);
+            if (checkInStatus) checkInStatus.textContent = `Come back in ~${hrs}h.`;
+            return;
+          }
+        }
+      }
+      try {
+        const profileRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profiles', 'user_profile');
+        await runTransaction(db, async (trx) => {
+          const ps = await trx.get(profileRef);
+          const cur = ps.exists()? (ps.data().jCoins||0):0;
+          trx.update(profileRef, { jCoins: cur + 10, updatedAt: serverTimestamp() });
+        });
+        await setDoc(ref, { lastAt: serverTimestamp() }, { merge: true });
+        if (checkInStatus) checkInStatus.textContent = `Checked‑in! +10 JCoins`;
+        await loadProfileAndWallet(currentUser.uid);
+      } catch(e){ console.error(e); showToast('Check‑in failed.'); }
+    }
+
+    async function handleSpin(){
+      if (!currentUser) { showToast('Login to spin.'); return; }
+      const spinRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'engagement', 'daily_spin');
+      const snap = await getDoc(spinRef);
+      const now = new Date();
+      if (snap.exists()) {
+        const last = snap.data().lastSpinAt?.toDate();
+        if (last) {
+          const since = now - last;
+          if (since < 24*60*60*1000) {
+            const hrs = Math.ceil((24*60*60*1000 - since)/3600000);
+            if (spinStatus) spinStatus.textContent = `Come back in ~${hrs}h.`;
+            return;
+          }
+        }
+      }
+      const rewards = [ {j:5, w:40}, {j:10, w:30}, {j:20, w:20}, {j:50, w:8}, {j:100, w:2} ];
+      const totalW = rewards.reduce((a,b)=>a+b.w,0);
+      let r = Math.random()*totalW, pick = rewards[0];
+      for (const it of rewards) { if (r < it.w) { pick = it; break; } r -= it.w; }
+      try {
+        const profileRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profiles', 'user_profile');
+        await runTransaction(db, async (trx) => {
+          const ps = await trx.get(profileRef);
+          const cur = ps.exists()? (ps.data().jCoins||0):0;
+          trx.update(profileRef, { jCoins: cur + pick.j, updatedAt: serverTimestamp() });
+        });
+        await setDoc(spinRef, { lastSpinAt: serverTimestamp() }, { merge: true });
+        if (spinStatus) spinStatus.textContent = `You won ${pick.j} JCoins!`;
+        await loadProfileAndWallet(currentUser.uid);
+      } catch(e){ console.error(e); showToast('Spin failed.'); }
+    }
+
+    onAuthStateChanged(auth, async (user)=>{
+      currentUser = user || null;
+      if (currentUser) {
+        await loadProfileAndWallet(currentUser.uid);
+      } else {
+        if (walletChipAmount) walletChipAmount.textContent = '0';
+        if (jcoinRateSpan) jcoinRateSpan.textContent = '0';
+      }
+      renderQuests();
+    });
+
+    if (checkInButton) checkInButton.addEventListener('click', handleCheckIn);
+    if (spinNowButton) spinNowButton.addEventListener('click', handleSpin);
+  </script>
+</body>
+</html>
