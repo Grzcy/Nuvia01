@@ -128,8 +128,7 @@
         <div class="status-chip status-locked" id="walletStatusChip">Locked</div>
       </div>
       <div class="rate-row">
-        <div class="rate-badge"><i class="fa-solid fa-coins" aria-hidden="true"></i> 1 JCoin ≈ <span id="oneJcoinRateDisplay">₦0.00 NGN</span></div>
-        <div class="rate-badge"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> Rate: ₦<span id="homeJcoinRateDisplay">0.000</span>/J</div>
+        <div class="rate-badge"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> Rate: ₦<span id="jcoinRate">0.000</span>/J</div>
         <div class="rate-badge" id="conversionBadge">0 JCoins → ₦0.00</div>
       </div>
       <div class="actions-grid" aria-label="Wallet quick actions">
@@ -214,7 +213,7 @@
 
     let currentUser = null;
     let currentProfile = null;
-    let currentSystemSettings = { jcoinNairaRate: 7.5 };
+    let currentSystemSettings = { jcoinNairaRate: 0.0005 };
     let txUnsub = null;
     let activeFilter = 'all';
 
@@ -233,23 +232,19 @@
     }
 
     function updateRateUI(){
-      const rateJPerN = Number(currentSystemSettings?.jcoinNairaRate || 7.5);
-      const nairaPerJ = rateJPerN > 0 ? (1 / rateJPerN) : 0;
-      const one = document.getElementById('oneJcoinRateDisplay');
-      if (one) one.textContent = `₦${nairaPerJ.toFixed(2)} NGN`;
+      const rate = Number(currentSystemSettings?.jcoinNairaRate || 0.0005);
       const j = Number(currentProfile?.jCoins || 0);
-      const homeRate = (j * 0.005).toFixed(3);
-      const homeEl = document.getElementById('homeJcoinRateDisplay');
-      if (homeEl) homeEl.textContent = homeRate;
-      conversionBadge.textContent = `${j.toLocaleString()} JCoins → ${fmtNaira(j * nairaPerJ)}`;
+      const computedRate = (j * 0.005).toFixed(3); // Same as index.html wallet chip logic
+      const rateEl = document.getElementById('jcoinRate');
+      if (rateEl) rateEl.textContent = computedRate;
+      conversionBadge.textContent = `${j.toLocaleString()} JCoins → ${fmtNaira(j * rate)}`;
     }
 
     function updateHeaderUI(){
-      const rateJPerN = Number(currentSystemSettings?.jcoinNairaRate || 7.5);
-      const nairaPerJ = rateJPerN > 0 ? (1 / rateJPerN) : 0;
+      const rate = Number(currentSystemSettings?.jcoinNairaRate || 0.0005);
       const j = Number(currentProfile?.jCoins || 0);
       balanceJcoin.textContent = j.toLocaleString();
-      balanceNaira.textContent = fmtNaira(j * nairaPerJ);
+      balanceNaira.textContent = fmtNaira(j * rate);
       const unlocked = !!currentProfile?.walletUnlocked;
       walletStatusChip.textContent = unlocked ? 'Unlocked' : 'Locked';
       walletStatusChip.classList.toggle('status-unlocked', unlocked);
