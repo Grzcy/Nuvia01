@@ -129,6 +129,7 @@
       </div>
       <div class="rate-row">
         <div class="rate-badge"><i class="fa-solid fa-coins" aria-hidden="true"></i> 1 JCoin ≈ <span id="oneJcoinRateDisplay">₦0.00 NGN</span></div>
+        <div class="rate-badge"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> Rate: ₦<span id="homeJcoinRateDisplay">0.000</span>/J</div>
         <div class="rate-badge" id="conversionBadge">0 JCoins → ₦0.00</div>
       </div>
       <div class="actions-grid" aria-label="Wallet quick actions">
@@ -232,24 +233,29 @@
     }
 
     function updateRateUI(){
-      const rate = Number(currentSystemSettings?.jcoinNairaRate || 7.5);
+      const rateJPerN = Number(currentSystemSettings?.jcoinNairaRate || 7.5);
+      const nairaPerJ = rateJPerN > 0 ? (1 / rateJPerN) : 0;
       const one = document.getElementById('oneJcoinRateDisplay');
-      if (one) one.textContent = `₦${rate.toFixed(2)} NGN`;
+      if (one) one.textContent = `₦${nairaPerJ.toFixed(2)} NGN`;
       const j = Number(currentProfile?.jCoins || 0);
-      conversionBadge.textContent = `${j.toLocaleString()} JCoins → ${fmtNaira(j * rate)}`;
+      const homeRate = (j * 0.005).toFixed(3);
+      const homeEl = document.getElementById('homeJcoinRateDisplay');
+      if (homeEl) homeEl.textContent = homeRate;
+      conversionBadge.textContent = `${j.toLocaleString()} JCoins → ${fmtNaira(j * nairaPerJ)}`;
     }
 
     function updateHeaderUI(){
-      const rate = Number(currentSystemSettings?.jcoinNairaRate || 7.5);
+      const rateJPerN = Number(currentSystemSettings?.jcoinNairaRate || 7.5);
+      const nairaPerJ = rateJPerN > 0 ? (1 / rateJPerN) : 0;
       const j = Number(currentProfile?.jCoins || 0);
       balanceJcoin.textContent = j.toLocaleString();
-      balanceNaira.textContent = fmtNaira(j * rate);
+      balanceNaira.textContent = fmtNaira(j * nairaPerJ);
       const unlocked = !!currentProfile?.walletUnlocked;
       walletStatusChip.textContent = unlocked ? 'Unlocked' : 'Locked';
       walletStatusChip.classList.toggle('status-unlocked', unlocked);
       walletStatusChip.classList.toggle('status-locked', !unlocked);
       lockedBanner.style.display = unlocked ? 'none' : 'block';
-      addMoneyBtn.classList.toggle('disabled', unlocked); // hide pay if already unlocked
+      addMoneyBtn.classList.toggle('disabled', unlocked);
       updateRateUI();
     }
 
