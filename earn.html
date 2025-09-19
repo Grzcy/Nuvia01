@@ -214,6 +214,33 @@
           <div id="weeklyStreakStatus" class="muted"></div>
         </div>
       </div>
+
+      <div class="engage-card">
+        <div class="engage-title">Hard Quiz (5 Q)</div>
+        <p class="muted">Score 4+ correct for rewards. One attempt per day.</p>
+        <div class="row">
+          <button id="startHardQuizButton" class="primary-btn"><i class="fa-solid fa-brain"></i> Start Hard Quiz</button>
+          <div id="hardQuizStatus" class="muted"></div>
+        </div>
+      </div>
+
+      <div class="engage-card">
+        <div class="engage-title">Focus Timer</div>
+        <p class="muted">Stay focused for 2 minutes without leaving or minimizing.</p>
+        <div class="row">
+          <button id="startFocusButton" class="primary-btn"><i class="fa-solid fa-hourglass"></i> Start 2‑min Focus</button>
+          <div id="focusStatus" class="muted"></div>
+        </div>
+      </div>
+
+      <div class="engage-card">
+        <div class="engage-title">Typing Challenge</div>
+        <p class="muted">Type the passage with 95%+ accuracy in 60s.</p>
+        <div class="row">
+          <button id="startTypingButton" class="primary-btn"><i class="fa-solid fa-keyboard"></i> Begin</button>
+          <div id="typingStatus" class="muted"></div>
+        </div>
+      </div>
     </div>
 
     <div class="earnings-footer">
@@ -244,6 +271,35 @@
       <div class="tile-actions mt-8 justify-end">
         <button id="rushStartButton" class="primary-btn"><i class="fa-solid fa-play"></i> Start</button>
         <button id="rushCloseButton" class="ghost-btn"><i class="fa-solid fa-xmark"></i> Close</button>
+      </div>
+    </div>
+  </div>
+  <div id="hardQuizModal" class="hidden modal-backdrop">
+    <div class="engage-card modal-card">
+      <div class="engage-title">Hard Quiz</div>
+      <div id="hardQuizContent" class="muted"></div>
+      <div class="tile-actions mt-8 justify-end">
+        <button id="hardQuizNextButton" class="primary-btn"><i class="fa-solid fa-arrow-right"></i> Next</button>
+        <button id="hardQuizCloseButton" class="ghost-btn"><i class="fa-solid fa-xmark"></i> Close</button>
+      </div>
+    </div>
+  </div>
+  <div id="focusModal" class="hidden modal-backdrop">
+    <div class="engage-card modal-card">
+      <div class="engage-title">Focus Timer</div>
+      <div id="focusContent" class="muted"></div>
+      <div class="tile-actions mt-8 justify-end">
+        <button id="focusCloseButton" class="ghost-btn"><i class="fa-solid fa-xmark"></i> Close</button>
+      </div>
+    </div>
+  </div>
+  <div id="typingModal" class="hidden modal-backdrop">
+    <div class="engage-card modal-card">
+      <div class="engage-title">Typing Challenge</div>
+      <div id="typingContent" class="muted"></div>
+      <div class="tile-actions mt-8 justify-end">
+        <button id="typingSubmitButton" class="primary-btn"><i class="fa-solid fa-paper-plane"></i> Submit</button>
+        <button id="typingCloseButton" class="ghost-btn"><i class="fa-solid fa-xmark"></i> Close</button>
       </div>
     </div>
   </div>
