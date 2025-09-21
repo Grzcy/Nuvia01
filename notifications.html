@@ -26,6 +26,11 @@
     .logo{font-family:Poppins, sans-serif;font-weight:800;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;font-size:1.2rem;text-decoration:none}
     .toolbar-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
     .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:10px;color:inherit;cursor:pointer}
+    /* header profile */
+    #profileLink{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:inherit}
+    #headerProfilePic{display:none;width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.18)}
+    #headerAvatarIcon{font-size:32px;display:none}
+    #headerDisplayName{font-weight:800;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     main{max-width:980px;margin:18px auto;padding:0 12px}
 
     /* Controls */
@@ -102,6 +107,11 @@
       <div class="toolbar-actions">
         <button class="btn" id="backBtn" aria-label="Go back"><i class="fa-solid fa-arrow-left"></i></button>
         <button class="btn" id="openPrefs" aria-haspopup="true" aria-expanded="false" aria-controls="prefsPopover" title="Notification preferences"><i class="fa-solid fa-bell-slash"></i></button>
+        <a href="/profile.html" id="profileLink" aria-label="View Profile">
+          <img id="headerProfilePic" src="" alt="Profile Picture">
+          <i id="headerAvatarIcon" class="fas fa-user-circle" aria-hidden="true"></i>
+          <span id="headerDisplayName">Loading...</span>
+        </a>
       </div>
     </div>
   </header>
@@ -152,8 +162,8 @@
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js';
-    import { getFirestore, collection, query, orderBy, limit, onSnapshot, doc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js';
-    import { getCloudinaryImageUrl } from './assets/js/avatar-utils.js';
+    import { getFirestore, collection, query, orderBy, limit, onSnapshot, doc, updateDoc, deleteDoc, getDoc } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js';
+    import { getCloudinaryImageUrl, displayProfilePicture } from './assets/js/avatar-utils.js';
 
     const firebaseConfig = typeof window.__firebase_config !== 'undefined' ? JSON.parse(window.__firebase_config) : {
       apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
@@ -179,6 +189,10 @@
       const prefDnd = document.getElementById('prefDnd');
       const prefSound = document.getElementById('prefSound');
       const clearCacheBtn = document.getElementById('clearCacheBtn');
+      const headerProfilePic = document.getElementById('headerProfilePic');
+      const headerAvatarIcon = document.getElementById('headerAvatarIcon');
+      const headerDisplayName = document.getElementById('headerDisplayName');
+      const profileLink = document.getElementById('profileLink');
 
       let currentTab = 'all';
       let currentUser = null;
@@ -206,7 +220,13 @@
       onAuthStateChanged(auth, async (u)=>{
         currentUser = u || null;
         if(unsubscribe){ try{ unsubscribe(); }catch(e){} unsubscribe=null; }
-        if(!currentUser) return loadCachedAndRender();
+        if(!currentUser){
+          if (headerDisplayName) headerDisplayName.textContent = 'Guest';
+          if (headerProfilePic) headerProfilePic.style.display = 'none';
+          if (headerAvatarIcon) headerAvatarIcon.style.display = 'block';
+          return loadCachedAndRender();
+        }
+        try{ await fetchAndDisplayHeaderProfile(currentUser); }catch(_){ }
         const col = collection(db,'artifacts', appId, 'users', currentUser.uid, 'notifications');
         const q = query(col, orderBy('timestamp','desc'), limit(400));
         unsubscribe = onSnapshot(q, snap=>{
@@ -357,6 +377,28 @@
 
       function truncateText(s,n){ if(!s) return ''; return s.length>n? s.slice(0,n-1)+'…': s; }
       function timeAgo(d){ const s=(Date.now()-new Date(d).getTime())/1000; if(s<60) return Math.floor(s)+'s'; const m=s/60; if(m<60) return Math.floor(m)+'m'; const h=m/60; if(h<24) return Math.floor(h)+'h'; const dd=h/24; if(dd<7) return Math.floor(dd)+'d'; const mo=dd/30; if(mo<12) return Math.floor(mo)+'mo'; return Math.floor(dd/365)+'y'; }
+
+      async function fetchAndDisplayHeaderProfile(user){
+        try{
+          const publicRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid);
+          const pubSnap = await getDoc(publicRef);
+          let username = user.displayName || 'Nuvia User';
+          let picId = user.photoURL || null;
+          if (pubSnap.exists()){
+            const d = pubSnap.data();
+            if (d && d.username) username = d.username;
+            if (d && (d.profilePicId || d.profilePhoto)) picId = d.profilePicId || d.profilePhoto;
+          }
+          const initial = (username || 'N').charAt(0).toUpperCase();
+          if (headerProfilePic && headerAvatarIcon) displayProfilePicture(headerProfilePic, headerAvatarIcon, picId, initial, 'w_70,h_70,c_fill,g_face,r_max');
+          if (headerDisplayName) headerDisplayName.textContent = username;
+          if (profileLink) profileLink.href = `/profile.html?userId=${user.uid}`;
+        }catch(e){
+          const initial = (user.displayName || 'N').charAt(0).toUpperCase();
+          if (headerProfilePic && headerAvatarIcon) displayProfilePicture(headerProfilePic, headerAvatarIcon, user.photoURL, initial, 'w_70,h_70,c_fill,g_face,r_max');
+          if (headerDisplayName) headerDisplayName.textContent = user.displayName || 'Nuvia User';
+        }
+      }
 
       function defaultTextFor(type,name,raw){
         switch(type){
