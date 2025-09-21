@@ -5098,13 +5098,15 @@
   .verified-badge i{font-size:1em}
   .verified-badge.sm{font-size:.85rem}
   .verified-badge.md{font-size:1rem}
+  .profile-avatar-anchor{position:relative;display:inline-block}
   /* Avatar corner badges (Facebook-style) */
-  .profile-avatar-badge{position:absolute;display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;border:2px solid var(--background-main);box-shadow:0 0 0 1px rgba(0,0,0,0.2);z-index:2;animation:soft-glow 2.2s ease-in-out infinite}
+  .profile-avatar-badge{position:absolute;display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;border:2px solid var(--background-main);box-shadow:0 0 0 1px rgba(0,0,0,0.2);z-index:2;animation:soft-glow 2.2s ease-in-out infinite;pointer-events:none}
   .profile-avatar-badge i{font-size:14px;line-height:1}
-  .profile-avatar-badge.verified{right:6px;bottom:6px;background:linear-gradient(135deg,#FFD700,#FFA500);color:#000;border-color:#FFD700;box-shadow:0 0 10px rgba(255,215,0,.75),0 0 20px rgba(255,165,0,.5),0 0 30px rgba(255,215,0,.35);animation:gold-pulse 1.8s ease-in-out infinite}
+  .profile-avatar-badge.verified{right:-8px;bottom:-8px;background:linear-gradient(135deg,#5DBB63,#3A9D5D);color:#fff;border-color:#3A9D5D;box-shadow:0 0 10px rgba(61,157,93,.7),0 0 20px rgba(61,157,93,.45);animation:green-pulse 2s ease-in-out infinite}
   .profile-avatar-badge.verified::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(255,215,0,.6);box-shadow:0 0 12px rgba(255,215,0,.5),0 0 22px rgba(255,165,0,.35);pointer-events:none}
-  .profile-avatar-badge.premium{right:6px;top:6px;background:linear-gradient(135deg,#FFD700,#FFA500);color:#000;border-color:#FFD700;box-shadow:0 0 12px rgba(255,215,0,.8),0 0 22px rgba(255,165,0,.5)}
+  .profile-avatar-badge.premium{right:-8px;top:-8px;background:linear-gradient(135deg,#FFD700,#FFA500);color:#000;border-color:#FFD700;box-shadow:0 0 12px rgba(255,215,0,.8),0 0 22px rgba(255,165,0,.5)}
   @keyframes soft-glow{0%,100%{filter:drop-shadow(0 0 0 rgba(0,0,0,0))}50%{filter:drop-shadow(0 0 2px rgba(255,255,255,.4))}}
+  @keyframes green-pulse{0%,100%{box-shadow:0 0 10px rgba(61,157,93,.7),0 0 20px rgba(61,157,93,.45)}50%{box-shadow:0 0 14px rgba(61,157,93,.85),0 0 26px rgba(61,157,93,.6)}}
   @keyframes gold-pulse{0%,100%{box-shadow:0 0 10px rgba(255,215,0,.75),0 0 20px rgba(255,165,0,.5),0 0 30px rgba(255,215,0,.35)}50%{box-shadow:0 0 14px rgba(255,215,0,.9),0 0 26px rgba(255,165,0,.65),0 0 40px rgba(255,215,0,.5)}}
   @media (max-width:768px){.profile-avatar-badge{width:22px;height:22px}.profile-avatar-badge i{font-size:12px}}
 </style>
@@ -5259,14 +5261,16 @@
                 </div>
 
                 <div class="profile-header-area">
-                    <div class="profile-pic-wrapper" id="profilePicWrapper">
-                        <img id="profilePagePic" src="" alt="Profile Picture" class="profile-pic" style="display: none;">
-                        <i id="profilePageAvatarIcon" class="fas fa-user-circle profile-pic-placeholder"></i>
-                        <input type="file" id="profilePicUploadInput" accept="image/*" style="display: none;">
-                        <label for="profilePicUploadInput" class="edit-profile-pic-overlay" id="editProfilePicOverlay">
-                            <i class="fas fa-camera"></i> Edit
-                        </label>
-                         <!-- NEW: Loading spinner for profile pic -->
+                    <div class="profile-avatar-anchor" id="profileAvatarAnchor">
+                        <div class="profile-pic-wrapper" id="profilePicWrapper">
+                            <img id="profilePagePic" src="" alt="Profile Picture" class="profile-pic" style="display: none;">
+                            <i id="profilePageAvatarIcon" class="fas fa-user-circle profile-pic-placeholder"></i>
+                            <input type="file" id="profilePicUploadInput" accept="image/*" style="display: none;">
+                            <label for="profilePicUploadInput" class="edit-profile-pic-overlay" id="editProfilePicOverlay">
+                                <i class="fas fa-camera"></i> Edit
+                            </label>
+                             <!-- NEW: Loading spinner for profile pic -->
+                        </div>
                     </div>
                     <h2 id="profileUsername" class="profile-name">Username</h2>
                     <p id="profileBio" class="profile-bio">No bio provided yet.</p>
