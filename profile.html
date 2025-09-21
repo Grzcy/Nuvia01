@@ -5356,6 +5356,28 @@
                     </div>
                 </div>
 
+                <!-- Invite & Earn Referral Section -->
+                <div class="clean-profile" id="referralInviteSection">
+                    <h3 class="section-title"><i class="fas fa-user-friends"></i> Invite & Earn</h3>
+                    <p class="form-help-text">Per successful referral: You receive +20 Gas and +5 JCoins. Your friend receives +20 Gas and +10 JCoins when they sign up.</p>
+
+                    <div class="input-group">
+                        <label for="referralLinkField">Your referral link</label>
+                        <input id="referralLinkField" type="text" readonly>
+                        <button id="copyReferralLinkBtn" class="copy-user-id-btn" type="button"><i class="fas fa-copy"></i> Copy Link</button>
+                    </div>
+
+                    <div class="form-status" id="referralCopyStatus" style="display: none;"></div>
+
+                    <div class="input-group">
+                        <label>Referrals</label>
+                        <div class="user-id-container">
+                            <span class="user-id-label">Successful:</span>
+                            <span id="referralCount" class="user-id-text">0</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="profile-actions" id="profileActions">
                     <!-- Buttons will be dynamically added/hidden based on owner/viewer -->
                     <!-- Removed Edit Profile Button -->
@@ -6091,6 +6113,10 @@
         const statFollowing = document.getElementById('statFollowing');
         const jCoinsSpan = document.getElementById('jCoins'); // Added for jCoins
         const jcoinExchangeRate = document.getElementById('jcoinExchangeRate'); // Added for exchange rate
+        const referralLinkField = document.getElementById('referralLinkField');
+        const referralCountEl = document.getElementById('referralCount');
+        const copyReferralLinkBtn = document.getElementById('copyReferralLinkBtn');
+        const referralCopyStatus = document.getElementById('referralCopyStatus');
         const jcoinUSDValue = document.getElementById('jcoinUSDValue'); // Added for USD value
 
         // XP Level Elements
@@ -9433,6 +9459,26 @@
                     // Fetch and display user profile after header profile is ready
                     await fetchAndDisplayUserProfile(displayedUserId);
                     fetchNotificationCount(user.uid); // Fetch notification count
+
+                    // Populate referral section for current user
+                    try{
+                        const link = `${location.origin.replace(/\/$/, '')}/login.html?ref=${user.uid}`;
+                        if (referralLinkField) referralLinkField.value = link;
+                        if (copyReferralLinkBtn) {
+                            copyReferralLinkBtn.addEventListener('click', async ()=>{
+                                try{
+                                    await navigator.clipboard.writeText(referralLinkField ? referralLinkField.value : link);
+                                    if (referralCopyStatus) { referralCopyStatus.className = 'form-status success'; referralCopyStatus.textContent = 'Referral link copied!'; referralCopyStatus.style.display = 'block'; setTimeout(()=>{ referralCopyStatus.style.display='none'; }, 1600); }
+                                    copyReferralLinkBtn.classList.add('copied'); setTimeout(()=>copyReferralLinkBtn.classList.remove('copied'), 1000);
+                                }catch(e){ if (referralCopyStatus) { referralCopyStatus.className = 'form-status error'; referralCopyStatus.textContent = 'Failed to copy link'; referralCopyStatus.style.display = 'block'; } }
+                            }, { once: true });
+                        }
+                        const privRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profiles', 'user_profile');
+                        const privSnap = await getDoc(privRef);
+                        if (privSnap.exists() && referralCountEl) {
+                            referralCountEl.textContent = Number(privSnap.data().successfulReferrals || 0).toLocaleString();
+                        }
+                    }catch(_){ /* non-fatal */ }
                     
                     // Presence heartbeat
                     try {
