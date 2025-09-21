@@ -1468,7 +1468,7 @@
   .users-table-container, .rewards-table-container, .reports-table-container, .posts-table-container { max-height: 60vh; overflow: auto; }
   /* Ensure containers keep rounded corners and borders */
   .users-table-container, .rewards-table-container, .reports-table-container, .posts-table-container { border-radius: 10px; }
-</style></head>
+</style><style id="verified-badge-styles">.verified-badge{display:inline-flex;align-items:center;justify-content:center;margin-left:6px;line-height:1;color:transparent;background-image:linear-gradient(90deg, var(--blue), var(--pink));background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;vertical-align:middle}.verified-badge i{font-size:1em}.verified-badge.sm{font-size:.85rem}.verified-badge.md{font-size:1rem}</style></head>
 <body class="theme-dark-mode">
 
     <header>
@@ -1688,6 +1688,7 @@
                             <p>Current Gas (XP): <strong id="lookedUpUserGas">N/A</strong></p>
                             <p>Wallet Status: <strong id="lookedUpUserWalletStatus">N/A</strong></p>
                             <p>Ban Status: <strong id="lookedUpUserBanStatus">N/A</strong></p>
+                            <p>Verified: <span id="lookedUpVerifiedStatusText">N/A</span></p>
                         </div>
 
                         <!-- User Management Section (visible only after lookup) -->
@@ -1753,6 +1754,16 @@
                                             <span class="button-text">Deduct Gas</span>
                                             
                                         </button>
+                                    </div>
+                                </div>
+
+                                <!-- Verification Management Card -->
+                                <div class="management-card">
+                                    <h4>User Verification</h4>
+                                    <p>Status: <span id="currentVerifiedStatusText">Unknown</span></p>
+                                    <div class="button-group">
+                                        <button id="verifyUserButton" class="admin-button"><span class="button-text">Verify User</span></button>
+                                        <button id="unverifyUserButton" class="admin-button secondary"><span class="button-text">Unverify User</span></button>
                                     </div>
                                 </div>
 
@@ -2070,6 +2081,7 @@
         import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, runTransaction, writeBatch, serverTimestamp, onSnapshot, addDoc, deleteDoc, Timestamp, arrayUnion, arrayRemove, orderBy } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
         import { getStorage, ref, getDownloadURL, deleteObject, uploadBytes } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js";
+import { renderVerifiedBadge } from './assets/js/verification-utils.js';
 
         // --- Firebase & Canvas Environment Configuration ---
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
@@ -2126,6 +2138,40 @@
         const saveSystemSettingsButton = document.getElementById('saveSystemSettingsButton');
 
         // Admin Page Specific Elements - User Lookup & Management
+        async function verifyLookedUpUser() {
+            if (!currentUser || currentUser.uid !== ADMIN_UID) { showMessageBox('Access denied.', 'error'); return; }
+            if (!lookedUpUserId) { showMessageBox('Lookup a user first.', 'warning'); return; }
+            toggleButtonLoading(verifyUserButton, true);
+            try {
+                const userProfileDocRef = doc(db, 'artifacts', appId, 'users', lookedUpUserId, 'profiles', 'user_profile');
+                const publicProfileDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', lookedUpUserId);
+                await updateDoc(userProfileDocRef, { verified: true, verifiedAt: serverTimestamp(), verifiedBy: currentUser.uid, updatedAt: serverTimestamp() });
+                await updateDoc(publicProfileDocRef, { verified: true, updatedAt: serverTimestamp() });
+                showMessageBox('User verified.', 'success');
+            } catch (e) {
+                console.error(e);
+                showMessageBox('Failed to verify user.', 'error');
+            } finally {
+                toggleButtonLoading(verifyUserButton, false);
+            }
+        }
+        async function unverifyLookedUpUser() {
+            if (!currentUser || currentUser.uid !== ADMIN_UID) { showMessageBox('Access denied.', 'error'); return; }
+            if (!lookedUpUserId) { showMessageBox('Lookup a user first.', 'warning'); return; }
+            toggleButtonLoading(unverifyUserButton, true);
+            try {
+                const userProfileDocRef = doc(db, 'artifacts', appId, 'users', lookedUpUserId, 'profiles', 'user_profile');
+                const publicProfileDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', lookedUpUserId);
+                await updateDoc(userProfileDocRef, { verified: false, verifiedAt: null, verifiedBy: null, updatedAt: serverTimestamp() });
+                await updateDoc(publicProfileDocRef, { verified: false, updatedAt: serverTimestamp() });
+                showMessageBox('User unverified.', 'success');
+            } catch (e) {
+                console.error(e);
+                showMessageBox('Failed to unverify user.', 'error');
+            } finally {
+                toggleButtonLoading(unverifyUserButton, false);
+            }
+        }
         const searchTypeSelect = document.getElementById('searchTypeSelect');
         const lookupUserInput = document.getElementById('lookupUserInput');
         const lookupUserButton = document.getElementById('lookupUserButton');
@@ -2139,6 +2185,10 @@
         const lookedUpUserGasDisplay = document.getElementById('lookedUpUserGas');
         const lookedUpUserWalletStatus = document.getElementById('lookedUpUserWalletStatus');
         const lookedUpUserBanStatus = document.getElementById('lookedUpUserBanStatus'); // New ban status display
+const lookedUpVerifiedStatusText = document.getElementById('lookedUpVerifiedStatusText');
+const currentVerifiedStatusText = document.getElementById('currentVerifiedStatusText');
+const verifyUserButton = document.getElementById('verifyUserButton');
+const unverifyUserButton = document.getElementById('unverifyUserButton');
 
         const userManagementSection = document.getElementById('userManagementSection');
         const currentLevelValue = document.getElementById('currentLevelValue');
@@ -2520,6 +2570,7 @@
                 const usernameInitial = (profileData.username || "J").charAt(0).toUpperCase();
                 displayProfilePicture(headerProfilePic, headerAvatarIcon, profileData?.profilePicId, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
                 headerDisplayName.textContent = profileData.username || "JCHAT User";
+if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.verified, 'sm');
                 if (headerNavLinkProfile) headerNavLinkProfile.href = `profile.html?userId=${user.uid}`;
 
                 // Show Admin Icon if current user is admin
@@ -2958,6 +3009,10 @@
                         banUserToggle.checked = lookedUpUserProfileData.banned; // Set ban toggle state
 
                         currentLevelValue.textContent = lookedUpUserProfileData.level ?? 1;
+                        if (lookedUpVerifiedStatusText) lookedUpVerifiedStatusText.textContent = lookedUpUserProfileData.verified ? 'Yes' : 'No';
+                        if (currentVerifiedStatusText) currentVerifiedStatusText.textContent = lookedUpUserProfileData.verified ? 'Verified' : 'Not Verified';
+                        renderVerifiedBadge(currentVerifiedStatusText, !!lookedUpUserProfileData.verified, 'sm');
+                        renderVerifiedBadge(lookedUpUsernameDisplay, !!lookedUpUserProfileData.verified, 'sm');
                         currentJCoinsValue.textContent = (lookedUpUserProfileData.jCoins ?? 0).toLocaleString();
                         currentGasValue.textContent = (lookedUpUserProfileData.gas ?? 0).toLocaleString();
                         document.getElementById('currentWalletStatus').textContent = lookedUpUserProfileData.walletUnlocked ? 'Unlocked' : 'Locked';
@@ -5618,6 +5673,8 @@
 
             // User Lookup
             if (lookupUserButton) lookupUserButton.addEventListener('click', () => lookupUser());
+            if (verifyUserButton) verifyUserButton.addEventListener('click', verifyLookedUpUser);
+            if (unverifyUserButton) unverifyUserButton.addEventListener('click', unverifyLookedUpUser);
             if (searchTypeSelect) {
                 searchTypeSelect.addEventListener('change', () => {
                     const selectedType = searchTypeSelect.value;
