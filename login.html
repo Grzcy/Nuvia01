@@ -29,18 +29,18 @@
             --background-main: rgba(255, 46, 99, .06);
             --background-gradient-1: var(--pink);
             --background-gradient-2: var(--blue);
-            --card-background: linear-gradient(180deg, #fffaf0 0%, #fff4de 100%);
+            --card-background: linear-gradient(180deg, #0f172a 0%, #0a0f1a 100%);
             --header-background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.0));
             --border-light: rgba(255, 212, 0, .18);
-            --input-background: #ffffff;
+            --input-background: #111827;
             --button-background: linear-gradient(90deg, var(--pink), #ff8a00);
             --button-shadow: 0 18px 30px rgba(255,46,99,0.22), 0 10px 24px rgba(255,138,0,0.14);
 
             /* Additional variables for consistency */
-            --background-color-primary: #ff2e63;
-            --background-color-secondary: #ffb400;
-            --text-color-primary: #3b1f1f; /* dark warm text */
-            --text-color-secondary: #6b3e2a;
+            --background-color-primary: #0d1b2a;
+            --background-color-secondary: #000000;
+            --text-color-primary: #e5f0ff; /* light text */
+            --text-color-secondary: #9fb3c8;
         }
 
         body {
@@ -61,7 +61,7 @@
         }
 
         .login-container {
-            background: linear-gradient(180deg, #fff6e6 0%, #fff1d4 100%); /* cream outer frame */
+            background: linear-gradient(180deg, #0f172a 0%, #0a0f1a 100%); /* dark blue outer frame */
             border-radius: 28px;
             padding: 18px; /* create outer padded frame */
             box-shadow: 0 18px 40px rgba(255,46,99,0.12);
@@ -72,7 +72,7 @@
             transition: all var(--transition);
         }
         .login-container .login-form {
-            background: #ffffff;
+            background: #0b1220;
             border-radius: 18px;
             padding: 28px 22px;
             box-shadow: 0 8px 30px rgba(0,0,0,0.06);
@@ -895,30 +895,30 @@
         .form-group input,
         textarea,
         .modal-field {
-            background: linear-gradient(180deg,#fffaf0 0%, #fff4dd 100%);
-            color: #3b2a1f; /* warm dark text */
-            border: 1px solid rgba(59,42,34,0.12);
-            caret-color: var(--pink);
+            background: linear-gradient(180deg,#0e1624 0%, #0a0f1a 100%);
+            color: #e5f0ff; /* light text */
+            border: 1px solid rgba(59,130,246,0.25);
+            caret-color: #60a5fa;
         }
 
         .form-group input::placeholder,
         textarea::placeholder,
         .modal-field::placeholder {
-            color: rgba(59,42,34,0.45);
+            color: rgba(159,179,200,0.75);
         }
 
         /* Make header tone warm and soft on the eyes */
         .login-header {
-            color: #6b3e2a !important; /* wool-warm brown */
-            background: linear-gradient(180deg, rgba(255,255,255,0.0), rgba(255,255,255,0.0));
+            color: #e5f0ff !important;
+            background: linear-gradient(180deg, rgba(0,0,0,0.0), rgba(0,0,0,0.0));
         }
 
         /* Slightly reduce harsh white highlights around inputs */
         .form-group input:focus,
         textarea:focus,
         .modal-field:focus {
-            box-shadow: 0 0 0 6px rgba(255,46,99,0.06);
-            border-color: var(--pink);
+            box-shadow: 0 0 0 6px rgba(59,130,246,0.20);
+            border-color: #60a5fa;
         }
     </style>
     <style id="accessibility-overrides">
