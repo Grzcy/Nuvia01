@@ -184,12 +184,9 @@
       const tabs = Array.from(document.querySelectorAll('.tab'));
       const searchInput = document.getElementById('searchInput');
 
-      // Deep link: initialize from URL
-      const url = new URL(window.location.href);
-      const initialTab = (url.searchParams.get('tab')||'all').toLowerCase();
-      const initialQ = url.searchParams.get('q')||'';
-      if (initialQ) searchInput.value = initialQ;
-      if (tabs.find(t=>t.dataset.tab===initialTab)) { currentTab = initialTab; tabs.forEach(x=>x.classList.toggle('active', x.dataset.tab===initialTab)); tabs.forEach(x=>x.setAttribute('aria-selected', String(x.dataset.tab===initialTab))); }
+      // Deep link: capture initial params (apply after currentTab declared)
+      const __dl = (function(){ try{ const u=new URL(window.location.href); return { tab:(u.searchParams.get('tab')||'all').toLowerCase(), q:(u.searchParams.get('q')||'') }; }catch(_){ return { tab:'all', q:'' }; } })();
+      if (__dl.q) searchInput.value = __dl.q;
       const markAllBtn = document.getElementById('markAllBtn');
       const backBtn = document.getElementById('backBtn');
       const prefsBtn = document.getElementById('openPrefs');
@@ -207,6 +204,13 @@
       let items = [];
       let unsubscribe = null;
       let prefs = loadPrefs();
+
+      // Apply deep link now that currentTab exists
+      if (tabs.find(t=>t.dataset.tab===__dl.tab)) {
+        currentTab = __dl.tab;
+        tabs.forEach(x=>x.classList.toggle('active', x.dataset.tab===__dl.tab));
+        tabs.forEach(x=>x.setAttribute('aria-selected', String(x.dataset.tab===__dl.tab)));
+      }
 
       function loadPrefs(){ try{ return Object.assign({dnd:false,sound:true,muted:[],snoozed:{}}, JSON.parse(localStorage.getItem('nuvia_notification_prefs')||'{}')); }catch(e){ return {dnd:false,sound:true,muted:[],snoozed:{}}; } }
       function savePrefs(){ localStorage.setItem('nuvia_notification_prefs', JSON.stringify(prefs)); }
