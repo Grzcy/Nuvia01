@@ -136,7 +136,10 @@
         .friend-item:hover { background: rgba(255,255,255,.05); }
         .friend-item img { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--border-light); object-fit: cover; }
         .friend-meta { min-width: 0; }
-        .friend-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .friend-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-flex; align-items: center; gap: 6px; }
+        .friend-unread-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 8px var(--blue); opacity: 0; transform: scale(0.8); transition: opacity .2s ease, transform .2s ease; animation: unreadBlink 1.2s ease-in-out infinite; }
+        .friend-unread-dot.show { opacity: 1; transform: scale(1); }
+        @keyframes unreadBlink { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
         .friend-sub { font-size: 11px; color: var(--text-light); }
         .friend-presence { display: inline-flex; align-items: center; gap: 6px; }
         .friend-dot { width: 8px; height: 8px; border-radius: 50%; background: #6c757d; }
@@ -1340,7 +1343,7 @@
                 return `<div class="friend-item" data-id="${f.id}">
                     <img src="${avatar}" onerror="this.src='https://placehold.co/36x36/00d5ff/ffffff?text=${initial}'" alt="${initial}">
                     <div class="friend-meta">
-                        <div class="friend-name">${escapeHtml(f.displayName)}</div>
+                        <div class="friend-name">${escapeHtml(f.displayName)} <span class="friend-unread-dot" data-unread-id="${f.id}" aria-hidden="true"></span></div>
                         <div class="friend-sub"><span class="friend-presence"><span class="friend-dot" data-presence-id="${f.id}"></span><span data-presence-text-id="${f.id}">Offline</span></span></div>
                     </div>
                 </div>`;
@@ -1360,10 +1363,13 @@
             });
             // subscribe to presence for each friend (lightweight)
             data.forEach(f => subscribeFriendPresence(f.id));
+            // subscribe to unread status per friend
+            data.forEach(f => subscribeFriendUnread(f.id));
         }
 
         const friendPresenceUnsubs = new Map();
         const friendPresenceCache = new Map(); // friendId -> { state, lastMs }
+        const friendUnreadUnsubs = new Map(); // friendId -> unsubscribe function
         function subscribeFriendPresence(friendId) {
             try {
                 if (friendPresenceUnsubs.has(friendId)) return;
@@ -1386,6 +1392,58 @@
                 friendPresenceUnsubs.set(friendId, unsub);
             } catch {}
         }
+
+        function subscribeFriendUnread(friendId) {
+            try {
+                if (!currentUser) return;
+                if (friendUnreadUnsubs.has(friendId)) return;
+                const chatId = chatIdFor(currentUser.uid, friendId);
+                let readAtMs = 0;
+                let latestMs = 0;
+                let latestSenderId = null;
+                const indicatorSelector = `[data-unread-id="${friendId}"]`;
+                const safeMs = (t) => {
+                    if (!t) return 0;
+                    if (typeof t === 'number') return t;
+                    if (t.toDate) return t.toDate().getTime();
+                    if (typeof t.seconds === 'number') return t.seconds * 1000;
+                    return 0;
+                };
+                const updateUI = () => {
+                    const el = document.querySelector(indicatorSelector);
+                    if (!el) return;
+                    const hasUnread = (latestSenderId && latestSenderId !== currentUser.uid && latestMs > (readAtMs || 0));
+                    if (hasUnread) { el.classList.add('show'); el.setAttribute('aria-hidden','false'); }
+                    else { el.classList.remove('show'); el.setAttribute('aria-hidden','true'); }
+                };
+                const receiptsRef = doc(db, "artifacts", appId, "public", "data", "chats", chatId, "presence", "receipts");
+                const unsubReceipts = onSnapshot(receiptsRef, (snap) => {
+                    try {
+                        const d = snap.data() || {};
+                        const ra = d.readAt ? d.readAt[currentUser.uid] : null;
+                        readAtMs = safeMs(ra);
+                        updateUI();
+                    } catch(_) {}
+                });
+                const msgsRef = query(collection(db, "artifacts", appId, "public", "data", "chats", chatId, "messages"), orderBy('timestamp','desc'));
+                const unsubMsg = onSnapshot(msgsRef, (qs) => {
+                    try {
+                        if (!qs.empty) {
+                            const m = qs.docs[0].data();
+                            latestMs = safeMs(m.timestamp);
+                            latestSenderId = m.senderId || null;
+                        } else { latestMs = 0; latestSenderId = null; }
+                        updateUI();
+                    } catch(_) {}
+                });
+                const unsub = () => { try{unsubReceipts();}catch{} try{unsubMsg();}catch{} friendUnreadUnsubs.delete(friendId); };
+                friendUnreadUnsubs.set(friendId, unsub);
+            } catch {}
+        }
+
+        window.addEventListener('beforeunload', () => {
+            try { friendUnreadUnsubs.forEach((fn) => { try{fn();}catch{} }); friendUnreadUnsubs.clear(); } catch {}
+        });
 
         // Visibility-based read receipts
         document.addEventListener('visibilitychange', () => {
