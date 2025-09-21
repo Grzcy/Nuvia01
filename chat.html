@@ -137,8 +137,8 @@
         .friend-item img { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--border-light); object-fit: cover; }
         .friend-meta { min-width: 0; }
         .friend-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-flex; align-items: center; gap: 6px; }
-        .friend-unread-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); box-shadow: 0 0 8px var(--blue); opacity: 0; transform: scale(0.8); transition: opacity .2s ease, transform .2s ease; animation: unreadBlink 1.2s ease-in-out infinite; }
-        .friend-unread-dot.show { opacity: 1; transform: scale(1); }
+        .friend-new-label { font-size: 11px; font-weight: 700; color: var(--white); background: var(--blue); padding: 3px 8px; border-radius: 12px; margin-left: 6px; opacity: 0; transition: opacity .2s ease; display: none; align-items: center; line-height: 1; animation: unreadBlink 1.2s ease-in-out infinite; }
+        .friend-new-label.show { display: inline-flex; opacity: 1; }
         @keyframes unreadBlink { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
         .friend-sub { font-size: 11px; color: var(--text-light); }
         .friend-presence { display: inline-flex; align-items: center; gap: 6px; }
@@ -1343,7 +1343,7 @@
                 return `<div class="friend-item" data-id="${f.id}">
                     <img src="${avatar}" onerror="this.src='https://placehold.co/36x36/00d5ff/ffffff?text=${initial}'" alt="${initial}">
                     <div class="friend-meta">
-                        <div class="friend-name">${escapeHtml(f.displayName)} <span class="friend-unread-dot" data-unread-id="${f.id}" aria-hidden="true"></span></div>
+                        <div class="friend-name">${escapeHtml(f.displayName)} <span class="friend-new-label" data-unread-id="${f.id}" aria-hidden="true">New message</span></div>
                         <div class="friend-sub"><span class="friend-presence"><span class="friend-dot" data-presence-id="${f.id}"></span><span data-presence-text-id="${f.id}">Offline</span></span></div>
                     </div>
                 </div>`;
@@ -1358,6 +1358,8 @@
                     if (currentPartner) {
                         updatePartnerHeader(currentPartner);
                         startMessagesListener();
+                        const chatId = chatIdFor(currentUser.uid, currentPartner.id);
+                        markRead(chatId);
                     }
                 });
             });
