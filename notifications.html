@@ -80,6 +80,7 @@
     /* Empty state */
     .empty{border:1px solid var(--border-light);border-radius:16px;background:var(--card-background);padding:32px;text-align:center;color:var(--text-light);margin-top:16px}
     .empty i{font-size:2rem;margin-bottom:8px;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+    .empty-title{font-weight:700;margin:6px 0}
 
     /* Toast */
     .toast{position:fixed;right:16px;bottom:16px;z-index:30;display:none;min-width:260px;border:1px solid var(--border-light);border-radius:12px;background:var(--card-background);padding:12px 14px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
@@ -153,7 +154,7 @@
     </section>
     <div id="emptyState" class="empty hidden">
       <i class="fa-regular fa-bell"></i>
-      <div style="font-weight:700;margin:6px 0">You're all caught up</div>
+      <div class="empty-title">You're all caught up</div>
       <div>New activity will appear here. Enjoy your day!</div>
     </div>
     <div id="bulkBar" class="bulkbar" aria-live="polite">
@@ -334,7 +335,6 @@
       renderList(listEarlier, earlier);
 
       const empty = (newest.length+earlier.length)===0;
-      emptyState.classList.toggle('hidden', !empty ? false : false); // reset first
       emptyState.classList.toggle('hidden', !empty);
       updateBulkBar();
     }
