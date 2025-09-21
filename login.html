@@ -1486,6 +1486,8 @@
                         profilePicId: null,
                         bio: bio || '',
                         location: location || '',
+                        referralId: user.uid,
+                        successfulReferrals: 0,
                         createdAt: serverTimestamp(),
                         updatedAt: serverTimestamp()
                     };
