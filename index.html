@@ -8724,7 +8724,10 @@ async function checkAndStartDailyBonusTimer() {
                     // prayers are simple strings
                     item = arr[Math.abs(seed) % arr.length];
                 } else {
-                    item = simpleInspirationQuotes[ Math.abs(seed) % simpleInspirationQuotes.length ];
+                    const quoteData = generateTimeBasedQuote(chosen || 'motivational');
+                    if (inspirationQuoteElement) inspirationQuoteElement.textContent = `"${quoteData.quote}"`;
+                    if (inspirationAuthorElement) inspirationAuthorElement.textContent = `- ${quoteData.author}`;
+                    return;
                 }
 
                 // Render item: it may be an object with text/ref or a simple string
