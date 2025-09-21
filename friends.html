@@ -1960,7 +1960,7 @@
 
                 // Safely set href for profileLink if it exists
                 if (profileLink) {
-                    profileLink.href = `Profile.html?userId=${user.uid}`;
+                    profileLink.href = `profile.html?userId=${user.uid}`;
                 }
 
                 // Show Admin Icon only if the current user is the ADMIN_UID
@@ -2137,7 +2137,7 @@
                 // Add event listener for clicking on friend info to go to profile
                 friendItem.querySelector('.friend-info').addEventListener('click', (e) => {
                     const friendId = e.currentTarget.getAttribute('data-user-id');
-                    window.location.href = `Profile.html?userId=${friendId}`;
+                    window.location.href = `profile.html?userId=${friendId}`;
                 });
 
                 // Add keyboard navigation support
@@ -2145,7 +2145,7 @@
                     if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         const friendId = e.currentTarget.getAttribute('data-user-id');
-                        window.location.href = `Profile.html?userId=${friendId}`;
+                        window.location.href = `profile.html?userId=${friendId}`;
                     }
                 });
 
