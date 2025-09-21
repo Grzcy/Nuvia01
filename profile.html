@@ -5364,7 +5364,10 @@
                     <div class="input-group">
                         <label for="referralLinkField">Your referral link</label>
                         <input id="referralLinkField" type="text" readonly>
-                        <button id="copyReferralLinkBtn" class="copy-user-id-btn" type="button"><i class="fas fa-copy"></i> Copy Link</button>
+                        <div style="display:flex; gap:8px; margin-top:8px;">
+                            <button id="copyReferralLinkBtn" class="copy-user-id-btn" type="button"><i class="fas fa-copy"></i> Copy Link</button>
+                            <button id="shareReferralBtn" class="copy-user-id-btn" type="button"><i class="fas fa-share"></i> Share</button>
+                        </div>
                     </div>
 
                     <div class="input-group">
@@ -6114,6 +6117,7 @@
         const referralLinkField = document.getElementById('referralLinkField');
         const referralCountEl = document.getElementById('referralCount');
         const copyReferralLinkBtn = document.getElementById('copyReferralLinkBtn');
+        const shareReferralBtn = document.getElementById('shareReferralBtn');
         const jcoinUSDValue = document.getElementById('jcoinUSDValue'); // Added for USD value
 
         // XP Level Elements
@@ -7052,7 +7056,7 @@
                 if (newWebsite) { if (websiteLink) { websiteLink.href = newWebsite; websiteLink.textContent = newWebsite.replace(/^(https?:\/\/)?(www\.)?/, ''); } if (profileWebsite) profileWebsite.style.display = 'block'; } else { if (profileWebsite) profileWebsite.style.display = 'none'; }
                 if (newSocialLinks) { if (socialLinksText) socialLinksText.textContent = newSocialLinks; if (profileSocialLinks) profileSocialLinks.style.display = 'block'; } else { if (profileSocialLinks) profileSocialLinks.style.display = 'none'; }
 
-                showEnhancedSmartSuccess("Profile saved successfully! ��", 'update');
+                showEnhancedSmartSuccess("Profile saved successfully! ✨", 'update');
 
 
 
@@ -9459,20 +9463,30 @@
 
                     // Populate referral section for current user
                     try{
-                        const link = `${location.origin.replace(/\/$/, '')}/login.html?ref=${user.uid}`;
+                        const privRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profiles', 'user_profile');
+                        let privSnap = await getDoc(privRef);
+                        if (!privSnap.exists()) { await setDoc(privRef, { referralId: user.uid, successfulReferrals: 0, updatedAt: serverTimestamp() }, { merge: true }); privSnap = await getDoc(privRef); }
+                        const pdata = privSnap.exists() ? (privSnap.data() || {}) : {};
+                        if (!pdata.referralId) { await updateDoc(privRef, { referralId: user.uid, updatedAt: serverTimestamp() }); }
+                        const referralId = (pdata.referralId || user.uid);
+                        const link = `${location.origin.replace(/\/$/, '')}/login.html?ref=${encodeURIComponent(referralId)}`;
                         if (referralLinkField) referralLinkField.value = link;
                         if (copyReferralLinkBtn) {
                             copyReferralLinkBtn.addEventListener('click', async ()=>{
-                                try{
-                                    await navigator.clipboard.writeText(referralLinkField ? referralLinkField.value : link);
-                                    copyReferralLinkBtn.classList.add('copied'); setTimeout(()=>copyReferralLinkBtn.classList.remove('copied'), 1000);
-                                }catch(e){ /* no-op */ }
+                                try{ await navigator.clipboard.writeText(referralLinkField ? referralLinkField.value : link); copyReferralLinkBtn.classList.add('copied'); setTimeout(()=>copyReferralLinkBtn.classList.remove('copied'), 1000); }catch(e){}
                             }, { once: true });
                         }
-                        const privRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profiles', 'user_profile');
-                        const privSnap = await getDoc(privRef);
-                        if (privSnap.exists() && referralCountEl) {
-                            referralCountEl.textContent = Number(privSnap.data().successfulReferrals || 0).toLocaleString();
+                        if (shareReferralBtn) {
+                            shareReferralBtn.addEventListener('click', async ()=>{
+                                try{
+                                    const text = 'Join me on JCHAT! Use my link to sign up.';
+                                    if (navigator.share) { await navigator.share({ title: 'Join JCHAT', text, url: link }); }
+                                    else { await navigator.clipboard.writeText(link); shareReferralBtn.classList.add('copied'); setTimeout(()=>shareReferralBtn.classList.remove('copied'), 1000); }
+                                }catch(e){}
+                            }, { once: true });
+                        }
+                        if (referralCountEl) {
+                            referralCountEl.textContent = Number(pdata.successfulReferrals || 0).toLocaleString();
                         }
                     }catch(_){ /* non-fatal */ }
                     
