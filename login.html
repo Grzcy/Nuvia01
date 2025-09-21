@@ -1019,14 +1019,25 @@
 
             <div class="form-group signup-only" style="display: none;">
                 <label for="location">Location (Optional)</label>
-                <input 
-                    type="text" 
-                    id="location" 
-                    name="location" 
+                <input
+                    type="text"
+                    id="location"
+                    name="location"
                     placeholder="Enter your location"
                 >
             </div>
-            
+
+            <!-- Referral (Optional) -->
+            <div class="form-group signup-only" style="display: none;">
+                <label for="referralLinkInput">Referral link or ID (Optional)</label>
+                <input
+                    type="text"
+                    id="referralLinkInput"
+                    name="referralLinkInput"
+                    placeholder="Paste your friend's referral link or ID"
+                >
+            </div>
+
             <div class="remember-forgot">
                 <div class="remember-me">
                     <input type="checkbox" id="remember" name="remember">
@@ -1131,6 +1142,25 @@
         // Referral support: read inviter from URL (?ref= or ?referrer= or ?refer=)
         function getQueryParam(name){ try{ const u=new URL(window.location.href); return u.searchParams.get(name) || null; }catch(_){ return null; } }
         const referrerIdFromUrl = (getQueryParam('ref') || getQueryParam('referrer') || getQueryParam('refer'))?.trim() || null;
+
+        // Parse manual referrer from optional input; accepts full URL or raw ID
+        function parseReferrerFromInput(){
+            try{
+                const el = document.getElementById('referralLinkInput');
+                if(!el) return null;
+                const raw = (el.value || '').trim();
+                if(!raw) return null;
+                try{
+                    const u = new URL(raw);
+                    const code = u.searchParams.get('ref') || u.searchParams.get('referrer') || u.searchParams.get('refer');
+                    return (code || '').trim() || raw;
+                }catch(_){
+                    return raw; // treat as raw ID if not a URL
+                }
+            }catch(_){ return null; }
+        }
+        document.addEventListener('DOMContentLoaded', ()=>{ try{ const el = document.getElementById('referralLinkInput'); if(el && referrerIdFromUrl){ el.value = referrerIdFromUrl; } }catch(_){} });
+
         // System settings reference used across the app
         const SYSTEM_SETTINGS_DOC_REF = doc(db, "artifacts", appId, "public", "data", "settings", "system_settings");
         // Public signup flag (default true). Also mirrored to a global used elsewhere in this file
@@ -1314,7 +1344,7 @@
             // Awards: inviter + new user once per account creation
             async function processReferralReward(newUserId){
                 try{
-                    const inviterId = referrerIdFromUrl;
+                    const inviterId = (parseReferrerFromInput() || referrerIdFromUrl);
                     if(!inviterId || inviterId === newUserId) return; // no self-referrals
                     const newUserPrivateRef = doc(db, 'artifacts', appId, 'users', newUserId, 'profiles', 'user_profile');
                     const inviterPrivateRef = doc(db, 'artifacts', appId, 'users', inviterId, 'profiles', 'user_profile');
