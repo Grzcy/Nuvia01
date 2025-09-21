@@ -78,7 +78,7 @@ export function renderAvatarStatusBadges(containerEl, flags = {}) {
       return el;
     };
 
-    const verifiedEl = ensureBadge('verified', 'profile-avatar-badge verified', 'fas fa-check', 'Verified');
+    const verifiedEl = ensureBadge('verified', 'profile-avatar-badge verified', 'fas fa-circle-check', 'Verified');
     const premiumEl = ensureBadge('premium', 'profile-avatar-badge premium', 'fas fa-crown', 'Premium');
 
     verifiedEl.style.display = verified ? 'flex' : 'none';
