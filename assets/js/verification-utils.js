@@ -39,3 +39,46 @@ export function renderVerifiedBadge(targetEl, isVerified, size = 'sm') {
     console.error('renderVerifiedBadge error:', e);
   }
 }
+
+/**
+ * Render corner badges inside an avatar container (e.g., .profile-pic-wrapper)
+ * - Verified: green circular badge with check icon (bottom-right)
+ * - Premium: gold circular badge with crown icon (top-right)
+ *
+ * @param {HTMLElement} containerEl - The avatar container (must be position: relative)
+ * @param {{verified?: boolean, premium?: boolean}} flags
+ */
+export function renderAvatarStatusBadges(containerEl, flags = {}) {
+  try {
+    if (!containerEl) return;
+    const { verified = false, premium = false } = flags;
+    const doc = containerEl.ownerDocument || document;
+
+    // Helper to create/find a badge
+    const ensureBadge = (suffix, className, iconClass, title) => {
+      const id = `${containerEl.id || 'avatar'}__${suffix}-badge`;
+      let el = doc.getElementById(id);
+      if (!el) {
+        el = doc.createElement('span');
+        el.id = id;
+        el.className = className;
+        el.setAttribute('aria-hidden', 'false');
+        el.setAttribute('role', 'img');
+        el.setAttribute('title', title);
+        const i = doc.createElement('i');
+        i.className = iconClass;
+        el.appendChild(i);
+        containerEl.appendChild(el);
+      }
+      return el;
+    };
+
+    const verifiedEl = ensureBadge('verified', 'profile-avatar-badge verified', 'fas fa-check', 'Verified');
+    const premiumEl = ensureBadge('premium', 'profile-avatar-badge premium', 'fas fa-crown', 'Premium');
+
+    verifiedEl.style.display = verified ? 'flex' : 'none';
+    premiumEl.style.display = premium ? 'flex' : 'none';
+  } catch (e) {
+    console.error('renderAvatarStatusBadges error:', e);
+  }
+}

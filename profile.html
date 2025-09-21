@@ -5093,7 +5093,19 @@
     .particle:nth-child(4) { animation-delay: -3s; animation-duration: 4.5s; }
     @keyframes orbit { 0% { transform: rotate(0deg) translateX(100px) rotate(0deg); opacity: 1; } 50% { opacity: 0.3; } 100% { transform: rotate(360deg) translateX(100px) rotate(-360deg); opacity: 1; } }
     </style>
-<style id="verified-badge-styles">.verified-badge{display:inline-flex;align-items:center;justify-content:center;margin-left:6px;line-height:1;color:transparent;background-image:linear-gradient(90deg, var(--blue), var(--pink));background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;vertical-align:middle}.verified-badge i{font-size:1em}.verified-badge.sm{font-size:.85rem}.verified-badge.md{font-size:1rem}</style>
+<style id="verified-badge-styles">
+  .verified-badge{display:inline-flex;align-items:center;justify-content:center;margin-left:6px;line-height:1;color:transparent;background-image:linear-gradient(90deg, var(--blue), var(--pink));background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;vertical-align:middle}
+  .verified-badge i{font-size:1em}
+  .verified-badge.sm{font-size:.85rem}
+  .verified-badge.md{font-size:1rem}
+  /* Avatar corner badges (Facebook-style) */
+  .profile-avatar-badge{position:absolute;display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;border:2px solid var(--background-main);box-shadow:0 0 0 1px rgba(0,0,0,0.2);z-index:2;animation:soft-glow 2.2s ease-in-out infinite}
+  .profile-avatar-badge i{font-size:14px;line-height:1}
+  .profile-avatar-badge.verified{right:6px;bottom:6px;background:var(--status-online);color:#fff;box-shadow:0 0 10px rgba(76,175,80,.7),0 0 20px rgba(76,175,80,.4)}
+  .profile-avatar-badge.premium{right:6px;top:6px;background:linear-gradient(135deg,#FFD700,#FFA500);color:#000;border-color:#FFD700;box-shadow:0 0 12px rgba(255,215,0,.8),0 0 22px rgba(255,165,0,.5)}
+  @keyframes soft-glow{0%,100%{filter:drop-shadow(0 0 0 rgba(0,0,0,0))}50%{filter:drop-shadow(0 0 2px rgba(255,255,255,.4))}}
+  @media (max-width:768px){.profile-avatar-badge{width:22px;height:22px}.profile-avatar-badge i{font-size:12px}}
+</style>
 </head>
 <body class="theme-dark-mode">
     <!-- Nuvia Pink & Blue Glowing Loader -->
@@ -5895,7 +5907,7 @@
         import { getFirestore, doc, getDoc, updateDoc, setDoc, deleteDoc, collection, query, where, getDocs, runTransaction, writeBatch, serverTimestamp, orderBy, addDoc, arrayUnion, documentId, onSnapshot, enableMultiTabIndexedDbPersistence, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js";
         import { Timestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
-import { renderVerifiedBadge } from './assets/js/verification-utils.js';
+import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verification-utils.js';
 
         // --- Firebase & Canvas Environment Configuration ---
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
@@ -8912,7 +8924,7 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
                     }
 
                     if (profileUsername) profileUsername.textContent = displayedUserProfileData.username || "JCHAT User"; // Null check
-if (profileUsername) renderVerifiedBadge(profileUsername, !!displayedUserProfileData.verified, 'md');
+if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !!displayedUserProfileData.verified, premium: !!(displayedUserProfileData.premiumTier || displayedUserProfileData.isPremium || displayedUserProfileData.premium) });
                     const usernameInitial = (displayedUserProfileData.username || "J").charAt(0).toUpperCase();
 
 
