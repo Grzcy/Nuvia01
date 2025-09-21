@@ -1098,7 +1098,7 @@
         // Import Firebase modules
         import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, updateProfile, setPersistence, browserLocalPersistence, browserSessionPersistence, signOut, fetchSignInMethodsForEmail } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
-        import { initializeFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+        import { initializeFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, getDocs, runTransaction, increment } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
 
         // Firebase configuration (using your existing config)
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
@@ -1128,6 +1128,9 @@
 
         // Application ID (consistent with other pages)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // Referral support: read inviter from URL (?ref= or ?referrer= or ?refer=)
+        function getQueryParam(name){ try{ const u=new URL(window.location.href); return u.searchParams.get(name) || null; }catch(_){ return null; } }
+        const referrerIdFromUrl = (getQueryParam('ref') || getQueryParam('referrer') || getQueryParam('refer'))?.trim() || null;
         // System settings reference used across the app
         const SYSTEM_SETTINGS_DOC_REF = doc(db, "artifacts", appId, "public", "data", "settings", "system_settings");
         // Public signup flag (default true). Also mirrored to a global used elsewhere in this file
@@ -1308,6 +1311,56 @@
 
         // Sign up user
         async function signUpUser(email, password) {
+            // Awards: inviter + new user once per account creation
+            async function processReferralReward(newUserId){
+                try{
+                    const inviterId = referrerIdFromUrl;
+                    if(!inviterId || inviterId === newUserId) return; // no self-referrals
+                    const newUserPrivateRef = doc(db, 'artifacts', appId, 'users', newUserId, 'profiles', 'user_profile');
+                    const inviterPrivateRef = doc(db, 'artifacts', appId, 'users', inviterId, 'profiles', 'user_profile');
+                    const inviterReferralRef = doc(db, 'artifacts', appId, 'users', inviterId, 'referrals', newUserId);
+
+                    await runTransaction(db, async (tx)=>{
+                        const newUserSnap = await tx.get(newUserPrivateRef);
+                        if (!newUserSnap.exists()) return; // must exist from earlier creation
+                        const nu = newUserSnap.data() || {};
+                        if (nu.referral?.rewarded === true) return; // already rewarded
+
+                        const inviterSnap = await tx.get(inviterPrivateRef);
+                        if (!inviterSnap.exists()) return; // inviter must exist
+                        const inviteLinkSnap = await tx.get(inviterReferralRef);
+                        if (inviteLinkSnap.exists()) return; // already credited for this pair
+
+                        // Credit new user: +20 gas, +10 JCoins
+                        tx.update(newUserPrivateRef, {
+                            gas: increment(20),
+                            totalGasEarned: increment(20),
+                            jCoins: increment(10),
+                            referral: { referrerId: inviterId, rewarded: true, rewardedAt: serverTimestamp() },
+                            updatedAt: serverTimestamp()
+                        });
+                        // Credit inviter: +20 gas, +5 JCoins and record link doc
+                        tx.update(inviterPrivateRef, {
+                            gas: increment(20),
+                            totalGasEarned: increment(20),
+                            jCoins: increment(5),
+                            successfulReferrals: increment(1),
+                            updatedAt: serverTimestamp()
+                        });
+                        tx.set(inviterReferralRef, { newUserId, createdAt: serverTimestamp() });
+                    });
+
+                    // Best-effort: reflect JCoins in public summaries (if present)
+                    try{
+                        const newUserPublicRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', newUserId);
+                        const inviterPublicRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', inviterId);
+                        await Promise.all([
+                            updateDoc(newUserPublicRef, { jCoins: increment(10), totalGasEarned: increment(20), updatedAt: serverTimestamp() }).catch(()=>{}),
+                            updateDoc(inviterPublicRef, { jCoins: increment(5), totalGasEarned: increment(20), updatedAt: serverTimestamp() }).catch(()=>{})
+                        ]);
+                    }catch(_){ /* non-fatal */ }
+                }catch(e){ console.warn('Referral reward failed or skipped:', e?.message || e); }
+            }
             // Get additional signup fields
             const fullName = document.getElementById('fullName').value.trim();
             const username = document.getElementById('username').value.trim();
@@ -1413,6 +1466,9 @@
                 } catch (profileErr) {
                     console.warn('JCHAT_WARN: Failed to create public/private profile docs on signup', profileErr);
                 }
+
+                // Referral rewards (inviter: +20 gas/+5 JCoin, new user: +20 gas/+10 JCoin)
+                await processReferralReward(user.uid);
 
                 // Send email verification
                 try {
