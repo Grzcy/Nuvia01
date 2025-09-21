@@ -1,512 +1,275 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nuvia — Notifications</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Nuvia — Notifications (Social Feed)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://firebaseio.com" crossorigin>
-  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
-  <link rel="preconnect" href="https://api.cloudinary.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box}
-    :root{
-      --pink:#ff2e92;--blue:#00d5ff;--radius:16px;--transition:.25s ease;
-      --white:#e2e8f0;--text-light:#94a3b8;--border-light:rgba(255,255,255,.1);
-      --background-main:linear-gradient(135deg,#0f172a,#1a1a2e);
-      --card-background:rgba(30,41,59,.7);
-      --button-background:linear-gradient(90deg,var(--blue),var(--pink));
-      --button-shadow:0 6px 18px rgba(0,213,255,.25),0 6px 18px rgba(255,46,146,.25);
-      --accent-color:var(--blue);--accent-color-dark:#00aaff;--border-color:#3a3a5a;
-    }
-    html{overflow-y:auto}
-    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--white);background:var(--background-main);min-height:100vh;display:flex;flex-direction:column}
-    .hidden{display:none !important}
-    /* Header */
-    header{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,rgba(10,10,20,.9),rgba(10,10,20,.75));backdrop-filter:blur(10px);border-bottom:1px solid var(--border-light)}
-    .header-wrap{max-width:1200px;margin:0 auto;padding:10px 16px;height:56px;display:flex;align-items:center;gap:12px}
-    .logo{font-family:Poppins,sans-serif;font-weight:800;letter-spacing:-.02em;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;font-size:1.25rem;text-decoration:none}
-    .header-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
-    .back-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border-light);border-radius:10px;background:transparent;color:var(--white);padding:6px 10px;cursor:pointer}
-    .pref-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--border-light);border-radius:10px;background:transparent;color:var(--white);padding:6px 10px;cursor:pointer}
-    .back-btn:hover,.pref-btn:hover{background:rgba(255,255,255,.06)}
+    :root{--bg:#0f172a;--card:rgba(255,255,255,0.03);--accent:#00d5ff;--accent2:#ff2e92;--muted:#94a3b8;--radius:14px}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;background:linear-gradient(135deg,var(--bg),#1a1a2e);color:#e6eef8}
+    header{position:sticky;top:0;background:linear-gradient(135deg,rgba(8,10,20,.9),rgba(10,10,20,.75));backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,0.04);z-index:50}
+    .header-wrap{max-width:1200px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;gap:12px}
+    .logo{font-family:Poppins, sans-serif;font-weight:800;background-image:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent;font-size:1.2rem}
+    .toolbar-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+    .btn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:10px;color:inherit;cursor:pointer}
+    main{max-width:980px;margin:18px auto;padding:0 12px}
 
-    /* Toolbar */
-    .toolbar{position:sticky;top:56px;z-index:19;background:linear-gradient(135deg,rgba(10,10,20,.85),rgba(10,10,20,.7));backdrop-filter:blur(10px);border-bottom:1px solid var(--border-light)}
-    .toolbar-wrap{max-width:1200px;margin:0 auto;padding:10px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:10px}
-    .tabs{display:flex;gap:8px;overflow:auto;padding-bottom:4px}
-    .tab{border:1px solid var(--border-light);background:rgba(255,255,255,.04);color:var(--white);padding:6px 10px;border-radius:999px;cursor:pointer;white-space:nowrap}
-    .tab.active{background:var(--button-background);box-shadow:var(--button-shadow)}
-    .filters{margin-left:auto;display:flex;align-items:center;gap:8px}
-    .chip{border:1px solid var(--border-light);padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.04);cursor:pointer}
-    .chip.active{background:linear-gradient(90deg,rgba(0,213,255,.25),rgba(255,46,146,.25))}
-    .search{flex:1 1 260px;min-width:200px;display:flex;align-items:center;border:1px solid var(--border-light);border-radius:10px;background:rgba(255,255,255,.04);padding:6px 10px}
-    .search input{flex:1;background:transparent;border:none;outline:none;color:var(--white)}
-    .search-icon{margin-right:8px}
+    /* Tabs + search */
+    .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+    .tabs{display:flex;gap:8px;overflow:auto}
+    .tab{padding:8px 12px;border-radius:999px;background:transparent;border:1px solid rgba(255,255,255,0.03);cursor:pointer;color:var(--muted)}
+    .tab.active{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#091022;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+    .search{flex:1;display:flex;align-items:center;background:var(--card);padding:8px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+    .search input{flex:1;background:transparent;border:0;color:inherit;outline:none;padding:6px}
 
-    /* Content */
-    main{max-width:900px;width:100%;margin:0 auto;padding:12px 12px 24px 12px}
-    .section{margin-top:16px}
-    .section-title{position:sticky;top:104px;z-index:10;background:transparent;color:var(--white);font-weight:700;font-size:.9rem;padding:6px 12px;backdrop-filter:blur(6px)}
+    /* Feed style: grouped threads (compact like IG/Twitter) */
+    .feed{display:flex;flex-direction:column;gap:12px}
+    .thread{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.03);border-radius:12px;padding:10px;display:flex;gap:12px;align-items:flex-start;transition:transform .18s ease,box-shadow .18s ease}
+    .thread:hover{transform:translateY(-6px);box-shadow:0 12px 40px rgba(0,0,0,0.6)}
+    .thread.unread{box-shadow:0 0 0 3px rgba(0,213,255,0.06) inset}
+    .avatar-col{flex:0 0 56px}
+    .avatar{width:56px;height:56px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,0.04);object-fit:cover}
+    .content{flex:1;min-width:0}
+    .thread-header{display:flex;align-items:center;gap:8px}
+    .actor-name{font-weight:700}
+    .thread-meta{margin-left:auto;display:flex;gap:8px;align-items:center;color:var(--muted);font-size:.85rem}
+    .priority-badge{background:linear-gradient(90deg,var(--accent),var(--accent2));padding:4px 8px;border-radius:999px;color:#061020;font-weight:800;font-size:.75rem}
 
-    /* List */
-    .list{list-style:none;margin:8px 0 0 0;padding:0}
-    .item{position:relative;display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:center;padding:12px;border:1px solid var(--border-light);border-radius:14px;background:var(--card-background);margin-bottom:10px;transition:transform .18s ease,background .2s ease}
-    .item:hover{transform:translateY(-1px)}
-    .avatar{width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid var(--accent-color)}
-    .item-main{min-width:0}
-    .line1{color:var(--white);font-size:.95rem}
-    .actor{font-weight:700}
-    .context{color:var(--text-light)}
-    .meta{display:flex;align-items:center;gap:6px;color:var(--text-light);font-size:.8rem;margin-top:4px}
-    .pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border-light);border-radius:999px;padding:4px 8px;background:rgba(255,255,255,.04)}
-    .icon{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--blue),var(--pink));color:#fff}
-    .actions{display:flex;align-items:center;gap:8px}
-    .btn{border:1px solid var(--border-light);border-radius:10px;background:transparent;color:var(--white);padding:6px 10px;cursor:pointer}
-    .btn.primary{background:var(--button-background);box-shadow:var(--button-shadow)}
-    .unread-dot{position:absolute;left:6px;top:6px;width:8px;height:8px;border-radius:50%;background:var(--blue)}
-    .item.read .unread-dot{display:none}
+    .thread-body{display:flex;align-items:flex-start;gap:12px;margin-top:8px}
+    .message{color:var(--muted);font-size:.95rem;line-height:1.25;overflow:hidden;text-overflow:ellipsis}
+    .media-thumb{width:72px;height:72px;border-radius:8px;flex:0 0 72px;object-fit:cover;border:1px solid rgba(255,255,255,0.03)}
 
-    /* Swipe actions (mobile) */
-    .item.swipeable{touch-action:pan-y}
-    .swipe-actions{position:absolute;inset:0;border-radius:14px;display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:0 12px;pointer-events:none}
-    .swipe-actions .btn{pointer-events:auto}
+    .thread-actions{display:flex;gap:8px;margin-top:10px}
+    .action-btn{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:6px 10px;border-radius:999px;cursor:pointer;color:var(--muted)}
+    .action-btn.primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#071022;border:none}
 
-    /* Empty state */
-    .empty{border:1px solid var(--border-light);border-radius:16px;background:var(--card-background);padding:32px;text-align:center;color:var(--text-light);margin-top:16px}
-    .empty i{font-size:2rem;margin-bottom:8px;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
-    .empty-title{font-weight:700;margin:6px 0}
+    .expanded-list{margin-top:10px;display:none;flex-direction:column;gap:6px}
+    .thread.expanded .expanded-list{display:flex}
+    .item-small{display:flex;gap:8px;align-items:flex-start;padding:8px;border-radius:10px;background:rgba(0,0,0,0.05);border:1px solid rgba(255,255,255,0.01)}
+    .item-small .avatar{width:40px;height:40px}
+    .item-small .meta{font-size:.85rem;color:var(--muted)}
+
+    /* Snooze / muted state */
+    .muted-note{font-size:.82rem;color:var(--muted);margin-top:8px}
+
+    /* Empty */
+    .empty{border:1px solid rgba(255,255,255,0.03);border-radius:12px;padding:28px;text-align:center;color:var(--muted);background:var(--card)}
 
     /* Toast */
-    .toast{position:fixed;right:16px;bottom:16px;z-index:30;display:none;min-width:260px;border:1px solid var(--border-light);border-radius:12px;background:var(--card-background);padding:12px 14px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
-    .toast.show{display:block;animation:slideIn .25s ease}
-    @keyframes slideIn{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .toast{position:fixed;right:16px;bottom:16px;z-index:90;padding:12px 14px;border-radius:12px;background:linear-gradient(90deg,var(--accent),var(--accent2));color:#04111a;font-weight:700;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
 
-    /* Preferences Modal */
-    .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:40}
-    .modal.show{display:flex}
-    .modal-card{width:min(560px,92vw);border:1px solid var(--border-light);border-radius:16px;background:var(--card-background);overflow:hidden}
-    .modal-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border-light)}
-    .modal-body{padding:16px;display:grid;gap:14px}
-    .toggle{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border-light);border-radius:12px;background:rgba(255,255,255,.04);padding:10px 12px}
-    .modal-footer{border-top:1px solid var(--border-light)}
-    .modal-title{font-weight:700}
-
-    /* Sticky bulk bar */
-    .bulkbar{position:sticky;bottom:0;z-index:18;display:none;gap:8px;align-items:center;justify-content:space-between;margin-top:8px;border:1px solid var(--border-light);border-radius:12px;background:var(--card-background);padding:8px 10px}
-    .bulkbar.show{display:flex}
-
-    .list-sentinel{height:1px}
-
-    /* Responsive */
-    @media (max-width:600px){
-      .item{grid-template-columns:40px 1fr auto}
-      .avatar{width:40px;height:40px}
-      .section-title{top:108px}
-      .filters{flex:1 1 100%;order:3}
-      .search{flex:1 1 100%}
-    }
+    /* responsive */
+    @media (max-width:600px){.avatar{width:48px;height:48px}.avatar-col{flex:0 0 48px}.media-thumb{width:56px;height:56px}}
   </style>
 </head>
 <body>
   <header>
     <div class="header-wrap">
-      <a href="index.html" class="logo" aria-label="Go Home">Nuvia</a>
-      <div class="header-actions">
-        <button class="back-btn" onclick="window.history.back()" aria-label="Go Back"><i class="fa-solid fa-arrow-left"></i><span>Back</span></button>
-        <button class="pref-btn" id="openPrefs" aria-haspopup="dialog" aria-controls="prefsModal"><i class="fa-solid fa-sliders"></i><span>Preferences</span></button>
+      <a class="logo" href="/">Nuvia</a>
+      <div class="toolbar-actions">
+        <button class="btn" onclick="window.history.back()"><i class="fa-solid fa-arrow-left"></i></button>
+        <button class="btn" id="openPrefs"><i class="fa-solid fa-bell-slash"></i></button>
       </div>
     </div>
   </header>
 
-  <div class="toolbar" role="region" aria-label="Notifications toolbar">
-    <div class="toolbar-wrap">
-      <nav class="tabs" role="tablist" aria-label="Categories">
-        <button class="tab active" role="tab" aria-selected="true" data-tab="all">All</button>
-        <button class="tab" role="tab" aria-selected="false" data-tab="mentions">Mentions</button>
-        <button class="tab" role="tab" aria-selected="false" data-tab="likes">Likes</button>
-        <button class="tab" role="tab" aria-selected="false" data-tab="comments">Comments</button>
-        <button class="tab" role="tab" aria-selected="false" data-tab="follows">Follows</button>
-        <button class="tab" role="tab" aria-selected="false" data-tab="system">System</button>
-      </nav>
-      <div class="filters">
-        <button id="unreadOnly" class="chip" aria-pressed="false"><i class="fa-solid fa-circle-dot"></i> Unread</button>
-        <div class="search" role="search">
-          <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
-          <input id="searchInput" type="search" placeholder="Search notifications" aria-label="Search notifications" />
-        </div>
-      </div>
-    </div>
-  </div>
-
   <main>
-    <section class="section" aria-labelledby="sec-new">
-      <div class="section-title" id="sec-new">New</div>
-      <ul id="listNew" class="list" role="list"></ul>
-    </section>
-    <section class="section" aria-labelledby="sec-early">
-      <div class="section-title" id="sec-early">Earlier</div>
-      <ul id="listEarlier" class="list" role="list"></ul>
-    </section>
-    <div id="emptyState" class="empty hidden">
-      <i class="fa-regular fa-bell"></i>
-      <div class="empty-title">You're all caught up</div>
-      <div>New activity will appear here. Enjoy your day!</div>
-    </div>
-    <div id="bulkBar" class="bulkbar" aria-live="polite">
-      <div><span id="bulkCount">0</span> selected</div>
-      <div>
-        <button class="btn" id="bulkRead"><i class="fa-solid fa-envelope-open"></i> Mark read</button>
-        <button class="btn" id="bulkDelete"><i class="fa-solid fa-trash"></i> Delete</button>
-        <button class="btn" id="bulkClear">Clear</button>
+    <div class="controls">
+      <div class="tabs" role="tablist" aria-label="Notification categories">
+        <button class="tab active" data-tab="all">All</button>
+        <button class="tab" data-tab="mentions">Mentions</button>
+        <button class="tab" data-tab="messages">Messages</button>
+        <button class="tab" data-tab="likes">Likes</button>
+        <button class="tab" data-tab="follows">Follows</button>
+        <button class="tab" data-tab="system">System</button>
+      </div>
+      <div class="search" role="search">
+        <i class="fa-solid fa-magnifying-glass" style="margin-right:8px"></i>
+        <input id="searchInput" placeholder="Search notifications, people or posts" aria-label="Search notifications" />
       </div>
     </div>
-    <div id="sentinel" class="list-sentinel"></div>
+
+    <div id="feed" class="feed" aria-live="polite"></div>
+
+    <div id="emptyState" class="empty" style="display:none">
+      <div style="font-weight:700;font-size:1.05rem;">You're all caught up</div>
+      <div style="margin-top:8px;color:var(--muted)">We’ll show new activity here. Try adjusting filters or preferences for more results.</div>
+    </div>
+
+    <div style="height:40px"></div>
   </main>
 
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="toast" class="toast" style="display:none"></div>
 
-  <div class="modal" id="prefsModal" role="dialog" aria-modal="true" aria-labelledby="prefsTitle">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div id="prefsTitle" class="modal-title">Notification Preferences</div>
-        <button class="btn" id="closePrefs" aria-label="Close preferences"><i class="fa-solid fa-xmark"></i></button>
-      </div>
-      <div class="modal-body">
-        <div class="toggle"><span>Do Not Disturb</span><label><input type="checkbox" id="prefDnd"> DND</label></div>
-        <div class="toggle"><span>Play sound</span><label><input type="checkbox" id="prefSound" checked> Enabled</label></div>
-        <div class="toggle"><span>Mute Likes</span><label><input type="checkbox" id="prefMuteLikes"> Mute</label></div>
-        <div class="toggle"><span>Mute Follows</span><label><input type="checkbox" id="prefMuteFollows"> Mute</label></div>
-        <div class="toggle"><span>Mute Comments</span><label><input type="checkbox" id="prefMuteComments"> Mute</label></div>
-        <div class="toggle"><span>Mute Mentions</span><label><input type="checkbox" id="prefMuteMentions"> Mute</label></div>
-      </div>
-      <div class="modal-header modal-footer">
-        <button class="btn" id="savePrefs"><i class="fa-solid fa-floppy-disk"></i> Save</button>
-      </div>
-    </div>
-  </div>
-
-  <script src="./assets/js/lazy-images.js" defer></script>
   <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, orderBy, where, getDocs, addDoc, onSnapshot, limit, runTransaction, arrayUnion, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
-  import { getCloudinaryImageUrl } from "./assets/js/avatar-utils.js";
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js';
+    import { getFirestore, collection, query, orderBy, limit, onSnapshot, doc, updateDoc, deleteDoc, addDoc, getDoc, runTransaction, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js';
+    import { getCloudinaryImageUrl } from './assets/js/avatar-utils.js';
 
-  const firebaseConfig = typeof window.__firebase_config !== 'undefined' ? JSON.parse(window.__firebase_config) : {
-    apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
-    authDomain: "jchat-1.firebaseapp.com",
-    databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
-    projectId: "jchat-1",
-    storageBucket: "jchat-1.firebasestorage.app",
-    messagingSenderId: "328479683167",
-    appId: "1:328479683167:web:placeholder"
-  };
-  const appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'default-app-id';
+    const firebaseConfig = typeof window.__firebase_config !== 'undefined' ? JSON.parse(window.__firebase_config) : {
+      apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+      authDomain: "jchat-1.firebaseapp.com",
+      projectId: "jchat-1"
+    };
+    const appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'default-app-id';
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-  (function(){
-    const listNew = document.getElementById('listNew');
-    const listEarlier = document.getElementById('listEarlier');
-    const emptyState = document.getElementById('emptyState');
-    const toast = document.getElementById('toast');
-    const sentinel = document.getElementById('sentinel');
-    const bulkBar = document.getElementById('bulkBar');
-    const bulkCount = document.getElementById('bulkCount');
-    const unreadOnlyBtn = document.getElementById('unreadOnly');
-    const searchInput = document.getElementById('searchInput');
+    (function(){
+      const feedEl = document.getElementById('feed');
+      const emptyEl = document.getElementById('emptyState');
+      const toastEl = document.getElementById('toast');
+      const tabs = Array.from(document.querySelectorAll('.tab'));
+      const searchInput = document.getElementById('searchInput');
 
-    const tabs = Array.from(document.querySelectorAll('.tab'));
-    let currentTab = 'all';
-    tabs.forEach(t=>t.addEventListener('click',()=>{
-      tabs.forEach(x=>{x.classList.toggle('active', x===t); x.setAttribute('aria-selected', x===t);});
-      currentTab = t.dataset.tab; refresh();
-    }));
+      let currentTab = 'all';
+      let currentUser = null;
+      let items = [];
+      let unsubscribe = null;
+      let prefs = loadPrefs();
 
-    unreadOnlyBtn.addEventListener('click',()=>{
-      const on = unreadOnlyBtn.getAttribute('aria-pressed')==='true' ? false : true;
-      unreadOnlyBtn.setAttribute('aria-pressed', String(on));
-      unreadOnlyBtn.classList.toggle('active', on); refresh();
-    });
+      function loadPrefs(){ try{ return Object.assign({dnd:false,sound:true,muted:[]}, JSON.parse(localStorage.getItem('nuvia_notification_prefs')||'{}')); }catch(e){ return {dnd:false,sound:true,muted:[]}; } }
+      function savePrefs(){ localStorage.setItem('nuvia_notification_prefs', JSON.stringify(prefs)); }
 
-    const state = { items: [], loaded: 0, page: 20, selected: new Set(), prefs: loadPrefs() };
-    let currentUser = null;
-    let currentUserProfile = null;
-    let unsubscribeNotifications = null;
+      tabs.forEach(t=>t.addEventListener('click',()=>{ tabs.forEach(x=>x.classList.toggle('active',x===t)); currentTab = t.dataset.tab; render(); }));
+      searchInput.addEventListener('input', debounce(()=>render(),220));
 
-    function loadPrefs(){
-      try{ return Object.assign({ dnd:false, sound:true, mute:{likes:false,follows:false,comments:false,mentions:false} }, JSON.parse(localStorage.getItem('nuvia_notification_prefs')||'{}')); }catch(e){ return { dnd:false, sound:true, mute:{likes:false,follows:false,comments:false,mentions:false} }; }
-    }
-    function savePrefs(){ localStorage.setItem('nuvia_notification_prefs', JSON.stringify(state.prefs)); }
-
-    function loadItems(){
-      try{
-        const raw = localStorage.getItem('nuvia_notifications_cache');
-        if(raw){ state.items = JSON.parse(raw).map(mapCacheToItem); }
-      }catch(e){}
-      refresh();
-
-      onAuthStateChanged(auth, async (user)=>{
-        currentUser = user || null;
-        if(unsubscribeNotifications){ try{ unsubscribeNotifications(); }catch(_){} unsubscribeNotifications=null; }
-        if(!currentUser){ return; }
-        try{
-          try{ const profRef = doc(db,'artifacts',appId,'users',currentUser.uid,'profiles','user_profile'); const profSnap = await getDoc(profRef); currentUserProfile = profSnap.exists() ? profSnap.data() : null; }catch(_){ currentUserProfile = null; }
-          const colRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'notifications');
-          const qRef = query(colRef, orderBy('timestamp','desc'), limit(200));
-          unsubscribeNotifications = onSnapshot(qRef, (snap)=>{
-            const items = [];
-            snap.forEach(docSnap=>{ items.push(mapFirestoreNotification(docSnap.id, docSnap.data())); });
-            state.items = items;
-            try{ localStorage.setItem('nuvia_notifications_cache', JSON.stringify(items.map(mapItemToCache))); }catch(e){}
-            state.loaded = Math.max(state.page, state.loaded||0);
-            refresh();
-          });
-        }catch(err){ console.error('Notifications subscribe failed', err); }
+      onAuthStateChanged(auth, async (u)=>{
+        currentUser = u || null;
+        if(unsubscribe){ try{ unsubscribe(); }catch(e){} unsubscribe=null; }
+        if(!currentUser) return loadCachedAndRender();
+        const col = collection(db,'artifacts', appId, 'users', currentUser.uid, 'notifications');
+        const q = query(col, orderBy('timestamp','desc'), limit(400));
+        unsubscribe = onSnapshot(q, snap=>{
+          const arr = [];
+          snap.forEach(s=>{ arr.push(map(s.id, s.data())); });
+          items = arr; cacheItems(); render();
+        }, err=>{ console.warn('notifications subscribe error', err); loadCachedAndRender(); });
       });
-    }
 
-    function mapFirestoreNotification(id, n){
-      const ts = n.timestamp && typeof n.timestamp.toDate === 'function' ? n.timestamp.toDate() : (n.timestamp ? new Date(n.timestamp) : new Date());
-      const name = n.senderUsername || 'System';
-      const profilePicId = n.senderProfilePhoto || n.senderProfilePicId || n.senderPhotoURL || null;
-      const type = n.type || 'system';
-      const text = n.message || defaultTextFor(type, name);
-      const actionLabel = defaultActionLabel(type);
-      const action = defaultAction(type);
-      return { id, type, actor:{ name, profilePicId }, createdAt: ts, unread: n.read===false || !n.read, url: n.targetUrl || '#', text, actionLabel, action };
-    }
-    function mapCacheToItem(c){ return { ...c, createdAt: new Date(c.createdAt) }; }
-    function mapItemToCache(i){ return { ...i, createdAt: i.createdAt.getTime() }; }
-    function defaultTextFor(type,name){
-      if(type==='message') return `${name} sent you a message`;
-      if(type==='friend_request') return `${name} sent you a friend request`;
-      if(type==='friend_accepted') return `${name} accepted your friend request`;
-      if(type==='likes') return `${name} liked your post`;
-      if(type==='comments') return `${name} commented on your post`;
-      if(type==='mentions') return `${name} mentioned you`;
-      if(type==='follows') return `${name} started following you`;
-      return 'System notification';
-    }
-    function defaultActionLabel(type){
-      if(type==='message') return 'Open';
-      if(type==='friend_request') return 'View';
-      if(type==='friend_accepted') return 'Say hi';
-      if(type==='likes') return 'View';
-      if(type==='comments') return 'Reply';
-      if(type==='mentions') return 'Open';
-      if(type==='follows') return 'Follow back';
-      return 'Open';
-    }
-    function defaultAction(type){
-      if(type==='comments') return 'reply';
-      if(type==='follows') return 'follow_back';
-      return 'open';
-    }
+      function loadCachedAndRender(){ try{ const raw = localStorage.getItem('nuvia_notifications_cache'); if(raw){ items = JSON.parse(raw).map(c=>({...c, createdAt:new Date(c.createdAt)})); } }catch(e){} render(); }
+      function cacheItems(){ try{ localStorage.setItem('nuvia_notifications_cache', JSON.stringify(items.map(i=>({...i, createdAt: i.createdAt.getTime()})))); }catch(e){} }
 
-    function refresh(){
-      const q = searchInput.value.trim().toLowerCase();
-      const unreadOnly = unreadOnlyBtn.getAttribute('aria-pressed')==='true';
-      const muted = state.prefs.mute;
-      const filtered = state.items.filter(n=>{
-        if(currentTab!=='all' && n.type!==currentTab) return false;
-        if(unreadOnly && !n.unread) return false;
-        if(q && !(`${n.text} ${n.actor.name}`.toLowerCase().includes(q))) return false;
-        if(n.type==='likes' && muted.likes) return false;
-        if(n.type==='follows' && muted.follows) return false;
-        if(n.type==='comments' && muted.comments) return false;
-        if(n.type==='mentions' && muted.mentions) return false;
-        return true;
-      }).sort((a,b)=>b.createdAt - a.createdAt);
+      function map(id, n){ const ts = n.timestamp && typeof n.timestamp.toDate==='function' ? n.timestamp.toDate() : (n.timestamp? new Date(n.timestamp) : new Date()); return {
+        id, threadId: n.threadId || n.postId || (n.targetUrl? n.targetUrl : id), type: n.type || 'system', actor:{name: n.senderUsername || 'System', profilePicId: n.senderProfilePhoto || n.senderProfilePicId || null}, text: n.message || '', createdAt: ts, unread: n.read===false || !n.read, meta: n.meta || {}, mediaUrl: n.mediaUrl || null, raw: n
+      } }
 
-      const now = Date.now();
-      const newCutoff = now - 36*3600*1000;
-      const newest = filtered.filter(n=>n.createdAt.getTime()>=newCutoff);
-      const earlier = filtered.filter(n=>n.createdAt.getTime()<newCutoff);
+      function render(){
+        const q = (searchInput.value||'').toLowerCase().trim();
+        let filtered = items.slice();
+        if(currentTab!=='all') filtered = filtered.filter(i=>i.type===currentTab);
+        if(q) filtered = filtered.filter(i=>`${i.text} ${i.actor.name}`.toLowerCase().includes(q));
+        filtered = filtered.filter(i=> !prefs.muted.includes(i.threadId) );
 
-      renderList(listNew, newest);
-      renderList(listEarlier, earlier);
+        const threads = groupThreads(filtered);
+        // apply priority sort
+        threads.sort((a,b)=>scoreThread(b)-scoreThread(a));
 
-      const empty = (newest.length+earlier.length)===0;
-      emptyState.classList.toggle('hidden', !empty);
-      updateBulkBar();
-    }
+        feedEl.innerHTML='';
+        if(threads.length===0){ emptyEl.style.display='block'; return; } else { emptyEl.style.display='none'; }
 
-    function renderList(ul, arr){
-      ul.innerHTML='';
-      const frag = document.createDocumentFragment();
-      for(const n of arr.slice(0, state.loaded || state.page)){
-        frag.appendChild(renderItem(n));
-      }
-      ul.appendChild(frag);
-    }
-
-    function renderItem(n){
-      const li = document.createElement('li');
-      li.className = `item ${n.unread?'':'read'} swipeable`;
-      li.setAttribute('role','listitem');
-      li.dataset.id = n.id;
-
-      const swipe = document.createElement('div');
-      swipe.className='swipe-actions';
-      swipe.innerHTML = `<button class="btn" data-act="delete"><i class="fa-solid fa-trash"></i></button>
-                         <button class="btn" data-act="read"><i class="fa-solid fa-envelope-open"></i></button>`;
-
-      const dot = document.createElement('span'); dot.className='unread-dot';
-      const avatar = document.createElement('img'); avatar.className='avatar'; avatar.alt = `${n.actor.name} avatar`; avatar.loading = 'lazy'; avatar.decoding = 'async';
-      const usernameInitial = (n.actor.name || 'U').charAt(0).toUpperCase();
-      const fallback = () => { avatar.onerror = null; avatar.src = `https://placehold.co/48x48/CCCCCC/000000?text=${usernameInitial}`; };
-      if (n.actor && (n.actor.profilePicId || n.actor.avatar)) {
-        const picId = n.actor.profilePicId || null;
-        if (picId) {
-          const imageUrl = getCloudinaryImageUrl(picId, 'w_60,h_60,c_fill,g_face,r_max');
-          avatar.src = imageUrl;
-          avatar.onerror = fallback;
-        } else {
-          avatar.src = n.actor.avatar;
-          avatar.onerror = fallback;
-        }
-      } else {
-        fallback();
+        const frag = document.createDocumentFragment();
+        threads.forEach(t=>frag.appendChild(renderThread(t)));
+        feedEl.appendChild(frag);
       }
 
-      const main = document.createElement('div'); main.className='item-main';
-      const line1 = document.createElement('div'); line1.className='line1';
-      line1.innerHTML = `<span class="actor">${escapeHtml(n.actor.name)}</span> <span class="context">${escapeHtml(n.text.replace(n.actor.name,''))}</span>`;
-      const meta = document.createElement('div'); meta.className='meta';
-      meta.innerHTML = `<span class="pill"><span class="icon">${typeIcon(n.type)}</span>${capitalize(n.type)}</span><span aria-label="time">${timeAgo(n.createdAt)}</span>`;
-      main.appendChild(line1); main.appendChild(meta);
-
-      const actions = document.createElement('div'); actions.className='actions';
-      const act = document.createElement('button'); act.className = `btn ${n.action==='open' || n.action==='reply' || n.action==='follow_back' ? 'primary':''}`; act.textContent = n.actionLabel; act.addEventListener('click',()=>handleAction(n));
-      const sel = document.createElement('input'); sel.type='checkbox'; sel.ariaLabel = 'Select notification'; sel.addEventListener('change',()=>toggleSelect(n.id, sel.checked));
-      actions.appendChild(act); actions.appendChild(sel);
-
-      li.appendChild(swipe); li.appendChild(dot); li.appendChild(avatar); li.appendChild(main); li.appendChild(actions);
-
-      li.addEventListener('click', (e)=>{ if(e.target===sel||e.target===act) return; markRead(n.id); });
-
-      let startX=0, dx=0; li.addEventListener('pointerdown',e=>{startX=e.clientX; li.setPointerCapture(e.pointerId);});
-      li.addEventListener('pointermove',e=>{ if(!startX) return; dx=e.clientX-startX; if(dx<-10){ li.style.transform=`translateX(${dx}px)`; swipe.style.opacity=Math.min(1,Math.abs(dx)/120);} });
-      li.addEventListener('pointerup',()=>{ if(Math.abs(dx)>100){ swipe.style.opacity=1; li.style.transform='translateX(-96px)'; swipe.querySelector('[data-act="delete"]').onclick=()=>remove(n.id); swipe.querySelector('[data-act="read"]').onclick=()=>markRead(n.id); } else { li.style.transform=''; swipe.style.opacity=''; } startX=0; dx=0;});
-
-      return li;
-    }
-
-    function updateBulkBar(){
-      const count = state.selected.size; bulkCount.textContent = String(count);
-      bulkBar.classList.toggle('show', count>0);
-    }
-    function toggleSelect(id,on){ if(on) state.selected.add(id); else state.selected.delete(id); updateBulkBar(); }
-
-    async function handleAction(n){
-      if(n.type === 'group_invite'){
-        const ok = confirm(`${n.actor.name} invited you to join ${escapeHtml(n.groupName || 'a group')}. Accept?`);
-        if(ok){ await acceptGroupInvite(n.senderId, n.groupId, n.id); } else { await rejectGroupInvite(n.senderId, n.groupId, n.id); }
-        return;
+      function groupThreads(list){
+        const m = new Map();
+        for(const it of list){ const k = it.threadId || it.id; if(!m.has(k)) m.set(k, {id:k, items:[], last:it}); m.get(k).items.push(it); if(!m.get(k).last || it.createdAt>m.get(k).last.createdAt) m.get(k).last = it; }
+        return Array.from(m.values()).map(v=>({...v, count:v.items.length, unreadCount: v.items.filter(x=>x.unread).length}));
       }
-      if(n.action==='follow_back'){ showToast(`Followed ${n.actor.name}`); }
-      if(n.action==='reply'){ showToast('Opening reply...'); }
-      if(n.action==='open'){ if(n.url && n.url!== '#'){ window.location.href = n.url; } }
-      markRead(n.id);
-    }
 
-    async function markRead(id){
-      const it = state.items.find(x=>x.id===id); if(!it) return; if(!it.unread) return;
-      it.unread = false; refresh();
-      try{ if(currentUser){ const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'notifications', id); await updateDoc(ref, { read: true }); } }catch(e){ console.warn('Failed to mark read in Firestore', e); }
-      try{ localStorage.setItem('nuvia_notifications_cache', JSON.stringify(state.items.map(mapItemToCache))); }catch(_){ }
-    }
-    async function remove(id){
-      state.items = state.items.filter(x=>x.id!==id); state.selected.delete(id); refresh(); showToast('Notification removed');
-      try{ if(currentUser){ const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'notifications', id); await deleteDoc(ref); } }catch(e){ console.warn('Failed to delete in Firestore', e); }
-      try{ localStorage.setItem('nuvia_notifications_cache', JSON.stringify(state.items.map(mapItemToCache))); }catch(_){ }
-    }
+      function scoreThread(t){
+        // simple heuristic: unread > mentions/messages > recency > size
+        const last = t.last;
+        let s = (t.unreadCount||0) * 200;
+        const typePriority = {'mentions':150,'message':140,'messages':140,'comments':80,'follows':60,'likes':30,'system':10};
+        s += (typePriority[last.type]||20);
+        const age = (Date.now()-last.createdAt.getTime())/1000; // seconds
+        s += Math.max(0, 100 - Math.min(100, age/60));
+        s += Math.min(50, t.count*6);
+        return s;
+      }
 
-    const io = new IntersectionObserver(entries=>{
-      for(const e of entries){ if(e.isIntersecting){ state.loaded += state.page; refresh(); } }
-    },{root:null,threshold:1});
-    io.observe(sentinel);
+      function renderThread(t){
+        const li = document.createElement('div'); li.className = `thread ${t.unreadCount? 'unread':''}`;
+        const avatarCol = document.createElement('div'); avatarCol.className='avatar-col';
+        const img = document.createElement('img'); img.className='avatar'; img.alt = t.last.actor.name + ' avatar';
+        if(t.last.actor.profilePicId){ img.src = getCloudinaryImageUrl(t.last.actor.profilePicId, 'w_120,h_120,c_fill,g_face'); }
+        else { img.src = `https://placehold.co/120x120/CCCCCC/000000?text=${encodeURIComponent((t.last.actor.name||'U').charAt(0))}` }
+        avatarCol.appendChild(img);
 
-    let tId; searchInput.addEventListener('input',()=>{ clearTimeout(tId); tId=setTimeout(refresh, 180); });
+        const content = document.createElement('div'); content.className='content';
+        const head = document.createElement('div'); head.className='thread-header';
+        const name = document.createElement('div'); name.innerHTML = `<span class="actor-name">${escape(t.last.actor.name)}</span> <span style="color:var(--muted);margin-left:6px">${escape(truncateText(t.last.text||'',80))}</span>`;
+        head.appendChild(name);
+        const meta = document.createElement('div'); meta.className='thread-meta';
+        if(t.unreadCount>0) meta.innerHTML = `<div class="priority-badge">${t.unreadCount} new</div>`;
+        const time = document.createElement('div'); time.textContent = timeAgo(t.last.createdAt); meta.appendChild(time);
+        head.appendChild(meta);
 
-    document.getElementById('bulkRead').addEventListener('click',async ()=>{
-      const ids = Array.from(state.selected);
-      state.items.forEach(n=>{ if(state.selected.has(n.id)) n.unread=false; }); state.selected.clear(); refresh();
-      if(currentUser){ for(const id of ids){ try{ await updateDoc(doc(db,'artifacts',appId,'users',currentUser.uid,'notifications',id), { read:true }); }catch(_){ } } }
-      try{ localStorage.setItem('nuvia_notifications_cache', JSON.stringify(state.items.map(mapItemToCache))); }catch(_){ }
-    });
-    document.getElementById('bulkDelete').addEventListener('click',async ()=>{
-      const ids = Array.from(state.selected);
-      state.items = state.items.filter(n=>!state.selected.has(n.id)); state.selected.clear(); refresh();
-      if(currentUser){ for(const id of ids){ try{ await deleteDoc(doc(db,'artifacts',appId,'users',currentUser.uid,'notifications',id)); }catch(_){ } } }
-      try{ localStorage.setItem('nuvia_notifications_cache', JSON.stringify(state.items.map(mapItemToCache))); }catch(_){ }
-    });
-    document.getElementById('bulkClear').addEventListener('click',()=>{ state.selected.clear(); updateBulkBar(); });
+        const body = document.createElement('div'); body.className='thread-body';
+        const msg = document.createElement('div'); msg.className='message'; msg.textContent = t.last.text || defaultTextFor(t.last.type, t.last.actor.name);
+        body.appendChild(msg);
+        if(t.last.mediaUrl){ const thumb = document.createElement('img'); thumb.className='media-thumb'; thumb.src = t.last.mediaUrl; body.appendChild(thumb); }
+        content.appendChild(head); content.appendChild(body);
 
-    function showToast(msg){ toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 2200); try{ if(state.prefs.sound && !state.prefs.dnd){ Tone.start(); const synth = new Tone.Synth().toDestination(); synth.triggerAttackRelease('C6','8n'); } }catch(e){} }
+        const actions = document.createElement('div'); actions.className='thread-actions';
+        const openBtn = document.createElement('button'); openBtn.className='action-btn primary'; openBtn.textContent = 'Open'; openBtn.addEventListener('click',()=>openThread(t));
+        const replyBtn = document.createElement('button'); replyBtn.className='action-btn'; replyBtn.innerHTML = '<i class="fa-solid fa-reply"></i> Reply'; replyBtn.addEventListener('click',()=>openThread(t,'reply'));
+        const moreBtn = document.createElement('button'); moreBtn.className='action-btn'; moreBtn.innerHTML = '<i class="fa-solid fa-ellipsis"></i>'; moreBtn.addEventListener('click',(e)=>openThreadMenu(e,t));
+        actions.appendChild(openBtn); actions.appendChild(replyBtn); actions.appendChild(moreBtn);
+        content.appendChild(actions);
 
-    const prefsModal = document.getElementById('prefsModal');
-    document.getElementById('openPrefs').addEventListener('click',()=>{ syncPrefForm(); prefsModal.classList.add('show'); });
-    document.getElementById('closePrefs').addEventListener('click',()=>prefsModal.classList.remove('show'));
-    document.getElementById('savePrefs').addEventListener('click',()=>{ state.prefs = collectPrefForm(); savePrefs(); prefsModal.classList.remove('show'); refresh(); showToast('Preferences saved'); });
-    prefsModal.addEventListener('click',e=>{ if(e.target===prefsModal) prefsModal.classList.remove('show'); });
+        const expanded = document.createElement('div'); expanded.className='expanded-list';
+        t.items.slice(0,6).forEach(it=>{ const r = document.createElement('div'); r.className='item-small'; r.innerHTML = `<img class="avatar" src="${it.actor.profilePicId? getCloudinaryImageUrl(it.actor.profilePicId,'w_80,h_80,c_fill,g_face') : 'https://placehold.co/40x40/CCCCCC/000000?text='+encodeURIComponent((it.actor.name||'U').charAt(0))}" alt=""> <div style="min-width:0"><div style="font-weight:700">${escape(it.actor.name)}</div><div class="meta">${escape(truncateText(it.text,120))} · ${timeAgo(it.createdAt)}</div></div>`; expanded.appendChild(r); });
+        content.appendChild(expanded);
 
-    function syncPrefForm(){
-      document.getElementById('prefDnd').checked = !!state.prefs.dnd;
-      document.getElementById('prefSound').checked = !!state.prefs.sound;
-      document.getElementById('prefMuteLikes').checked = !!state.prefs.mute.likes;
-      document.getElementById('prefMuteFollows').checked = !!state.prefs.mute.follows;
-      document.getElementById('prefMuteComments').checked = !!state.prefs.mute.comments;
-      document.getElementById('prefMuteMentions').checked = !!state.prefs.mute.mentions;
-    }
-    function collectPrefForm(){
-      return {
-        dnd: document.getElementById('prefDnd').checked,
-        sound: document.getElementById('prefSound').checked,
-        mute: {
-          likes: document.getElementById('prefMuteLikes').checked,
-          follows: document.getElementById('prefMuteFollows').checked,
-          comments: document.getElementById('prefMuteComments').checked,
-          mentions: document.getElementById('prefMuteMentions').checked
-        }
-      };
-    }
+        li.appendChild(avatarCol); li.appendChild(content);
 
-    function escapeHtml(str){ return str.replace(/[&<>"]/g,s=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[s])); }
-    function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
-    function timeAgo(d){ const s=(Date.now()-d.getTime())/1000; if(s<60) return Math.floor(s)+"s"; const m=s/60; if(m<60) return Math.floor(m)+"m"; const h=m/60; if(h<24) return Math.floor(h)+"h"; const dd=h/24; if(dd<7) return Math.floor(dd)+"d"; const w=dd/7; if(w<4) return Math.floor(w)+"w"; const mo=dd/30; if(mo<12) return Math.floor(mo)+"mo"; return Math.floor(dd/365)+"y"; }
-    function typeIcon(t){
-      if(t==='likes') return '<i class="fa-solid fa-heart"></i>';
-      if(t==='comments') return '<i class="fa-solid fa-comment"></i>';
-      if(t==='mentions') return '<i class="fa-solid fa-at"></i>';
-      if(t==='follows') return '<i class="fa-solid fa-user-plus"></i>';
-      return '<i class="fa-solid fa-bell"></i>';
-    }
+        li.addEventListener('click',(e)=>{ if(e.target.closest('.action-btn')|| e.target.tagName==='BUTTON') return; li.classList.toggle('expanded'); });
 
-    async function acceptGroupInvite(senderId, groupId, notificationId){ if(!currentUser) return showToast('Sign in to accept'); try{ await runTransaction(db, async (tx)=>{ const reqCol = collection(db,'artifacts',appId,'public','data','group_requests'); const q = query(reqCol, where('senderId','==', senderId), where('receiverId','==', currentUser.uid), where('groupId','==', groupId), where('status','==','pending'), limit(1)); const snap = await getDocs(q); if(snap.empty) throw new Error('Invite not found'); const reqDoc = snap.docs[0]; const reqRef = doc(db,'artifacts',appId,'public','data','group_requests', reqDoc.id); tx.update(reqRef, { status: 'accepted', updatedAt: serverTimestamp() }); const gRef = doc(db,'artifacts',appId,'public','data','groups',groupId); const gSnap = await tx.get(gRef); if(!gSnap.exists()) throw new Error('Group missing'); const g = gSnap.data(); if(!(g.members||[]).includes(currentUser.uid)){ tx.update(gRef, { members: arrayUnion(currentUser.uid), memberCount: (g.memberCount||0)+1, updatedAt: serverTimestamp() }); }
-          const uRef = doc(db,'artifacts',appId,'users',currentUser.uid,'profiles','user_profile'); tx.set(uRef, { memberOfGroups: arrayUnion(groupId) }, { merge: true }); });
-        try{ const notifRef = collection(db,'artifacts',appId,'users', senderId, 'notifications'); await addDoc(notifRef, { type: 'group_invite_accepted', message: `${currentUserProfile?.username||'A user'} accepted your invite to join ${(groupId||'group')}`, senderId: currentUser.uid, recipientId: senderId, groupId, timestamp: serverTimestamp(), read: false }); }catch(e){}
-        showToast('You joined the group!');
-      }catch(e){ console.error('acceptGroupInvite',e); showToast('Failed to accept invite'); }
-    }
+        return li;
+      }
 
-    async function rejectGroupInvite(senderId, groupId, notificationId){ if(!currentUser) return showToast('Sign in to respond'); try{ const reqCol = collection(db,'artifacts',appId,'public','data','group_requests'); const q = query(reqCol, where('senderId','==', senderId), where('receiverId','==', currentUser.uid), where('groupId','==', groupId), where('status','==','pending'), limit(1)); const snap = await getDocs(q); if(!snap.empty){ const reqDoc = snap.docs[0]; await deleteDoc(doc(db,'artifacts',appId,'public','data','group_requests', reqDoc.id)); }
-        try{ const notifRef = collection(db,'artifacts',appId,'users', senderId, 'notifications'); await addDoc(notifRef, { type: 'group_invite_rejected', message: `${currentUserProfile?.username||'A user'} rejected your invite to join ${(groupId||'group')}`, senderId: currentUser.uid, recipientId: senderId, groupId, timestamp: serverTimestamp(), read: false }); }catch(e){}
-        showToast('Invite rejected');
-      }catch(e){ console.error('rejectGroupInvite',e); showToast('Failed to reject invite'); }
-    }
+      function openThread(t,mode){ if(mode==='reply'){ showToast('Opening reply composer'); } else { if(t.last && t.last.raw && t.last.raw.targetUrl) window.location.href = t.last.raw.targetUrl; else showToast('Opening thread'); } markThreadRead(t); }
+      async function markThreadRead(t){ t.items.forEach(it=>it.unread=false); render(); if(!currentUser) return; for(const it of t.items){ try{ await updateDoc(doc(db,'artifacts',appId,'users',currentUser.uid,'notifications', it.id), { read:true }); }catch(e){} } cacheItems(); }
 
-    loadItems(); state.loaded = state.page; refresh();
-  })();
+      function openThreadMenu(e,t){ e.stopPropagation(); const menu = document.createElement('div'); menu.style.position='absolute'; menu.style.right='20px'; menu.style.top=(e.clientY)+'px'; menu.style.background='var(--card)'; menu.style.padding='8px'; menu.style.border='1px solid rgba(255,255,255,0.04)'; menu.style.borderRadius='8px'; menu.innerHTML = `<div style="padding:6px;cursor:pointer">Mute thread</div><div style="padding:6px;cursor:pointer">Snooze 1h</div><div style="padding:6px;cursor:pointer;color:var(--muted)">Delete all</div>`;
+        document.body.appendChild(menu);
+        const cleanup = ()=>{ try{ menu.remove(); document.removeEventListener('click',cleanup); }catch(_){} };
+        menu.children[0].addEventListener('click',()=>{ prefs.muted.push(t.id); savePrefs(); cleanup(); render(); showToast('Thread muted'); });
+        menu.children[1].addEventListener('click',()=>{ cleanup(); showToast('Snoozed for 1 hour'); });
+        menu.children[2].addEventListener('click', async ()=>{ cleanup(); if(!currentUser) return showToast('Sign in to delete'); for(const it of t.items){ try{ await deleteDoc(doc(db,'artifacts',appId,'users',currentUser.uid,'notifications', it.id)); }catch(e){} } showToast('Deleted thread'); });
+      }
+
+      function groupBy(k, arr){ return arr.reduce((s,i)=>{ (s[i[k]] = s[i[k]]||[]).push(i); return s; },{}); }
+
+      function truncateText(s,n){ if(!s) return ''; return s.length>n? s.slice(0,n-1)+'…': s; }
+      function escape(s){ return String(s||'').replace(/[&<>\"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch])); }
+
+      function timeAgo(d){ const s=(Date.now()-new Date(d).getTime())/1000; if(s<60) return Math.floor(s)+'s'; const m=s/60; if(m<60) return Math.floor(m)+'m'; const h=m/60; if(h<24) return Math.floor(h)+'h'; const dd=h/24; if(dd<7) return Math.floor(dd)+'d'; const mo=dd/30; if(mo<12) return Math.floor(mo)+'mo'; return Math.floor(dd/365)+'y'; }
+
+      function defaultTextFor(type,name){ if(type==='likes') return `${name} liked your post`; if(type==='comments') return `${name} commented on your post`; if(type==='mentions') return `${name} mentioned you`; if(type==='follows') return `${name} started following you`; return 'System notification'; }
+
+      function showToast(msg){ toastEl.textContent = msg; toastEl.style.display='block'; setTimeout(()=>{ toastEl.style.display='none'; },2200); try{ if(prefs.sound && !prefs.dnd){ Tone.start(); new Tone.Synth().toDestination().triggerAttackRelease('C6','8n'); } }catch(e){} }
+
+      function debounce(fn,ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); } }
+
+      // initial load
+      try{ const raw = localStorage.getItem('nuvia_notifications_cache'); if(raw) items = JSON.parse(raw).map(i=>({...i, createdAt:new Date(i.createdAt)})); }catch(e){}
+      render();
+
+    })();
   </script>
 </body>
 </html>
