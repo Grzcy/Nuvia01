@@ -26,6 +26,7 @@
     }
     html{overflow-y:auto}
     body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--white);background:var(--background-main);min-height:100vh;display:flex;flex-direction:column}
+    .hidden{display:none !important}
     /* Header */
     header{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,rgba(10,10,20,.9),rgba(10,10,20,.75));backdrop-filter:blur(10px);border-bottom:1px solid var(--border-light)}
     .header-wrap{max-width:1200px;margin:0 auto;padding:10px 16px;height:56px;display:flex;align-items:center;gap:12px}
@@ -46,6 +47,7 @@
     .chip.active{background:linear-gradient(90deg,rgba(0,213,255,.25),rgba(255,46,146,.25))}
     .search{flex:1 1 260px;min-width:200px;display:flex;align-items:center;border:1px solid var(--border-light);border-radius:10px;background:rgba(255,255,255,.04);padding:6px 10px}
     .search input{flex:1;background:transparent;border:none;outline:none;color:var(--white)}
+    .search-icon{margin-right:8px}
 
     /* Content */
     main{max-width:900px;width:100%;margin:0 auto;padding:12px 12px 24px 12px}
@@ -91,10 +93,13 @@
     .modal-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border-light)}
     .modal-body{padding:16px;display:grid;gap:14px}
     .toggle{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border-light);border-radius:12px;background:rgba(255,255,255,.04);padding:10px 12px}
+    .modal-footer{border-top:1px solid var(--border-light)}
 
     /* Sticky bulk bar */
     .bulkbar{position:sticky;bottom:0;z-index:18;display:none;gap:8px;align-items:center;justify-content:space-between;margin-top:8px;border:1px solid var(--border-light);border-radius:12px;background:var(--card-background);padding:8px 10px}
     .bulkbar.show{display:flex}
+
+    .list-sentinel{height:1px}
 
     /* Responsive */
     @media (max-width:600px){
@@ -130,7 +135,7 @@
       <div class="filters">
         <button id="unreadOnly" class="chip" aria-pressed="false"><i class="fa-solid fa-circle-dot"></i> Unread</button>
         <div class="search" role="search">
-          <i class="fa-solid fa-magnifying-glass" aria-hidden="true" style="margin-right:8px"></i>
+          <i class="fa-solid fa-magnifying-glass search-icon" aria-hidden="true"></i>
           <input id="searchInput" type="search" placeholder="Search notifications" aria-label="Search notifications" />
         </div>
       </div>
@@ -146,7 +151,7 @@
       <div class="section-title" id="sec-early">Earlier</div>
       <ul id="listEarlier" class="list" role="list"></ul>
     </section>
-    <div id="emptyState" class="empty" style="display:none">
+    <div id="emptyState" class="empty hidden">
       <i class="fa-regular fa-bell"></i>
       <div style="font-weight:700;margin:6px 0">You're all caught up</div>
       <div>New activity will appear here. Enjoy your day!</div>
@@ -159,7 +164,7 @@
         <button class="btn" id="bulkClear">Clear</button>
       </div>
     </div>
-    <div id="sentinel" style="height:1px"></div>
+    <div id="sentinel" class="list-sentinel"></div>
   </main>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -178,19 +183,19 @@
         <div class="toggle"><span>Mute Comments</span><label><input type="checkbox" id="prefMuteComments"> Mute</label></div>
         <div class="toggle"><span>Mute Mentions</span><label><input type="checkbox" id="prefMuteMentions"> Mute</label></div>
       </div>
-      <div class="modal-header" style="border-top:1px solid var(--border-light)">
+      <div class="modal-header modal-footer">
         <button class="btn" id="savePrefs"><i class="fa-solid fa-floppy-disk"></i> Save</button>
       </div>
     </div>
   </div>
 
+  <script src="./assets/js/lazy-images.js" defer></script>
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, orderBy, where, getDocs, addDoc, onSnapshot, limit, runTransaction, arrayUnion } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
-  import { getCloudinaryImageUrl, displayProfilePicture } from "./assets/js/avatar-utils.js";
+  import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, orderBy, where, getDocs, addDoc, onSnapshot, limit, runTransaction, arrayUnion, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+  import { getCloudinaryImageUrl } from "./assets/js/avatar-utils.js";
 
-  // Firebase config (from environment or fallback to Home.html defaults)
   const firebaseConfig = typeof window.__firebase_config !== 'undefined' ? JSON.parse(window.__firebase_config) : {
     apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
     authDomain: "jchat-1.firebaseapp.com",
@@ -201,7 +206,6 @@
     appId: "1:328479683167:web:placeholder"
   };
   const appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'default-app-id';
-
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
@@ -241,13 +245,11 @@
     }
     function savePrefs(){ localStorage.setItem('nuvia_notification_prefs', JSON.stringify(state.prefs)); }
 
-    // Data: Firestore-first with LocalStorage fallback
     function loadItems(){
-      // Render from cache quickly
       try{
         const raw = localStorage.getItem('nuvia_notifications_cache');
         if(raw){ state.items = JSON.parse(raw).map(mapCacheToItem); }
-      }catch(e){ /* ignore */ }
+      }catch(e){}
       refresh();
 
       onAuthStateChanged(auth, async (user)=>{
@@ -255,7 +257,6 @@
         if(unsubscribeNotifications){ try{ unsubscribeNotifications(); }catch(_){} unsubscribeNotifications=null; }
         if(!currentUser){ return; }
         try{
-          // load current user profile
           try{ const profRef = doc(db,'artifacts',appId,'users',currentUser.uid,'profiles','user_profile'); const profSnap = await getDoc(profRef); currentUserProfile = profSnap.exists() ? profSnap.data() : null; }catch(_){ currentUserProfile = null; }
           const colRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'notifications');
           const qRef = query(colRef, orderBy('timestamp','desc'), limit(200));
@@ -269,18 +270,6 @@
           });
         }catch(err){ console.error('Notifications subscribe failed', err); }
       });
-    }
-
-    function genItem({type,actor,createdAt,unread}){
-      const id = Math.random().toString(36).slice(2);
-      const base = { id, type, actor, createdAt, unread, url:'#' };
-      switch(type){
-        case 'likes': return Object.assign(base,{ text:`${actor.name} liked your post`, actionLabel:'View', action:'open' });
-        case 'comments': return Object.assign(base,{ text:`${actor.name} commented: “Amazing work!”`, actionLabel:'Reply', action:'reply' });
-        case 'mentions': return Object.assign(base,{ text:`${actor.name} mentioned you in a post`, actionLabel:'Open', action:'open' });
-        case 'follows': return Object.assign(base,{ text:`${actor.name} started following you`, actionLabel:'Follow back', action:'follow_back' });
-        default: return Object.assign(base,{ text:`System message: Your account is secured.`, actionLabel:'Details', action:'open' });
-      }
     }
 
     function mapFirestoreNotification(id, n){
@@ -321,9 +310,6 @@
       return 'open';
     }
 
-    function saveAll(){ try{ localStorage.setItem('nuvia_notifications', JSON.stringify(state.items)); }catch(e){} }
-
-    // Rendering
     function refresh(){
       const q = searchInput.value.trim().toLowerCase();
       const unreadOnly = unreadOnlyBtn.getAttribute('aria-pressed')==='true';
@@ -340,7 +326,7 @@
       }).sort((a,b)=>b.createdAt - a.createdAt);
 
       const now = Date.now();
-      const newCutoff = now - 36*3600*1000; // within ~36h considered New
+      const newCutoff = now - 36*3600*1000;
       const newest = filtered.filter(n=>n.createdAt.getTime()>=newCutoff);
       const earlier = filtered.filter(n=>n.createdAt.getTime()<newCutoff);
 
@@ -348,7 +334,8 @@
       renderList(listEarlier, earlier);
 
       const empty = (newest.length+earlier.length)===0;
-      emptyState.style.display = empty? 'block':'none';
+      emptyState.classList.toggle('hidden', !empty ? false : false); // reset first
+      emptyState.classList.toggle('hidden', !empty);
       updateBulkBar();
     }
 
@@ -404,13 +391,11 @@
 
       li.appendChild(swipe); li.appendChild(dot); li.appendChild(avatar); li.appendChild(main); li.appendChild(actions);
 
-      // mark read on click
       li.addEventListener('click', (e)=>{ if(e.target===sel||e.target===act) return; markRead(n.id); });
 
-      // swipe (simple)
       let startX=0, dx=0; li.addEventListener('pointerdown',e=>{startX=e.clientX; li.setPointerCapture(e.pointerId);});
       li.addEventListener('pointermove',e=>{ if(!startX) return; dx=e.clientX-startX; if(dx<-10){ li.style.transform=`translateX(${dx}px)`; swipe.style.opacity=Math.min(1,Math.abs(dx)/120);} });
-      li.addEventListener('pointerup',()=>{ if(Math.abs(dx)>100){ /* reveal */ swipe.style.opacity=1; li.style.transform='translateX(-96px)'; swipe.querySelector('[data-act="delete"]').onclick=()=>remove(n.id); swipe.querySelector('[data-act="read"]').onclick=()=>markRead(n.id); } else { li.style.transform=''; swipe.style.opacity=''; } startX=0; dx=0;});
+      li.addEventListener('pointerup',()=>{ if(Math.abs(dx)>100){ swipe.style.opacity=1; li.style.transform='translateX(-96px)'; swipe.querySelector('[data-act="delete"]').onclick=()=>remove(n.id); swipe.querySelector('[data-act="read"]').onclick=()=>markRead(n.id); } else { li.style.transform=''; swipe.style.opacity=''; } startX=0; dx=0;});
 
       return li;
     }
@@ -429,7 +414,7 @@
       }
       if(n.action==='follow_back'){ showToast(`Followed ${n.actor.name}`); }
       if(n.action==='reply'){ showToast('Opening reply...'); }
-      if(n.action==='open'){ window.location.href = n.url || '#'; }
+      if(n.action==='open'){ if(n.url && n.url!== '#'){ window.location.href = n.url; } }
       markRead(n.id);
     }
 
@@ -445,16 +430,13 @@
       try{ localStorage.setItem('nuvia_notifications_cache', JSON.stringify(state.items.map(mapItemToCache))); }catch(_){ }
     }
 
-    // Infinite scroll
     const io = new IntersectionObserver(entries=>{
       for(const e of entries){ if(e.isIntersecting){ state.loaded += state.page; refresh(); } }
     },{root:null,threshold:1});
     io.observe(sentinel);
 
-    // Search debounce
     let tId; searchInput.addEventListener('input',()=>{ clearTimeout(tId); tId=setTimeout(refresh, 180); });
 
-    // Bulk actions
     document.getElementById('bulkRead').addEventListener('click',async ()=>{
       const ids = Array.from(state.selected);
       state.items.forEach(n=>{ if(state.selected.has(n.id)) n.unread=false; }); state.selected.clear(); refresh();
@@ -469,10 +451,8 @@
     });
     document.getElementById('bulkClear').addEventListener('click',()=>{ state.selected.clear(); updateBulkBar(); });
 
-    // Toast
-    function showToast(msg){ toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 2200); if(state.prefs.sound && !state.prefs.dnd){ try{ const synth = new Tone.Synth().toDestination(); synth.triggerAttackRelease('C6','8n'); }catch(e){} } }
+    function showToast(msg){ toast.textContent=msg; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'), 2200); try{ if(state.prefs.sound && !state.prefs.dnd){ Tone.start(); const synth = new Tone.Synth().toDestination(); synth.triggerAttackRelease('C6','8n'); } }catch(e){} }
 
-    // Preferences modal
     const prefsModal = document.getElementById('prefsModal');
     document.getElementById('openPrefs').addEventListener('click',()=>{ syncPrefForm(); prefsModal.classList.add('show'); });
     document.getElementById('closePrefs').addEventListener('click',()=>prefsModal.classList.remove('show'));
@@ -500,7 +480,6 @@
       };
     }
 
-    // Helpers
     function escapeHtml(str){ return str.replace(/[&<>"]/g,s=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[s])); }
     function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
     function timeAgo(d){ const s=(Date.now()-d.getTime())/1000; if(s<60) return Math.floor(s)+"s"; const m=s/60; if(m<60) return Math.floor(m)+"m"; const h=m/60; if(h<24) return Math.floor(h)+"h"; const dd=h/24; if(dd<7) return Math.floor(dd)+"d"; const w=dd/7; if(w<4) return Math.floor(w)+"w"; const mo=dd/30; if(mo<12) return Math.floor(mo)+"mo"; return Math.floor(dd/365)+"y"; }
@@ -512,21 +491,19 @@
       return '<i class="fa-solid fa-bell"></i>';
     }
 
-    async function acceptGroupInvite(senderId, groupId, notificationId){ if(!currentUser) return showToast('Sign in to accept','error'); try{ const confirmed = true; if(!confirmed) return; await runTransaction(db, async (tx)=>{ const reqCol = collection(db,'artifacts',appId,'public','data','group_requests'); const q = query(reqCol, where('senderId','==', senderId), where('receiverId','==', currentUser.uid), where('groupId','==', groupId), where('status','==','pending'), limit(1)); const snap = await getDocs(q); if(snap.empty) throw new Error('Invite not found'); const reqDoc = snap.docs[0]; const reqRef = doc(db,'artifacts',appId,'public','data','group_requests', reqDoc.id); tx.update(reqRef, { status: 'accepted', updatedAt: serverTimestamp() }); const gRef = doc(db,'artifacts',appId,'public','data','groups',groupId); const gSnap = await tx.get(gRef); if(!gSnap.exists()) throw new Error('Group missing'); const g = gSnap.data(); if(!(g.members||[]).includes(currentUser.uid)){ tx.update(gRef, { members: arrayUnion(currentUser.uid), memberCount: (g.memberCount||0)+1, updatedAt: serverTimestamp() }); }
+    async function acceptGroupInvite(senderId, groupId, notificationId){ if(!currentUser) return showToast('Sign in to accept'); try{ await runTransaction(db, async (tx)=>{ const reqCol = collection(db,'artifacts',appId,'public','data','group_requests'); const q = query(reqCol, where('senderId','==', senderId), where('receiverId','==', currentUser.uid), where('groupId','==', groupId), where('status','==','pending'), limit(1)); const snap = await getDocs(q); if(snap.empty) throw new Error('Invite not found'); const reqDoc = snap.docs[0]; const reqRef = doc(db,'artifacts',appId,'public','data','group_requests', reqDoc.id); tx.update(reqRef, { status: 'accepted', updatedAt: serverTimestamp() }); const gRef = doc(db,'artifacts',appId,'public','data','groups',groupId); const gSnap = await tx.get(gRef); if(!gSnap.exists()) throw new Error('Group missing'); const g = gSnap.data(); if(!(g.members||[]).includes(currentUser.uid)){ tx.update(gRef, { members: arrayUnion(currentUser.uid), memberCount: (g.memberCount||0)+1, updatedAt: serverTimestamp() }); }
           const uRef = doc(db,'artifacts',appId,'users',currentUser.uid,'profiles','user_profile'); tx.set(uRef, { memberOfGroups: arrayUnion(groupId) }, { merge: true }); });
-        // notify sender
         try{ const notifRef = collection(db,'artifacts',appId,'users', senderId, 'notifications'); await addDoc(notifRef, { type: 'group_invite_accepted', message: `${currentUserProfile?.username||'A user'} accepted your invite to join ${(groupId||'group')}`, senderId: currentUser.uid, recipientId: senderId, groupId, timestamp: serverTimestamp(), read: false }); }catch(e){}
-        showMessageBox('You joined the group!', 'success');
-      }catch(e){ console.error('acceptGroupInvite',e); showMessageBox('Failed to accept invite: '+(e.message||e), 'error'); }
+        showToast('You joined the group!');
+      }catch(e){ console.error('acceptGroupInvite',e); showToast('Failed to accept invite'); }
     }
 
-    async function rejectGroupInvite(senderId, groupId, notificationId){ if(!currentUser) return showToast('Sign in to respond','error'); try{ const reqCol = collection(db,'artifacts',appId,'public','data','group_requests'); const q = query(reqCol, where('senderId','==', senderId), where('receiverId','==', currentUser.uid), where('groupId','==', groupId), where('status','==','pending'), limit(1)); const snap = await getDocs(q); if(!snap.empty){ const reqDoc = snap.docs[0]; await deleteDoc(doc(db,'artifacts',appId,'public','data','group_requests', reqDoc.id)); }
+    async function rejectGroupInvite(senderId, groupId, notificationId){ if(!currentUser) return showToast('Sign in to respond'); try{ const reqCol = collection(db,'artifacts',appId,'public','data','group_requests'); const q = query(reqCol, where('senderId','==', senderId), where('receiverId','==', currentUser.uid), where('groupId','==', groupId), where('status','==','pending'), limit(1)); const snap = await getDocs(q); if(!snap.empty){ const reqDoc = snap.docs[0]; await deleteDoc(doc(db,'artifacts',appId,'public','data','group_requests', reqDoc.id)); }
         try{ const notifRef = collection(db,'artifacts',appId,'users', senderId, 'notifications'); await addDoc(notifRef, { type: 'group_invite_rejected', message: `${currentUserProfile?.username||'A user'} rejected your invite to join ${(groupId||'group')}`, senderId: currentUser.uid, recipientId: senderId, groupId, timestamp: serverTimestamp(), read: false }); }catch(e){}
-        showMessageBox('Invite rejected.', 'info');
-      }catch(e){ console.error('rejectGroupInvite',e); showMessageBox('Failed to reject invite: '+(e.message||e), 'error'); }
+        showToast('Invite rejected');
+      }catch(e){ console.error('rejectGroupInvite',e); showToast('Failed to reject invite'); }
     }
 
-    // Init (no simulation when using Firestore)
     loadItems(); state.loaded = state.page; refresh();
   })();
   </script>
