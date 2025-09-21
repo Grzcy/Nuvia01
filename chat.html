@@ -361,6 +361,7 @@
                 <div id="voiceWrap" style="display:none; text-align:center; padding:24px;">
                     <i class="fas fa-phone" style="font-size:36px; color:var(--accent-color);"></i>
                     <div id="callStatus" style="margin-top:8px; color:var(--text-light);">Connecting…</div>
+                    <audio id="remoteAudio" autoplay playsinline style="display:none"></audio>
                 </div>
             </div>
         </div>
@@ -372,7 +373,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where, getDocs } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
         import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js";
 
         // Firebase config (same pattern as Profile.html)
@@ -604,6 +605,7 @@
         const videoWrap = document.getElementById('videoWrap');
         const localVideo = document.getElementById('localVideo');
         const remoteVideo = document.getElementById('remoteVideo');
+        const remoteAudio = document.getElementById('remoteAudio');
         
         // --- WebRTC signaling (Firestore) ---
         let pc = null;
@@ -851,7 +853,16 @@
                 if (isVideo) localVideo.srcObject = stream;
                 pc = new RTCPeerConnection(rtcConfig);
                 stream.getTracks().forEach(t => pc.addTrack(t, stream));
-                pc.ontrack = (e) => { if (isVideo) remoteVideo.srcObject = e.streams[0]; };
+                pc.ontrack = (e) => {
+                const stream = e.streams[0];
+                if (isVideo) {
+                    remoteVideo.srcObject = stream;
+                } else if (remoteAudio) {
+                    remoteAudio.srcObject = stream;
+                    remoteAudio.style.display = 'block';
+                    try { remoteAudio.play().catch(() => {}); } catch {}
+                }
+            };
 
                 // Create call doc
                 const callsCol = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
@@ -925,7 +936,16 @@
                 if (isVideo) localVideo.srcObject = stream;
                 pc = new RTCPeerConnection(rtcConfig);
                 stream.getTracks().forEach(t => pc.addTrack(t, stream));
-                pc.ontrack = (e) => { if (isVideo) remoteVideo.srcObject = e.streams[0]; };
+                pc.ontrack = (e) => {
+                const stream = e.streams[0];
+                if (isVideo) {
+                    remoteVideo.srcObject = stream;
+                } else if (remoteAudio) {
+                    remoteAudio.srcObject = stream;
+                    remoteAudio.style.display = 'block';
+                    try { remoteAudio.play().catch(() => {}); } catch {}
+                }
+            };
                 const calleeCandCol = collection(callDocRef, 'calleeCandidates');
                 pc.onicecandidate = (e) => { if (e.candidate) addDoc(calleeCandCol, e.candidate.toJSON()); };
                 // Set remote offer
@@ -963,6 +983,9 @@
             try { unsubCallDoc && unsubCallDoc(); } catch {}
             try { unsubCallerCand && unsubCallerCand(); } catch {}
             try { unsubCalleeCand && unsubCalleeCand(); } catch {}
+            try { if (remoteVideo) remoteVideo.srcObject = null; } catch {}
+            try { if (remoteAudio) { remoteAudio.pause(); remoteAudio.srcObject = null; remoteAudio.style.display = 'none'; } } catch {}
+            try { if (localVideo && localVideo.srcObject) { localVideo.srcObject.getTracks().forEach(t => t.stop()); localVideo.srcObject = null; } } catch {}
             if (callDocRef) { try { await updateDoc(callDocRef, { status: 'ended' }); } catch {} }
             callDocRef = null;
             callModal.style.display = 'none';
