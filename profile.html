@@ -5093,6 +5093,7 @@
     .particle:nth-child(4) { animation-delay: -3s; animation-duration: 4.5s; }
     @keyframes orbit { 0% { transform: rotate(0deg) translateX(100px) rotate(0deg); opacity: 1; } 50% { opacity: 0.3; } 100% { transform: rotate(360deg) translateX(100px) rotate(-360deg); opacity: 1; } }
     </style>
+<style id="verified-badge-styles">.verified-badge{display:inline-flex;align-items:center;justify-content:center;margin-left:6px;line-height:1;color:transparent;background-image:linear-gradient(90deg, var(--blue), var(--pink));background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;vertical-align:middle}.verified-badge i{font-size:1em}.verified-badge.sm{font-size:.85rem}.verified-badge.md{font-size:1rem}</style>
 </head>
 <body class="theme-dark-mode">
     <!-- Nuvia Pink & Blue Glowing Loader -->
@@ -5894,6 +5895,7 @@
         import { getFirestore, doc, getDoc, updateDoc, setDoc, deleteDoc, collection, query, where, getDocs, runTransaction, writeBatch, serverTimestamp, orderBy, addDoc, arrayUnion, documentId, onSnapshot } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js";
         import { Timestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+import { renderVerifiedBadge } from './assets/js/verification-utils.js';
 
         // --- Firebase & Canvas Environment Configuration ---
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
@@ -8001,6 +8003,7 @@
                 const usernameInitial = (profileData.username || "J").charAt(0).toUpperCase();
                 displayProfilePicture(headerProfilePic, headerAvatarIcon, profileData?.profilePicId, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
                 headerDisplayName.textContent = profileData.username || "JCHAT User";
+if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.verified, 'sm');
                 if (headerNavLinkProfile) headerNavLinkProfile.href = `/profile.html?userId=${user.uid}`; // Ensure header nav link is correct, null check
 
                 // Show Admin Icon if current user is admin
@@ -8903,6 +8906,7 @@
                     }
 
                     if (profileUsername) profileUsername.textContent = displayedUserProfileData.username || "JCHAT User"; // Null check
+if (profileUsername) renderVerifiedBadge(profileUsername, !!displayedUserProfileData.verified, 'md');
                     const usernameInitial = (displayedUserProfileData.username || "J").charAt(0).toUpperCase();
 
 
