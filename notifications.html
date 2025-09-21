@@ -152,12 +152,13 @@
         unsubscribe = onSnapshot(q, snap=>{
           const arr = [];
           snap.forEach(s=>{ arr.push(map(s.id, s.data())); });
-          items = arr; cacheItems(); render();
+          items = arr; cacheItems(); render(); updateGlobalUnreadCount();
         }, err=>{ console.warn('notifications subscribe error', err); loadCachedAndRender(); });
       });
 
       function loadCachedAndRender(){ try{ const raw = localStorage.getItem('nuvia_notifications_cache'); if(raw){ items = JSON.parse(raw).map(c=>({...c, createdAt:new Date(c.createdAt)})); } }catch(e){} render(); }
       function cacheItems(){ try{ localStorage.setItem('nuvia_notifications_cache', JSON.stringify(items.map(i=>({...i, createdAt: i.createdAt.getTime()})))); }catch(e){} }
+      function updateGlobalUnreadCount(){ try{ const count = items.filter(i=>i.unread).length; localStorage.setItem('nuvia_unread_count', String(count)); try{ localStorage.setItem('nuvia_notifications_cache', JSON.stringify(items.map(i=>({...i, createdAt: i.createdAt.getTime()})))); }catch(e){} }catch(e){} }
 
       function map(id, n){ const ts = n.timestamp && typeof n.timestamp.toDate==='function' ? n.timestamp.toDate() : (n.timestamp? new Date(n.timestamp) : new Date()); return {
         id, threadId: n.threadId || n.postId || (n.targetUrl? n.targetUrl : id), type: n.type || 'system', actor:{name: n.senderUsername || 'System', profilePicId: n.senderProfilePhoto || n.senderProfilePicId || null}, text: n.message || '', createdAt: ts, unread: n.read===false || !n.read, meta: n.meta || {}, mediaUrl: n.mediaUrl || null, raw: n
@@ -241,15 +242,15 @@
         return li;
       }
 
-      function openThread(t,mode){ if(mode==='reply'){ showToast('Opening reply composer'); } else { if(t.last && t.last.raw && t.last.raw.targetUrl) window.location.href = t.last.raw.targetUrl; else showToast('Opening thread'); } markThreadRead(t); }
-      async function markThreadRead(t){ t.items.forEach(it=>it.unread=false); render(); if(!currentUser) return; for(const it of t.items){ try{ await updateDoc(doc(db,'artifacts',appId,'users',currentUser.uid,'notifications', it.id), { read:true }); }catch(e){} } cacheItems(); }
+      function openThread(t,mode){ if(mode==='reply'){ notify('Opening reply composer','info'); } else { if(t.last && t.last.raw && t.last.raw.targetUrl) window.location.href = t.last.raw.targetUrl; else notify('Opening thread','info'); } markThreadRead(t); }
+      async function markThreadRead(t){ t.items.forEach(it=>it.unread=false); render(); if(!currentUser) return; for(const it of t.items){ try{ await updateDoc(doc(db,'artifacts',appId,'users',currentUser.uid,'notifications', it.id), { read:true }); }catch(e){} } cacheItems(); updateGlobalUnreadCount(); }
 
       function openThreadMenu(e,t){ e.stopPropagation(); const menu = document.createElement('div'); menu.style.position='absolute'; menu.style.right='20px'; menu.style.top=(e.clientY)+'px'; menu.style.background='var(--card)'; menu.style.padding='8px'; menu.style.border='1px solid rgba(255,255,255,0.04)'; menu.style.borderRadius='8px'; menu.innerHTML = `<div style="padding:6px;cursor:pointer">Mute thread</div><div style="padding:6px;cursor:pointer">Snooze 1h</div><div style="padding:6px;cursor:pointer;color:var(--muted)">Delete all</div>`;
         document.body.appendChild(menu);
         const cleanup = ()=>{ try{ menu.remove(); document.removeEventListener('click',cleanup); }catch(_){} };
-        menu.children[0].addEventListener('click',()=>{ prefs.muted.push(t.id); savePrefs(); cleanup(); render(); showToast('Thread muted'); });
-        menu.children[1].addEventListener('click',()=>{ cleanup(); showToast('Snoozed for 1 hour'); });
-        menu.children[2].addEventListener('click', async ()=>{ cleanup(); if(!currentUser) return showToast('Sign in to delete'); for(const it of t.items){ try{ await deleteDoc(doc(db,'artifacts',appId,'users',currentUser.uid,'notifications', it.id)); }catch(e){} } showToast('Deleted thread'); });
+        menu.children[0].addEventListener('click',()=>{ prefs.muted.push(t.id); savePrefs(); cleanup(); render(); notify('Thread muted','info'); });
+        menu.children[1].addEventListener('click',()=>{ cleanup(); notify('Snoozed for 1 hour','info'); });
+        menu.children[2].addEventListener('click', async ()=>{ cleanup(); if(!currentUser) return notify('Sign in to delete','error'); for(const it of t.items){ try{ await deleteDoc(doc(db,'artifacts',appId,'users',currentUser.uid,'notifications', it.id)); }catch(e){} } cacheItems(); updateGlobalUnreadCount(); notify('Deleted thread','success'); });
       }
 
       function groupBy(k, arr){ return arr.reduce((s,i)=>{ (s[i[k]] = s[i[k]]||[]).push(i); return s; },{}); }
@@ -261,7 +262,7 @@
 
       function defaultTextFor(type,name){ if(type==='likes') return `${name} liked your post`; if(type==='comments') return `${name} commented on your post`; if(type==='mentions') return `${name} mentioned you`; if(type==='follows') return `${name} started following you`; return 'System notification'; }
 
-      function showToast(msg){ toastEl.textContent = msg; toastEl.style.display='block'; setTimeout(()=>{ toastEl.style.display='none'; },2200); try{ if(prefs.sound && !prefs.dnd){ Tone.start(); new Tone.Synth().toDestination().triggerAttackRelease('C6','8n'); } }catch(e){} }
+      function notify(msg, type='info'){ try{ if (window.showMessageBox && typeof window.showMessageBox === 'function') { window.showMessageBox(msg, type); } else { toastEl.textContent = msg; toastEl.style.display = 'block'; setTimeout(()=>{ toastEl.style.display='none'; },2200); } }catch(e){ toastEl.textContent = msg; toastEl.style.display = 'block'; setTimeout(()=>{ toastEl.style.display='none'; },2200); } try{ if(prefs.sound && !prefs.dnd){ Tone.start(); new Tone.Synth().toDestination().triggerAttackRelease('C6','8n'); } }catch(e){} }
 
       function debounce(fn,ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); } }
 
