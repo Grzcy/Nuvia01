@@ -515,7 +515,7 @@
             const profilePicId = snap.exists() ? (snap.data().profilePicId || user.photoURL || null) : (user.photoURL || null);
             const initial = displayName.charAt(0).toUpperCase();
             displayProfilePicture(document.getElementById('headerProfilePic'), document.getElementById('headerProfileIcon'), profilePicId, initial, "w_36,h_36,c_fill,g_face,r_max");
-            document.getElementById('headerProfile').onclick = () => window.location.href = '/Profile.html';
+            document.getElementById('headerProfile').onclick = () => window.location.href = '/profile.html';
         }
 
         function updatePartnerHeader(partner) {
