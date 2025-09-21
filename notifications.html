@@ -36,8 +36,9 @@
     /* Controls */
     .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
     .tabs{display:flex;gap:8px;overflow:auto}
-    .tab{padding:8px 12px;border-radius:999px;background:transparent;border:1px solid rgba(255,255,255,0.03);cursor:pointer;color:var(--muted);white-space:nowrap}
+    .tab{padding:8px 12px;border-radius:999px;background:transparent;border:1px solid rgba(255,255,255,0.03);cursor:pointer;color:var(--muted);white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
     .tab.active{background:linear-gradient(90deg,var(--blue),var(--pink));color:#091022;box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+    .tab-count{display:none;min-width:18px;height:18px;border-radius:999px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.1);color:inherit;font-size:.75rem;line-height:18px;text-align:center;padding:0 6px}
     .search{flex:1;display:flex;align-items:center;background:var(--card);padding:8px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
     .search-input{flex:1;background:transparent;border:0;color:inherit;outline:none;padding:6px}
     .search-icon{margin-right:8px;color:var(--muted)}
@@ -182,6 +183,13 @@
       const toastEl = document.getElementById('toast');
       const tabs = Array.from(document.querySelectorAll('.tab'));
       const searchInput = document.getElementById('searchInput');
+
+      // Deep link: initialize from URL
+      const url = new URL(window.location.href);
+      const initialTab = (url.searchParams.get('tab')||'all').toLowerCase();
+      const initialQ = url.searchParams.get('q')||'';
+      if (initialQ) searchInput.value = initialQ;
+      if (tabs.find(t=>t.dataset.tab===initialTab)) { currentTab = initialTab; tabs.forEach(x=>x.classList.toggle('active', x.dataset.tab===initialTab)); tabs.forEach(x=>x.setAttribute('aria-selected', String(x.dataset.tab===initialTab))); }
       const markAllBtn = document.getElementById('markAllBtn');
       const backBtn = document.getElementById('backBtn');
       const prefsBtn = document.getElementById('openPrefs');
@@ -203,9 +211,9 @@
       function loadPrefs(){ try{ return Object.assign({dnd:false,sound:true,muted:[],snoozed:{}}, JSON.parse(localStorage.getItem('nuvia_notification_prefs')||'{}')); }catch(e){ return {dnd:false,sound:true,muted:[],snoozed:{}}; } }
       function savePrefs(){ localStorage.setItem('nuvia_notification_prefs', JSON.stringify(prefs)); }
 
-      tabs.forEach(t=>t.addEventListener('click',()=>{ tabs.forEach(x=>x.classList.toggle('active',x===t)); tabs.forEach(x=>x.setAttribute('aria-selected', String(x===t))); currentTab = t.dataset.tab; render(); }));
-      searchInput.addEventListener('input', debounce(()=>render(),220));
-      markAllBtn.addEventListener('click', async ()=>{ if(items.length===0) return; await markAllAsRead(); notify('All notifications marked as read','info'); });
+      tabs.forEach(t=>t.addEventListener('click',()=>{ tabs.forEach(x=>x.classList.toggle('active',x===t)); tabs.forEach(x=>x.setAttribute('aria-selected', String(x===t))); currentTab = t.dataset.tab; syncUrl(); render(); }));
+      searchInput.addEventListener('input', debounce(()=>{ syncUrl(); render(); },220));
+      markAllBtn.addEventListener('click', async ()=>{ const scoped = getCurrentFilteredItems(); if(scoped.length===0) return; await markAllAsRead(scoped); notify('All visible marked as read','info'); });
       backBtn.addEventListener('click',()=>window.history.back());
 
       // Prefs UI
@@ -239,6 +247,8 @@
       function loadCachedAndRender(){ try{ const raw = localStorage.getItem('nuvia_notifications_cache'); if(raw){ items = JSON.parse(raw).map(c=>({...c, createdAt:new Date(c.createdAt)})); } }catch(e){} render(); }
       function cacheItems(){ try{ localStorage.setItem('nuvia_notifications_cache', JSON.stringify(items.map(i=>({...i, createdAt: i.createdAt.getTime()})))); }catch(e){} }
       function updateGlobalUnreadCount(){ try{ const count = items.filter(i=>i.unread).length; localStorage.setItem('nuvia_unread_count', String(count)); try{ if(typeof window.updateNotificationBadge === 'function'){ window.updateNotificationBadge(count); } else { const el = document.getElementById('notificationCount'); if (el) { if (count>0){ el.textContent = String(count); el.style.display='flex'; } else { el.style.display='none'; } } } }catch(_){} try{ window.dispatchEvent(new CustomEvent('nuvia:unreadChange',{ detail: count })); }catch(_){} }catch(e){} }
+      function syncUrl(){ try{ const u = new URL(window.location.href); if(currentTab && currentTab!=='all') u.searchParams.set('tab', currentTab); else u.searchParams.delete('tab'); const qv = (searchInput.value||'').trim(); if(qv) u.searchParams.set('q', qv); else u.searchParams.delete('q'); window.history.replaceState({}, '', u.toString()); }catch(_){} }
+      function getCurrentFilteredItems(){ const q = (searchInput.value||'').toLowerCase().trim(); return items.filter(i=> (currentTab==='all' || i.type===currentTab) && (!q || (`${i.text} ${i.actor.name}`.toLowerCase().includes(q))) && !prefs.muted.includes(i.threadId) && !isSnoozed(i.threadId)); }
 
       function normalizeType(t){ const x = String(t||'').toLowerCase();
         if(['like','reaction','react','heart'].includes(x)) return 'likes';
@@ -256,7 +266,7 @@
 
       function map(id, n){
         const ts = n.timestamp && typeof n.timestamp.toDate==='function' ? n.timestamp.toDate() : (n.timestamp? new Date(n.timestamp) : new Date());
-        const norm = normalizeType(n.type || 'system');
+        const norm = normalizeType(n.type || n.category || 'system');
         return {
           id,
           threadId: n.threadId || n.postId || (n.targetUrl? n.targetUrl : id),
@@ -281,6 +291,7 @@
         const threads = groupThreads(filtered);
         threads.sort((a,b)=>scoreThread(b)-scoreThread(a));
 
+        updateTabCounts();
         feedEl.innerHTML='';
         if(threads.length===0){ emptyEl.style.display='block'; return; } else { emptyEl.style.display='none'; }
 
@@ -356,10 +367,10 @@
         return li;
       }
 
-      function openThread(t,mode){ if(mode==='reply'){ notify('Opening reply composer','info'); } else { if(t.last && t.last.raw && t.last.raw.targetUrl) window.location.href = t.last.raw.targetUrl; else notify('Opening thread','info'); } markThreadRead(t); }
+      function openThread(t,mode){ if(mode==='reply'){ notify('Opening reply composer','info'); } else { const raw=t.last && t.last.raw || {}; if(raw && raw.targetUrl){ window.location.href = raw.targetUrl; } else if(t.last.type==='messages'){ if(raw.chatId){ window.location.href = `/chat.html?chatId=${encodeURIComponent(raw.chatId)}`; } else if(raw.partnerId){ window.location.href = `/chat.html?partnerId=${encodeURIComponent(raw.partnerId)}`; } else { notify('Opening messages','info'); } } else if(t.last.type==='groups' && raw.groupId){ window.location.href = `/group_chat.html?groupId=${encodeURIComponent(raw.groupId)}`; } else { notify('Opening thread','info'); } } markThreadRead(t); }
       async function markThreadRead(t){ t.items.forEach(it=>it.unread=false); render(); if(!currentUser) return; for(const it of t.items){ try{ await updateDoc(doc(db,'artifacts',appId,'users',currentUser.uid,'notifications', it.id), { read:true }); }catch(e){} } cacheItems(); updateGlobalUnreadCount(); }
 
-      async function markAllAsRead(){ const toMark = items.filter(i=>i.unread); items.forEach(i=>i.unread=false); render(); if(!currentUser) return; for(const it of toMark){ try{ await updateDoc(doc(db,'artifacts',appId,'users',currentUser.uid,'notifications', it.id), { read:true }); }catch(e){} } cacheItems(); updateGlobalUnreadCount(); }
+      async function markAllAsRead(scope){ const toMark = (scope && scope.length? scope : items).filter(i=>i.unread); (scope && scope.length? scope : items).forEach(i=>i.unread=false); render(); if(!currentUser) return; for(const it of toMark){ try{ await updateDoc(doc(db,'artifacts',appId,'users',currentUser.uid,'notifications', it.id), { read:true }); }catch(e){} } cacheItems(); updateGlobalUnreadCount(); }
 
       function openThreadMenu(e,t){ e.stopPropagation();
         const menu = document.createElement('div'); menu.className='context-menu'; menu.style.top = (e.clientY)+'px';
@@ -409,8 +420,8 @@
           case 'tags': return `${name} tagged you`;
           case 'follows': return `${name} started following you`;
           case 'shares': return `${name} shared your post`;
-          case 'groups': return `${name} posted in your group`;
-          case 'events': return `${name} invited you to an event`;
+          case 'groups': return raw && raw.roleChange ? `${name} updated your group role` : `${name} posted in your group`;
+          case 'events': return raw && raw.eventStatus ? `Event update: ${raw.eventStatus}` : `${name} invited you to an event`;
           case 'messages': return `${name} sent you a message`;
           case 'system': {
             const k = String(raw?.subtype||'').toLowerCase();
@@ -431,6 +442,12 @@
       }
 
       function debounce(fn,ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); } }
+      function updateTabCounts(){ try{
+        const counts = items.reduce((acc,i)=>{ acc.all=(acc.all||0)+ (i.unread?1:0); acc[i.type]=(acc[i.type]||0)+ (i.unread?1:0); return acc; },{});
+        tabs.forEach(tb=>{ const key = tb.dataset.tab; let badge = tb.querySelector('.tab-count'); if(!badge){ badge = document.createElement('span'); badge.className='tab-count'; tb.appendChild(badge); }
+          const val = key==='all' ? (counts.all||0) : (counts[key]||0); if(val>0){ badge.textContent=String(val); badge.style.display='inline-block'; } else { badge.textContent=''; badge.style.display='none'; }
+        });
+      }catch(_){}}
 
       // initial load
       try{ const raw = localStorage.getItem('nuvia_notifications_cache'); if(raw) items = JSON.parse(raw).map(i=>({...i, createdAt:new Date(i.createdAt)})); }catch(e){}
