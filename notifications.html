@@ -200,7 +200,7 @@
       let unsubscribe = null;
       let prefs = loadPrefs();
 
-      function loadPrefs(){ try{ return Object.assign({dnd:false,sound:true,muted:[]}, JSON.parse(localStorage.getItem('nuvia_notification_prefs')||'{}')); }catch(e){ return {dnd:false,sound:true,muted:[]}; } }
+      function loadPrefs(){ try{ return Object.assign({dnd:false,sound:true,muted:[],snoozed:{}}, JSON.parse(localStorage.getItem('nuvia_notification_prefs')||'{}')); }catch(e){ return {dnd:false,sound:true,muted:[],snoozed:{}}; } }
       function savePrefs(){ localStorage.setItem('nuvia_notification_prefs', JSON.stringify(prefs)); }
 
       tabs.forEach(t=>t.addEventListener('click',()=>{ tabs.forEach(x=>x.classList.toggle('active',x===t)); tabs.forEach(x=>x.setAttribute('aria-selected', String(x===t))); currentTab = t.dataset.tab; render(); }));
@@ -238,7 +238,7 @@
 
       function loadCachedAndRender(){ try{ const raw = localStorage.getItem('nuvia_notifications_cache'); if(raw){ items = JSON.parse(raw).map(c=>({...c, createdAt:new Date(c.createdAt)})); } }catch(e){} render(); }
       function cacheItems(){ try{ localStorage.setItem('nuvia_notifications_cache', JSON.stringify(items.map(i=>({...i, createdAt: i.createdAt.getTime()})))); }catch(e){} }
-      function updateGlobalUnreadCount(){ try{ const count = items.filter(i=>i.unread).length; localStorage.setItem('nuvia_unread_count', String(count)); }catch(e){} }
+      function updateGlobalUnreadCount(){ try{ const count = items.filter(i=>i.unread).length; localStorage.setItem('nuvia_unread_count', String(count)); try{ if(typeof window.updateNotificationBadge === 'function'){ window.updateNotificationBadge(count); } else { const el = document.getElementById('notificationCount'); if (el) { if (count>0){ el.textContent = String(count); el.style.display='flex'; } else { el.style.display='none'; } } } }catch(_){} try{ window.dispatchEvent(new CustomEvent('nuvia:unreadChange',{ detail: count })); }catch(_){} }catch(e){} }
 
       function normalizeType(t){ const x = String(t||'').toLowerCase();
         if(['like','reaction','react','heart'].includes(x)) return 'likes';
@@ -276,7 +276,7 @@
         let filtered = items.slice();
         if(currentTab!=='all') filtered = filtered.filter(i=>i.type===currentTab);
         if(q) filtered = filtered.filter(i=>`${i.text} ${i.actor.name}`.toLowerCase().includes(q));
-        filtered = filtered.filter(i=> !prefs.muted.includes(i.threadId) );
+        filtered = filtered.filter(i=> !prefs.muted.includes(i.threadId) && !isSnoozed(i.threadId) );
 
         const threads = groupThreads(filtered);
         threads.sort((a,b)=>scoreThread(b)-scoreThread(a));
@@ -310,7 +310,7 @@
         const li = document.createElement('div'); li.className = `thread ${t.unreadCount? 'unread':''}`;
         const avatarCol = document.createElement('div'); avatarCol.className='avatar-col';
         const img = document.createElement('img'); img.className='avatar'; img.alt = (t.last.actor.name||'') + ' avatar';
-        if(t.last.actor.profilePicId){ img.src = getCloudinaryImageUrl(t.last.actor.profilePicId, 'w_120,h_120,c_fill,g_face'); }
+        if(t.last.actor.profilePicId){ img.src = getCloudinaryImageUrl(t.last.actor.profilePicId, 'w_120,h_120,c_fill,g_face,r_max'); }
         else { img.src = `https://placehold.co/120x120/CCCCCC/000000?text=${encodeURIComponent((t.last.actor.name||'U').charAt(0))}` }
         avatarCol.appendChild(img);
 
@@ -342,7 +342,7 @@
         const expanded = document.createElement('div'); expanded.className='expanded-list';
         t.items.slice(0,6).forEach(it=>{
           const r = document.createElement('div'); r.className='item-small';
-          const a = document.createElement('img'); a.className='avatar'; a.alt=''; a.src = it.actor.profilePicId? getCloudinaryImageUrl(it.actor.profilePicId,'w_80,h_80,c_fill,g_face') : `https://placehold.co/40x40/CCCCCC/000000?text=${encodeURIComponent((it.actor.name||'U').charAt(0))}`;
+          const a = document.createElement('img'); a.className='avatar'; a.alt=''; a.src = it.actor.profilePicId? getCloudinaryImageUrl(it.actor.profilePicId,'w_80,h_80,c_fill,g_face,r_max') : `https://placehold.co/40x40/CCCCCC/000000?text=${encodeURIComponent((it.actor.name||'U').charAt(0))}`;
           const tx = document.createElement('div'); tx.className='item-text';
           const nm = document.createElement('div'); nm.className='item-name'; nm.textContent = it.actor.name || '';
           const mt = document.createElement('div'); mt.className='item-meta'; mt.textContent = `${truncateText(it.text,120)} · ${timeAgo(it.createdAt)}`;
@@ -371,12 +371,13 @@
         const cleanup = ()=>{ try{ menu.remove(); document.removeEventListener('click',cleanup); }catch(_){} };
         setTimeout(()=>document.addEventListener('click',cleanup),0);
         m1.addEventListener('click',()=>{ prefs.muted.push(t.id); savePrefs(); cleanup(); render(); notify('Thread muted','info'); });
-        m2.addEventListener('click',()=>{ cleanup(); notify('Snoozed for 1 hour','info'); });
+        m2.addEventListener('click',()=>{ prefs.snoozed = prefs.snoozed || {}; prefs.snoozed[t.id] = Date.now() + 60*60*1000; savePrefs(); cleanup(); render(); notify('Snoozed for 1 hour','info'); });
         m3.addEventListener('click', async ()=>{ cleanup(); if(!currentUser) return notify('Sign in to delete','error'); for(const it of t.items){ try{ await deleteDoc(doc(db,'artifacts',appId,'users',currentUser.uid,'notifications', it.id)); }catch(e){} } cacheItems(); updateGlobalUnreadCount(); notify('Deleted thread','success'); });
       }
 
       function truncateText(s,n){ if(!s) return ''; return s.length>n? s.slice(0,n-1)+'…': s; }
       function timeAgo(d){ const s=(Date.now()-new Date(d).getTime())/1000; if(s<60) return Math.floor(s)+'s'; const m=s/60; if(m<60) return Math.floor(m)+'m'; const h=m/60; if(h<24) return Math.floor(h)+'h'; const dd=h/24; if(dd<7) return Math.floor(dd)+'d'; const mo=dd/30; if(mo<12) return Math.floor(mo)+'mo'; return Math.floor(dd/365)+'y'; }
+      function isSnoozed(threadId){ try{ const until = prefs && prefs.snoozed && prefs.snoozed[threadId]; return !!(until && Date.now() < until); }catch(_){ return false; } }
 
       async function fetchAndDisplayHeaderProfile(user){
         try{
