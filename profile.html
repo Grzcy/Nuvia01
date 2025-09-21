@@ -5101,7 +5101,8 @@
   /* Avatar corner badges (Facebook-style) */
   .profile-avatar-badge{position:absolute;display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;border:2px solid var(--background-main);box-shadow:0 0 0 1px rgba(0,0,0,0.2);z-index:2;animation:soft-glow 2.2s ease-in-out infinite}
   .profile-avatar-badge i{font-size:14px;line-height:1}
-  .profile-avatar-badge.verified{right:6px;bottom:6px;background:var(--status-online);color:#fff;box-shadow:0 0 10px rgba(76,175,80,.7),0 0 20px rgba(76,175,80,.4)}
+  .profile-avatar-badge.verified{right:6px;bottom:6px;background:linear-gradient(135deg,#FFD700,#FFA500);color:#000;border-color:#FFD700;box-shadow:0 0 10px rgba(255,215,0,.75),0 0 20px rgba(255,165,0,.5),0 0 30px rgba(255,215,0,.35);animation:gold-pulse 1.8s ease-in-out infinite}
+  .profile-avatar-badge.verified::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(255,215,0,.6);box-shadow:0 0 12px rgba(255,215,0,.5),0 0 22px rgba(255,165,0,.35);pointer-events:none}
   .profile-avatar-badge.premium{right:6px;top:6px;background:linear-gradient(135deg,#FFD700,#FFA500);color:#000;border-color:#FFD700;box-shadow:0 0 12px rgba(255,215,0,.8),0 0 22px rgba(255,165,0,.5)}
   @keyframes soft-glow{0%,100%{filter:drop-shadow(0 0 0 rgba(0,0,0,0))}50%{filter:drop-shadow(0 0 2px rgba(255,255,255,.4))}}
   @media (max-width:768px){.profile-avatar-badge{width:22px;height:22px}.profile-avatar-badge i{font-size:12px}}
