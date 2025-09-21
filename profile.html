@@ -5367,8 +5367,6 @@
                         <button id="copyReferralLinkBtn" class="copy-user-id-btn" type="button"><i class="fas fa-copy"></i> Copy Link</button>
                     </div>
 
-                    <div class="form-status" id="referralCopyStatus" style="display: none;"></div>
-
                     <div class="input-group">
                         <label>Referrals</label>
                         <div class="user-id-container">
@@ -6116,7 +6114,6 @@
         const referralLinkField = document.getElementById('referralLinkField');
         const referralCountEl = document.getElementById('referralCount');
         const copyReferralLinkBtn = document.getElementById('copyReferralLinkBtn');
-        const referralCopyStatus = document.getElementById('referralCopyStatus');
         const jcoinUSDValue = document.getElementById('jcoinUSDValue'); // Added for USD value
 
         // XP Level Elements
@@ -7055,7 +7052,7 @@
                 if (newWebsite) { if (websiteLink) { websiteLink.href = newWebsite; websiteLink.textContent = newWebsite.replace(/^(https?:\/\/)?(www\.)?/, ''); } if (profileWebsite) profileWebsite.style.display = 'block'; } else { if (profileWebsite) profileWebsite.style.display = 'none'; }
                 if (newSocialLinks) { if (socialLinksText) socialLinksText.textContent = newSocialLinks; if (profileSocialLinks) profileSocialLinks.style.display = 'block'; } else { if (profileSocialLinks) profileSocialLinks.style.display = 'none'; }
 
-                showEnhancedSmartSuccess("Profile saved successfully! ✨", 'update');
+                showEnhancedSmartSuccess("Profile saved successfully! ��", 'update');
 
 
 
@@ -9468,9 +9465,8 @@
                             copyReferralLinkBtn.addEventListener('click', async ()=>{
                                 try{
                                     await navigator.clipboard.writeText(referralLinkField ? referralLinkField.value : link);
-                                    if (referralCopyStatus) { referralCopyStatus.className = 'form-status success'; referralCopyStatus.textContent = 'Referral link copied!'; referralCopyStatus.style.display = 'block'; setTimeout(()=>{ referralCopyStatus.style.display='none'; }, 1600); }
                                     copyReferralLinkBtn.classList.add('copied'); setTimeout(()=>copyReferralLinkBtn.classList.remove('copied'), 1000);
-                                }catch(e){ if (referralCopyStatus) { referralCopyStatus.className = 'form-status error'; referralCopyStatus.textContent = 'Failed to copy link'; referralCopyStatus.style.display = 'block'; } }
+                                }catch(e){ /* no-op */ }
                             }, { once: true });
                         }
                         const privRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profiles', 'user_profile');
