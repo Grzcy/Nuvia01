@@ -1606,7 +1606,7 @@
                                     <label for="announcementTypeSelect">Announcement Type:</label>
                                     <select id="announcementTypeSelect">
                                         <option value="info">ℹ️ Information</option>
-                                        <option value="warning">⚠️ Warning</option>
+                                        <option value="warning">��️ Warning</option>
                                         <option value="success">✅ Success</option>
                                         <option value="maintenance">🔧 Maintenance</option>
                                         <option value="update">🆕 Update</option>
@@ -2079,7 +2079,7 @@
         // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, runTransaction, writeBatch, serverTimestamp, onSnapshot, addDoc, deleteDoc, Timestamp, arrayUnion, arrayRemove, orderBy } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, runTransaction, writeBatch, serverTimestamp, onSnapshot, addDoc, deleteDoc, Timestamp, arrayUnion, arrayRemove, orderBy, enableMultiTabIndexedDbPersistence, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
         import { getStorage, ref, getDownloadURL, deleteObject, uploadBytes } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js";
 import { renderVerifiedBadge } from './assets/js/verification-utils.js';
 
@@ -2107,7 +2107,22 @@ import { renderVerifiedBadge } from './assets/js/verification-utils.js';
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        (async ()=>{
+            try { await enableMultiTabIndexedDbPersistence(db); }
+            catch (e) { try { await enableIndexedDbPersistence(db); } catch(_) {} }
+        })();
         const storage = getStorage(app);
+
+        // Re-fetch on network restore
+        window.addEventListener('online', async () => {
+            try {
+                if (currentUser) {
+                    await fetchAndDisplayHeaderProfile(currentUser);
+                    fetchNotificationCount(currentUser.uid);
+                    if (typeof fetchPendingJCoinRequests === 'function') fetchPendingJCoinRequests();
+                }
+            } catch(_) {}
+        });
 
         // --- ADMIN UID ---
         const ADMIN_UID = 'cc96gdhCRPO72NFZtleRCujHvIq2'; // Your admin UID
