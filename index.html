@@ -6819,8 +6819,62 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
 const fixedInspirationQuote = 'Breathe: peace finds its way in.';
 const fixedInspirationAuthor = 'Nuvia';
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+// Simple English mode: keep messages short and easy to read across all categories
+const SIMPLE_ENGLISH_MODE = true;
+const simpleCategoryTemplates = {
+  motivational: [
+    "Keep going.",
+    "Start small.",
+    "One step at a time.",
+    "Believe in yourself.",
+    "Try again.",
+    "Little wins add up.",
+    "Do your best today.",
+    "Progress, not perfect."
+  ],
+  peaceful: [
+    "Breathe slowly.",
+    "Be calm.",
+    "Take a short rest.",
+    "Let worries go.",
+    "Move gently.",
+    "Sit in quiet for a moment.",
+    "Be kind to yourself.",
+    "Slow down a little."
+  ],
+  funny: [
+    "Smile a little.",
+    "A short break helps.",
+    "Drink water and relax.",
+    "Naps can help.",
+    "We will try again.",
+    "Keep it simple today.",
+    "Small laugh, big help.",
+    "Snack, then continue."
+  ],
+  wisdom: [
+    "Listen more.",
+    "Learn a little each day.",
+    "Be patient.",
+    "Ask good questions.",
+    "Small habits matter.",
+    "Practice makes better.",
+    "Stay humble.",
+    "Focus on what matters."
+  ],
+  love: [
+    "Be kind.",
+    "Say thank you.",
+    "Help someone today.",
+    "Listen with care.",
+    "Speak gently.",
+    "Forgive and move on.",
+    "Show patience.",
+    "Choose love again."
+  ]
+};
         const quoteTemplates = {
-            motivational: { openers:["Keep going","Start small","Believe in yourself","Stay consistent","Trust the process"], bridges:["����"," because ",": ",", and ","; "], endings:["every step counts.","tomorrow thanks you for today's effort.","progress loves momentum.","you're closer than you think.","discipline builds destiny."] },
+            motivational: { openers:["Keep going","Start small","Believe in yourself","Stay consistent","Trust the process"], bridges:["�����"," because ",": ",", and ","; "], endings:["every step counts.","tomorrow thanks you for today's effort.","progress loves momentum.","you're closer than you think.","discipline builds destiny."] },
             peaceful: { openers:["Breathe","Slow down","Be gentle","Find quiet","Let go"], bridges:["—"," and ",", then "," as ",": "], endings:["clarity will meet you.","peace finds its way in.","the heart softens.","the mind untangles.","you return to yourself."] },
             funny: { openers:["Reminder","Breaking news","Pro tip","True story","PSA"], bridges:[": "," — "," ��� ",": "], endings:["motivation will arrive after snacks.","I'm on a seafood diet���I see food and I code.","sleep is a patch we never apply.","tomorrow is just today with a wig.","coffee is my personality driver."] },
             wisdom: { openers:["Growth","Curiosity","Patience","Listening","Kindness"], bridges:[" reveals that "," teaches that "," reminds us "," shows that ",": "], endings:["there's more to learn than to prove.","small habits shape great outcomes.","the quietest lessons echo the longest.","consistency outlives talent.","clarity follows attention."] },
@@ -8649,7 +8703,11 @@ async function checkAndStartDailyBonusTimer() {
             const userSalt = (currentUser?.uid || 'guest').split('').reduce((a, c) => a + c.charCodeAt(0), 0);
             const typeSalt = Object.keys(inspirationLexicon).indexOf(type) + 1;
             const seed = minuteIndex * 131 + userSalt * 17 + typeSalt * 7;
-            const lex = inspirationLexicon[type];
+            if (SIMPLE_ENGLISH_MODE && simpleCategoryTemplates[type]) {
+    const sentence = pickDeterministic(simpleCategoryTemplates[type], seed + 5);
+    return { quote: sentence, author: 'Nuvia' };
+}
+const lex = inspirationLexicon[type];
             if (lex) {
                 const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
                 const a1 = pickDeterministic(lex.adjectives, seed + 11);
