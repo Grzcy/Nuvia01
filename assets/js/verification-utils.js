@@ -54,9 +54,14 @@ export function renderAvatarStatusBadges(containerEl, flags = {}) {
     const { verified = false, premium = false } = flags;
     const doc = containerEl.ownerDocument || document;
 
+    // Choose host: prefer an outer anchor to avoid overflow clipping
+    const host = (containerEl.classList && containerEl.classList.contains('profile-pic-wrapper') && containerEl.parentElement && containerEl.parentElement.classList.contains('profile-avatar-anchor'))
+      ? containerEl.parentElement
+      : containerEl;
+
     // Helper to create/find a badge
     const ensureBadge = (suffix, className, iconClass, title) => {
-      const id = `${containerEl.id || 'avatar'}__${suffix}-badge`;
+      const id = `${(host.id || containerEl.id || 'avatar')}__${suffix}-badge`;
       let el = doc.getElementById(id);
       if (!el) {
         el = doc.createElement('span');
@@ -68,7 +73,7 @@ export function renderAvatarStatusBadges(containerEl, flags = {}) {
         const i = doc.createElement('i');
         i.className = iconClass;
         el.appendChild(i);
-        containerEl.appendChild(el);
+        host.appendChild(el);
       }
       return el;
     };
