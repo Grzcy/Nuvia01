@@ -5607,23 +5607,80 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         async function fetchExchangeRates() {
             if (isRatesLoading) return;
             isRatesLoading = true;
-            
+
             try {
-                // Use a free exchange rate API (NGN base)
-                const response = await fetch(`https://api.exchangerate-api.com/v4/latest/NGN`);
-                const data = await response.json();
-                
-                if (data.rates) {
-                    exchangeRates = data.rates;
+                // Try cached rates first (updated within last 24h)
+                try {
+                    const cachedRaw = localStorage.getItem('nuvia-exchange-rates');
+                    if (cachedRaw) {
+                        const cached = JSON.parse(cachedRaw);
+                        if (cached && cached.rates && Number(cached.ts) && (Date.now() - Number(cached.ts) < 24 * 60 * 60 * 1000)) {
+                            exchangeRates = cached.rates;
+                        }
+                    }
+                } catch (_) {}
+
+                // Fetch with timeout and multiple fallbacks (NGN base)
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+                const endpoints = [
+                    'https://open.er-api.com/v6/latest/NGN',
+                    // Fallback community dataset via jsdelivr (lowercase codes under `ngn`)
+                    'https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1/latest/currencies/ngn.json'
+                ];
+
+                let fetchedRates = null;
+                for (const url of endpoints) {
+                    try {
+                        const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+                        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                        const payload = await res.json();
+                        if (payload && payload.rates) {
+                            fetchedRates = payload.rates; // uppercase codes
+                            break;
+                        }
+                        if (payload && payload.ngn) {
+                            const out = {};
+                            for (const [k, v] of Object.entries(payload.ngn)) {
+                                out[String(k).toUpperCase()] = Number(v);
+                            }
+                            out.NGN = 1;
+                            fetchedRates = out;
+                            break;
+                        }
+                    } catch (e) {
+                        // try next endpoint
+                        continue;
+                    }
+                }
+
+                clearTimeout(timeoutId);
+
+                if (fetchedRates) {
+                    exchangeRates = fetchedRates;
+                    try { localStorage.setItem('nuvia-exchange-rates', JSON.stringify({ rates: exchangeRates, ts: Date.now() })); } catch (_) {}
                     console.log('Exchange rates updated successfully');
-                    // Update theme picker prices if it's open
                     if (document.querySelector('.theme-picker')) {
                         updateThemePickerPrices();
                     }
+                    return;
                 }
+
+                throw new Error('No exchange rates from any endpoint');
             } catch (error) {
                 console.error('Failed to fetch exchange rates:', error);
-                // Fallback to approximate rates (NGN base)
+                // Use cached rates if any, else fallback to approximate (NGN base)
+                try {
+                    const cachedRaw = localStorage.getItem('nuvia-exchange-rates');
+                    if (cachedRaw) {
+                        const cached = JSON.parse(cachedRaw);
+                        if (cached && cached.rates) {
+                            exchangeRates = cached.rates;
+                            return;
+                        }
+                    }
+                } catch (_) {}
                 exchangeRates = {
                     USD: 0.0012, EUR: 0.0011, GBP: 0.0009, CAD: 0.0016,
                     AUD: 0.0018, INR: 0.10, JPY: 0.18, KRW: 1.62,
