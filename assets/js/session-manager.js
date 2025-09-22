@@ -1,7 +1,7 @@
 // Session manager: single active session per user (Firestore-based prototype)
 // Usage: import { registerSession, unregisterSession } from './assets/js/session-manager.js'
 
-import { doc, runTransaction, onSnapshot, updateDoc, serverTimestamp, setDoc } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js';
+import { doc, runTransaction, onSnapshot, updateDoc, serverTimestamp, setDoc, getDoc } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js';
 import { signOut } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js';
 
 function generateId(){
