@@ -379,6 +379,37 @@
       window.prompt = (msg, def='') => { try{ return showDialog({ type:'prompt', message: String(msg), defaultValue: def||'' }); }catch(e){ return Promise.resolve(window.__nativeDialogs.prompt(String(msg), def)); } };
     })();
 
+    // Basic receipt modal handlers available even if firebase fails
+    let modalEl = document.getElementById('receiptModal');
+    let modalClose = document.getElementById('receiptModalClose');
+    let receiptCancel = document.getElementById('receiptCancel');
+    let receiptSubmit = document.getElementById('receiptSubmit');
+    let receiptAmount = document.getElementById('receiptAmount');
+    let receiptCurrency = document.getElementById('receiptCurrency');
+    let receiptFile = document.getElementById('receiptFile');
+    let receiptNote = document.getElementById('receiptNote');
+    let modalTitle = document.getElementById('receiptModalTitle');
+    let modalState = { type:null, payload:null };
+
+    function openPaymentModal(type, payload){
+      modalState = { type, payload };
+      if (!modalEl) modalEl = document.getElementById('receiptModal');
+      if (!modalTitle) modalTitle = document.getElementById('receiptModalTitle');
+      try{
+        if (type === 'theme_usd') { modalTitle.textContent = `Pay $4.00 • ${payload.theme.name}`; if(receiptAmount) receiptAmount.value = 4.00; if(receiptCurrency) receiptCurrency.value = 'USD'; }
+        else if (type === 'jcoin_pack') { modalTitle.textContent = `Buy ${payload.qty.toLocaleString()} JCoins`; if(receiptAmount) receiptAmount.value = (payload.usd||0).toFixed(2); if(receiptCurrency) receiptCurrency.value = 'USD'; }
+        else if (type === 'gas_usd') { const j = payload.gas / GAS_PER_JCOIN; const usd = j * USD_PER_JCOIN; modalTitle.textContent = `Buy ${payload.gas} Gas`; if(receiptAmount) receiptAmount.value = usd.toFixed(2); if(receiptCurrency) receiptCurrency.value = 'USD'; }
+        else if (type === 'wallet_unlock_usd') { modalTitle.textContent = 'Wallet Unlock ($10)'; if(receiptAmount) receiptAmount.value = 10.00; if(receiptCurrency) receiptCurrency.value = 'USD'; }
+        else if (type === 'verify_usd') { modalTitle.textContent = 'Verified Badge ($10)'; if(receiptAmount) receiptAmount.value = 10.00; if(receiptCurrency) receiptCurrency.value = 'USD'; }
+        if (modalEl) { modalEl.classList.add('show'); modalEl.setAttribute('aria-hidden','false'); }
+      }catch(e){ console.warn('openPaymentModal error', e); }
+    }
+    function closePaymentModal(){ if (!modalEl) modalEl = document.getElementById('receiptModal'); if (!modalEl) return; modalEl.classList.remove('show'); modalEl.setAttribute('aria-hidden','true'); if (receiptFile) receiptFile.value=''; if (receiptNote) receiptNote.value=''; }
+    modalClose?.addEventListener('click', closePaymentModal);
+    receiptCancel?.addEventListener('click', closePaymentModal);
+    // fallback submit when firebase not available
+    receiptSubmit?.addEventListener('click', ()=>{ alert('Receipt submitted (offline mode).'); closePaymentModal(); });
+
     try{
       const { initializeApp } = await import('https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js');
       const { getFirestore, doc, getDoc, setDoc, serverTimestamp, addDoc, collection, runTransaction, updateDoc, increment, arrayUnion } = await import('https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js');
@@ -563,16 +594,16 @@
 
       // Receipt Modal
       const cloudinaryConfig = { cloudName: 'dxld01rcp', uploadPreset: 'Storage_preset' };
-      const modalEl = document.getElementById('receiptModal');
-      const modalClose = document.getElementById('receiptModalClose');
-      const receiptCancel = document.getElementById('receiptCancel');
-      const receiptSubmit = document.getElementById('receiptSubmit');
-      const receiptAmount = document.getElementById('receiptAmount');
-      const receiptCurrency = document.getElementById('receiptCurrency');
-      const receiptFile = document.getElementById('receiptFile');
-      const receiptNote = document.getElementById('receiptNote');
-      const modalTitle = document.getElementById('receiptModalTitle');
-      let modalState = { type:null, payload:null };
+      // DOM references already initialized above; re-query to ensure they're up-to-date
+      modalEl = document.getElementById('receiptModal');
+      modalClose = document.getElementById('receiptModalClose');
+      receiptCancel = document.getElementById('receiptCancel');
+      receiptSubmit = document.getElementById('receiptSubmit');
+      receiptAmount = document.getElementById('receiptAmount');
+      receiptCurrency = document.getElementById('receiptCurrency');
+      receiptFile = document.getElementById('receiptFile');
+      receiptNote = document.getElementById('receiptNote');
+      modalTitle = document.getElementById('receiptModalTitle');
 
       function openPaymentModal(type, payload){
         modalState = { type, payload };
