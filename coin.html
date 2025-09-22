@@ -141,6 +141,20 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // Sync theme with global selection
+    const __themeKey = 'jchat-theme';
+    const __themes = ['theme-light-mode','theme-dark-mode','theme-glass-mode','theme-sunset-mode'];
+    function __applySavedTheme(){
+      try{
+        const saved = localStorage.getItem(__themeKey);
+        const t = __themes.includes(saved) ? saved : 'theme-dark-mode';
+        document.body.classList.remove(...__themes);
+        document.body.classList.add(t);
+      }catch(_){/* noop */}
+    }
+    __applySavedTheme();
+    window.addEventListener('storage', (e)=>{ if (e.key === __themeKey) __applySavedTheme(); });
+
     const hdrJc = document.getElementById('hdrJc');
     const hdrGas = document.getElementById('hdrGas');
     const rateLabel = document.getElementById('rateLabel');
@@ -159,8 +173,8 @@
 
     let currentProfile = null;
     let jcoinRate = 7.5;
-    const USD_PER_J = 0.0000001;
-    const BASE_J_PER_NAIRA = 3.75; // ₦200 ⇒ 750 JCoins
+    const USD_PER_J = 0.005;
+    function jPerNaira(){ return 1 / Number(jcoinRate || 7.5); }
 
     // Cloudinary
     const cloudinaryConfig = { cloudName: 'dxld01rcp', uploadPreset: 'Storage_preset' };
@@ -213,12 +227,12 @@
           if (typeof s.jcoinNairaRate === 'number' && s.jcoinNairaRate > 0) jcoinRate = s.jcoinNairaRate;
         }
       } catch {}
-      if (usdRateLabel) usdRateLabel.textContent = USD_PER_J.toFixed(7);
-      if (ratePill) ratePill.textContent = '—';
+      if (usdRateLabel) usdRateLabel.textContent = USD_PER_J.toFixed(3);
+      if (ratePill) ratePill.textContent = `₦${Number(jcoinRate||7.5).toLocaleString(undefined,{maximumFractionDigits:2})}/J`;
     }
 
     function calculateJCoins(naira){
-      const base = Math.floor(naira * BASE_J_PER_NAIRA);
+      const base = Math.floor(naira * jPerNaira());
       const bonus = naira >= BONUS_THRESHOLD_NAIRA ? Math.floor(base * BONUS_PERCENT) : 0;
       return { base, bonus, total: base + bonus };
     }
