@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuvia Store</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    :root {
+      --pink: #ff2e92; --blue: #00d5ff; --radius: 18px; --white: #fff; --text-light: rgba(255,255,255,.7);
+      --background-main: #1a1a2e; --card-background: linear-gradient(145deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      --header-background: linear-gradient(135deg, rgba(10,10,10,.85), rgba(10,10,10,.75));
+      --border-light: rgba(255,255,255,.06); --input-background: rgba(255,255,255,.06);
+      --button-background: linear-gradient(90deg, var(--blue), var(--pink));
+      --button-shadow: 0 4px 15px rgba(0,213,255,.35), 0 4px 15px rgba(255,46,146,.35);
+    }
+    body { margin:0; font-family:'Inter',sans-serif; background: var(--background-main); color: var(--white); }
+    header { position: sticky; top:0; z-index: 10; background: var(--header-background); border-bottom: 1px solid var(--border-light); height: 55px; display:flex; align-items:center; justify-content:center; }
+    .header-content { width:100%; max-width: 1200px; padding: 0 24px; display:flex; align-items:center; justify-content:space-between; }
+    .logo { font-family:'Poppins',sans-serif; font-size:1.6rem; font-weight:800; background-image: linear-gradient(90deg, var(--blue), var(--pink)); background-clip:text; -webkit-background-clip:text; color:transparent; text-decoration:none; display:flex; align-items:center; gap:10px; }
+    .header-actions { display:flex; align-items:center; gap:10px; }
+    .icon-btn { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; background: rgba(255,255,255,.08); border:1px solid var(--border-light); color: var(--white); cursor:pointer; }
+    .icon-btn:hover { filter:brightness(1.05); }
+
+    main { max-width: 1200px; margin: 0 auto; padding: 18px 16px 48px; }
+    .intro { background: var(--card-background); border:1px solid var(--border-light); border-radius: var(--radius); padding: 18px; display:flex; flex-direction:column; gap:10px; }
+    .intro h1 { margin:0; font-family:'Poppins',sans-serif; font-weight:800; font-size:1.6rem; background-image: linear-gradient(90deg, var(--blue), var(--pink)); background-clip:text; -webkit-background-clip:text; color:transparent; }
+    .intro p { margin:0; color: var(--text-light); }
+
+    .products-section { margin-top: 16px; }
+    .section-title { margin: 0 0 10px 0; font-family:'Poppins',sans-serif; font-weight:800; font-size:1.3rem; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+    .card { background: var(--card-background); border:1px solid var(--border-light); border-radius: var(--radius); padding: 14px; display:flex; flex-direction:column; gap:8px; }
+    .card h3 { margin:0; font-size:1.05rem; font-weight:800; font-family:'Poppins',sans-serif; }
+    .card p { margin:0; color: var(--text-light); font-size:.95rem; }
+    .price { font-weight:800; }
+    .buy-btn, .link-btn { margin-top:auto; background: var(--button-background); color:#111; font-weight:800; border: none; border-radius: 12px; padding: 10px 12px; cursor:pointer; box-shadow: var(--button-shadow); text-decoration:none; text-align:center; }
+    .buy-btn.secondary { background: rgba(255,255,255,.1); color: var(--white); border:1px solid var(--border-light); box-shadow:none; }
+    .meta { font-size:.85rem; color: var(--text-light); }
+
+    .bank-panel { background: rgba(255,255,255,.04); border:1px solid var(--border-light); border-radius: 12px; padding: 10px; }
+
+    /* Modal */
+    .modal { position: fixed; inset: 0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,.7); z-index: 50; }
+    .modal.show { display:flex; }
+    .modal-card { width: 95%; max-width: 520px; background: var(--card-background); border:1px solid var(--border-light); border-radius: 16px; box-shadow: 0 8px 30px rgba(0,0,0,.45); padding: 16px; display:flex; flex-direction:column; gap:12px; }
+    .modal-hd { display:flex; align-items:center; justify-content:space-between; }
+    .modal-title { font-family:'Poppins',sans-serif; font-size:1.2rem; font-weight:800; }
+    .close-x { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; background: rgba(255,255,255,.08); border:1px solid var(--border-light); color: var(--white); cursor:pointer; }
+    .file-input { display:none; }
+    .upload-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .upload-label { display:inline-flex; align-items:center; gap:8px; background: var(--button-background); color:#111; border-radius: 12px; padding: 10px 12px; font-weight:800; cursor:pointer; box-shadow: var(--button-shadow); }
+    .file-name { color: var(--text-light); font-size:.9rem; }
+    .actions { display:flex; gap:8px; justify-content:flex-end; }
+    .primary { background: var(--button-background); color:#111; border:none; border-radius:12px; padding:10px 12px; font-weight:800; box-shadow: var(--button-shadow); cursor:pointer; }
+    .secondary { background: rgba(255,255,255,.1); color: var(--white); border:1px solid var(--border-light); border-radius:12px; padding:10px 12px; font-weight:800; cursor:pointer; }
+    .error { color: #ff6b6b; font-size:.9rem; }
+
+    @media (max-width: 600px){ .grid{ grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body class="theme-dark-mode">
+  <header>
+    <div class="header-content">
+      <a class="logo" href="index.html"><i class="fas fa-store"></i> <span>Nuvia Store</span></a>
+      <div class="header-actions">
+        <a href="notifications.html" class="icon-btn" aria-label="Notifications"><i class="fas fa-bell"></i></a>
+        <a href="profile.html" class="icon-btn" aria-label="Profile"><i class="fas fa-user"></i></a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="intro">
+      <h1>Shop</h1>
+      <p>Buy premium themes, unlock perks, and top‑up. After payment, upload your receipt. A developer reviews and approves quickly.</p>
+      <div class="bank-panel">
+        <div id="bank-details"></div>
+      </div>
+      <div class="meta">Conversion: 1 JCoin = $0.005</div>
+    </div>
+
+    <section class="products-section" id="jcoinSection">
+      <h2 class="section-title"><i class="fas fa-coins"></i> JCoin Packs</h2>
+      <div class="grid" id="jcoinGrid"></div>
+    </section>
+
+    <section class="products-section" id="gasSection">
+      <h2 class="section-title"><i class="fas fa-gas-pump"></i> Gas Packs</h2>
+      <div class="grid" id="gasGrid"></div>
+    </section>
+
+    <section class="products-section" id="themesSection">
+      <h2 class="section-title"><i class="fas fa-palette"></i> Premium Themes</h2>
+      <div class="grid" id="themesGrid"></div>
+    </section>
+
+    <section class="products-section" id="verifySection">
+      <h2 class="section-title"><i class="fas fa-badge-check"></i> Verification & Wallet</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Verified Badge</h3>
+          <p>Get a verified checkmark on your profile.</p>
+          <div class="price" data-id="verifyPrice">$9.99</div>
+          <button class="buy-btn" data-action="buy-verify">Buy & Upload Receipt</button>
+        </div>
+        <div class="card">
+          <h3>Unlock Wallet</h3>
+          <p>Instant access to wallet features after approval.</p>
+          <a class="buy-btn link-btn" href="unlock-wallet.html">Go to Unlock</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Purchase Modal -->
+  <div class="modal" id="purchaseModal" aria-hidden="true">
+    <div class="modal-card">
+      <div class="modal-hd">
+        <div class="modal-title" id="modalTitle">Complete Purchase</div>
+        <button class="close-x" id="closeModal" aria-label="Close"><i class="fas fa-xmark"></i></button>
+      </div>
+      <div id="modalSummary" class="meta"></div>
+      <div id="modalPrice" class="price"></div>
+      <div class="upload-row">
+        <label class="upload-label" for="receiptFile"><i class="fas fa-upload"></i> Upload Receipt</label>
+        <input id="receiptFile" class="file-input" type="file" accept="image/*,.pdf">
+        <span id="fileName" class="file-name"></span>
+      </div>
+      <div id="modalError" class="error" style="display:none;"></div>
+      <div class="actions">
+        <button class="secondary" id="cancelBtn">Cancel</button>
+        <button class="primary" id="submitPurchaseBtn">Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js';
+    import { getFirestore, doc, setDoc, addDoc, collection, serverTimestamp, getDoc } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js';
+    import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js';
+    import { BANK_DETAILS, renderBankDetails } from './bank-details.js';
+
+    const firebaseConfig = { apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w", authDomain: "jchat-1.firebaseapp.com", databaseURL: "https://jchat-1-default-rtdb.firebaseio.com", projectId: "jchat-1", storageBucket: "jchat-1.firebasestorage.app", messagingSenderId: "328479683167", appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea", measurementId: "G-S6Z9GG0R9P" };
+    const appId = 'default-app-id';
+    const ADMIN_UID = 'cc96gdhCRPO72NFZtleRCujHvIq2';
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    renderBankDetails('bank-details', { layout: 'cards' });
+
+    const USD_PER_JCOIN = 0.005;
+    let gasPerJcoin = 0.1; // fallback; will fetch from settings if present
+
+    const SYSTEM_SETTINGS_DOC_REF = doc(db, 'artifacts', appId, 'public', 'system', 'settings');
+    try {
+      const snap = await getDoc(SYSTEM_SETTINGS_DOC_REF);
+      if (snap.exists()) {
+        const s = snap.data();
+        if (typeof s.gasJcoinRate === 'number' && s.gasJcoinRate > 0) gasPerJcoin = s.gasJcoinRate;
+      }
+    } catch(_) {}
+
+    const jcoinPacks = [1000, 2500, 5000, 10000].map(amount => ({
+      id: `jpack_${amount}`, amount, priceUsd: +(amount * USD_PER_JCOIN).toFixed(2)
+    }));
+
+    const gasPacks = [100, 300, 1000].map(gasAmount => {
+      const requiredJ = Math.ceil(gasAmount / gasPerJcoin);
+      const priceUsd = +(requiredJ * USD_PER_JCOIN).toFixed(2);
+      return { id: `gpack_${gasAmount}`, gasAmount, jcoins: requiredJ, priceUsd };
+    });
+
+    const themes = [
+      { id:'theme_quantum_nexus', themeKey:'theme-quantum-nexus', name:'Quantum Nexus', priceUsd: 4.00 },
+      { id:'theme_holographic_matrix', themeKey:'theme-holographic-matrix', name:'Holographic Matrix', priceUsd: 4.00 },
+      { id:'theme_stellar_genesis', themeKey:'theme-stellar-genesis', name:'Stellar Genesis', priceUsd: 4.00 },
+      { id:'theme_circus_maximus', themeKey:'theme-circus-maximus', name:'Circus Maximus', priceUsd: 4.00 },
+      { id:'theme_temporal_paradox', themeKey:'theme-temporal-paradox', name:'Temporal Paradox', priceUsd: 4.00 },
+      { id:'theme_ocean_mode', themeKey:'theme-ocean-mode', name:'Ocean Mode', priceUsd: 4.00 },
+      { id:'theme_forest_mode', themeKey:'theme-forest-mode', name:'Forest Mode', priceUsd: 4.00 },
+      { id:'theme_cosmic_mode', themeKey:'theme-cosmic-mode', name:'Cosmic Mode', priceUsd: 4.00 },
+      { id:'theme_retro_mode', themeKey:'theme-retro-mode', name:'Retro Mode', priceUsd: 4.00 },
+      { id:'theme_neon_mode', themeKey:'theme-neon-mode', name:'Neon Mode', priceUsd: 4.00 },
+      { id:'theme_elegant_mode', themeKey:'theme-elegant-mode', name:'Elegant Mode', priceUsd: 4.00 },
+    ];
+
+    const jcoinGrid = document.getElementById('jcoinGrid');
+    const gasGrid = document.getElementById('gasGrid');
+    const themesGrid = document.getElementById('themesGrid');
+
+    function el(tag, attrs={}, html='') { const e = document.createElement(tag); for (const k in attrs) e.setAttribute(k, attrs[k]); e.innerHTML = html; return e; }
+
+    function renderJcoinPacks(){
+      jcoinGrid.innerHTML = '';
+      jcoinPacks.forEach(p => {
+        const card = el('div', { class:'card' });
+        card.innerHTML = `<h3>${p.amount.toLocaleString()} JCoins</h3><p>Top‑up your balance.</p><div class="price">$${p.priceUsd.toFixed(2)}</div>`;
+        const btn = el('button', { class:'buy-btn', 'data-id': p.id }, 'Buy & Upload Receipt');
+        btn.addEventListener('click', ()=> openModal({ kind:'jcoin', jcoinAmount: p.amount, priceUsd: p.priceUsd, title:`${p.amount.toLocaleString()} JCoins` }));
+        card.appendChild(btn); jcoinGrid.appendChild(card);
+      });
+    }
+
+    function renderGasPacks(){
+      gasGrid.innerHTML = '';
+      gasPacks.forEach(p => {
+        const card = el('div', { class:'card' });
+        card.innerHTML = `<h3>${p.gasAmount.toLocaleString()} Gas</h3><p>Boost your XP.</p><div class="price">$${p.priceUsd.toFixed(2)}</div><div class="meta">≈ ${p.jcoins.toLocaleString()} JCoins</div>`;
+        const btn = el('button', { class:'buy-btn', 'data-id': p.id }, 'Buy & Upload Receipt');
+        btn.addEventListener('click', ()=> openModal({ kind:'gas', gasAmount: p.gasAmount, jcoins: p.jcoins, priceUsd: p.priceUsd, title:`${p.gasAmount.toLocaleString()} Gas` }));
+        card.appendChild(btn); gasGrid.appendChild(card);
+      });
+    }
+
+    function renderThemes(){
+      themesGrid.innerHTML = '';
+      themes.forEach(t => {
+        const card = el('div', { class:'card' });
+        card.innerHTML = `<h3>${t.name}</h3><p>Premium visual theme.</p><div class="price">$${t.priceUsd.toFixed(2)}</div>`;
+        const btn = el('button', { class:'buy-btn', 'data-id': t.id }, 'Buy & Upload Receipt');
+        btn.addEventListener('click', ()=> openModal({ kind:'theme', theme:t, priceUsd: t.priceUsd, title: t.name }));
+        card.appendChild(btn); themesGrid.appendChild(card);
+      });
+    }
+
+    renderJcoinPacks(); renderGasPacks(); renderThemes();
+
+    // Modal logic
+    const modal = document.getElementById('purchaseModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalSummary = document.getElementById('modalSummary');
+    const modalPrice = document.getElementById('modalPrice');
+    const receiptFile = document.getElementById('receiptFile');
+    const fileName = document.getElementById('fileName');
+    const modalError = document.getElementById('modalError');
+    const closeModalBtn = document.getElementById('closeModal');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const submitBtn = document.getElementById('submitPurchaseBtn');
+    let currentOrder = null;
+
+    function openModal(order){
+      currentOrder = order; modal.classList.add('show'); modal.setAttribute('aria-hidden','false');
+      modalTitle.textContent = `Complete Purchase — ${order.title}`;
+      modalSummary.textContent = 'Transfer payment to one of the listed accounts, then upload your receipt. Your order will be reviewed and approved.';
+      modalPrice.textContent = `$${order.priceUsd.toFixed(2)} (USD)`;
+      receiptFile.value = ''; fileName.textContent = ''; modalError.style.display = 'none'; modalError.textContent = '';
+    }
+    function closeModal(){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); currentOrder = null; }
+    closeModalBtn.addEventListener('click', closeModal); cancelBtn.addEventListener('click', closeModal);
+    receiptFile.addEventListener('change', (e)=>{ const f=e.target.files?.[0]; fileName.textContent = f? `File: ${f.name}` : ''; });
+
+    onAuthStateChanged(auth, (user)=>{ if (!user) { /* read-only browsing allowed */ } });
+
+    async function submitPurchase(){
+      try {
+        if (!auth.currentUser) { modalError.textContent = 'Please log in to submit.'; modalError.style.display = 'block'; return; }
+        if (!currentOrder) { modalError.textContent = 'Invalid order.'; modalError.style.display = 'block'; return; }
+        const f = receiptFile.files?.[0]; if (!f) { modalError.textContent = 'Attach a payment receipt image or PDF.'; modalError.style.display = 'block'; return; }
+
+        submitBtn.disabled = true; submitBtn.textContent = 'Submitting...';
+
+        const path = `shop_payments/${auth.currentUser.uid}/${Date.now()}_${encodeURIComponent(f.name)}`;
+        const storageRefRef = ref(storage, path);
+        await uploadBytes(storageRefRef, f);
+        const receiptUrl = await getDownloadURL(storageRefRef);
+
+        const docRef = await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'shop_payment_requests'), buildShopRequest(currentOrder, receiptUrl));
+
+        submitBtn.textContent = 'Submitted';
+        setTimeout(()=>{ closeModal(); submitBtn.disabled = false; submitBtn.textContent = 'Submit'; alert('Receipt submitted. We will approve shortly.'); }, 600);
+      } catch (e) {
+        console.error(e); modalError.textContent = e?.message || 'Failed to submit receipt'; modalError.style.display = 'block'; submitBtn.disabled = false; submitBtn.textContent = 'Submit';
+      }
+    }
+    submitBtn.addEventListener('click', submitPurchase);
+
+    function buildShopRequest(order, receiptUrl){
+      const base = {
+        userId: auth.currentUser.uid,
+        paymentMethod: 'bank_transfer',
+        receiptUrl, status: 'pending', timestamp: serverTimestamp(),
+        assignedAdminId: ADMIN_UID,
+        userCurrencyCode: 'USD', userCurrencyAmount: +order.priceUsd.toFixed(2),
+        items: []
+      };
+      if (order.kind === 'jcoin') {
+        base.jcoinAmount = order.jcoinAmount;
+        base.items.push({ id: order.title, category:'jcoin_pack', jcoinAmount: order.jcoinAmount, price: order.priceUsd });
+      } else if (order.kind === 'gas') {
+        base.items.push({ id: order.title, category:'gas_pack', gasAmount: order.gasAmount, price: order.priceUsd });
+      } else if (order.kind === 'theme') {
+        base.items.push({ id: order.theme.id, category:'premium_theme', themeKey: order.theme.themeKey, themeName: order.theme.name, price: order.priceUsd });
+      }
+      return base;
+    }
+
+    // Verified badge quick flow
+    document.querySelector('[data-action="buy-verify"]').addEventListener('click', ()=>{
+      openModal({ kind:'verify', title:'Verified Badge', priceUsd: 9.99 });
+      // Override submit for this flow to set verificationBadge flag
+      const orig = submitPurchase;
+      submitBtn.removeEventListener('click', submitPurchase);
+      submitBtn.addEventListener('click', async function onVerifySubmit(){
+        try {
+          if (!auth.currentUser) { modalError.textContent = 'Please log in to submit.'; modalError.style.display = 'block'; return; }
+          const f = receiptFile.files?.[0]; if (!f) { modalError.textContent = 'Attach a payment receipt image or PDF.'; modalError.style.display = 'block'; return; }
+          submitBtn.disabled = true; submitBtn.textContent = 'Submitting...';
+          const path = `shop_payments/${auth.currentUser.uid}/${Date.now()}_${encodeURIComponent(f.name)}`;
+          const storageRefRef = ref(storage, path);
+          await uploadBytes(storageRefRef, f);
+          const receiptUrl = await getDownloadURL(storageRefRef);
+          await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'shop_payment_requests'), {
+            userId: auth.currentUser.uid, paymentMethod: 'bank_transfer', receiptUrl, status: 'pending', timestamp: serverTimestamp(), assignedAdminId: ADMIN_UID,
+            userCurrencyCode: 'USD', userCurrencyAmount: 9.99,
+            verificationBadge: true, items: []
+          });
+          submitBtn.textContent = 'Submitted';
+          setTimeout(()=>{ closeModal(); submitBtn.disabled = false; submitBtn.textContent = 'Submit'; alert('Receipt submitted. We will approve shortly.'); }, 600);
+        } catch(e){ console.error(e); modalError.textContent = e?.message || 'Failed to submit receipt'; modalError.style.display = 'block'; submitBtn.disabled = false; submitBtn.textContent = 'Submit'; }
+        finally { submitBtn.removeEventListener('click', onVerifySubmit); submitBtn.addEventListener('click', orig); }
+      }, { once:true });
+    });
+  </script>
+</body>
+</html>
