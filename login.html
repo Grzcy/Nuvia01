@@ -1362,16 +1362,7 @@
 
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
-            const remember = document.getElementById('remember').checked;
             const isSignupMode = document.querySelector('.login-container').classList.contains('signup-mode');
-
-            try {
-                if (remember) {
-                    localStorage.setItem('remembered_email', email);
-                } else {
-                    localStorage.removeItem('remembered_email');
-                }
-            } catch(_) {}
 
             try {
                 const cd = parseInt(localStorage.getItem('login_cooldown_until') || '0', 10);
@@ -1404,7 +1395,7 @@
                 if (isSignupMode) {
                     await signUpUser(email, password);
                 } else {
-                    await loginUser(email, password, remember);
+                    await loginUser(email, password);
                 }
             } catch (error) {
                 console.error('Authentication error:', error);
@@ -1635,11 +1626,11 @@
         }
 
         // Login user
-        async function loginUser(email, password, remember) {
+        async function loginUser(email, password) {
             showSmartLoader('Signing In', 'Authenticating your credentials...');
             
             try {
-                await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
+                await setPersistence(auth, browserLocalPersistence);
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
