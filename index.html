@@ -1073,7 +1073,7 @@
             100% { transform: scale(1) rotate(0deg); }
         }
 
-        /* 5. ������� Temporal Paradox - Premium Time Manipulation Interface */
+        /* 5. �������� Temporal Paradox - Premium Time Manipulation Interface */
         body.theme-temporal-paradox {
             background: 
                 conic-gradient(from 0deg at 50% 50%, 
@@ -6276,7 +6276,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             const msgEl = document.getElementById('urgentAnnMessage');
             const metaEl = document.getElementById('urgentAnnMeta');
             const ctaEl = document.getElementById('urgentAnnCta');
-            if (titleEl) titleEl.textContent = `${t} — ${p}`;
+            if (titleEl) titleEl.textContent = `${t} �� ${p}`;
             if (typeEl) typeEl.textContent = t;
             if (prioEl) { prioEl.textContent = p; prioEl.setAttribute('data-priority', announcementData.priority); }
             if (msgEl) msgEl.textContent = announcementData.message || '';
@@ -13570,6 +13570,51 @@ async function fetchAndDisplayPosts() {
   if (closeBtn) closeBtn.addEventListener('click', close);
   if (overlay) overlay.addEventListener('click', (e)=>{ if(e.target===overlay) close(); });
   document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && overlay && overlay.classList.contains('show')) close(); });
+})();
+</script>
+<script>
+(function(){
+  // Remove any card or element whose visible text suggests "Who is new" to hide the unwanted card.
+  function removeWhoIsNew(root){
+    if(!root) return;
+    const patterns = [/who\s*is\s*new/i, /who'?s\s*new/i, /new\s+on\s+nuvia/i];
+    // search elements with text nodes
+    const elems = root.querySelectorAll('*');
+    elems.forEach(el => {
+      try{
+        const txt = (el.textContent||'').trim();
+        if(!txt) return;
+        for(const p of patterns){ if(p.test(txt)){
+            // prefer removing an enclosing post-card/feature-card/panel if present
+            const card = el.closest('.post-card, .feature-card, .content-card, .panel, .card') || el;
+            if(card && card.parentNode) card.parentNode.removeChild(card);
+            break;
+        }}
+      }catch(e){}
+    });
+  }
+
+  function init(){
+    const feed = document.getElementById('postsFeed') || document.body;
+    removeWhoIsNew(feed);
+    // observe future insertions
+    try{
+      const mo = new MutationObserver(muts => {
+        muts.forEach(m => {
+          m.addedNodes.forEach(n => {
+            if(n.nodeType===1) removeWhoIsNew(n);
+          });
+        });
+      });
+      mo.observe(feed, { childList: true, subtree: true });
+      // keep reference to stop observer when navigating away
+      window.__removeWhoIsNewObserver = mo;
+    }catch(e){}
+    // additional pass after a short delay to catch async renders
+    setTimeout(()=> removeWhoIsNew(feed), 700);
+  }
+
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
 </script>
 </body>
