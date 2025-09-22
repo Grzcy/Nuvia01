@@ -1062,6 +1062,30 @@
                 </div>
             </div>
 
+            <!-- APK Download (styled pink → yellow gradient) -->
+            <style>
+                .apk-download-link {
+                    background: linear-gradient(90deg, var(--pink, #ff2e92), #ffd400);
+                    -webkit-background-clip: text;
+                    background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    color: transparent;
+                    font-weight: 800;
+                    text-decoration: none;
+                    display: inline-block;
+                    padding: 8px 14px;
+                    border-radius: 999px;
+                    border: 1px solid rgba(255,255,255,0.06);
+                    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+                    transition: transform 0.18s ease, filter 0.18s ease;
+                }
+                .apk-download-link:hover { transform: translateY(-2px); filter: brightness(1.04); }
+            </style>
+
+            <div class="download-apk" style="text-align:center; margin-top:12px;">
+                <a id="downloadApkBtn" href="https://www.mediafire.com/file/sb2i2dtiksebbkg/Nuvia.apk/file" class="apk-download-link" target="_blank" rel="noopener noreferrer" aria-label="Download Nuvia APK">Download Nuvia APK</a>
+            </div>
+
         </form>
     </div>
 
