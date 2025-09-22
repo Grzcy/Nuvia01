@@ -8278,8 +8278,7 @@ async function checkAndStartDailyBonusTimer() {
                 await signOut(auth); // Sign out from Firebase.
                 try { localStorage.removeItem('nuvia_auth_user'); localStorage.setItem('nuvia_auth_status','signed_out'); } catch(_) {}
                 showMessageBox("Logged out successfully! ��", 'success');
-                // Stay on page; no redirect to login.
-                try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch(_) {}
+                setTimeout(() => { window.location.href = '/login.html'; }, 1500);
 
             } catch (error) {
                 console.error("Nuvia_ERROR: Error logging out:", error);
