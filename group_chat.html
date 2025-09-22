@@ -1594,7 +1594,7 @@
                         if (!currentUser) return showMessageBox('Not authenticated','error');
                         if (currentUser.uid !== groupData.ownerId) { showMessageBox('Only owner can close this group','error'); return; }
                         const willClose = !groupData.isClosed;
-                        if (!confirm(willClose ? 'Close this group? Members will not be able to join or post.' : 'Reopen this group?')) return;
+                        if (!(await confirm(willClose ? 'Close this group? Members will not be able to join or post.' : 'Reopen this group?'))) return;
                         try{
                             await runTransaction(db, async (tx)=>{
                                 const gRef = doc(db, 'artifacts', appId, 'public', 'data', 'groups', groupId);
