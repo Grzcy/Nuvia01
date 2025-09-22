@@ -931,6 +931,20 @@
         @media (max-width: 720px) { .jchat-title, .login-header::before, .gemini-spinner, .login-container { animation: none !important; transform: none !important; } }
         @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
     </style>
+<style>
+/* Signup layout enhancements */
+.login-container.signup-mode { max-width: 640px; }
+@media (min-width: 768px) {
+  .login-container.signup-mode { max-width: 720px; }
+  .login-form .signup-only { display: inline-block; width: calc(50% - 10px); vertical-align: top; }
+  .login-form .signup-only:nth-child(odd) { margin-right: 10px; }
+  .optional-details .signup-only { display: block; width: 100%; margin-right: 0; }
+}
+.optional-details { border: 1px solid var(--border-light); border-radius: var(--radius); background: var(--card-background); padding: 8px 12px; margin: 10px 0 0; }
+.optional-summary { cursor: pointer; font-weight: 600; color: var(--white); list-style: none; }
+.optional-summary::-webkit-details-marker { display: none; }
+.optional-details-content { margin-top: 10px; }
+</style>
 </head>
 <body>
     <!-- Floating Particles -->
@@ -1007,6 +1021,9 @@
                 >
             </div>
 
+        <details class="optional-details signup-only" style="display: none;">
+          <summary class="optional-summary" aria-controls="optionalDetailsContent" aria-expanded="false">Optional details</summary>
+          <div id="optionalDetailsContent" class="optional-details-content">
             <div class="form-group signup-only" style="display: none;">
                 <label for="bio">Bio (Optional)</label>
                 <textarea
@@ -1038,6 +1055,8 @@
                     placeholder="Paste your friend's referral link or ID"
                 >
             </div>
+          </div>
+        </details>
 
             <div class="remember-forgot">
                 <div class="remember-actions">
