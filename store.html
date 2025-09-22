@@ -142,7 +142,7 @@
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js';
-    import { getFirestore, doc, setDoc, addDoc, collection, serverTimestamp, getDoc } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js';
+    import { getFirestore, doc, setDoc, addDoc, collection, serverTimestamp, getDoc, updateDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js';
     import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js';
     // bank-details.js exposes window.renderBankDetails and window.BANK_DETAILS; use the global to avoid module export mismatch.
 
