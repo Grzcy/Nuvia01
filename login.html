@@ -1657,9 +1657,7 @@
                     localStorage.setItem('nuvia_auth_user', JSON.stringify({ uid: user.uid, email: user.email || null, displayName: user.displayName || null, ts: Date.now() }));
                     localStorage.setItem('nuvia_auth_status', 'authenticated');
                 } catch (_) {}
-                showSuccessModal(`Welcome back, ${user.displayName || user.email}!`, () => {
-                    window.location.href = 'index.html';
-                });
+                await showSavePasswordPrompt(email, password, () => { window.location.href = 'index.html'; });
 
             } catch (error) {
                 hideSmartLoader();
