@@ -139,7 +139,7 @@
       </div>
       <div class="locked-banner" id="lockedBanner" role="region" aria-live="polite">
         <div class="banner-row">
-          <div><i class="fa-solid fa-lock" aria-hidden="true"></i> Your wallet is locked. Pay ₦5,000 to unlock.</div>
+          <div><i class="fa-solid fa-lock" aria-hidden="true"></i> Your wallet is locked. Pay 5,000 JCoins ($10) to unlock.</div>
           <div class="banner-actions">
             <a class="btn secondary" href="/unlock-wallet.html"><i class="fa-solid fa-receipt"></i> Submit Proof</a>
             <button class="btn" id="showUnlockModalBtn" type="button"><i class="fa-solid fa-money-bill-transfer"></i> Pay Now</button>
@@ -164,7 +164,7 @@
   <div class="modal" id="unlockModal" role="dialog" aria-modal="true" aria-labelledby="unlockTitle">
     <div class="modal-card">
       <div class="modal-hd">
-        <h3 class="modal-title" id="unlockTitle"><i class="fa-solid fa-unlock-keyhole"></i> Unlock Wallet — ₦5,000</h3>
+        <h3 class="modal-title" id="unlockTitle"><i class="fa-solid fa-unlock-keyhole"></i> Unlock Wallet — 5,000 JCoins ($10)</h3>
         <button class="icon-btn" id="closeUnlockModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <p class="balance-sub">Transfer ₦5,000 to one of the bank accounts below, then submit your receipt. Unlock is processed after verification.</p>
@@ -311,7 +311,7 @@
     function closeUnlock(){ unlockModal.classList.remove('active'); }
 
     function handleUnlockActions(){
-      showUnlockModalBtn?.addEventListener('click', openUnlockModal);
+      showUnlockModalBtn?.addEventListener('click', ()=>{ window.location.href = '/developer.html'; });
       closeUnlockModal?.addEventListener('click', closeUnlock);
       document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeUnlock(); });
       const q = parseQuery(); if (q.unlock === '1') openUnlockModal();
