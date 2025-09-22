@@ -70,6 +70,14 @@
     .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
     .input{padding:10px;border-radius:10px;border:1px solid var(--border-light);background:var(--input-background);color:var(--white)}
     .close-btn{background:rgba(255,255,255,.08);border:1px solid var(--border-light);border-radius:10px;padding:8px 12px;color:var(--white);cursor:pointer}
+
+    /* Global custom dialog to replace native alert/confirm/prompt */
+    .global-dialog-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:110}
+    .global-dialog-overlay.show{display:flex}
+    .global-dialog-card{width:min(520px,94vw);background:var(--card-background);border:1px solid var(--border-light);border-radius:14px;padding:16px;box-shadow:0 10px 35px rgba(0,0,0,.6);display:flex;flex-direction:column;gap:12px}
+    .global-dialog-message{color:var(--white);font-size:1rem;line-height:1.4}
+    .global-dialog-actions{display:flex;gap:8px;justify-content:flex-end}
+    .global-dialog-input{padding:10px;border-radius:10px;border:1px solid var(--border-light);background:var(--input-background);color:var(--white);width:100%}
   </style>
 </head>
 <body>
@@ -194,6 +202,20 @@
       </div>
     </div>
   </div>
+
+  <!-- Global dialog overlay for alert/confirm/prompt replacements -->
+  <div class="global-dialog-overlay" id="globalDialog" aria-hidden="true">
+    <div class="global-dialog-card" role="dialog" aria-modal="true" aria-labelledby="globalDialogTitle">
+      <div id="globalDialogTitle" class="modal-title" style="font-size:1.1rem">Notice</div>
+      <div id="globalDialogMessage" class="global-dialog-message"></div>
+      <input id="globalDialogInput" class="global-dialog-input" style="display:none" />
+      <div class="global-dialog-actions" id="globalDialogActions">
+        <button class="close-btn" id="globalDialogCancel" style="display:none">Cancel</button>
+        <button class="btn" id="globalDialogOk">OK</button>
+      </div>
+    </div>
+  </div>
+
   </main>
 
   <script type="module">
@@ -318,6 +340,45 @@
     renderJcoinPacks();
     renderGasPacks();
 
+    // --- Global custom dialog overrides (replace native alert/confirm/prompt) ---
+    (function(){
+      const overlay = document.getElementById('globalDialog');
+      const msgEl = document.getElementById('globalDialogMessage');
+      const titleEl = document.getElementById('globalDialogTitle');
+      const inputEl = document.getElementById('globalDialogInput');
+      const okBtn = document.getElementById('globalDialogOk');
+      const cancelBtn = document.getElementById('globalDialogCancel');
+
+      function showDialog({ type='alert', title='Notice', message='', defaultValue='' } = {}){
+        return new Promise((resolve) => {
+          titleEl.textContent = title;
+          msgEl.textContent = typeof message === 'string' ? message : JSON.stringify(message);
+          inputEl.style.display = type === 'prompt' ? 'block' : 'none';
+          inputEl.value = defaultValue || '';
+          cancelBtn.style.display = type === 'confirm' || type === 'prompt' ? 'inline-flex' : 'none';
+          overlay.classList.add('show'); overlay.setAttribute('aria-hidden','false');
+
+          function cleanup(){ overlay.classList.remove('show'); overlay.setAttribute('aria-hidden','true'); okBtn.removeEventListener('click', onOk); cancelBtn.removeEventListener('click', onCancel); document.removeEventListener('keydown', onKey); }
+          function onOk(){ try{ const val = type === 'prompt' ? inputEl.value : true; cleanup(); resolve(type === 'prompt' ? val : true); }catch(e){ cleanup(); resolve(type === 'prompt' ? null : true); } }
+          function onCancel(){ cleanup(); resolve(type === 'prompt' ? null : false); }
+          function onKey(e){ if(e.key === 'Escape'){ onCancel(); } else if(e.key === 'Enter'){ onOk(); } }
+
+          okBtn.addEventListener('click', onOk);
+          cancelBtn.addEventListener('click', onCancel);
+          document.addEventListener('keydown', onKey);
+          // focus logic
+          setTimeout(()=>{ if(type==='prompt'){ inputEl.focus(); inputEl.select(); } else { okBtn.focus(); } },50);
+        });
+      }
+
+      // Preserve originals just in case
+      window.__nativeDialogs = { alert: window.alert.bind(window), confirm: window.confirm.bind(window), prompt: window.prompt.bind(window) };
+
+      window.alert = (msg) => { try{ return showDialog({ type:'alert', message: String(msg) }); }catch(e){ window.__nativeDialogs.alert(String(msg)); } };
+      window.confirm = (msg) => { try{ return showDialog({ type:'confirm', message: String(msg) }); }catch(e){ return Promise.resolve(window.__nativeDialogs.confirm(String(msg))); } };
+      window.prompt = (msg, def='') => { try{ return showDialog({ type:'prompt', message: String(msg), defaultValue: def||'' }); }catch(e){ return Promise.resolve(window.__nativeDialogs.prompt(String(msg), def)); } };
+    })();
+
     try{
       const { initializeApp } = await import('https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js');
       const { getFirestore, doc, getDoc, setDoc, serverTimestamp, addDoc, collection, runTransaction, updateDoc, increment, arrayUnion } = await import('https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js');
@@ -425,7 +486,7 @@
             userCurrencyAmount: 4.0,
             timestamp: serverTimestamp()
           });
-          alert('Request sent. Developer will review shortly.');
+          await alert('Request sent. Developer will review shortly.');
           window.location.href = '/developer.html';
         } catch (e) {
           alert(e?.message || 'Failed to create request');
