@@ -4434,11 +4434,6 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                     <span id="headerPremiumBadge" class="premium-badge" style="display: none;"></span>
                 </a>
             </div>
-            <!-- Guest-only quick keys (visible only to guests) -->
-            <div id="guestHeaderKeys" class="guest-header-keys" style="display:none;margin-left:12px;">
-                <a href="login.html#signup" id="guestSignupBtn" class="guest-join-button" aria-label="Join Nuvia">Join</a>
-                <div class="guest-join-subtext" id="guestJoinSubtext">Join the global vibe</div>
-            </div>
         </div>
     </header>
 
@@ -11026,7 +11021,7 @@ async function fetchAndDisplayPosts() {
                     const computedRate = (jCoinsBal * 0.005).toFixed(3);
                     jcoinRateSpan.textContent = computedRate;
                 // Also update wallet.html oneJcoinRateDisplay if opened in same session/window (best-effort)
-                try { if (window.parent && window.parent.document) { const oneEl = window.parent.document.getElementById('oneJcoinRateDisplay'); if (oneEl && currentSystemSettings?.jcoinNairaRate) oneEl.textContent = `₦${(1/currentSystemSettings.jcoinNairaRate).toFixed(2)} NGN`; } } catch(e) {}
+                try { if (window.parent && window.parent.document) { const oneEl = window.parent.document.getElementById('oneJcoinRateDisplay'); if (oneEl && currentSystemSettings?.jcoinNairaRate) oneEl.textContent = `���${(1/currentSystemSettings.jcoinNairaRate).toFixed(2)} NGN`; } } catch(e) {}
                     homeChipsRow.style.display = 'flex';
                 }
                 // Wallet chip click: gate by walletUnlocked
@@ -11181,7 +11176,7 @@ async function fetchAndDisplayPosts() {
                 fetchNotificationCount(user.uid);
 
             } else {
-                console.log("Nuvia_DEBUG: No user signed in. Attempting anonymous sign-in or redirecting to login page.");
+                window.location.href = '/login.html'; return;
                 try {
                     // Detect preview environments that may block cross-origin fetch (e.g., fly.dev proxies)
                     const __previewBlocked = /(^|\.)fly\.dev$/i.test(location.hostname);
@@ -11367,7 +11362,7 @@ async function fetchAndDisplayPosts() {
         });
 
         // Guest header keys helper
-        function updateGuestHeaderKeysVisibility(show) {
+        function updateGuestHeaderKeysVisibility(show) { return;
             try {
                 const el = document.getElementById('guestHeaderKeys');
                 if (!el) return;
