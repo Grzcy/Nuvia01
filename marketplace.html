@@ -102,7 +102,7 @@
       <section class="section-card" aria-labelledby="walletTitle">
         <div class="section-head">
           <div class="section-title" id="walletTitle"><i class="fas fa-unlock"></i> Unlock Wallet</div>
-          <div class="section-sub">One‑time ₦5,000 verification. Faster review after proof upload.</div>
+          <div class="section-sub">One‑time 5,000 JCoins ($10) verification. Faster review after proof upload.</div>
         </div>
         <div class="product-card">
           <div class="product-top">
@@ -112,12 +112,12 @@
             </div>
           </div>
           <div class="price-row">
-            <span class="price-badge primary">₦5,000</span>
-            <span class="price-badge muted"><i class="fas fa-receipt"></i> Submit Proof</span>
+            <span class="price-badge primary">5,000 JCoins</span>
+            <span class="price-badge muted">$10.00</span>
           </div>
           <div class="actions">
             <a class="btn secondary" href="/unlock-wallet.html"><i class="fas fa-file-invoice"></i> Submit Receipt</a>
-            <a class="btn" href="/wallet.html?unlock=1"><i class="fas fa-money-bill-transfer"></i> Pay Now</a>
+            <a class="btn" href="/developer.html"><i class="fas fa-money-bill-transfer"></i> Pay Now</a>
           </div>
         </div>
       </section>
@@ -139,7 +139,7 @@
             <span class="price-badge muted">$10.00</span>
           </div>
           <div class="actions">
-            <button class="btn" id="requestVerifyBtn" type="button"><i class="fas fa-paper-plane"></i> Request Verification</button>
+            <a class="btn" href="/developer.html"><i class="fas fa-paper-plane"></i> Buy via Developer</a>
           </div>
         </div>
       </section>
@@ -198,7 +198,7 @@
             document.body.classList.add(t.id);
           } catch(_){}
         });
-        const buyBtn = el('a','btn'); buyBtn.href = '/wallet.html'; buyBtn.innerHTML = `<i class="fas fa-cart-shopping"></i> Buy`;
+        const buyBtn = el('a','btn'); buyBtn.href = '/developer.html'; buyBtn.innerHTML = `<i class=\"fas fa-cart-shopping\"></i> Buy`;
         actions.appendChild(previewBtn); actions.appendChild(buyBtn);
         card.appendChild(top); card.appendChild(priceRow); card.appendChild(actions);
         frag.appendChild(card);
@@ -224,7 +224,7 @@
         const b2 = el('span','price-badge muted'); b2.textContent = `${qty.toLocaleString()} JC`;
         priceRow.appendChild(b1); priceRow.appendChild(b2);
         const actions = el('div','actions');
-        const buy = el('a','btn'); buy.href = `/wallet.html`; buy.innerHTML = '<i class="fas fa-cart-shopping"></i> Buy Pack';
+        const buy = el('a','btn'); buy.href = `/developer.html`; buy.innerHTML = '<i class=\"fas fa-cart-shopping\"></i> Buy Pack';
         actions.appendChild(buy);
         card.appendChild(top); card.appendChild(priceRow); card.appendChild(actions);
         frag.appendChild(card);
@@ -250,7 +250,7 @@
         const b2 = el('span','price-badge muted'); b2.textContent = `${j.toFixed(1)} JC`;
         priceRow.appendChild(b1); priceRow.appendChild(b2);
         const actions = el('div','actions');
-        const buy = el('a','btn'); buy.href = '/wallet.html'; buy.innerHTML = '<i class="fas fa-cart-shopping"></i> Buy Pack';
+        const buy = el('a','btn'); buy.href = '/developer.html'; buy.innerHTML = '<i class=\"fas fa-cart-shopping\"></i> Buy Pack';
         actions.appendChild(buy);
         card.appendChild(top); card.appendChild(priceRow); card.appendChild(actions);
         frag.appendChild(card);
