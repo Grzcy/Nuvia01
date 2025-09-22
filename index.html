@@ -5504,25 +5504,26 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         let cancelEditPostButton, saveEditedPostButton;
         // Theme switcher functionality
         let currentTheme = 'theme-dark-mode'; // Default theme
-        const themeSwitcherThemes = ['theme-light-mode', 'theme-dark-mode', 'theme-sunset-mode', 'theme-glass-mode', 'theme-ocean-mode', 'theme-forest-mode', 'theme-cosmic-mode', 'theme-retro-mode', 'theme-neon-mode', 'theme-elegant-mode', 'theme-quantum-nexus', 'theme-holographic-matrix', 'theme-stellar-genesis', 'theme-circus-maximus', 'theme-temporal-paradox'];
-        
+        const themeSwitcherThemes = [
+          'theme-light-mode', 'theme-dark-mode', 'theme-sunset-mode', 'theme-glass-mode',
+          'theme-ocean-mode', 'theme-forest-mode', 'theme-cosmic-mode', 'theme-neon-mode',
+          'theme-retro-mode', 'theme-elegant-mode', 'theme-aurora-bliss', 'theme-midnight-sky'
+        ];
+
         // Theme catalog with pricing and product IDs - Premium themes locked (NGN pricing)
         const themeCatalog = {
             'theme-light-mode': { name: 'Light Mode', price: 0, currency: 'NGN', isFree: true, productId: null },
             'theme-dark-mode': { name: 'Dark Mode', price: 0, currency: 'NGN', isFree: true, productId: null },
-            'theme-sunset-mode': { name: 'Sunset Theme', price: 0, currency: 'NGN', isFree: true, productId: null },
-            'theme-glass-mode': { name: 'Glass Mode', price: 0, currency: 'NGN', isFree: true, productId: null },
-            'theme-ocean-mode': { name: 'Ocean Theme', price: 1500, currency: 'NGN', isFree: false, productId: 'theme_ocean_premium' },
-            'theme-forest-mode': { name: 'Forest Theme', price: 1800, currency: 'NGN', isFree: false, productId: 'theme_forest_premium' },
-            'theme-cosmic-mode': { name: 'Cosmic Theme', price: 2000, currency: 'NGN', isFree: false, productId: 'theme_cosmic_premium' },
-            'theme-retro-mode': { name: 'Retro Theme', price: 2200, currency: 'NGN', isFree: false, productId: 'theme_retro_premium' },
-            'theme-neon-mode': { name: 'Neon Theme', price: 2500, currency: 'NGN', isFree: false, productId: 'theme_neon_premium' },
-            'theme-elegant-mode': { name: 'Elegant Theme', price: 2800, currency: 'NGN', isFree: false, productId: 'theme_elegant_premium' },
-            'theme-quantum-nexus': { name: '🌌 Quantum Nexus', price: 3000, currency: 'NGN', isFree: false, productId: 'theme_quantum_nexus_premium' },
-            'theme-holographic-matrix': { name: '🎭 Holographic Matrix', price: 3300, currency: 'NGN', isFree: false, productId: 'theme_holographic_matrix_premium' },
-            'theme-stellar-genesis': { name: '🌟 Stellar Genesis', price: 3600, currency: 'NGN', isFree: false, productId: 'theme_stellar_genesis_premium' },
-            'theme-circus-maximus': { name: '���� Circus Maximus', price: 4000, currency: 'NGN', isFree: false, productId: 'theme_circus_maximus_premium' },
-            'theme-temporal-paradox': { name: '🔮 Temporal Paradox (VIP)', price: 5000, currency: 'NGN', isFree: false, productId: 'theme_temporal_paradox_premium', isVip: true }
+            'theme-sunset-mode': { name: 'Sunset Mode', price: 1200, currency: 'NGN', isFree: false, productId: 'theme_sunset_premium' },
+            'theme-glass-mode': { name: 'Glass Mode', price: 1200, currency: 'NGN', isFree: false, productId: 'theme_glass_premium' },
+            'theme-ocean-mode': { name: 'Ocean Mode', price: 1500, currency: 'NGN', isFree: false, productId: 'theme_ocean_premium' },
+            'theme-forest-mode': { name: 'Forest Mode', price: 1500, currency: 'NGN', isFree: false, productId: 'theme_forest_premium' },
+            'theme-cosmic-mode': { name: 'Cosmic Mode', price: 1800, currency: 'NGN', isFree: false, productId: 'theme_cosmic_premium' },
+            'theme-neon-mode': { name: 'Neon Mode', price: 1800, currency: 'NGN', isFree: false, productId: 'theme_neon_premium' },
+            'theme-retro-mode': { name: 'Retro Mode', price: 1800, currency: 'NGN', isFree: false, productId: 'theme_retro_premium' },
+            'theme-elegant-mode': { name: 'Elegant Mode', price: 2000, currency: 'NGN', isFree: false, productId: 'theme_elegant_premium' },
+            'theme-aurora-bliss': { name: 'Aurora Bliss', price: 2200, currency: 'NGN', isFree: false, productId: 'theme_aurora_bliss_premium' },
+            'theme-midnight-sky': { name: 'Midnight Sky', price: 3000, currency: 'NGN', isFree: false, productId: 'theme_midnight_sky_premium', isVip: true }
         };
 
         // Theme purchase/lock state
@@ -5531,31 +5532,29 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
 
         // Mapping between shop product IDs and theme classes
         const productIdToThemeClass = {
+            'theme_sunset_premium': 'theme-sunset-mode',
+            'theme_glass_premium': 'theme-glass-mode',
             'theme_ocean_premium': 'theme-ocean-mode',
             'theme_forest_premium': 'theme-forest-mode',
             'theme_cosmic_premium': 'theme-cosmic-mode',
-            'theme_retro_premium': 'theme-retro-mode',
             'theme_neon_premium': 'theme-neon-mode',
+            'theme_retro_premium': 'theme-retro-mode',
             'theme_elegant_premium': 'theme-elegant-mode',
-            'theme_quantum_nexus_premium': 'theme-quantum-nexus',
-            'theme_holographic_matrix_premium': 'theme-holographic-matrix',
-            'theme_stellar_genesis_premium': 'theme-stellar-genesis',
-            'theme_circus_maximus_premium': 'theme-circus-maximus',
-            'theme_temporal_paradox_premium': 'theme-temporal-paradox'
+            'theme_aurora_bliss_premium': 'theme-aurora-bliss',
+            'theme_midnight_sky_premium': 'theme-midnight-sky'
         };
 
         const themeClassToProductId = {
+            'theme-sunset-mode': 'theme_sunset_premium',
+            'theme-glass-mode': 'theme_glass_premium',
             'theme-ocean-mode': 'theme_ocean_premium',
             'theme-forest-mode': 'theme_forest_premium',
             'theme-cosmic-mode': 'theme_cosmic_premium',
-            'theme-retro-mode': 'theme_retro_premium',
             'theme-neon-mode': 'theme_neon_premium',
+            'theme-retro-mode': 'theme_retro_premium',
             'theme-elegant-mode': 'theme_elegant_premium',
-            'theme-quantum-nexus': 'theme_quantum_nexus_premium',
-            'theme-holographic-matrix': 'theme_holographic_matrix_premium',
-            'theme-stellar-genesis': 'theme_stellar_genesis_premium',
-            'theme-circus-maximus': 'theme_circus_maximus_premium',
-            'theme-temporal-paradox': 'theme_temporal_paradox_premium'
+            'theme-aurora-bliss': 'theme_aurora_bliss_premium',
+            'theme-midnight-sky': 'theme_midnight_sky_premium'
         };
 
         // Currency configuration
