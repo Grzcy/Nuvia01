@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuvia - Marketplace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <style>
+    *,*::before,*::after{box-sizing:border-box}
+    :root{
+      --pink:#ff2e92; --blue:#00d5ff; --radius:20px; --transition:.3s ease;
+      --white:#e0e0e0; --text-light:#94a3b8; --background-main:#1a1a2e; --border-light:rgba(255,255,255,.08);
+      --card-background:linear-gradient(145deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      --header-background:linear-gradient(135deg, rgba(15,15,35,.95), rgba(26,26,46,.9));
+      --input-background:rgba(255,255,255,.08);
+      --button-background:linear-gradient(90deg, var(--blue), var(--pink));
+      --button-shadow:0 4px 15px rgba(0, 213, 255, .35), 0 4px 15px rgba(255, 46, 146, .35);
+      --accent-color:#00d5ff; --accent-color-dark:#00aaff; --border-color:#3a3a5a; --theme-gold:#ffd700;
+    }
+    body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--white);background:var(--background-main)}
+    header{position:sticky;top:0;z-index:10;background:var(--header-background);border-bottom:1px solid var(--border-light)}
+    .header-bar{max-width:1200px;margin:0 auto;padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
+    .logo{font-family:Poppins,sans-serif;font-weight:800;font-size:1.6rem;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;text-decoration:none}
+    .header-actions{display:flex;align-items:center;gap:10px}
+    .icon-chip{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;border:1px solid var(--border-light);background:rgba(255,255,255,.06);color:var(--white)}
+
+    main{max-width:1100px;margin:20px auto;padding:0 16px}
+    .page-title{display:flex;align-items:center;gap:10px;font-family:Poppins,sans-serif;font-weight:800;font-size:2rem;margin:6px 0 16px;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+    .market-sections{display:flex;flex-direction:column;gap:24px}
+    .section-card{background:var(--card-background);border:1px solid var(--border-light);border-radius:16px;padding:18px;box-shadow:0 8px 25px rgba(0,0,0,.28)}
+    .section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+    .section-title{display:flex;align-items:center;gap:10px;font-family:Poppins,sans-serif;font-weight:800;font-size:1.4rem}
+    .section-sub{color:var(--text-light);font-size:.95rem}
+
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+    .product-card{display:flex;flex-direction:column;gap:10px;background:rgba(255,255,255,.05);border:1px solid var(--border-light);border-radius:14px;padding:14px;position:relative;overflow:hidden}
+    .product-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .product-title{font-weight:800}
+    .product-meta{color:var(--text-light);font-size:.9rem}
+    .price-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .price-badge{border:1px solid var(--border-light);border-radius:999px;padding:6px 10px;font-weight:800}
+    .price-badge.primary{background:var(--button-background);border-color:transparent;box-shadow:var(--button-shadow);color:#fff}
+    .price-badge.muted{background:rgba(255,255,255,.06);color:var(--white)}
+    .actions{display:flex;gap:8px;margin-top:6px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:10px;border:1px solid var(--border-light);background:var(--button-background);box-shadow:var(--button-shadow);color:#fff;font-weight:800;text-decoration:none;justify-content:center}
+    .btn.secondary{background:rgba(255,255,255,.08);box-shadow:none}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+
+    .preview-note{margin-top:6px;color:var(--text-light);font-size:.85rem}
+
+    .theme-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--border-light);background:rgba(255,255,255,.04);font-weight:700}
+    .theme-chips{display:flex;flex-wrap:wrap;gap:6px}
+
+    @media (max-width:600px){.page-title{font-size:1.6rem}.section-title{font-size:1.2rem}}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-bar">
+      <a class="logo" href="/index.html">Nuvia</a>
+      <div class="header-actions">
+        <a class="icon-chip" href="/wallet.html" aria-label="Wallet"><i class="fas fa-wallet"></i></a>
+        <a class="icon-chip" href="/notifications.html" aria-label="Notifications"><i class="fas fa-bell"></i></a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <h1 class="page-title"><i class="fas fa-store"></i> Marketplace</h1>
+    <div class="market-sections">
+
+      <section class="section-card" aria-labelledby="themesTitle">
+        <div class="section-head">
+          <div class="section-title" id="themesTitle"><i class="fas fa-palette"></i> Premium Themes</div>
+          <div class="section-sub">Each theme $4.00 • 800 JCoins</div>
+        </div>
+        <div class="theme-chips" id="themeChips"></div>
+        <div class="grid" id="themesGrid"></div>
+        <div class="preview-note">Preview applies temporarily. Purchase unlocks it permanently for your account.</div>
+      </section>
+
+      <section class="section-card" aria-labelledby="jcoinTitle">
+        <div class="section-head">
+          <div class="section-title" id="jcoinTitle"><i class="fas fa-coins"></i> JCoin Packs</div>
+          <div class="section-sub">Rate: $0.005 per 1 JCoin</div>
+        </div>
+        <div class="grid" id="jcoinGrid"></div>
+      </section>
+
+      <section class="section-card" aria-labelledby="gasTitle">
+        <div class="section-head">
+          <div class="section-title" id="gasTitle"><i class="fas fa-gas-pump"></i> Gas Packs</div>
+          <div class="section-sub">Default link: 1 JCoin = 10 Gas (updates if admin changed it)</div>
+        </div>
+        <div class="grid" id="gasGrid"></div>
+      </section>
+
+      <section class="section-card" aria-labelledby="walletTitle">
+        <div class="section-head">
+          <div class="section-title" id="walletTitle"><i class="fas fa-unlock"></i> Unlock Wallet</div>
+          <div class="section-sub">One‑time ₦5,000 verification. Faster review after proof upload.</div>
+        </div>
+        <div class="product-card">
+          <div class="product-top">
+            <div>
+              <div class="product-title">Wallet Unlock</div>
+              <div class="product-meta">Pay and submit receipt • Developer reviews and unlocks</div>
+            </div>
+          </div>
+          <div class="price-row">
+            <span class="price-badge primary">₦5,000</span>
+            <span class="price-badge muted"><i class="fas fa-receipt"></i> Submit Proof</span>
+          </div>
+          <div class="actions">
+            <a class="btn secondary" href="/unlock-wallet.html"><i class="fas fa-file-invoice"></i> Submit Receipt</a>
+            <a class="btn" href="/wallet.html?unlock=1"><i class="fas fa-money-bill-transfer"></i> Pay Now</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-card" aria-labelledby="verifyTitle">
+        <div class="section-head">
+          <div class="section-title" id="verifyTitle"><i class="fas fa-badge-check"></i> Verified Badge</div>
+          <div class="section-sub">One‑time 2,000 JCoins • $10.00</div>
+        </div>
+        <div class="product-card">
+          <div class="product-top">
+            <div>
+              <div class="product-title">Get Verified</div>
+              <div class="product-meta">Blue check on your name. Manual review by admin.</div>
+            </div>
+          </div>
+          <div class="price-row">
+            <span class="price-badge primary">2,000 JCoins</span>
+            <span class="price-badge muted">$10.00</span>
+          </div>
+          <div class="actions">
+            <button class="btn" id="requestVerifyBtn" type="button"><i class="fas fa-paper-plane"></i> Request Verification</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script type="module">
+    const USD_PER_JCOIN = 0.005;
+    let GAS_PER_JCOIN = 10; // default, will try to fetch
+
+    const themes = [
+      { id:'theme-quantum-nexus', name:'Quantum Nexus', icon:'fa-atom' },
+      { id:'theme-holographic-matrix', name:'Holographic Matrix', icon:'fa-cubes' },
+      { id:'theme-stellar-genesis', name:'Stellar Genesis', icon:'fa-star' },
+      { id:'theme-circus-maximus', name:'Circus Maximus', icon:'fa-masks-theater' },
+      { id:'theme-temporal-paradox', name:'Temporal Paradox', icon:'fa-clock' }
+    ];
+
+    const jcoinPacks = [1000, 2500, 5000, 10000, 25000];
+    const gasPacks = [100, 250, 500, 1000, 2500, 5000];
+
+    function formatUSD(v){ try{return new Intl.NumberFormat(undefined,{style:'currency',currency:'USD'}).format(v);}catch(_){return `$${Number(v).toFixed(2)}`;} }
+
+    function el(tag, cls){ const e=document.createElement(tag); if(cls) e.className=cls; return e; }
+
+    function renderThemes(){
+      const chips = document.getElementById('themeChips');
+      const grid = document.getElementById('themesGrid');
+      chips.innerHTML = ''; grid.innerHTML = '';
+      const fragC = document.createDocumentFragment();
+      themes.forEach(t=>{
+        const c = el('span','theme-chip'); c.innerHTML = `<i class="fas ${t.icon}"></i> ${t.name}`; fragC.appendChild(c);
+      });
+      chips.appendChild(fragC);
+
+      const frag = document.createDocumentFragment();
+      themes.forEach(t=>{
+        const card = el('div','product-card');
+        const top = el('div','product-top');
+        const left = el('div');
+        const title = el('div','product-title'); title.textContent = t.name;
+        const meta = el('div','product-meta'); meta.textContent = 'Premium visual theme';
+        left.appendChild(title); left.appendChild(meta);
+        const icon = el('div','icon-chip'); icon.innerHTML = `<i class="fas ${t.icon}"></i>`;
+        top.appendChild(left); top.appendChild(icon);
+        const priceRow = el('div','price-row');
+        const b1 = el('span','price-badge primary'); b1.textContent = '800 JCoins';
+        const b2 = el('span','price-badge muted'); b2.textContent = '$4.00';
+        priceRow.appendChild(b1); priceRow.appendChild(b2);
+        const actions = el('div','actions');
+        const previewBtn = el('button','btn secondary'); previewBtn.type='button'; previewBtn.innerHTML = `<i class="fas fa-eye"></i> Preview`;
+        previewBtn.addEventListener('click',()=>{
+          try {
+            document.body.classList.remove(...Array.from(document.body.classList).filter(c=>c.startsWith('theme-')));
+            document.body.classList.add(t.id);
+          } catch(_){}
+        });
+        const buyBtn = el('a','btn'); buyBtn.href = '/wallet.html'; buyBtn.innerHTML = `<i class="fas fa-cart-shopping"></i> Buy`;
+        actions.appendChild(previewBtn); actions.appendChild(buyBtn);
+        card.appendChild(top); card.appendChild(priceRow); card.appendChild(actions);
+        frag.appendChild(card);
+      });
+      grid.appendChild(frag);
+    }
+
+    function renderJcoinPacks(){
+      const grid = document.getElementById('jcoinGrid'); grid.innerHTML='';
+      const frag = document.createDocumentFragment();
+      jcoinPacks.forEach(qty=>{
+        const usd = qty * USD_PER_JCOIN;
+        const card = el('div','product-card');
+        const top = el('div','product-top');
+        const left = el('div');
+        const title = el('div','product-title'); title.textContent = `${qty.toLocaleString()} JCoins`;
+        const meta = el('div','product-meta'); meta.textContent = 'Instant credit after verification';
+        left.appendChild(title); left.appendChild(meta);
+        const icon = el('div','icon-chip'); icon.innerHTML = '<i class="fas fa-sack-dollar"></i>';
+        top.appendChild(left); top.appendChild(icon);
+        const priceRow = el('div','price-row');
+        const b1 = el('span','price-badge primary'); b1.textContent = formatUSD(usd);
+        const b2 = el('span','price-badge muted'); b2.textContent = `${qty.toLocaleString()} JC`;
+        priceRow.appendChild(b1); priceRow.appendChild(b2);
+        const actions = el('div','actions');
+        const buy = el('a','btn'); buy.href = `/wallet.html`; buy.innerHTML = '<i class="fas fa-cart-shopping"></i> Buy Pack';
+        actions.appendChild(buy);
+        card.appendChild(top); card.appendChild(priceRow); card.appendChild(actions);
+        frag.appendChild(card);
+      });
+      grid.appendChild(frag);
+    }
+
+    function renderGasPacks(){
+      const grid = document.getElementById('gasGrid'); grid.innerHTML='';
+      const frag = document.createDocumentFragment();
+      gasPacks.forEach(gas=>{
+        const j = gas / GAS_PER_JCOIN; const usd = j * USD_PER_JCOIN;
+        const card = el('div','product-card');
+        const top = el('div','product-top');
+        const left = el('div');
+        const title = el('div','product-title'); title.textContent = `${gas.toLocaleString()} Gas`;
+        const meta = el('div','product-meta'); meta.textContent = `${j.toFixed(1)} JCoins equivalent`;
+        left.appendChild(title); left.appendChild(meta);
+        const icon = el('div','icon-chip'); icon.innerHTML = '<i class="fas fa-gas-pump"></i>';
+        top.appendChild(left); top.appendChild(icon);
+        const priceRow = el('div','price-row');
+        const b1 = el('span','price-badge primary'); b1.textContent = formatUSD(usd);
+        const b2 = el('span','price-badge muted'); b2.textContent = `${j.toFixed(1)} JC`;
+        priceRow.appendChild(b1); priceRow.appendChild(b2);
+        const actions = el('div','actions');
+        const buy = el('a','btn'); buy.href = '/wallet.html'; buy.innerHTML = '<i class="fas fa-cart-shopping"></i> Buy Pack';
+        actions.appendChild(buy);
+        card.appendChild(top); card.appendChild(priceRow); card.appendChild(actions);
+        frag.appendChild(card);
+      });
+      grid.appendChild(frag);
+    }
+
+    renderThemes();
+    renderJcoinPacks();
+    renderGasPacks();
+
+    try{
+      const { initializeApp } = await import('https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js');
+      const { getFirestore, doc, getDoc, setDoc, serverTimestamp, addDoc, collection } = await import('https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js');
+      const { getAuth, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js');
+
+      const firebaseConfig = typeof window.__firebase_config !== 'undefined' ? JSON.parse(window.__firebase_config) : {
+        apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+        authDomain: "jchat-1.firebaseapp.com",
+        databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+        projectId: "jchat-1",
+        storageBucket: "jchat-1.firebasestorage.app",
+        messagingSenderId: "328479683167",
+        appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
+        measurementId: "G-S6Z9GG0R9P"
+      };
+      const appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'default-app-id';
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+      const auth = getAuth(app);
+
+      // Try fetch J/G link setting
+      try{
+        const linkRef = doc(db, 'artifacts', appId, 'public', 'data', 'system_settings', 'jg_link_settings');
+        const snap = await getDoc(linkRef);
+        if (snap.exists()){
+          const rate = Number(snap.data().jCoinsPerGas || 10);
+          if (rate > 0){ GAS_PER_JCOIN = rate; renderGasPacks(); }
+        }
+      }catch(_){ }
+
+      // Verification request
+      const requestBtn = document.getElementById('requestVerifyBtn');
+      if (requestBtn){
+        requestBtn.addEventListener('click', async ()=>{
+          onAuthStateChanged(auth, async (user)=>{
+            if (!user){ alert('Please log in first.'); return; }
+            try {
+              const col = collection(db, 'artifacts', appId, 'public', 'data', 'verification_requests');
+              await addDoc(col, {
+                userId: user.uid,
+                priceJCoins: 2000,
+                priceUSD: 2000 * USD_PER_JCOIN,
+                status: 'pending',
+                createdAt: serverTimestamp()
+              });
+              alert('Verification request sent. An admin will review it shortly.');
+            } catch (e) {
+              alert(`Failed to send request: ${e?.message||e}`);
+            }
+          });
+        });
+      }
+    }catch(_){ /* offline or firebase not available; soft-fail */ }
+  </script>
+</body>
+</html>
