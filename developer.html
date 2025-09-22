@@ -5336,6 +5336,7 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
                     // Check if this is a theme purchase
                     const themeItems = toAdd.filter(item => item.category === 'premium_theme');
                     const otherItems = toAdd.filter(item => item.category !== 'premium_theme');
+                    const gasItems = toAdd.filter(item => item.category === 'gas_pack');
                     const vipPass = req.vipPass || null; // 'lifetime' | 'yearly'
                     
                     // VIP: unlock all premium themes
@@ -5403,7 +5404,7 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
                         const profile = profileSnap.exists() ? profileSnap.data() : {};
                         const currentPurchased = Array.isArray(profile.purchasedItems) ? profile.purchasedItems : [];
                         const merged = [...currentPurchased];
-                        
+
                         for (const item of otherItems) {
                             if (!merged.some(p => p.id === item.id)) {
                                 merged.push({ ...item, purchaseDate: new Date(), paymentMethod: req.paymentMethod || 'manual' });
@@ -5414,6 +5415,25 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
                         // Also mirror into users/{uid}/shop/purchases for quick reads
                         const purchasesRef = doc(db, 'artifacts', appId, 'users', userId, 'shop', 'purchases');
                         tx.set(purchasesRef, { items: merged, updatedAt: serverTimestamp() }, { merge: true });
+                    }
+
+                    // Credit Gas for gas_pack items
+                    if (gasItems.length > 0) {
+                        const totalGas = gasItems.reduce((sum, it) => sum + Number(it.gasAmount || 0), 0);
+                        if (totalGas > 0) {
+                            const userProfileRef = doc(db, 'artifacts', appId, 'users', userId, 'profiles', 'user_profile');
+                            const profileSnap2 = await tx.get(userProfileRef);
+                            const profile2 = profileSnap2.exists() ? profileSnap2.data() : {};
+                            const curGas = Number(profile2.gas || 0);
+                            const curTotalGas = Number(profile2.totalGasEarned || 0);
+                            tx.set(userProfileRef, { gas: curGas + totalGas, totalGasEarned: curTotalGas + totalGas, updatedAt: serverTimestamp() }, { merge: true });
+                        }
+                    }
+
+                    // Set verified badge if this request is for verification
+                    if (req.verificationBadge === true) {
+                        const userProfileRef = doc(db, 'artifacts', appId, 'users', userId, 'profiles', 'user_profile');
+                        tx.set(userProfileRef, { verified: true, updatedAt: serverTimestamp() }, { merge: true });
                     }
 
                     // Mark request approved
@@ -5431,6 +5451,7 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
                     
                     let title = 'Your purchase was approved';
                     let message = 'Your items have been unlocked. Enjoy your new content!';
+                    if (reqData.verificationBadge) { title = 'Verification Approved'; message = 'Your account is now verified.'; }
                     
                     if (reqData.vipPass) {
                         title = 'VIP Pass Approved!';
