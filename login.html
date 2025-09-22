@@ -1910,6 +1910,48 @@
             showCustomModal('error', 'Authentication Error', message);
         }
 
+        async function showSavePasswordPrompt(email, password, next){
+            try{
+                const modal = document.getElementById('customModal');
+                const primaryBtn = document.getElementById('modalPrimaryBtn');
+                const btnContainer = modal.querySelector('.modal-buttons');
+                const titleEl = document.getElementById('modalTitle');
+                const messageEl = document.getElementById('modalMessage');
+                const icon = document.getElementById('modalIcon');
+
+                // Configure modal for save prompt
+                icon.className = 'modal-icon question';
+                icon.textContent = '?';
+                titleEl.textContent = 'Save Password?';
+                messageEl.textContent = 'Would you like your browser to save your login for next time?';
+                const originalPrimaryText = primaryBtn.textContent;
+                primaryBtn.textContent = 'Save';
+
+                // Add a temporary "Not now" button
+                const secondary = document.createElement('button');
+                secondary.className = 'modal-btn secondary';
+                secondary.type = 'button';
+                secondary.textContent = 'Not now';
+                const cleanup = ()=>{ try{ secondary.remove(); primaryBtn.textContent = originalPrimaryText; }catch(_){} };
+                secondary.onclick = ()=>{ cleanup(); closeModal(); if (typeof next === 'function') next(); };
+                btnContainer.appendChild(secondary);
+
+                primaryBtn.onclick = async ()=>{
+                    try{
+                        if (navigator.credentials && window.PasswordCredential) {
+                            const cred = new PasswordCredential({ id: email, password });
+                            await navigator.credentials.store(cred).catch(()=>{});
+                        }
+                    }catch(_){ /* ignore */ }
+                    cleanup();
+                    closeModal();
+                    if (typeof next === 'function') next();
+                };
+
+                modal.style.display = 'flex';
+            }catch(_){ if (typeof next === 'function') next(); }
+        }
+
         // Show success message
         function showSuccess(message) {
             const errorDiv = document.getElementById('errorMessage');
