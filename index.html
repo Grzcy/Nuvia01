@@ -1073,7 +1073,7 @@
             100% { transform: scale(1) rotate(0deg); }
         }
 
-        /* 5. �������� Temporal Paradox - Premium Time Manipulation Interface */
+        /* 5. ���������� Temporal Paradox - Premium Time Manipulation Interface */
         body.theme-temporal-paradox {
             background: 
                 conic-gradient(from 0deg at 50% 50%, 
@@ -5733,11 +5733,11 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         function redirectToShop(themeKey) {
             const themeInfo = themeCatalog[themeKey];
             if (themeInfo) {
-                const shopUrl = `Shop.html?theme=${themeKey}&name=${encodeURIComponent(themeInfo.name)}&price=${themeInfo.price}`;
+                const shopUrl = `store.html?theme=${encodeURIComponent(themeKey)}`;
                 window.location.href = shopUrl;
             } else {
-                // Fallback to general shop
-                window.location.href = 'Shop.html';
+                // Fallback to general store
+                window.location.href = 'store.html';
             }
         }
 
