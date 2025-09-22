@@ -161,7 +161,7 @@
     const USD_PER_JCOIN = 0.005;
     let gasPerJcoin = 0.1; // fallback; will fetch from settings if present
 
-    const SYSTEM_SETTINGS_DOC_REF = doc(db, 'artifacts', appId, 'public', 'system', 'settings');
+    const SYSTEM_SETTINGS_DOC_REF = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'system_settings');
     try {
       const snap = await getDoc(SYSTEM_SETTINGS_DOC_REF);
       if (snap.exists()) {
