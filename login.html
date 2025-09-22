@@ -1033,26 +1033,7 @@
         <details class="optional-details signup-only" style="display: none;">
           <summary class="optional-summary" aria-controls="optionalDetailsContent" aria-expanded="false">Optional details</summary>
           <div id="optionalDetailsContent" class="optional-details-content">
-            <div class="form-group signup-only" style="display: none;">
-                <label for="bio">Bio (Optional)</label>
-                <textarea
-                    id="bio"
-                    name="bio"
-                    placeholder="Tell us about yourself..."
-                    rows="3"
-                    class="signup-bio-input"
-                ></textarea>
-            </div>
 
-            <div class="form-group signup-only" style="display: none;">
-                <label for="location">Location (Optional)</label>
-                <input
-                    type="text"
-                    id="location"
-                    name="location"
-                    placeholder="Enter your location"
-                >
-            </div>
 
             <!-- Referral (Optional) -->
             <div class="form-group signup-only" style="display: none;">
@@ -1490,9 +1471,6 @@
             const fullName = document.getElementById('fullName').value.trim();
             const username = document.getElementById('username').value.trim();
             const confirmPassword = document.getElementById('confirmPassword').value;
-            const bio = document.getElementById('bio').value.trim();
-            const location = document.getElementById('location').value.trim();
-            
             // Enhanced validation for signup
             if (!fullName) {
                 showErrorModal('Please enter your full name.');
@@ -1545,18 +1523,13 @@
                     displayName: fullName,
                     username: username.toLowerCase(),
                     fullName: fullName,
-                    bio: bio || '',
-                    location: location || '',
                     provider: 'email',
                     createdAt: serverTimestamp(),
                     lastLogin: serverTimestamp(),
                     isNewUser: true,
-                    profileCompletion: calculateInitialCompletion(fullName, username, bio, location),
-                    // Profile visibility settings
+                    profileCompletion: calculateInitialCompletion(fullName, username),
                     visibility: {
                         email: false,
-                        location: !!location,
-                        bio: !!bio,
                         fullName: true
                     }
                 };
@@ -1579,8 +1552,6 @@
                         username: username.toLowerCase(),
                         displayName: fullName,
                         profilePicId: null,
-                        bio: bio || '',
-                        location: location || '',
                         referralId: user.uid,
                         successfulReferrals: 0,
                         createdAt: serverTimestamp(),
@@ -2135,12 +2106,10 @@
         }
 
         // Calculate initial profile completion
-        function calculateInitialCompletion(fullName, username, bio, location) {
+        function calculateInitialCompletion(fullName, username) {
             let completion = 0;
-            if (fullName) completion += 25;
-            if (username) completion += 25;
-            if (bio) completion += 25;
-            if (location) completion += 25;
+            if (fullName) completion += 50;
+            if (username) completion += 50;
             return completion;
         }
 
