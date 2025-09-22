@@ -64,9 +64,22 @@ export async function registerSession(auth, db, appId){
     }
   }
 
-  // Listen for remote changes - if another session claims ownership, sign out
+  // Listen for remote changes - only attach snapshot listener if reads are permitted
   let unsub = null;
   try{
+    // Preflight read to detect permission issues early
+    let pre = null;
+    try{
+      pre = await getDoc(sessionDocRef);
+    }catch(readErr){
+      if(readErr && (readErr.code === 'permission-denied' || (readErr.message && readErr.message.toLowerCase().includes('permission')))){
+        console.warn('session-manager: preflight read permission denied, skipping real-time listener');
+        return function unregister(){/* no-op */};
+      }
+      // If other read error, log and continue to attempt listener
+      console.warn('session-manager: preflight read error (continuing):', readErr);
+    }
+
     unsub = onSnapshot(sessionDocRef, (snap)=>{
       try{
         if(!snap.exists()) return;
