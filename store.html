@@ -144,7 +144,7 @@
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js';
     import { getFirestore, doc, setDoc, addDoc, collection, serverTimestamp, getDoc } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js';
     import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js';
-    import { BANK_DETAILS, renderBankDetails } from './bank-details.js';
+    // bank-details.js exposes window.renderBankDetails and window.BANK_DETAILS; use the global to avoid module export mismatch.
 
     const firebaseConfig = { apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w", authDomain: "jchat-1.firebaseapp.com", databaseURL: "https://jchat-1-default-rtdb.firebaseio.com", projectId: "jchat-1", storageBucket: "jchat-1.firebasestorage.app", messagingSenderId: "328479683167", appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea", measurementId: "G-S6Z9GG0R9P" };
     const appId = 'default-app-id';
@@ -155,7 +155,8 @@
     const db = getFirestore(app);
     const storage = getStorage(app);
 
-    renderBankDetails('bank-details', { layout: 'cards' });
+    // Render bank details panel (bank-details.js attaches renderBankDetails to window)
+    if (window.renderBankDetails) window.renderBankDetails('bank-details', { layout: 'cards' }); else console.warn('renderBankDetails not available');
 
     const USD_PER_JCOIN = 0.005;
     let gasPerJcoin = 0.1; // fallback; will fetch from settings if present
