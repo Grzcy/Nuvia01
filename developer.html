@@ -5430,6 +5430,20 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
                         }
                     }
 
+                    // Credit JCoins for jcoin_pack items or top-level jcoinAmount
+                    const jcoinPackItems = toAdd.filter(item => item.category === 'jcoin_pack');
+                    let totalJCoinsToCredit = Number(req.jcoinAmount || 0);
+                    if (jcoinPackItems.length > 0) {
+                        totalJCoinsToCredit += jcoinPackItems.reduce((sum, it) => sum + Number(it.jcoinAmount || it.coins || 0), 0);
+                    }
+                    if (totalJCoinsToCredit > 0) {
+                        const userProfileRef2 = doc(db, 'artifacts', appId, 'users', userId, 'profiles', 'user_profile');
+                        const profileSnapJ = await tx.get(userProfileRef2);
+                        const profileJ = profileSnapJ.exists() ? profileSnapJ.data() : {};
+                        const curJ = Number(profileJ.jCoins || 0);
+                        tx.set(userProfileRef2, { jCoins: curJ + totalJCoinsToCredit, updatedAt: serverTimestamp() }, { merge: true });
+                    }
+
                     // Set verified badge if this request is for verification
                     if (req.verificationBadge === true) {
                         const userProfileRef = doc(db, 'artifacts', appId, 'users', userId, 'profiles', 'user_profile');
