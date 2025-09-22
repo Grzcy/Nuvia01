@@ -117,6 +117,7 @@
           </div>
           <div class="actions">
             <a class="btn secondary" href="/unlock-wallet.html"><i class="fas fa-file-invoice"></i> Submit Receipt</a>
+            <button class="btn" id="unlockWithJCoinsBtn" type="button"><i class="fas fa-coins"></i> Unlock with JCoins</button>
             <a class="btn" href="/developer.html"><i class="fas fa-money-bill-transfer"></i> Pay Now</a>
           </div>
         </div>
@@ -139,6 +140,7 @@
             <span class="price-badge muted">$10.00</span>
           </div>
           <div class="actions">
+            <button class="btn" id="verifyWithJCoinsBtn" type="button"><i class="fas fa-certificate"></i> Verify with JCoins</button>
             <a class="btn" href="/developer.html"><i class="fas fa-paper-plane"></i> Buy via Developer</a>
           </div>
         </div>
@@ -198,8 +200,11 @@
             document.body.classList.add(t.id);
           } catch(_){}
         });
-        const buyBtn = el('a','btn'); buyBtn.href = '/developer.html'; buyBtn.innerHTML = `<i class=\"fas fa-cart-shopping\"></i> Buy`;
-        actions.appendChild(previewBtn); actions.appendChild(buyBtn);
+        const buyJcBtn = el('button','btn'); buyJcBtn.type='button'; buyJcBtn.innerHTML = '<i class="fas fa-coins"></i> Buy with JCoins';
+        buyJcBtn.addEventListener('click',()=> purchaseThemeWithJCoins(t));
+        const buyUsdBtn = el('button','btn secondary'); buyUsdBtn.type='button'; buyUsdBtn.innerHTML = '<i class="fas fa-dollar-sign"></i> Buy with $';
+        buyUsdBtn.addEventListener('click',()=> requestThemePurchaseUSD(t));
+        actions.appendChild(previewBtn); actions.appendChild(buyJcBtn); actions.appendChild(buyUsdBtn);
         card.appendChild(top); card.appendChild(priceRow); card.appendChild(actions);
         frag.appendChild(card);
       });
@@ -250,8 +255,10 @@
         const b2 = el('span','price-badge muted'); b2.textContent = `${j.toFixed(1)} JC`;
         priceRow.appendChild(b1); priceRow.appendChild(b2);
         const actions = el('div','actions');
-        const buy = el('a','btn'); buy.href = '/developer.html'; buy.innerHTML = '<i class=\"fas fa-cart-shopping\"></i> Buy Pack';
-        actions.appendChild(buy);
+        const buyJc = el('button','btn'); buyJc.type='button'; buyJc.innerHTML = '<i class="fas fa-coins"></i> Buy with JCoins';
+        buyJc.addEventListener('click',()=> buyGasWithJCoins(gas));
+        const buyUsd = el('a','btn secondary'); buyUsd.href = '/developer.html'; buyUsd.innerHTML = '<i class="fas fa-dollar-sign"></i> Buy with $';
+        actions.appendChild(buyJc); actions.appendChild(buyUsd);
         card.appendChild(top); card.appendChild(priceRow); card.appendChild(actions);
         frag.appendChild(card);
       });
@@ -264,7 +271,7 @@
 
     try{
       const { initializeApp } = await import('https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js');
-      const { getFirestore, doc, getDoc, setDoc, serverTimestamp, addDoc, collection } = await import('https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js');
+      const { getFirestore, doc, getDoc, setDoc, serverTimestamp, addDoc, collection, runTransaction, updateDoc, increment, arrayUnion } = await import('https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js');
       const { getAuth, onAuthStateChanged } = await import('https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js');
 
       const firebaseConfig = typeof window.__firebase_config !== 'undefined' ? JSON.parse(window.__firebase_config) : {
@@ -314,6 +321,135 @@
           });
         });
       }
+
+      // --- Payment Flow Helpers ---
+      const ADMIN_UID = 'cc96gdhCRPO72NFZtleRCujHvIq2';
+
+      async function ensureUser() {
+        return new Promise((resolve) => {
+          onAuthStateChanged(auth, (u) => {
+            if (!u) { alert('Please log in first.'); resolve(null); }
+            else resolve(u);
+          });
+        });
+      }
+
+      async function purchaseThemeWithJCoins(theme) {
+        const user = await ensureUser(); if (!user) return;
+        const priceJC = 800;
+        try {
+          await runTransaction(db, async (tx) => {
+            const profileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profiles', 'user_profile');
+            const entRefA = doc(db, 'artifacts', appId, 'users', user.uid, 'profiles', 'user_entitlements');
+            const entRefB = doc(db, 'artifacts', appId, 'users', user.uid, 'user_entitlements');
+            const profSnap = await tx.get(profileRef);
+            if (!profSnap.exists()) throw new Error('Profile not found');
+            const data = profSnap.data() || {};
+            const cur = Number(data.jCoins || 0);
+            if (cur < priceJC) throw new Error('Not enough JCoins');
+            tx.update(profileRef, { jCoins: cur - priceJC, updatedAt: serverTimestamp() });
+            const entUpdates = {};
+            entUpdates.themes = arrayUnion(theme.id);
+            entUpdates[`theme_${theme.id}_purchased`] = true;
+            entUpdates[`theme_${theme.id}_purchase_date`] = serverTimestamp();
+            entUpdates.updatedAt = serverTimestamp();
+            tx.set(entRefA, entUpdates, { merge: true });
+            tx.set(entRefB, entUpdates, { merge: true });
+          });
+          alert('Theme unlocked with JCoins.');
+        } catch (e) {
+          alert(e?.message || 'Purchase failed');
+        }
+      }
+
+      async function requestThemePurchaseUSD(theme) {
+        const user = await ensureUser(); if (!user) return;
+        try {
+          const colRef = collection(db, 'artifacts', appId, 'public', 'data', 'shop_payment_requests');
+          await addDoc(colRef, {
+            userId: user.uid,
+            assignedAdminId: ADMIN_UID,
+            status: 'pending',
+            paymentMethod: 'fiat',
+            items: [{ id: theme.id, category: 'premium_theme', themeKey: theme.id, themeName: theme.name, price: 4.0 }],
+            userCurrencyCode: 'USD',
+            userCurrencyAmount: 4.0,
+            timestamp: serverTimestamp()
+          });
+          alert('Request sent. Developer will review shortly.');
+          window.location.href = '/developer.html';
+        } catch (e) {
+          alert(e?.message || 'Failed to create request');
+        }
+      }
+
+      async function unlockWalletWithJCoins() {
+        const user = await ensureUser(); if (!user) return;
+        const priceJC = 5000;
+        try {
+          await runTransaction(db, async (tx) => {
+            const profileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profiles', 'user_profile');
+            const profSnap = await tx.get(profileRef);
+            if (!profSnap.exists()) throw new Error('Profile not found');
+            const data = profSnap.data() || {};
+            const cur = Number(data.jCoins || 0);
+            if (cur < priceJC) throw new Error('Not enough JCoins');
+            tx.update(profileRef, { jCoins: cur - priceJC, walletUnlocked: true, updatedAt: serverTimestamp() });
+            const txCol = collection(db, 'artifacts', appId, 'users', user.uid, 'transactions');
+            tx.set(doc(txCol), { type: 'wallet_unlock_jcoins', amount: -priceJC, timestamp: serverTimestamp() });
+          });
+          alert('Wallet unlocked successfully.');
+        } catch (e) {
+          alert(e?.message || 'Failed to unlock wallet');
+        }
+      }
+
+      async function verifyWithJCoins() {
+        const user = await ensureUser(); if (!user) return;
+        const priceJC = 2000;
+        try {
+          await runTransaction(db, async (tx) => {
+            const profileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profiles', 'user_profile');
+            const profSnap = await tx.get(profileRef);
+            if (!profSnap.exists()) throw new Error('Profile not found');
+            const data = profSnap.data() || {};
+            const cur = Number(data.jCoins || 0);
+            if (cur < priceJC) throw new Error('Not enough JCoins');
+            tx.update(profileRef, { jCoins: cur - priceJC, verified: true, updatedAt: serverTimestamp() });
+          });
+          alert('You are now verified.');
+        } catch (e) {
+          alert(e?.message || 'Verification failed');
+        }
+      }
+
+      async function buyGasWithJCoins(gasAmount) {
+        const user = await ensureUser(); if (!user) return;
+        const jcoinsNeeded = gasAmount / GAS_PER_JCOIN;
+        try {
+          await runTransaction(db, async (tx) => {
+            const profileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profiles', 'user_profile');
+            const profSnap = await tx.get(profileRef);
+            if (!profSnap.exists()) throw new Error('Profile not found');
+            const data = profSnap.data() || {};
+            const curJ = Number(data.jCoins || 0);
+            if (curJ < jcoinsNeeded) throw new Error('Not enough JCoins');
+            const newJ = curJ - jcoinsNeeded;
+            const newGas = Number(data.gas || 0) + gasAmount;
+            const newTotalGas = Number(data.totalGasEarned || 0) + gasAmount;
+            tx.update(profileRef, { jCoins: newJ, gas: newGas, totalGasEarned: newTotalGas, updatedAt: serverTimestamp() });
+            const txCol = collection(db, 'artifacts', appId, 'users', user.uid, 'transactions');
+            tx.set(doc(txCol), { type: 'buy_gas_jcoins', amount: gasAmount, jCoinsSpent: jcoinsNeeded, timestamp: serverTimestamp() });
+          });
+          alert('Gas added to your account.');
+        } catch (e) {
+          alert(e?.message || 'Failed to buy gas');
+        }
+      }
+
+      // Attach handlers for static buttons
+      document.getElementById('unlockWithJCoinsBtn')?.addEventListener('click', unlockWalletWithJCoins);
+      document.getElementById('verifyWithJCoinsBtn')?.addEventListener('click', verifyWithJCoins);
     }catch(_){ /* offline or firebase not available; soft-fail */ }
   </script>
 </body>
