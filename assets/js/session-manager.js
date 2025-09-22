@@ -34,39 +34,61 @@ export async function registerSession(auth, db, appId){
 
   const sessionDocRef = doc(db, 'artifacts', appId, 'sessions', uid);
 
-  // Atomically set session as current
+  // Try to set session document; prefer simple setDoc (more likely allowed by security rules) over transaction
   try{
-    await runTransaction(db, async (tx)=>{
-      tx.set(sessionDocRef, {
-        sessionId: mySessionId,
-        deviceId,
-        userAgent: navigator.userAgent || null,
-        issuedAt: serverTimestamp(),
-        lastSeen: serverTimestamp()
-      }, { merge: true });
-    });
+    await setDoc(sessionDocRef, {
+      sessionId: mySessionId,
+      deviceId,
+      userAgent: navigator.userAgent || null,
+      issuedAt: serverTimestamp(),
+      lastSeen: serverTimestamp()
+    }, { merge: true });
   }catch(e){
-    console.error('registerSession: txn failed', e);
-    // If permission denied, bail out silently to avoid noisy errors
+    console.error('registerSession: initial write failed', e);
+    // If permission denied, bail out silently to avoid noisy errors and fallback to local-only session
     if(e && (e.code === 'permission-denied' || (e.message && e.message.toLowerCase().includes('permission')))) return null;
+    // For other errors, attempt a transaction as a fallback
+    try{
+      await runTransaction(db, async (tx)=>{
+        tx.set(sessionDocRef, {
+          sessionId: mySessionId,
+          deviceId,
+          userAgent: navigator.userAgent || null,
+          issuedAt: serverTimestamp(),
+          lastSeen: serverTimestamp()
+        }, { merge: true });
+      });
+    }catch(txErr){
+      console.error('registerSession: txn failed', txErr);
+      if(txErr && (txErr.code === 'permission-denied' || (txErr.message && txErr.message.toLowerCase().includes('permission')))) return null;
+    }
   }
 
   // Listen for remote changes - if another session claims ownership, sign out
   let unsub = null;
   try{
     unsub = onSnapshot(sessionDocRef, (snap)=>{
-      if(!snap.exists()) return;
-      const data = snap.data();
-      if(!data) return;
-      const remoteId = data.sessionId;
-      if(remoteId && remoteId !== mySessionId){
-        // Another session claimed this account -> force sign out
-        console.warn('Session replaced by remote:', remoteId, 'local:', mySessionId);
-        try{ signOut(auth); showSessionReplacedMessage(); }catch(e){ console.error(e); }
+      try{
+        if(!snap.exists()) return;
+        const data = snap.data();
+        if(!data) return;
+        const remoteId = data.sessionId;
+        if(remoteId && remoteId !== mySessionId){
+          // Another session claimed this account -> force sign out
+          console.warn('Session replaced by remote:', remoteId, 'local:', mySessionId);
+          try{ signOut(auth); showSessionReplacedMessage(); }catch(e){ console.error(e); }
+        }
+      }catch(innerErr){
+        console.error('session-manager: onSnapshot handler error', innerErr);
       }
     }, (err)=>{
+      // Handle listener errors gracefully; suppress noisy permission-denied stack traces
+      if(err && (err.code === 'permission-denied' || (err.message && err.message.toLowerCase().includes('permission')))){
+        console.warn('session-manager: onSnapshot permission denied, unsubscribing');
+        try{ if(unsub) unsub(); }catch(e){}
+        return;
+      }
       console.error('session-manager: onSnapshot error', err);
-      // Stop heartbeat and unsubscribe to avoid repeated permission-denied errors
       try{ if(unsub) unsub(); }catch(e){}
     });
   }catch(err){
@@ -79,6 +101,8 @@ export async function registerSession(auth, db, appId){
       if(err && (err.code === 'permission-denied' || (err.message && err.message.toLowerCase().includes('permission')))){
         console.warn('session-manager: heartbeat permission denied, stopping heartbeat');
         try{ clearInterval(hb); if(unsub) unsub(); }catch(e){}
+      }else{
+        console.error('session-manager: heartbeat update failed', err);
       }
     });
   }, 60000);
