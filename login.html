@@ -1650,43 +1650,71 @@
 
             } catch (error) {
                 hideSmartLoader();
+                // Better handle network/fetch failures which sometimes don't provide error.code
                 let errorMessage = 'Invalid email or password.';
-                
-                switch (error.code) {
-                    case 'auth/user-not-found':
-                        errorMessage = 'No account found with this email.';
+
+                // Detect raw fetch/TypeError failures
+                try {
+                    const msg = (error && (error.message || '')).toString();
+                    if (msg.includes('Failed to fetch') || error.name === 'TypeError') {
+                        // perform a small network check
                         try {
-                            if (typeof __public_signup_enabled === 'undefined' || __public_signup_enabled !== false) {
-                                const currentEmail = document.getElementById('email')?.value.trim();
-                                showCustomModal('info', 'Create Account?', 'We can create a new account with this email. Continue?', () => {
-                                    const emailInput = document.getElementById('email');
-                                    if (emailInput && currentEmail) emailInput.value = currentEmail;
-                                    const container = document.querySelector('.login-container');
-                                    if (container && !container.classList.contains('signup-mode')) {
-                                        toggleSignupMode();
-                                    }
-                                });
-                            }
-                        } catch (_) {}
-                        break;
-                    case 'auth/wrong-password':
-                        errorMessage = 'Incorrect password. Please check your password and try again, or use "Forgot password" to reset it.';
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage = 'Please enter a valid email address.';
-                        break;
-                    case 'auth/invalid-credential':
-                        errorMessage = 'Invalid login credentials. Please check your email and password.';
-                        break;
-                    case 'auth/user-disabled':
-                        errorMessage = 'This account has been disabled. Please contact support for assistance.';
-                        break;
-                    case 'auth/too-many-requests':
-                        errorMessage = 'Too many failed attempts. Please try again later, or reset your password.';
-                        break;
-                    case 'auth/network-request-failed':
-                        errorMessage = 'Network error. Please check your internet connection and try again.';
-                        break;
+                            const controller = new AbortController();
+                            const timeout = setTimeout(() => controller.abort(), 3000);
+                            await fetch('https://www.gstatic.com/generate_204', { method: 'GET', mode: 'no-cors', signal: controller.signal }).catch(()=>{});
+                            clearTimeout(timeout);
+                        } catch (netErr) {
+                            console.warn('Network check failed:', netErr);
+                            errorMessage = 'Network error: Unable to reach authentication server. Check your internet connection or browser extensions (adblockers/proxies) and try again.';
+                            showErrorModal(errorMessage);
+                            return;
+                        }
+                        // If network check passed, fall back to generic message
+                        errorMessage = 'Network error while communicating with authentication server. Please try again.';
+                    }
+                } catch (_) {}
+
+                // If firebase provided an error code, map to friendly messages
+                if (error && error.code) {
+                    switch (error.code) {
+                        case 'auth/user-not-found':
+                            errorMessage = 'No account found with this email.';
+                            try {
+                                if (typeof __public_signup_enabled === 'undefined' || __public_signup_enabled !== false) {
+                                    const currentEmail = document.getElementById('email')?.value.trim();
+                                    showCustomModal('info', 'Create Account?', 'We can create a new account with this email. Continue?', () => {
+                                        const emailInput = document.getElementById('email');
+                                        if (emailInput && currentEmail) emailInput.value = currentEmail;
+                                        const container = document.querySelector('.login-container');
+                                        if (container && !container.classList.contains('signup-mode')) {
+                                            toggleSignupMode();
+                                        }
+                                    });
+                                }
+                            } catch (_) {}
+                            break;
+                        case 'auth/wrong-password':
+                            errorMessage = 'Incorrect password. Please check your password and try again, or use "Forgot password" to reset it.';
+                            break;
+                        case 'auth/invalid-email':
+                            errorMessage = 'Please enter a valid email address.';
+                            break;
+                        case 'auth/invalid-credential':
+                            errorMessage = 'Invalid login credentials. Please check your email and password.';
+                            break;
+                        case 'auth/user-disabled':
+                            errorMessage = 'This account has been disabled. Please contact support for assistance.';
+                            break;
+                        case 'auth/too-many-requests':
+                            errorMessage = 'Too many failed attempts. Please try again later, or reset your password.';
+                            break;
+                        case 'auth/network-request-failed':
+                            errorMessage = 'Network error. Please check your internet connection and try again.';
+                            break;
+                        default:
+                            // Keep generic message
+                            break;
+                    }
                 }
 
                 try {
