@@ -945,6 +945,15 @@
 .optional-summary::-webkit-details-marker { display: none; }
 .optional-details-content { margin-top: 10px; }
 </style>
+<style>
+/* Create Account button color (black & gold) only in signup mode */
+.login-container.signup-mode .login-btn {
+  background: linear-gradient(90deg, #000000, #d4af37);
+  color: #ffffff;
+  border-color: rgba(255,255,255,0.85);
+}
+.login-container.signup-mode .login-btn:hover { filter: brightness(1.02); }
+</style>
 </head>
 <body>
     <!-- Floating Particles -->
@@ -2013,9 +2022,8 @@
                 rememberForgot.style.display = 'flex';
 
                 // Hide signup-only fields
-                signupOnlyFields.forEach(field => {
-                    field.style.display = 'none';
-                });
+                signupOnlyFields.forEach(field => { field.style.display = 'none'; });
+                try { const opt = document.querySelector('.optional-details'); if (opt) opt.removeAttribute('open'); } catch(_){}
 
                 } else {
                 // Switch to signup mode
@@ -2027,9 +2035,8 @@
                 rememberForgot.style.display = 'none';
 
                 // Show signup-only fields
-                signupOnlyFields.forEach(field => {
-                    field.style.display = 'block';
-                });
+                signupOnlyFields.forEach(field => { field.style.display = 'block'; });
+                try { const opt = document.querySelector('.optional-details'); if (opt) opt.setAttribute('open',''); } catch(_){}
 
                 }
 
