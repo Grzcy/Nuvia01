@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
     <style>
         * {
             margin: 0;
@@ -990,7 +991,7 @@
                     required
                 >
                 <button type="button" class="password-toggle" id="passwordToggle" aria-pressed="false" aria-label="Show password" aria-controls="password" onclick="togglePassword()">
-                    👁��
+                    <i id="passwordToggleIcon" class="fas fa-eye" aria-hidden="true"></i>
                 </button>
                 <div id="capsWarning" class="caps-warning">Caps Lock is ON</div>
             </div>
@@ -1226,20 +1227,45 @@
         window.togglePassword = function() {
             const passwordInput = document.getElementById('password');
             const toggleBtn = document.getElementById('passwordToggle') || document.querySelector('.password-toggle');
+            const icon = document.getElementById('passwordToggleIcon') || (toggleBtn ? toggleBtn.querySelector('i') : null);
             try {
                 if (passwordInput.type === 'password') {
                     passwordInput.type = 'text';
-                    toggleBtn.textContent = '🙈';
-                    toggleBtn.setAttribute('aria-pressed','true');
-                    toggleBtn.setAttribute('aria-label','Hide password');
+                    if (icon) { icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash'); }
+                    if (toggleBtn) { toggleBtn.setAttribute('aria-pressed','true'); toggleBtn.setAttribute('aria-label','Hide password'); }
                 } else {
                     passwordInput.type = 'password';
-                    toggleBtn.textContent = '👁️';
-                    toggleBtn.setAttribute('aria-pressed','false');
-                    toggleBtn.setAttribute('aria-label','Show password');
+                    if (icon) { icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye'); }
+                    if (toggleBtn) { toggleBtn.setAttribute('aria-pressed','false'); toggleBtn.setAttribute('aria-label','Show password'); }
                 }
             } catch(e) { console.warn('togglePassword error', e); }
         };
+
+        // Press-and-hold to peek password without toggling state
+        (function(){
+            const btn = document.getElementById('passwordToggle');
+            const input = document.getElementById('password');
+            const icon = document.getElementById('passwordToggleIcon');
+            if (!btn || !input) return;
+            let holdActive = false;
+            function pressDown(){
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    holdActive = true;
+                    if (icon) { icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash'); }
+                }
+            }
+            function pressUp(){
+                if (holdActive && btn.getAttribute('aria-pressed') !== 'true') {
+                    input.type = 'password';
+                    if (icon) { icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye'); }
+                }
+                holdActive = false;
+            }
+            btn.addEventListener('mousedown', pressDown);
+            btn.addEventListener('touchstart', pressDown, { passive: true });
+            ['mouseup','mouseleave','touchend','touchcancel','blur'].forEach(ev => btn.addEventListener(ev, pressUp));
+        })();
 
 
 
