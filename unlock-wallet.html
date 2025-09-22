@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -148,7 +147,7 @@
         import { getAuth } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js";
-        import { BANK_DETAILS, renderBankDetails } from "./bank-details.js";
+    // bank-details.js attaches renderBankDetails and BANK_DETAILS to window; use the global instead of importing as module exports.
 
         const firebaseConfig = {
             apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
@@ -167,7 +166,7 @@
         const db = getFirestore(app);
         const storage = getStorage(app);
 
-        renderBankDetails("bank-details-container", { layout: 'cards' });
+        if (window.renderBankDetails) window.renderBankDetails("bank-details-container", { layout: 'cards' }); else console.warn('renderBankDetails not found');
 
         const paymentProofInput = document.getElementById("paymentProof");
         const fileNameDisplay = document.getElementById("fileName");
