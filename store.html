@@ -223,13 +223,51 @@
       });
     }
 
+    async function immediateUnlockTheme(theme){
+      if (!auth || !auth.currentUser) { alert('Please sign in to unlock themes.'); return; }
+      try{
+        const entRef = doc(db, 'artifacts', appId, 'users', auth.currentUser.uid, 'profiles', 'user_entitlements');
+        // Try update with arrayUnion
+        try{
+          await updateDoc(entRef, { themes: arrayUnion(theme.themeKey), updatedAt: serverTimestamp() });
+        }catch(uerr){
+          // If update failed because doc missing, set doc
+          try{
+            const snap = await getDoc(entRef);
+            if (!snap.exists()) {
+              await setDoc(entRef, { themes: [theme.themeKey], updatedAt: serverTimestamp() });
+            } else {
+              // Last resort: merge set
+              await setDoc(entRef, { themes: arrayUnion(theme.themeKey), updatedAt: serverTimestamp() }, { merge: true });
+            }
+          }catch(e){ console.warn('Failed to write entitlements:', e); throw e; }
+        }
+
+        // Also update local purchased state and apply theme immediately
+        try{ localStorage.setItem('nuvia-theme', theme.themeKey); }catch(_){}
+        // Remove previous theme classes and add new one
+        try{
+          document.body.classList.forEach(c => { if (c.startsWith('theme-')) document.body.classList.remove(c); });
+        }catch(_){}
+        document.body.classList.add(theme.themeKey);
+
+        alert(`${theme.name} unlocked and applied.`);
+        // Refresh themes UI
+        renderThemes();
+      }catch(e){ console.error('immediateUnlockTheme failed', e); alert('Failed to unlock theme: '+(e.message||e)); }
+    }
+
     function renderThemes(){
       themesGrid.innerHTML = '';
       themes.forEach(t => {
         const card = el('div', { class:'card' });
         card.innerHTML = `<h3>${t.name}</h3><p>Premium visual theme.</p><div class="price">$${t.priceUsd.toFixed(2)}</div>`;
-        const btn = el('button', { class:'buy-btn', 'data-id': t.id }, 'Buy & Upload Receipt');
-        btn.addEventListener('click', ()=> openModal({ kind:'theme', theme:t, priceUsd: t.priceUsd, title: t.name }));
+        const btn = el('button', { class:'buy-btn', 'data-id': t.id }, 'Unlock Now');
+        btn.addEventListener('click', ()=>{
+          if (!auth || !auth.currentUser) { if (confirm('You must sign in to unlock this theme. Go to login?')) window.location.href='login.html'; return; }
+          if (!confirm(`Unlock ${t.name} now for $${t.priceUsd.toFixed(2)}?`)) return;
+          immediateUnlockTheme(t);
+        });
         card.appendChild(btn); themesGrid.appendChild(card);
       });
     }
