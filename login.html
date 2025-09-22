@@ -1245,37 +1245,66 @@
 
 
 
-        // Save user data to Firestore
+        // Save user data to Firestore (use public artifacts path to match other modules; handle permission errors)
         async function saveUserData(user, provider, additionalData = {}) {
             try {
-                const userRef = doc(db, 'users', user.uid);
+                if (!user || !user.uid) return;
+
+                // Ensure auth has settled and currentUser matches the target uid when possible
+                if (typeof auth !== 'undefined' && auth.currentUser && auth.currentUser.uid !== user.uid) {
+                    // give auth a short moment to settle (useful when saveUserData is called immediately after sign-in)
+                    await new Promise(res => setTimeout(res, 300));
+                }
+
+                // Use the same 'artifacts' public users collection used across the app to avoid mismatched security rules
+                const userRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', user.uid);
                 const userDoc = await getDoc(userRef);
-                
+
+                const now = serverTimestamp();
                 const userData = {
                     uid: user.uid,
-                    email: user.email,
-                    displayName: user.displayName,
-                    photoURL: user.photoURL,
-                    provider: provider,
-                    lastLogin: serverTimestamp(),
+                    email: user.email || null,
+                    displayName: user.displayName || null,
+                    photoURL: user.photoURL || null,
+                    provider: provider || null,
+                    lastLogin: now,
                     ...additionalData
                 };
-                
+
                 if (!userDoc.exists()) {
                     // New user
-                    userData.createdAt = serverTimestamp();
+                    userData.createdAt = now;
                     userData.isNewUser = true;
                     await setDoc(userRef, userData);
                 } else {
-                    // Existing user
+                    // Existing user - only update allowed fields
                     await updateDoc(userRef, {
-                        lastLogin: serverTimestamp(),
-                        provider: provider
+                        lastLogin: now,
+                        provider: provider || null
                     });
                 }
-                
+
             } catch (error) {
                 console.error('Error saving user data:', error);
+
+                // Specific guidance and a safe fallback when this is a Firestore permission issue
+                if (error && error.code === 'permission-denied') {
+                    console.warn('Permission denied while writing user profile. Likely causes: Firestore rules restrict writes to this path or the user is not authenticated yet.');
+
+                    try {
+                        // Attempt a minimal public profile write to a permissive summary collection as a best-effort fallback
+                        const fallbackRef = doc(db, 'artifacts', appId, 'public', 'data', 'user_profiles', user.uid);
+                        await setDoc(fallbackRef, {
+                            uid: user.uid,
+                            displayName: user.displayName || null,
+                            photoURL: user.photoURL || null,
+                            updatedAt: serverTimestamp()
+                        }, { merge: true });
+                        console.info('Fallback public profile written to artifacts/.../user_profiles as minimal record.');
+                    } catch (fbErr) {
+                        console.warn('Fallback write also failed:', fbErr);
+                    }
+                }
             }
         }
 
