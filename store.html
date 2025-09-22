@@ -262,17 +262,30 @@
       themes.forEach(t => {
         const card = el('div', { class:'card' });
         card.innerHTML = `<h3>${t.name}</h3><p>Premium visual theme.</p><div class="price">$${t.priceUsd.toFixed(2)}</div>`;
-        const btn = el('button', { class:'buy-btn', 'data-id': t.id }, 'Unlock Now');
+        const btn = el('button', { class:'buy-btn', 'data-id': t.id }, 'Buy & Upload Receipt');
         btn.addEventListener('click', ()=>{
-          if (!auth || !auth.currentUser) { if (confirm('You must sign in to unlock this theme. Go to login?')) window.location.href='login.html'; return; }
-          if (!confirm(`Unlock ${t.name} now for $${t.priceUsd.toFixed(2)}?`)) return;
-          immediateUnlockTheme(t);
+          if (!auth || !auth.currentUser) { if (confirm('You must sign in to purchase this theme. Go to login?')) window.location.href='login.html'; return; }
+          openModal({ kind:'theme', theme: t, priceUsd: t.priceUsd, title: t.name });
         });
         card.appendChild(btn); themesGrid.appendChild(card);
       });
     }
 
     renderJcoinPacks(); renderGasPacks(); renderThemes();
+
+    // If redirected with ?theme=theme-key, preselect and open modal
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const themeKey = params.get('theme');
+      if (themeKey) {
+        const t = themes.find(x => x.themeKey === themeKey || x.id === themeKey);
+        if (t) {
+          // Scroll to themes section and open modal
+          document.getElementById('themesSection')?.scrollIntoView({ behavior:'smooth', block:'start' });
+          setTimeout(()=> openModal({ kind:'theme', theme: t, priceUsd: t.priceUsd, title: t.name }), 300);
+        }
+      }
+    } catch(_) {}
 
     // Modal logic
     const modal = document.getElementById('purchaseModal');
