@@ -5640,6 +5640,7 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
                     fetchNotificationCount(user.uid);
                     fetchPendingJCoinRequests(); // Start listening for pending JCoin requests
                     fetchAndDisplayPendingRewards(); // Start listening for pending Activity Rewards
+                    startAutoApproveRewards();
                     fetchAndDisplayReportedContent(); // New: Start listening for reported content
                     fetchAndDisplayPublicPosts(); // New: Start listening for public posts
                     fetchAndFilterAllUsers(); // New: Initial load of global users
@@ -6103,6 +6104,7 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
                     fetchNotificationCount(user.uid);
                     fetchPendingJCoinRequests(); // Start listening for pending JCoin requests
                     fetchAndDisplayPendingRewards(); // Start listening for pending Activity Rewards
+                    startAutoApproveRewards();
                     fetchAndDisplayReportedContent(); // New: Start listening for reported content
                     fetchAndDisplayPublicPosts(); // New: Start listening for public posts
                     fetchAndFilterAllUsers(); // New: Initial load of global users
