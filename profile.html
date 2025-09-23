@@ -6199,6 +6199,11 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
         const profileSocialLinks = document.getElementById('profileSocialLinks');
         const socialLinksText = document.getElementById('socialLinksText');
 
+        // User Info toggle and section (default hidden, will show for owner only)
+        const userInfoToggleBtn = document.getElementById('userInfoToggle');
+        const userInfoSectionEl = document.getElementById('userInfoSection');
+        if (userInfoToggleBtn) userInfoToggleBtn.style.display = 'none';
+
         const statPosts = document.getElementById('statPosts');
         const statFriends = document.getElementById('statFriends');
         const statFollowers = document.getElementById('statFollowers');
@@ -9307,7 +9312,7 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
 
                     // Action Buttons and Inline Edit Fields
                     if (isCurrentUserProfile) {
-            
+                        if (userInfoToggleBtn) userInfoToggleBtn.style.display = 'inline-flex';            
 
                         if (claimDailyBonusButton) claimDailyBonusButton.style.display = 'inline-flex'; // NEW: Show daily bonus button
                         updateDailyBonusUI(); // NEW: Update daily bonus UI
@@ -9393,6 +9398,8 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
 
                     } else if (currentUser) { // If logged in and viewing another user
                         // Hide all owner-specific buttons and editing sections
+                        if (userInfoToggleBtn) userInfoToggleBtn.style.display = 'none';
+                        if (userInfoSectionEl) userInfoSectionEl.style.display = 'none';
                         
 
                         if (claimDailyBonusButton) claimDailyBonusButton.style.display = 'none'; // Hide daily bonus button for others
@@ -9432,6 +9439,8 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
                         // Calculate and update profile completion for other users
                         calculateAndUpdateProfileCompletion(displayedUserProfileData);
                     } else { // Not logged in, viewing any profile
+                        if (userInfoToggleBtn) userInfoToggleBtn.style.display = 'none';
+                        if (userInfoSectionEl) userInfoSectionEl.style.display = 'none';
                         
 
                         if (claimDailyBonusButton) claimDailyBonusButton.style.display = 'none'; // Hide daily bonus button
