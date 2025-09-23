@@ -6063,7 +6063,7 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
         const headerDisplayName = document.getElementById('headerDisplayName');
         const notificationCountElement = document.getElementById('notificationCount');
 
-        // const headerNavLinkProfile = document.getElementById('profileLink'); // Removed - element doesn't exist
+        const headerNavLinkProfile = document.getElementById('profileLink') || document.getElementById('headerNavLinkProfile') || null; // Safe reference, some pages use 'profileLink' or 'headerNavLinkProfile'
         const adminIconLink = document.getElementById('adminIconLink');
         
 
