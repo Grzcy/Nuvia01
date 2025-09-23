@@ -14443,6 +14443,29 @@ async function fetchAndDisplayPosts() {
 })();
 </script>
 <script>(function(){function init(){try{var btn=document.getElementById('chipsToggleBtn');if(!btn)return;var ic=btn.querySelector('i');function setState(h){btn.setAttribute('aria-pressed',h?'true':'false');if(ic) ic.className=h?'fas fa-eye':'fas fa-eye-slash';}btn.addEventListener('click',function(e){try{e.preventDefault();var h=document.body.classList.toggle('secondary-header-hidden');setState(h);}catch(_){}});setState(document.body.classList.contains('secondary-header-hidden'));}catch(_){}}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}})();</script>
+<script type="module">
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+import { getFirestore, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+const APP_ID = 'jchat_1_0_0';
+function startPagePresence(){
+  try{
+    onAuthStateChanged(getAuth(), (user) => {
+      if (!user || !user.uid) return;
+      const db = getFirestore();
+      const userDoc = doc(db, 'artifacts', APP_ID, 'public', 'data', 'users', user.uid);
+      const post = () => setDoc(userDoc, { online: navigator.onLine, lastActive: serverTimestamp(), currentPage: window.location.pathname }, { merge: true }).catch(()=>{});
+      post();
+      const tid = setInterval(post, 15000);
+      const debounced = () => post();
+      window.addEventListener('online', debounced);
+      window.addEventListener('offline', debounced);
+      document.addEventListener('visibilitychange', debounced);
+      window.addEventListener('beforeunload', () => { try{ post(); } catch(_){} });
+    });
+  }catch(e){console.error('JCHAT_ERROR startPagePresence', e);}
+}
+startPagePresence();
+</script>
 <script type="module" src="jchat-global-call-service.js" defer></script>
 </body>
 </html>
