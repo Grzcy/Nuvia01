@@ -1107,6 +1107,7 @@
                 const desiredVideo = !!(docSnap.data()?.video);
                 openCallUI(desiredVideo);
                 if (incomingActions) incomingActions.style.display = 'none';
+                if (endCallBtn) endCallBtn.style.display = 'inline-flex';
                 stopRingtone();
                 const csEl = document.getElementById('callStatus');
                 if (csEl) csEl.textContent = 'Connecting…';
