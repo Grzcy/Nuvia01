@@ -4749,6 +4749,10 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                     <input type="file" id="postMediaUpload" accept="image/*,video/*" disabled>
                     <img id="mediaImagePreview" class="media-preview hidden" src="" alt="Image Preview" loading="lazy" decoding="async">
                     <video id="mediaVideoPreview" class="media-preview hidden" src="" controls preload="metadata" playsinline></video>
+                    <div id="videoThumbnailControls" class="video-thumbnail-controls hidden" aria-live="polite">
+                        <button id="openThumbnailModalButton" class="post-control-button" type="button"><i class="fas fa-image"></i> Set Thumbnail</button>
+                        <img id="videoThumbnailPreview" class="thumbnail-preview hidden" alt="Thumbnail preview" loading="lazy" decoding="async" />
+                    </div>
                 </div>
                 <div class="post-controls-row">
                     <label class="post-poll-toggle">
@@ -5083,7 +5087,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         <div class="smart-success-content">
             <div class="smart-success-header">
                 <div class="smart-success-icon"><i class="fas fa-check-circle"></i></div>
-                <button class="smart-success-close" aria-label="Close success message">��</button>
+                <button class="smart-success-close" aria-label="Close success message">���</button>
             </div>
             <div class="smart-success-title" id="smartSuccessTitle">Success!</div>
             <div class="smart-success-message" id="smartSuccessMessage">Operation completed successfully.</div>
