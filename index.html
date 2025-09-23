@@ -4560,7 +4560,17 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
     </div>
 
 
-    <a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">Skip to main content</a>
+    <div id="announcementPillContainer" class="announcement-pill-container" aria-live="polite" style="display:none; pointer-events:auto;">
+  <div class="announcement-pill" role="region" aria-label="Global announcement" tabindex="0">
+    <i class="fas fa-bullhorn announcement-pill-icon" aria-hidden="true"></i>
+    <div id="announcementPillText" class="announcement-pill-message">Announcement message</div>
+    <button id="announcementPillCta" class="announcement-pill-cta" style="display:none;">Action</button>
+    <button id="announcementPillDismiss" class="announcement-pill-dismiss" aria-label="Dismiss announcement">×</button>
+  </div>
+  <div id="announcementLiveRegion" class="sr-only" aria-live="assertive" aria-atomic="true" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">""</div>
+</div>
+
+<a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">Skip to main content</a>
 
 <main id="main-content">
         <div class="content-wrapper">
@@ -7040,7 +7050,7 @@ const simpleBibleQuotes = [
     { text: "Trust in the Lord with all your heart; do not rely only on your own understanding.", ref: "Proverbs 3:5 (KJV)" },
     { text: "Blessed are the peacemakers; they will be called children of God.", ref: "Matthew 5:9 (KJV)" },
     { text: "Come to me if you are tired, and I will give you rest.", ref: "Matthew 11:28 (KJV)" },
-    { text: "I know the plans I have for you—plans for good and hope for the future.", ref: "Jeremiah 29:11 (KJV)" },
+    { text: "I know the plans I have for you��plans for good and hope for the future.", ref: "Jeremiah 29:11 (KJV)" },
     { text: "Those who hope in the Lord will renew their strength and rise up like eagles.", ref: "Isaiah 40:31 (KJV)" },
     { text: "God is our refuge and strength; He helps in trouble.", ref: "Psalm 46:1 (KJV)" },
     { text: "This is the day the Lord has made; be glad and rejoice in it.", ref: "Psalm 118:24 (KJV)" },
@@ -7068,7 +7078,7 @@ const simpleBibleQuotes = [
 const simpleQuranQuotes = [
     { text: "Remember Me, and I will remember you.", ref: "Al‑Baqarah 2:152" },
     { text: "Whoever does good, it is for his own soul.", ref: "Al���An'am 6:160" },
-    { text: "Allah does not burden a soul beyond its capacity.", ref: "Al‑Baqarah 2:286" },
+    { text: "Allah does not burden a soul beyond its capacity.", ref: "Al���Baqarah 2:286" },
     { text: "In the remembrance of Allah hearts find rest.", ref: "Ar‑Ra'd 13:28" },
     { text: "Seek help through patience and prayer.", ref: "Al‑Baqarah 2:45" },
     { text: "God loves those who do good.", ref: "Al‑Baqarah 2:195" },
