@@ -1249,33 +1249,78 @@
             fileInput.value = '';
         });
 
+        // Robust fetch with timeout and retries to avoid uncaught "Failed to fetch" errors
+        async function safeFetch(input, init = {}, opts = {}){
+            const { timeout = 15000, retries = 2, retryDelay = 600 } = opts;
+            let attempt = 0;
+            while(attempt <= retries){
+                attempt++;
+                const controller = new AbortController();
+                const id = setTimeout(()=> controller.abort(), timeout);
+                try{
+                    const res = await fetch(input, { signal: controller.signal, ...init });
+                    clearTimeout(id);
+                    if (!res.ok) {
+                        // for 4xx do not retry
+                        if (res.status >= 400 && res.status < 500) return res;
+                        throw new Error('Network response was not ok: ' + res.status);
+                    }
+                    return res;
+                }catch(err){
+                    clearTimeout(id);
+                    if (attempt > retries) throw err;
+                    // simple exponential backoff
+                    await new Promise(r => setTimeout(r, retryDelay * attempt));
+                }
+            }
+        }
+
         async function uploadToCloudinary(file) {
             try {
                 const fd = new FormData();
                 fd.append('file', file);
                 fd.append('upload_preset', cloudinaryConfig.uploadPreset);
                 const type = file.type.startsWith('image/') ? 'image' : (file.type.startsWith('video/') ? 'video' : 'raw');
-                const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/${type}/upload`, { method: 'POST', body: fd });
-                if (!res.ok) return null;
+                let res;
+                try {
+                    res = await safeFetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/${type}/upload`, { method: 'POST', body: fd }, { timeout: 20000, retries: 2, retryDelay: 800 });
+                } catch (e) {
+                    console.error('Cloudinary upload failed', e);
+                    showMessageBox('Upload failed. Check your connection and try again.', 'error');
+                    return null;
+                }
+                if (!res || !res.ok) return null;
                 const data = await res.json();
                 return data.secure_url || data.url || null;
-            } catch (e) { return null; }
+            } catch (e) { console.error('uploadToCloudinary unexpected error', e); return null; }
         }
 
         async function sendFileMessage(file, url) {
             const chatId = chatIdFor(currentUser.uid, currentPartner.id);
             const messagesRef = collection(db, "artifacts", appId, "public", "data", "chats", chatId, "messages");
-            await addDoc(messagesRef, {
-                text: file.type.startsWith('image/') ? 'Photo' : (file.type.startsWith('video/') ? 'Video' : 'Attachment'),
-                type: 'file',
-                fileUrl: url,
-                fileName: file.name,
-                senderId: currentUser.uid,
-                receiverId: currentPartner.id,
-                timestamp: serverTimestamp(),
-                status: 'sent',
-                chatId
-            });
+            try{
+                await addDoc(messagesRef, {
+                    text: file.type.startsWith('image/') ? 'Photo' : (file.type.startsWith('video/') ? 'Video' : 'Attachment'),
+                    type: 'file',
+                    fileUrl: url,
+                    fileName: file.name,
+                    senderId: currentUser.uid,
+                    receiverId: currentPartner.id,
+                    timestamp: serverTimestamp(),
+                    status: 'sent',
+                    chatId
+                });
+            }catch(e){
+                console.error('sendFileMessage failed to write message', e);
+                // Fallback: send a text message with link so user still gets something
+                try{
+                    const fallback = `${file.type.startsWith('image/') ? 'Photo' : (file.type.startsWith('video/') ? 'Video' : 'Attachment')}: ${url}`;
+                    await addDoc(messagesRef, { text: fallback, senderId: currentUser.uid, receiverId: currentPartner.id, timestamp: serverTimestamp(), status: 'sent', chatId });
+                }catch(err){
+                    console.error('Fallback message also failed', err);
+                    showMessageBox('Failed to send message. Please try again.', 'error');
+                }
+            }
         }
 
         // Friends dropdown logic
