@@ -241,10 +241,31 @@
         try{ await fetchAndDisplayHeaderProfile(currentUser); }catch(_){ }
         const col = collection(db,'artifacts', appId, 'users', currentUser.uid, 'notifications');
         const q = query(col, orderBy('timestamp','desc'), limit(400));
+        let __notifInitialized = false;
         unsubscribe = onSnapshot(q, snap=>{
           const arr = [];
           snap.forEach(s=>{ arr.push(map(s.id, s.data())); });
-          items = arr; cacheItems(); render(); updateGlobalUnreadCount();
+          // detect newly received notifications since last snapshot
+          try{
+            const prevIds = new Set(items.map(i=>i.id));
+            const newItems = arr.filter(i=>!prevIds.has(i.id) && i.unread);
+            // update items and UI
+            items = arr; cacheItems(); render(); updateGlobalUnreadCount();
+            // play sound for new notifications only after initial load
+            if(__notifInitialized && newItems.length>0){
+              try{
+                if (prefs.sound && !prefs.dnd){
+                  if (!__notifAudio) { __notifAudio = new Audio('ne.mp3'); __notifAudio.preload = 'auto'; __notifAudio.volume = 0.7; }
+                  __notifAudio.currentTime = 0; __notifAudio.play().catch(()=>{});
+                }
+              }catch(_){ }
+            }
+            __notifInitialized = true;
+          }catch(e){
+            console.warn('Error processing notifications snapshot', e);
+            items = arr; cacheItems(); render(); updateGlobalUnreadCount();
+            __notifInitialized = true;
+          }
         }, err=>{ console.warn('notifications subscribe error', err); loadCachedAndRender(); });
       });
 
