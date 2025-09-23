@@ -4437,15 +4437,6 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         </div>
     </header>
 
-    <div id="announcementPillContainer" class="announcement-pill-container" style="display:none;">
-      <div class="announcement-pill" role="button" tabindex="0" aria-label="View announcement">
-        <i class="fas fa-bullhorn" aria-hidden="true"></i>
-        <span id="announcementPillText" class="announcement-pill-message"></span>
-        <button id="announcementPillCta" class="announcement-pill-cta" type="button" style="display:none;">Open</button>
-        <button id="announcementPillDismiss" class="announcement-pill-dismiss" type="button" aria-label="Dismiss announcement">&times;</button>
-      </div>
-    </div>
-    <div id="announcementLiveRegion" class="sr-only" aria-live="polite"></div>
 
 
 
@@ -4552,105 +4543,10 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 </div>
             </section>
 
-            <!-- People You May Know Strip -->
-            <div id="peopleMayKnow" style="display:none; margin: 16px auto; max-width: 900px;">
-                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-                    <div style="font-family: 'Poppins', sans-serif; font-weight:700; color: var(--white);">People you may know</div>
-                    <button id="refreshPymkBtn" class="icon-btn" title="Refresh" style="border:1px solid var(--border-color); border-radius:10px; padding:6px 10px;"><i class="fas fa-rotate"></i></button>
-                </div>
-                <div id="pymkScroller" style="display:flex; gap:12px; overflow-x:auto; padding:8px; border:1px solid var(--border-color); border-radius:12px; background: var(--card-background);">
-                </div>
-            </div>
 
-            <!-- Global Announcements Section -->
-            <div id="globalAnnouncementsSection" class="global-announcements-section" style="display: none;">
-                <div class="announcement-header">
-                    <i class="fas fa-bullhorn announcement-icon"></i>
-                    <h3 class="announcement-title">Important Announcement</h3>
-                    <button id="dismissAnnouncementBtn" class="announcement-dismiss-btn" aria-label="Dismiss announcement">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="announcement-content">
-                    <div class="announcement-type-badge" id="announcementTypeBadge"></div>
-                    <div class="announcement-priority-badge" id="announcementPriorityBadge"></div>
-                    <p id="announcementMessage" class="announcement-message"></p>
-                    <div class="announcement-meta">
-                        <small id="announcementTimestamp" class="announcement-timestamp"></small>
-                        <small class="announcement-source">From Nuvia TEAM</small>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Home Chips: Level and Wallet -->
-            <div class="home-chips-row" id="homeChipsRow" style="display:none;">
-                <div class="chip level-chip">
-                    <i class="fas fa-star"></i>
-                    <div class="chip-text">
-                        <div style="display:flex;align-items:center;gap:8px;">
-                            <i id="levelChipIcon" class="fas fa-question-circle"></i>
-                            <div id="levelChipName">Novice</div>
-                            <div id="levelChipPercent" style="opacity:.85;font-size:.85rem;">0%</div>
-                        </div>
-                        <div class="chip-progress"><div id="levelChipProgressFill"></div></div>
-                    </div>
-                </div>
-                <a href="#" id="walletChipLink" class="chip wallet-chip">
-                    <i class="fas fa-wallet"></i>
-                    <div class="chip-text">
-                        <div><span id="walletChipAmount">0</span> JCoins</div>
-                        <div class="chip-sub">Rate: ₦<span id="jcoinRate">0</span>/J</div>
-                    </div>
-                </a>
-            </div>
 
-            <!-- Premium Features Section -->
-            <div class="premium-features-section" id="premiumFeaturesSection" style="display: none;">
-                <h3>🌟 Premium Features</h3>
-                <p style="color: var(--text-light); margin-bottom: 15px;">Unlock exclusive features with your premium subscription!</p>
-                
-                <div class="premium-features-grid">
-                    <div class="premium-feature-card">
-                        <div class="premium-feature-icon">�����</div>
-                        <div class="premium-feature-title">Custom Themes</div>
-                        <div class="premium-feature-desc">Choose from exclusive premium themes</div>
-                        <div style="margin-top: 10px;">
-                            <button class="premium-post-option" onclick="applyPremiumTheme('dark')">Dark Theme</button>
-                            <button class="premium-post-option" onclick="applyPremiumTheme('neon')">Neon Theme</button>
-                            <button class="premium-post-option" onclick="applyPremiumTheme('glass')">Glass Theme</button>
-                        </div>
-                    </div>
-                    
-                    <div class="premium-feature-card">
-                        <div class="premium-feature-icon">������</div>
-                        <div class="premium-feature-title">Ad-Free Experience</div>
-                        <div class="premium-feature-desc">Enjoy Nuvia without any advertisements</div>
-                    </div>
-                    
-                    <div class="premium-feature-card">
-                        <div class="premium-feature-icon">�����������</div>
-                        <div class="premium-feature-title">Priority Support</div>
-                        <div class="premium-feature-desc">Get faster response times from support</div>
-                    </div>
-                    
-                    <div class="premium-feature-card">
-                        <div class="premium-feature-icon">�����</div>
-                        <div class="premium-feature-title">Advanced Features</div>
-                        <div class="premium-feature-desc">Access to exclusive tools and options</div>
-                    </div>
-                </div>
-            </div>
-            <!-- Highlights Strip -->
-            <div class="highlights-section" id="highlightsSection" style="display:none;">
-                <div class="section-title"><i class="fas fa-bookmark"></i> Highlights</div>
-                <div class="scroll-row" id="highlightsStrip"></div>
-            </div>
 
-            <!-- Saved Widget -->
-            <div class="saved-widget-section" id="savedWidgetSection" style="display:none;">
-                <div class="section-title"><i class="fas fa-bookmark"></i> Saved</div>
-                <div class="scroll-row" id="savedWidget"></div>
-            </div>
 
 
             <!-- Post Creation Section -->
@@ -4704,30 +4600,6 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
 
             <div id="trendingHashtags" style="margin:8px 0;color:var(--text-light);font-size:0.9rem;"></div>
 
-            <!-- Engagement Panel -->
-            <div class="engagement-panel" style="display:none;" id="engagementPanel">
-                <div class="engage-card" id="streakCard">
-                    <div class="engage-title">Daily Streak</div>
-                    <div id="streakInfo" style="color:var(--text-light);">Loading streak...</div>
-                </div>
-                <div class="engage-card" id="questsCard">
-                    <div class="engage-title">Weekly Quests</div>
-                    <div class="quests-list" id="questsList"></div>
-                </div>
-                <div class="engage-card" id="spinCard">
-                    <div class="engage-title">Daily Spin</div>
-                    <button class="spin-button" id="spinNowButton"><i class="fas fa-sync"></i> Spin Now</button>
-                    <div id="spinStatus" style="color:var(--text-light); margin-top:6px;"></div>
-                </div>
-                <div class="engage-card" id="storiesCard">
-                    <div style="display:flex;align-items:center;justify-content:space-between;">
-                        <div class="engage-title">Stories</div>
-                        <button class="add-story-button" id="addStoryButton"><i class="fas fa-plus"></i> Add Story</button>
-                        <input type="file" id="storyUploadInput" accept="image/*,video/*" style="display:none;">
-                    </div>
-                    <div class="stories-bar" id="storiesBar"></div>
-                </div>
-            </div>
 
             <!-- Posts Feed Section -->
             <div class="posts-feed-section" id="postsFeed">
@@ -13293,7 +13165,7 @@ async function fetchAndDisplayPosts() {
         function getPremiumBadgeIcon(tier) {
             switch (tier) {
                 case 'premium': return '🌟';
-                case 'vip': return '💎';
+                case 'vip': return '���';
                 case 'elite': return '👑';
                 default: return '🌟';
             }
