@@ -10142,6 +10142,18 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
             // Initialize Profile Notifications
             profileNotifications = new ProfileNotifications();
 
+            // One-click preview for profile picture and cover
+            const canOpen = (imgEl) => imgEl && imgEl.src && getComputedStyle(imgEl).display !== 'none';
+            if (profilePagePic) {
+                profilePagePic.style.cursor = 'zoom-in';
+                profilePagePic.addEventListener('click', () => { if (canOpen(profilePagePic)) { openMediaViewer(profilePagePic.src); } });
+            }
+            const coverImgEl = document.getElementById('profileCoverImg');
+            if (coverImgEl) {
+                coverImgEl.style.cursor = 'zoom-in';
+                coverImgEl.addEventListener('click', () => { if (canOpen(coverImgEl)) { openMediaViewer(coverImgEl.src); } });
+            }
+
             // NEW: User Information Toggle Functionality
             initializeUserInfoToggle();
 
@@ -10378,5 +10390,35 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
 
     </script>
     <script src="assets/js/lazy-images.js" defer></script>
+
+<!-- Media Viewer (matches Home page style) -->
+<div id="mediaViewer" class="media-viewer-overlay" role="dialog" aria-modal="true" aria-label="Image preview" style="display:none;">
+  <div class="media-viewer-content">
+    <button id="mediaViewerClose" class="media-viewer-close" aria-label="Close">&times;</button>
+    <img id="mediaViewerImage" alt="Preview" />
+    <a id="mediaViewerDownload" class="media-viewer-download" download>Download</a>
+  </div>
+</div>
+<style>
+.media-viewer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:2000}
+.media-viewer-overlay.show{display:flex}
+.media-viewer-content{position:relative;max-width:90vw;max-height:90vh;padding:12px;background:var(--card-background);border:1px solid var(--border-light);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+#mediaViewerImage{max-width:86vw;max-height:76vh;display:block;border-radius:8px}
+.media-viewer-close{position:absolute;top:8px;right:8px;background:transparent;border:none;color:var(--white);font-size:28px;cursor:pointer}
+.media-viewer-download{position:absolute;left:8px;bottom:8px;background:var(--button-background);color:var(--white);border:none;padding:8px 12px;border-radius:10px;text-decoration:none;box-shadow:var(--button-shadow)}
+</style>
+<script>
+(function(){
+  const overlay = document.getElementById('mediaViewer');
+  const img = document.getElementById('mediaViewerImage');
+  const closeBtn = document.getElementById('mediaViewerClose');
+  const dl = document.getElementById('mediaViewerDownload');
+  window.openMediaViewer = function(url){ try{ img.src = url; dl.href = url; dl.download = (url.split('/').pop()||'image'); overlay.classList.add('show'); overlay.style.display='flex'; }catch(e){} };
+  function close(){ try{ overlay.classList.remove('show'); overlay.style.display='none'; img.src=''; }catch(e){} }
+  if (closeBtn) closeBtn.addEventListener('click', close);
+  if (overlay) overlay.addEventListener('click', (e)=>{ if(e.target===overlay) close(); });
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && overlay && overlay.classList.contains('show')) close(); });
+})();
+</script>
 </body>
 </html>
