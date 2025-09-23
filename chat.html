@@ -974,15 +974,20 @@
                 pc = new RTCPeerConnection(rtcConfig);
                 stream.getTracks().forEach(t => pc.addTrack(t, stream));
                 pc.ontrack = (e) => {
-                const stream = e.streams[0];
-                if (isVideo) {
-                    remoteVideo.srcObject = stream;
-                } else if (remoteAudio) {
-                    remoteAudio.srcObject = stream;
-                    remoteAudio.style.display = 'block';
-                    try { remoteAudio.play().catch(() => {}); } catch {}
-                }
-            };
+                    const rstream = e.streams[0];
+                    if (!callStartMs) {
+                        callStartMs = Date.now();
+                        const cs = document.getElementById('callStatus');
+                        if (cs) cs.textContent = 'Connected';
+                    }
+                    if (isVideo) {
+                        remoteVideo.srcObject = rstream;
+                    } else if (remoteAudio) {
+                        remoteAudio.srcObject = rstream;
+                        remoteAudio.style.display = 'block';
+                        try { remoteAudio.play().catch(() => {}); } catch {}
+                    }
+                };
 
                 // Create call doc
                 const callsCol = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
