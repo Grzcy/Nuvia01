@@ -6275,42 +6275,8 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 }
             } catch (_) { }
 
-            // Update the slim pill under header
-            const pillContainer = document.getElementById('announcementPillContainer');
-            const pill = pillContainer ? pillContainer.querySelector('.announcement-pill') : null;
-            const pillText = document.getElementById('announcementPillText');
-            const pillCta = document.getElementById('announcementPillCta');
-            const pillDismiss = document.getElementById('announcementPillDismiss');
-            const liveRegion = document.getElementById('announcementLiveRegion');
-            if (pillContainer && pillText) {
-                pillContainer.setAttribute('data-ann-id', annId);
-                pillText.textContent = announcementData.message || '';
-                pillContainer.style.display = 'block';
-                if (liveRegion) liveRegion.textContent = `Announcement: ${announcementData.message || ''}`;
-                if (pillCta) {
-                    if (announcementData.cta && announcementData.cta.label && announcementData.cta.url) {
-                        pillCta.textContent = announcementData.cta.label;
-                        pillCta.style.display = '';
-                        pillCta.onclick = (ev)=>{ ev.stopPropagation(); try{ window.open(announcementData.cta.url, '_blank', 'noopener'); }catch(e){} };
-                    } else {
-                        pillCta.style.display = 'none';
-                        pillCta.onclick = null;
-                    }
-                }
-                if (pill) {
-                    pill.onclick = (e)=>{
-                        if (e.target && (e.target.id === 'announcementPillCta' || e.target.id === 'announcementPillDismiss')) return;
-                        if (announcementData.priority === 'urgent') { showAnnouncementBottomSheet(announcementData, annId); }
-                        else { showAnnouncementModal(announcementData, annId); }
-                    };
-                    pill.onkeydown = (e)=>{
-                        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (announcementData.priority === 'urgent') { showAnnouncementBottomSheet(announcementData, annId); } else { showAnnouncementModal(announcementData, annId); } }
-                    };
-                }
-                if (pillDismiss) {
-                    pillDismiss.onclick = (ev)=>{ ev.stopPropagation(); dismissAnnouncementById(annId); pillContainer.style.display='none'; hideGlobalAnnouncement(); };
-                }
-            }
+            // Set accessible live region if present
+            try { const liveRegion = document.getElementById('announcementLiveRegion'); if (liveRegion) liveRegion.textContent = `Announcement: ${announcementData.message || ''}`; } catch(_) {}
 
             // Set announcement type
             if (announcementTypeBadge) announcementTypeBadge.textContent = getAnnouncementTypeLabel(announcementData.type);
