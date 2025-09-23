@@ -1131,16 +1131,18 @@
             const statusIcon = m.sender === 'current' ? `<span class="msg-status" data-id="${m.id || ''}" style="margin-left:6px;opacity:.85;">${renderStatusIcon(m.status || 'delivered')}</span>` : '';
             let content = '';
             if (m.type === 'file' && m.fileUrl) {
+                const caption = (m.text || '').trim() ? `<div style="margin-bottom:6px">${escapeHtml(m.text)}</div>` : '';
                 if (m.fileUrl.match(/\.(png|jpe?g|gif|webp)$/i)) {
-                    content = `<div style="margin-bottom:6px"><img src="${m.fileUrl}" alt="${escapeHtml(m.fileName||'image')}" style="max-width:220px;border-radius:10px;border:1px solid var(--border-light)" onerror="this.style.display='none'"></div>`;
+                    content = `${caption}<div style="margin-bottom:6px"><img src="${m.fileUrl}" alt="${escapeHtml(m.fileName||'image')}" style="max-width:220px;border-radius:10px;border:1px solid var(--border-light)" onerror="this.style.display='none'"></div>`;
                 } else if (m.fileUrl.match(/\.(mp4|webm|ogg)$/i)) {
-                    content = `<div style="margin-bottom:6px"><video src="${m.fileUrl}" controls style="max-width:220px;border-radius:10px;border:1px solid var(--border-light)"></video></div>`;
+                    content = `${caption}<div style="margin-bottom:6px"><video src="${m.fileUrl}" controls style="max-width:220px;border-radius:10px;border:1px solid var(--border-light)"></video></div>`;
                 } else {
-                    content = `<div style="margin-bottom:6px"><a href="${m.fileUrl}" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline">${escapeHtml(m.fileName||'File')}</a></div>`;
+                    content = `${caption}<div style="margin-bottom:6px"><a href="${m.fileUrl}" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline">${escapeHtml(m.fileName||'File')}</a></div>`;
                 }
             } else if (m.type === 'audio') {
+                const caption = (m.text || '').trim() ? `<div style="margin-bottom:6px">${escapeHtml(m.text)}</div>` : '';
                 if (m.fileUrl) {
-                    content = `<div style="margin-bottom:6px"><audio controls src="${m.fileUrl}" style="width:220px"></audio></div>`;
+                    content = `${caption}<div style="margin-bottom:6px"><audio controls src="${m.fileUrl}" style="width:220px"></audio></div>`;
                 } else {
                     content = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><i class="fas fa-microphone"></i><span>Voice note</span><i class="fas fa-spinner fa-spin"></i></div>`;
                 }
