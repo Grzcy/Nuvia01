@@ -811,6 +811,7 @@
                     this.setStatus('Connected');
                     coIncomingControls.classList.add('hidden');
                     coActiveControls.classList.remove('hidden');
+                    coEndBtn.style.display = 'flex';
                 }catch(err){ this.end(true); }
             }
             async decline(){
