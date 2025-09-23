@@ -12599,10 +12599,6 @@ async function fetchAndDisplayPosts() {
 
         // Hook into document click for share referral and hashtag
         document.addEventListener('click', (ev) => {
-            const shareRefBtn = ev.target.closest('.share-referral-button');
-            if (shareRefBtn) {
-                openReferralShareOptions(shareRefBtn);
-                return;
             }
             // Per-post share button: open post share modal (uses .share-post-button, .share-btn, or post-action-btn.share-btn)
             const postShareBtn = ev.target.closest('.share-post-button, .share-btn, .post-action-btn.share-btn, [data-action="share"]');
