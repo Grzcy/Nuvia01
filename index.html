@@ -7888,7 +7888,7 @@ async function checkAndStartDailyBonusTimer() {
         function showEnhancedSmartSuccess(message, style = 'default', duration = 4000) {
             let title = 'Success!';
             switch (style) {
-                case 'achievement': title = '��� Achievement Unlocked!'; break;
+                case 'achievement': title = '🎉 Achievement Unlocked!'; break;
                 case 'update': title = '✅ Update Complete!'; break;
                 case 'celebration': title = '🎊 Celebration!'; break;
                 default: title = 'Success!';
@@ -11762,6 +11762,95 @@ async function fetchAndDisplayPosts() {
                     await updateDoc(chatDocRef, { updatedAt: serverTimestamp() });
                 }
             } catch {}
+        }
+
+        // --- Per-post share modal (mirrors Share Inspiration modal UX) ---
+        function openSharePostModal(postId, content, mediaUrl){
+            try{
+                if(!postId) return;
+                let modal = document.getElementById('sharePostModal');
+                if(!modal){
+                    modal = document.createElement('div');
+                    modal.id = 'sharePostModal';
+                    modal.className = 'modal-overlay share-modal';
+                    modal.style.display = 'none';
+                    modal.setAttribute('role','dialog');
+                    modal.setAttribute('aria-modal','true');
+                    modal.innerHTML = `
+                        <div class="modal-content">
+                            <h3 id="sharePostTitle">Share Post</h3>
+                            <div id="sharePostPreview" style="padding:10px;border:1px dashed var(--border-light);border-radius:10px;color:var(--white);max-height:240px;overflow:auto;">
+                                <div id="sharePostPreviewContent" style="margin-bottom:8px;white-space:pre-wrap;"></div>
+                                <div id="sharePostPreviewMedia" style="margin-top:8px;"> </div>
+                            </div>
+                            <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+                                <button id="copyPostBtn" class="share-option-btn"><i class="fas fa-copy"></i> Copy Post</button>
+                                <button id="sendPostToFriendBtn" class="share-option-btn"><i class="fas fa-paper-plane"></i> Send to Friends</button>
+                                <button id="systemSharePostBtn" class="share-option-btn"><i class="fas fa-share-square"></i> Share via App</button>
+                                <button id="closeSharePostBtn" class="modal-button cancel-button">Close</button>
+                            </div>
+                        </div>`;
+                    document.body.appendChild(modal);
+                    modal.addEventListener('click', (ev)=>{ if(ev.target===modal) closeSharePostModal(); });
+                }
+                // fill preview
+                const contentEl = document.getElementById('sharePostPreviewContent');
+                const mediaEl = document.getElementById('sharePostPreviewMedia');
+                if(contentEl) contentEl.textContent = content || '';
+                if(mediaEl){
+                    mediaEl.innerHTML = '';
+                    if(mediaUrl){
+                        if(/\.(png|jpe?g|gif|webp)$/i.test(mediaUrl)) mediaEl.innerHTML = `<img src="${mediaUrl}" style="max-width:100%;border-radius:8px;" alt="Post Media">`;
+                        else if(/\.(mp4|webm|ogg)$/i.test(mediaUrl)) mediaEl.innerHTML = `<video src="${mediaUrl}" controls style="max-width:100%;border-radius:8px;"></video>`;
+                        else mediaEl.innerHTML = `<a href="${mediaUrl}" target="_blank" rel="noopener" style="color:var(--white)">Open attachment</a>`;
+                    }
+                }
+                modal.style.display = 'flex'; setTimeout(()=> modal.classList.add('active'),0);
+                // wire buttons
+                const copyBtn = document.getElementById('copyPostBtn');
+                const sendBtn = document.getElementById('sendPostToFriendBtn');
+                const sysBtn = document.getElementById('systemSharePostBtn');
+                const closeBtn = document.getElementById('closeSharePostBtn');
+                if(copyBtn) copyBtn.onclick = async ()=>{ try{ const text = (content||'') + (mediaUrl? '\n'+mediaUrl : ''); const ok = await safeCopyText(text); if(ok) showMessageBox('Post copied to clipboard.','success'); else showMessageBox('Copy failed.','error'); }catch(e){ showMessageBox('Copy failed.','error'); } };
+                if(sendBtn) sendBtn.onclick = async ()=>{ try{ await openFriendPickerAndSendPost(postId, content, mediaUrl); }catch(e){ console.error(e); showMessageBox('Failed to open friend picker.','error'); } };
+                if(sysBtn) sysBtn.onclick = async ()=>{ try{ const url = `${location.origin}/index.html#post-${encodeURIComponent(postId)}`; const text = content || ''; if(navigator.share){ await navigator.share({ title: 'Check this post', text, url }); } else { await safeCopyText(url); showMessageBox('Link copied to clipboard.','success'); } }catch(e){ console.error(e); showMessageBox('Share failed.','error'); } };
+                if(closeBtn) closeBtn.onclick = closeSharePostModal;
+            }catch(e){ console.error('openSharePostModal failed', e); }
+        }
+        function closeSharePostModal(){ const m=document.getElementById('sharePostModal'); if(!m) return; m.classList.remove('active'); setTimeout(()=>{ try{ m.style.display='none'; }catch(_){} },200); }
+
+        async function sendPostToFriend(friendId, postId, content, mediaUrl){
+            try{
+                if(!isAuthReady || !currentUser){ showMessageBox('Please log in.','warning'); return; }
+                const chatId = chatIdFor(currentUser.uid, friendId);
+                const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'messages');
+                await ensureChatDocForHome(chatId, friendId);
+                const text = (content||'') + (mediaUrl? '\n'+mediaUrl : '') + `\n\nView: ${location.origin}/index.html#post-${encodeURIComponent(postId)}`;
+                await addDoc(messagesRef, { text, senderId: currentUser.uid, receiverId: friendId, timestamp: serverTimestamp(), status: 'sent', chatId });
+                showMessageBox('Post sent to friend!','success');
+            }catch(e){ console.error('sendPostToFriend failed', e); showMessageBox('Failed to send post.','error'); }
+        }
+
+        async function openFriendPickerAndSendPost(postId, content, mediaUrl){
+            if (!isAuthReady || !currentUser) { showMessageBox('Please log in.', 'warning'); return; }
+            const friendPicker = document.getElementById('friendPicker');
+            if (!friendPicker) { showMessageBox('Friend picker UI not found.', 'error'); return; }
+            friendPicker.innerHTML = '<div style="opacity:0.8;">Loading friends...</div>';
+            friendPicker.style.display = 'block';
+            try{
+                const publicFriendsRef = collection(db, 'artifacts', appId, 'public', 'data', 'friends');
+                const snap = await getDocs(publicFriendsRef);
+                const myFriends = new Set();
+                snap.forEach(docSnap => { const f = docSnap.data(); if (!f) return; if (f.user1Id === currentUser.uid) myFriends.add(f.user2Id); else if (f.user2Id === currentUser.uid) myFriends.add(f.user1Id); });
+                const friendIds = Array.from(myFriends);
+                if (!friendIds.length) { friendPicker.innerHTML = '<div style="opacity:0.8;">No friends yet.</div>'; return; }
+                const profiles = await Promise.all(friendIds.map(async (fid) => { const pRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', fid); const pSnap = await getDoc(pRef); const p = pSnap.exists() ? pSnap.data() : {}; return { id: fid, displayName: p.displayName || p.username || 'Nuvia User', username: p.username || '', profilePicId: p.profilePicId || null }; }));
+                friendPicker.innerHTML = '';
+                const search = document.createElement('input'); search.type='text'; search.placeholder='Search friends'; search.style.cssText='width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border-light);margin-bottom:6px;background:var(--input-background);color:var(--white)'; friendPicker.appendChild(search);
+                const listWrap = document.createElement('div'); friendPicker.appendChild(listWrap);
+                function renderList(filter=''){ listWrap.innerHTML=''; profiles.filter(f => (f.displayName||'').toLowerCase().includes(filter.toLowerCase()) || (f.username||'').toLowerCase().includes(filter.toLowerCase())).forEach(f => { const initial = (f.displayName||'U').charAt(0).toUpperCase(); const imgUrl = f.profilePicId ? getCloudinaryImageUrl(f.profilePicId, 'w_60,h_60,c_fill,g_face,r_max') : `https://placehold.co/40x40/ff2e92/ffffff?text=${initial}`; const row = document.createElement('div'); row.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.05);margin-bottom:6px;gap:10px;'; row.innerHTML = `<div style="display:flex;align-items:center;gap:10px;"><img src="${imgUrl}" alt="${f.displayName}" loading="lazy" decoding="async" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid var(--border-light);"><span>${f.displayName}</span></div><button class="btn" data-fid="${f.id}">Send</button>`; row.querySelector('button').addEventListener('click', async (e)=>{ const btn=e.currentTarget; btn.disabled=true; try{ await sendPostToFriend(f.id, postId, content, mediaUrl); btn.textContent='Sent'; } catch(err){ btn.disabled=false; showMessageBox('Failed to send.', 'error'); } }); listWrap.appendChild(row); }); }
+                renderList(''); search.addEventListener('input', ()=> renderList(search.value));
+            }catch(e){ friendPicker.innerHTML = '<div style="color:salmon;">Failed to load friends.</div>'; console.error('Friend picker load failed', e); }
         }
         async function sendQuoteToFriend(friendId) {
             if (!isAuthReady || !currentUser) { showMessageBox('Please log in.', 'warning'); return; }
