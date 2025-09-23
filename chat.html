@@ -1116,16 +1116,16 @@
                 const callsCol = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
                 const q = query(callsCol, where('calleeId', '==', currentUser.uid), where('status', '==', 'ringing'));
                 unsubIncoming = onSnapshot(q, async (snap) => {
-                    snap.docChanges().forEach(async change => {
-                        if (change.type === 'added' && !pc) {
-                            // Show accept/decline UI instead of auto-answer
-                            callDocRef = change.doc.ref;
-                            await showIncomingPrompt(change.doc);
-                        } else if ((change.type === 'modified' || change.type === 'removed')) {
-                            try{
+                    for (const change of snap.docChanges()) {
+                        try{
+                            if (change.type === 'added' && !pc) {
+                                // Show accept/decline UI instead of auto-answer
+                                callDocRef = change.doc.ref;
+                                await showIncomingPrompt(change.doc);
+                            } else if (change.type === 'modified' || change.type === 'removed') {
                                 const same = currentIncomingDoc && (change.doc.id === currentIncomingDoc.id);
-                                const st = change.doc.data && change.doc.data() ? change.doc.data().status : null;
-                                if (same && st && st !== 'ringing'){
+                                if (same) {
+                                    // Call cancelled/ended by remote while ringing
                                     stopRingtone();
                                     try{ clearTimeout(incomingRingTimeoutId); }catch(_){ }
                                     if (incomingActions) incomingActions.style.display = 'none';
@@ -1133,9 +1133,9 @@
                                     callModal.style.display = 'none';
                                     isIncoming = false; currentIncomingDoc = null;
                                 }
-                            }catch(_){ }
-                        }
-                    });
+                            }
+                        }catch(_){ }
+                    }
                 });
             } catch {}
         }
