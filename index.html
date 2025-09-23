@@ -11902,8 +11902,29 @@ async function fetchAndDisplayPosts() {
                 const chatId = chatIdFor(currentUser.uid, friendId);
                 const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'messages');
                 await ensureChatDocForHome(chatId, friendId);
-                const text = (content||'') + (mediaUrl? '\n'+mediaUrl : '') + `\n\nView: ${location.origin}/index.html#post-${encodeURIComponent(postId)}`;
-                await addDoc(messagesRef, { text, senderId: currentUser.uid, receiverId: friendId, timestamp: serverTimestamp(), status: 'sent', chatId });
+                // If mediaUrl is provided and appears to be an image/video/audio, send as a file-type message so chat can render it inline
+                const url = mediaUrl || null;
+                const viewLink = `${location.origin}/index.html#post-${encodeURIComponent(postId)}`;
+                const baseText = (content||'').trim();
+                if (url) {
+                    const lower = url.toLowerCase();
+                    const fileName = url.split('/').pop()?.split('?')[0] || '';
+                    if (/\.(png|jpe?g|gif|webp)$/i.test(lower)) {
+                        await addDoc(messagesRef, { text: baseText || '', senderId: currentUser.uid, receiverId: friendId, timestamp: serverTimestamp(), status: 'sent', chatId, type: 'file', fileUrl: url, fileName, viewLink });
+                    } else if (/\.(mp4|webm|ogg)$/i.test(lower)) {
+                        await addDoc(messagesRef, { text: baseText || '', senderId: currentUser.uid, receiverId: friendId, timestamp: serverTimestamp(), status: 'sent', chatId, type: 'file', fileUrl: url, fileName, viewLink });
+                    } else if (/\.(mp3|wav|m4a|aac)$/i.test(lower) || url.includes('audio')) {
+                        await addDoc(messagesRef, { text: baseText || '', senderId: currentUser.uid, receiverId: friendId, timestamp: serverTimestamp(), status: 'sent', chatId, type: 'audio', fileUrl: url, fileName, viewLink });
+                    } else {
+                        // Unknown media type: send as text + link
+                        const text = `${baseText}${baseText? '\n\n':''}${url}\n\nView: ${viewLink}`.trim();
+                        await addDoc(messagesRef, { text, senderId: currentUser.uid, receiverId: friendId, timestamp: serverTimestamp(), status: 'sent', chatId });
+                    }
+                } else {
+                    const text = `${baseText}${baseText? '\n\n':''}View: ${viewLink}`.trim();
+                    await addDoc(messagesRef, { text, senderId: currentUser.uid, receiverId: friendId, timestamp: serverTimestamp(), status: 'sent', chatId });
+                }
+
                 showMessageBox('Post sent to friend!','success');
             }catch(e){ console.error('sendPostToFriend failed', e); showMessageBox('Failed to send post.','error'); }
         }
