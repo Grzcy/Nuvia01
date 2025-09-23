@@ -5979,6 +5979,7 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
             unsubscribePublicPostsListener = null; // New: Clear posts listener
 
             console.log("JCHAT_DEBUG: All Firestore listeners detached on Admin page unload.");
+            try { if (__autoApproveRewardsTimer) { clearInterval(__autoApproveRewardsTimer); __autoApproveRewardsTimer = null; } } catch(_) {}
         });
 
         // Listen for changes in local storage (e.g., theme changes from other tabs).
