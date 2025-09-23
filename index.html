@@ -8615,6 +8615,69 @@ async function checkAndStartDailyBonusTimer() {
             const idx = Math.abs(seed) % arr.length;
             return arr[idx];
         }
+        // Expand a short inspiration into a longer, clearer paragraph
+        function expandInspiration(base, type, seed){
+            try{
+                const t = (type && String(type)) || 'motivational';
+                const extras = {
+                    motivational: [
+                        "Break this into small, doable steps you can start today, and keep a simple checklist to track your momentum.",
+                        "If you feel unsure, begin with a two‑minute action that moves you forward and build from there.",
+                        "Celebrate tiny wins and write down one thing you learned; that reflection turns effort into growth.",
+                        "When doubts appear, return to your reason for starting and take the next kind, practical step.",
+                    ],
+                    peaceful: [
+                        "Slow your breathing, relax your shoulders, and notice the sensations in your body without rushing.",
+                        "Let distractions pass like clouds, and give attention to what genuinely matters in this moment.",
+                        "Create a quiet corner for yourself: dim the lights, silence notifications, and rest your eyes.",
+                        "Offer yourself patience; calm takes time and grows with gentle practice.",
+                    ],
+                    wisdom: [
+                        "Ask: what is the simplest helpful action I can take now, and what can wait for later?",
+                        "Seek advice from one trustworthy source, then act on the clearest insight you receive.",
+                        "Write your decision criteria on paper; clarity often comes when thoughts are visible.",
+                        "Choose what aligns with your values even if it takes longer; integrity compounds over time.",
+                    ],
+                    love: [
+                        "Send a short message of kindness to someone today and notice how connection lightens the heart.",
+                        "Listen fully before replying; understanding often heals more than perfect words ever could.",
+                        "Show care in small, steady ways—consistency is a language love trusts.",
+                        "Offer forgiveness where you can, and set boundaries that keep love honest and safe.",
+                    ],
+                    funny: [
+                        "Laugh at the tiny stumbles; they make great stories and soften the day.",
+                        "Share a cheerful note or a meme with a friend who could use a smile right now.",
+                        "Remember: perfection is overrated—progress with a grin beats delay with a frown.",
+                        "Drink water, stretch, and keep your sense of humor; it’s portable resilience.",
+                    ],
+                    prayers: [
+                        "Ask plainly for what you need, thank God for what you have, and rest the outcome in His care.",
+                        "Speak from the heart; short, sincere prayers often carry the deepest faith.",
+                        "Invite peace into your thoughts and courage into your choices today.",
+                        "Trust that steady steps and honest prayers shape the path ahead.",
+                    ],
+                    bible: [
+                        "Consider how this verse applies in one small situation today, and practice it with humility.",
+                        "Write it down and revisit it at midday; repetition helps truth settle into action.",
+                        "Share a gentle word from it with someone who needs encouragement.",
+                        "Let it guide one decision; wisdom grows when belief becomes practice.",
+                    ],
+                    quran: [
+                        "Reflect on one practical way to live this guidance—through patience, kindness, or honesty.",
+                        "Read it slowly twice, then carry one phrase with you as a reminder during the day.",
+                        "Offer a quiet prayer for those in need, letting mercy shape your next action.",
+                        "Turn insight into a small act; consistency brings blessing.",
+                    ]
+                };
+                const pad = pickDeterministic(extras[t] || extras.motivational, (seed||0)+97);
+                const pad2 = pickDeterministic(extras[t] || extras.motivational, (seed||0)+193);
+                if (pad2 === pad) {
+                    // ensure variation
+                    const arr = extras[t] || extras.motivational; if (arr.length>1){ const alt = (arr.indexOf(pad)+1)%arr.length; return `${base} ${pad} ${arr[alt]}`; }
+                }
+                return `${base} ${pad} ${pad2}`;
+            }catch(_){ return base; }
+        }
         function getPartOfDay(h) {
             if (h >= 5 && h < 12) return 'morning';
             if (h >= 12 && h < 17) return 'afternoon';
@@ -8662,14 +8725,16 @@ const lex = inspirationLexicon[type];
                 } else {
                     sentence = `When ${a1} ${n1} ${v1} ${oObj}, ${close}.`;
                 }
-                return { quote: sentence, author: 'Nuvia' };
+                const longText = expandInspiration(sentence, type, seed);
+                return { quote: longText, author: 'Nuvia' };
             }
             // Fallback to simple templates
             const t = quoteTemplates[type] || quoteTemplates.motivational;
             const open = pickDeterministic(t.openers, seed + 17);
             const bridge = pickDeterministic(t.bridges, seed + 31);
             const end = pickDeterministic(t.endings, seed + 53);
-            return { quote: `${open}${bridge}${end}`, author: 'Nuvia' };
+            const shortText = `${open}${bridge}${end}`;
+            return { quote: expandInspiration(shortText, type, seed), author: 'Nuvia' };
         }
         /**
          * Displays the time-based inspiration quote.
@@ -8728,10 +8793,12 @@ const lex = inspirationLexicon[type];
                 if (typeof item === 'object' && item !== null) {
                     const q = item.text || item.quote || '';
                     const ref = item.ref || item.author || '';
-                    if (inspirationQuoteElement) inspirationQuoteElement.textContent = `"${q}"`;
+                    const longQ = expandInspiration(q, chosen || 'motivational', seed);
+                    if (inspirationQuoteElement) inspirationQuoteElement.textContent = `"${longQ}"`;
                     if (inspirationAuthorElement) inspirationAuthorElement.textContent = ref ? `- ${ref}` : `- Nuvia`;
                 } else {
-                    if (inspirationQuoteElement) inspirationQuoteElement.textContent = `"${item}"`;
+                    const longItem = expandInspiration(String(item), chosen || 'motivational', seed);
+                    if (inspirationQuoteElement) inspirationQuoteElement.textContent = `"${longItem}"`;
                     if (inspirationAuthorElement) inspirationAuthorElement.textContent = `- Nuvia`;
                 }
             } catch(e) {
