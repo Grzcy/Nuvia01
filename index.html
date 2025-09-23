@@ -9388,6 +9388,8 @@ const lex = inspirationLexicon[type];
                 if (mediaVideoPreview) mediaVideoPreview.style.display = 'none';
                 if (mediaImagePreview) mediaImagePreview.src = '';
                 if (mediaVideoPreview) mediaVideoPreview.src = '';
+                if (videoThumbnailControls) videoThumbnailControls.classList.add('hidden');
+                resetSelectedThumbnail(); window.postDataExtras = {};
                 currentMediaFile = null;
 
             } catch (error) {
@@ -14138,7 +14140,7 @@ async function fetchAndDisplayPosts() {
         // Get Premium Badge Icon
         function getPremiumBadgeIcon(tier) {
             switch (tier) {
-                case 'premium': return '🌟';
+                case 'premium': return '����';
                 case 'vip': return '���';
                 case 'elite': return '👑';
                 default: return '🌟';
