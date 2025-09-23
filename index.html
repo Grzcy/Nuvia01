@@ -1394,6 +1394,13 @@
         .chat-icon-svg .chat-bubble-body { transition: fill 160ms ease; fill: #007bff !important; }
         .chat-icon-svg .chat-dots { fill: #ffffff !important; }
         #headerChatLink:hover .chat-icon-svg .chat-bubble-body { fill: #005fb5 !important; }
+        /* Ensure leaderboard/trophy icon matches notification bell size */
+        #leaderboardLink i, .sidebar-nav-item i.fas.fa-trophy, .icon-wrapper i.fas.fa-trophy {
+            font-size: 1.5rem; /* same as .notification-icon-wrapper i */
+            line-height: 1;
+            display: inline-block;
+            vertical-align: middle;
+        }
 
         .notification-icon-wrapper a:hover i {
             transform: rotate(10deg) scale(1.05);
