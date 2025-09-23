@@ -1418,6 +1418,30 @@
             if (isTyping) typingTimer = setTimeout(() => handleTyping(false), 1200);
         }
 
+        async function logCallSummary(kind, startedAtMs, endedAtMs){
+            try{
+                if (!currentUser || !currentPartner) return;
+                const chatId = chatIdFor(currentUser.uid, currentPartner.id);
+                const messagesRef = collection(db, "artifacts", appId, "public", "data", "chats", chatId, "messages");
+                await ensureChatDoc(chatId);
+                const durationMs = Math.max(0, (endedAtMs - startedAtMs));
+                const text = `${kind === 'video' ? 'Video' : 'Voice'} call • ${formatDuration(durationMs)}`;
+                await addDoc(messagesRef, {
+                    type: 'call',
+                    callKind: kind,
+                    durationMs,
+                    startedAt: startedAtMs,
+                    endedAt: endedAtMs,
+                    text,
+                    senderId: currentUser.uid,
+                    receiverId: currentPartner.id,
+                    timestamp: serverTimestamp(),
+                    status: 'sent',
+                    chatId
+                });
+            }catch(e){ /* ignore */ }
+        }
+
         // Notification sound helper
         let soundPlayedLock = false;
         function playNotificationSoundOnce() {
