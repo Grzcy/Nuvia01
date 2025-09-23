@@ -1216,6 +1216,7 @@
             }
             callDocRef = null;
             stopRingtone();
+            if (endCallBtn) endCallBtn.style.display = 'inline-flex';
             if (incomingActions) incomingActions.style.display = 'none';
             if (remoteAvatarPlaceholder) { remoteAvatarPlaceholder.style.display = 'none'; remoteAvatarPlaceholder.src=''; }
             callModal.style.display = 'none';
