@@ -5646,8 +5646,24 @@
                                     <span class="slider"></span>
                                 </label>
                             </div>
+
+                            <div class="privacy-toggle-group">
+                                <label>Show JCoins to others</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleJCoinsVisibility">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="privacy-toggle-group">
+                                <label>Show Gas (XP) to others</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="toggleGasVisibility">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
                         </div>
-                        
+
                         <!-- Activity & Interaction Settings -->
                         <div class="privacy-category">
                             <h5 class="privacy-category-title">
@@ -6256,6 +6272,8 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
             const toggleInterestsVisibility = document.getElementById('toggleInterestsVisibility');
             const toggleWebsiteVisibility = document.getElementById('toggleWebsiteVisibility');
             const toggleSocialLinksVisibility = document.getElementById('toggleSocialLinksVisibility');
+            const toggleJCoinsVisibility = document.getElementById('toggleJCoinsVisibility');
+            const toggleGasVisibility = document.getElementById('toggleGasVisibility');
 
 
         // NEW: Customization Selects
@@ -9187,14 +9205,33 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
                             jcoinExchangeRate.style.display = 'flex'; // Use flex to align icon and text
                             if (jCoinsSpan.closest('.stat-item')) jCoinsSpan.closest('.stat-item').style.display = 'block'; // Ensure the entire stat item is visible
                         } else {
-                            // Hide JCoins and exchange rate for other users
-                            if (jCoinsSpan.closest('.stat-item')) jCoinsSpan.closest('.stat-item').style.display = 'none';
+                            // For viewers: respect privacy for JCoins
+                            const canSeeJCoins = !!visibility.jCoinsVisible;
+                            if (jCoinsSpan.closest('.stat-item')) jCoinsSpan.closest('.stat-item').style.display = canSeeJCoins ? 'block' : 'none';
+                            if (canSeeJCoins) {
+                                const j = (displayedUserProfileData.jCoins ?? 0);
+                                jCoinsSpan.textContent = j.toLocaleString();
+                                const uc = (typeof userCurrency === 'object' && userCurrency) ? userCurrency : { code: 'USD', symbol: '$', label: 'USD' };
+                                let fiatValue = 0;
+                                if (uc.code === 'NGN') {
+                                    const rate = currentSystemSettings.jcoinNairaRate || 7.5;
+                                    fiatValue = j * rate;
+                                } else {
+                                    const nairaRate = currentSystemSettings.jcoinNairaRate || 7.5;
+                                    const usdPerNaira = 0.001;
+                                    fiatValue = j * nairaRate * usdPerNaira;
+                                }
+                                const fmt = (typeof formatLocalCurrency === 'function') ? formatLocalCurrency : (amt => `$${Number(amt).toFixed(2)}`);
+                                jcoinUSDValue.textContent = fmt(fiatValue);
+                                jcoinExchangeRate.style.display = 'flex';
+                            } else {
+                                jcoinExchangeRate.style.display = 'none';
+                            }
                             if (referralInviteSection) referralInviteSection.style.display = 'none';
-                            if (gasStatItem) gasStatItem.style.display = 'none';
                             if (friendsStatItemEl) { friendsStatItemEl.style.pointerEvents = 'none'; friendsStatItemEl.style.cursor = 'not-allowed'; friendsStatItemEl.setAttribute('aria-disabled', 'true'); }
                         }
                     }
-                    
+
                     // NEW: Display Gas (XP) and Level Progress
                     const currentGasBalance = displayedUserProfileData.gas ?? 0; // Current spendable Gas
                     const totalGasEarned = displayedUserProfileData.totalGasEarned ?? 0; // Cumulative Gas for leveling
@@ -9215,6 +9252,9 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
                     const levelInfo = getLevelInfo(currentLevel); // Get info for the calculated level
 
                     if (gasValue) gasValue.textContent = currentGasBalance.toLocaleString(); // Display current Gas balance, null check
+                    if (!isCurrentUserProfile && gasStatItem) {
+                        gasStatItem.style.display = visibility.gasVisible ? 'block' : 'none';
+                    }
 
                     // Update Level Name and Icon
                     if (xpLevelName) xpLevelName.textContent = levelInfo.name; // Null check
@@ -9302,6 +9342,8 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
                         if (toggleInterestsVisibility) toggleInterestsVisibility.checked = visibility.interests ?? false;
                         if (toggleWebsiteVisibility) toggleWebsiteVisibility.checked = visibility.website ?? false;
                         if (toggleSocialLinksVisibility) toggleSocialLinksVisibility.checked = visibility.socialLinks ?? false;
+                        if (toggleJCoinsVisibility) toggleJCoinsVisibility.checked = visibility.jCoinsVisible ?? false;
+                        if (toggleGasVisibility) toggleGasVisibility.checked = visibility.gasVisible ?? false;
                         // Show privacy toggles and save button
                         if (toggleEmailVisibility) toggleEmailVisibility.closest('.privacy-toggle-group').style.display = 'flex';
                         if (togglePhoneVisibility) togglePhoneVisibility.closest('.privacy-toggle-group').style.display = 'flex';
@@ -9315,6 +9357,8 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
                         if (toggleInterestsVisibility) toggleInterestsVisibility.closest('.privacy-toggle-group').style.display = 'flex';
                         if (toggleWebsiteVisibility) toggleWebsiteVisibility.closest('.privacy-toggle-group').style.display = 'flex';
                         if (toggleSocialLinksVisibility) toggleSocialLinksVisibility.closest('.privacy-toggle-group').style.display = 'flex';
+                        if (toggleJCoinsVisibility) toggleJCoinsVisibility.closest('.privacy-toggle-group').style.display = 'flex';
+                        if (toggleGasVisibility) toggleGasVisibility.closest('.privacy-toggle-group').style.display = 'flex';
 
                         // Populate customization selects
                         if (profileFrameSelect) profileFrameSelect.value = displayedUserProfileData.profileFrame || 'default';
@@ -9979,6 +10023,8 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
                     interestsVisible: toggleInterestsVisibility ? toggleInterestsVisibility.checked : false,
                     websiteVisible: toggleWebsiteVisibility ? toggleWebsiteVisibility.checked : false,
                     socialLinksVisible: toggleSocialLinksVisibility ? toggleSocialLinksVisibility.checked : false,
+                    jCoinsVisible: toggleJCoinsVisibility ? toggleJCoinsVisibility.checked : false,
+                    gasVisible: toggleGasVisibility ? toggleGasVisibility.checked : false,
                     onlineStatusVisible: toggleOnlineStatusVisibility ? toggleOnlineStatusVisibility.checked : false,
                     allowFriendRequests: toggleFriendRequests ? toggleFriendRequests.checked : true,
                     allowDirectMessages: toggleMessages ? toggleMessages.checked : true,
@@ -10024,6 +10070,8 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
             if (toggleInterestsVisibility) toggleInterestsVisibility.checked = visibility.interestsVisible || false;
             if (toggleWebsiteVisibility) toggleWebsiteVisibility.checked = visibility.websiteVisible || false;
             if (toggleSocialLinksVisibility) toggleSocialLinksVisibility.checked = visibility.socialLinksVisible || false;
+            if (toggleJCoinsVisibility) toggleJCoinsVisibility.checked = visibility.jCoinsVisible || false;
+            if (toggleGasVisibility) toggleGasVisibility.checked = visibility.gasVisible || false;
             if (toggleOnlineStatusVisibility) toggleOnlineStatusVisibility.checked = visibility.onlineStatusVisible || false;
             if (toggleFriendRequests) toggleFriendRequests.checked = visibility.allowFriendRequests !== false; // Default true
             if (toggleMessages) toggleMessages.checked = visibility.allowDirectMessages !== false; // Default true
