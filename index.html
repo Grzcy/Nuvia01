@@ -9834,7 +9834,7 @@ const lex = inspirationLexicon[type];
                         <button class="delete-post-button" data-post-id="${postId}" data-author-id="${post.authorId}" style="display:none;" aria-label="Delete Post">
                             <i class="fas fa-trash"></i> Delete
                         </button>
-                        <button class="share-post-button" data-post-id="${postId}" data-content="${post.content}" ${!isAuthReady || (!currentSystemSettings.enablePostCreation) ? 'disabled' : ''} aria-label="Share Post">
+                        <button class="share-post-button" data-post-id="${postId}" data-content="${post.content}" ${!isAuthReady ? 'disabled' : ''} aria-label="Share Post">
                             <i class="fas fa-share"></i> Share
                         </button>
                         <button class="add-to-highlights-button" data-post-id="${postId}" ${!isAuthReady ? 'disabled' : ''} aria-label="Add to Highlights">
