@@ -11866,7 +11866,7 @@ async function fetchAndDisplayPosts() {
                 setTimeout(()=>{
                     function outsideHandler(ev){
                         if(!pop.contains(ev.target) && !anchor.contains(ev.target)){
-                            try{ pop.style.display='none'; pop.classList.remove('active'); pickerContainer.style.display='none'; pickerContainer.innerHTML=''; document.removeEventListener('click', outsideHandler); }catch(_){}
+                            try{ const prev = document.getElementById('sharePostPopoverPreview'); if(prev) prev.classList.remove('share-preview-glow'); pop.style.display='none'; pop.classList.remove('active'); pickerContainer.style.display='none'; pickerContainer.innerHTML=''; document.removeEventListener('click', outsideHandler); }catch(_){}
                         }
                     }
                     document.addEventListener('click', outsideHandler);
