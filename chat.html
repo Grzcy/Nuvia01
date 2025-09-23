@@ -740,13 +740,26 @@
                 try{
                     const callerId = data.callerId;
                     if (callerId) {
-                        const callerPubRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', callerId);
-                        const callerSnap = await getDoc(callerPubRef);
-                        const callerData = callerSnap.exists() ? callerSnap.data() : null;
-                        const initial = (callerData?.username || 'U').charAt(0).toUpperCase();
                         let avatarUrl = '';
-                        if (callerData?.profilePicId) avatarUrl = getCloudinaryImageUrl(callerData.profilePicId, 'w_240,h_240,c_fill,g_face,r_max');
-                        else avatarUrl = `https://placehold.co/240x240/00d5ff/ffffff?text=${initial}`;
+                        let initial = ((data.callerName || data.callerId || 'U')).charAt(0).toUpperCase();
+                        // First try public user doc (fast path)
+                        try {
+                            const callerPubRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', callerId);
+                            const callerSnap = await getDoc(callerPubRef);
+                            const callerData = callerSnap.exists() ? callerSnap.data() : null;
+                            initial = (callerData?.username || data.callerName || 'U').charAt(0).toUpperCase();
+                            if (callerData?.profilePicId) avatarUrl = getCloudinaryImageUrl(callerData.profilePicId, 'w_240,h_240,c_fill,g_face,r_max');
+                        } catch(_) { /* ignore */ }
+                        // Fallback to user's profile document if public doc had no avatar
+                        if (!avatarUrl) {
+                            try {
+                                const profRef = doc(db, 'artifacts', appId, 'users', callerId, 'profiles', 'user_profile');
+                                const profSnap = await getDoc(profRef);
+                                const pd = profSnap.exists() ? profSnap.data() : null;
+                                if (pd?.profilePicId) avatarUrl = getCloudinaryImageUrl(pd.profilePicId, 'w_240,h_240,c_fill,g_face,r_max');
+                            } catch(_) { /* ignore */ }
+                        }
+                        if (!avatarUrl) avatarUrl = `https://placehold.co/240x240/00d5ff/ffffff?text=${initial}`;
                         try{ if (remoteAvatarPlaceholder) { remoteAvatarPlaceholder.src = avatarUrl; remoteAvatarPlaceholder.style.display = 'block'; } }catch(_){ }
                         try{ if (voiceAvatarPlaceholder) { voiceAvatarPlaceholder.src = avatarUrl; voiceAvatarPlaceholder.style.display = 'block'; } }catch(_){ }
                     }
@@ -1118,14 +1131,31 @@
                 unsubIncoming = onSnapshot(q, async (snap) => {
                     for (const change of snap.docChanges()) {
                         try{
+                            const docSnap = change.doc;
+                            const d = docSnap.data() || {};
                             if (change.type === 'added' && !pc) {
                                 // Show accept/decline UI instead of auto-answer
-                                callDocRef = change.doc.ref;
-                                await showIncomingPrompt(change.doc);
-                            } else if (change.type === 'modified' || change.type === 'removed') {
-                                const same = currentIncomingDoc && (change.doc.id === currentIncomingDoc.id);
+                                callDocRef = docSnap.ref;
+                                await showIncomingPrompt(docSnap);
+                            } else if (change.type === 'modified') {
+                                // Only treat as cancellation if status changed away from 'ringing' or signaledEnd flag set
+                                const same = currentIncomingDoc && (docSnap.id === currentIncomingDoc.id);
                                 if (same) {
-                                    // Call cancelled/ended by remote while ringing
+                                    if (d.signaledEnd || (d.status && d.status !== 'ringing')) {
+                                        // Call cancelled/ended by remote while ringing
+                                        stopRingtone();
+                                        try{ clearTimeout(incomingRingTimeoutId); }catch(_){ }
+                                        if (incomingActions) incomingActions.style.display = 'none';
+                                        if (endCallBtn) endCallBtn.style.display = 'inline-flex';
+                                        callModal.style.display = 'none';
+                                        isIncoming = false; currentIncomingDoc = null;
+                                    } else {
+                                        // ignore unrelated modifications (offer/answer/ice updates)
+                                    }
+                                }
+                            } else if (change.type === 'removed') {
+                                const same = currentIncomingDoc && (docSnap.id === currentIncomingDoc.id);
+                                if (same) {
                                     stopRingtone();
                                     try{ clearTimeout(incomingRingTimeoutId); }catch(_){ }
                                     if (incomingActions) incomingActions.style.display = 'none';
