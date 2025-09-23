@@ -4040,8 +4040,11 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
                 const batch = writeBatch(db);
                 const usersToUpdate = new Set();
                 for (const item of stale) {
-                    await approveSingleRewardInBatch(item.id, item.data, batch);
-                    usersToUpdate.add(item.data.userId);
+                    const r = item.data || {};
+                    const requiresReceipt = !!(r.receiptUrl || r.receiptImageUrl || r.requiresReceipt === true || (typeof r.activityType === 'string' && /receipt|payment|purchase|order|gas|shop/i.test(r.activityType)));
+                    if (requiresReceipt) { continue; }
+                    await approveSingleRewardInBatch(item.id, r, batch);
+                    usersToUpdate.add(r.userId);
                 }
                 await batch.commit();
                 // Level checks post-commit
