@@ -811,6 +811,8 @@
                     const docRef = docSnap.ref;
                     unsubRingingCallDoc = onSnapshot(docRef, (s)=>{
                         try{
+                            // If we're currently accepting this call, ignore transient modifications to avoid hiding UI
+                            if (acceptInProgressDocId && acceptInProgressDocId === s.id) return;
                             const d = s.data() || {};
                             if (d.signaledEnd || (d.status && d.status !== 'ringing')){
                                 // remote ended/cancelled call while we were ringing
