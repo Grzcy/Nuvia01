@@ -4444,23 +4444,6 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         </div>
     </header>
 
-    <style>
-        /* New Message Ticker (below header) */
-        .incoming-message-container { display:none; position: relative; z-index: 9; }
-        .incoming-message-ticker {
-            display: flex; align-items: center; gap: 10px;
-            padding: 8px 14px; border-bottom: 1px solid var(--border-light);
-            background: var(--card-background); color: var(--white); cursor: pointer;
-            overflow: hidden; white-space: nowrap; user-select: none;
-        }
-        .incoming-message-ticker .tick-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); flex: 0 0 auto; }
-        .incoming-message-ticker .tick-text { display:inline-block; animation: ticker-slide 14s linear infinite; }
-        @keyframes ticker-slide { 0% { transform: translateX(-10%); } 100% { transform: translateX(110%); } }
-        @media (max-width: 520px){ .incoming-message-ticker { padding: 8px 10px; } }
-    </style>
-    <div id="incomingMessageTickerContainer" class="incoming-message-container" role="region" aria-live="polite">
-        <div id="incomingMessageTicker" class="incoming-message-ticker" tabindex="0" aria-label="New message" title="Open message"></div>
-    </div>
 
     <a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">Skip to main content</a>
 
@@ -4578,6 +4561,21 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                     <button id="refreshPymkBtn" class="icon-btn" title="Refresh" style="border:1px solid var(--border-color); border-radius:10px; padding:6px 10px;"><i class="fas fa-rotate"></i></button>
                 </div>
                 <div id="pymkScroller" style="display:flex; gap:12px; overflow-x:auto; padding:8px; border:1px solid var(--border-color); border-radius:12px; background: var(--card-background);">
+                </div>
+            </div>
+
+            <!-- Unread Chat Banner (below People You May Know) -->
+            <style>
+                .unread-chat-banner { display:none; margin: 16px auto; max-width: 900px; }
+                .unread-chat-banner .banner-card { display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--border-light); background: var(--card-background); color: var(--white); border-radius:12px; cursor:pointer; }
+                .unread-chat-banner .badge-dot { width:10px; height:10px; border-radius:50%; background: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); flex: 0 0 auto; }
+                .unread-chat-banner .banner-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                @media (max-width:520px){ .unread-chat-banner .banner-card { padding:8px 10px; } }
+            </style>
+            <div id="unreadChatBanner" class="unread-chat-banner" role="region" aria-live="polite">
+                <div class="banner-card" tabindex="0" aria-label="New message" title="Open message">
+                    <span class="badge-dot" aria-hidden="true"></span>
+                    <span id="unreadBannerText" class="banner-text"></span>
                 </div>
             </div>
 
@@ -4806,7 +4804,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                     <div class="premium-tiers">
                         <div class="premium-tier-option" data-tier="premium">
                             <div class="tier-header">
-                                <span class="tier-badge">��� Premium</span>
+                                <span class="tier-badge">���� Premium</span>
                                 <span class="tier-price">$9.99/month</span>
                             </div>
                             <ul class="tier-features">
@@ -11294,7 +11292,7 @@ async function fetchAndDisplayPosts() {
                 } catch(e) { console.warn('saved widget load', e); }
                 await fetchAndDisplayPosts(); // This will setup all real-time listeners for posts and comments.
                 fetchNotificationCount(user.uid);
-                startIncomingMessageBanner();
+                startUnreadChatBanner();
 
             } else {
                 window.location.href = '/login.html'; return;
@@ -11901,6 +11899,99 @@ async function fetchAndDisplayPosts() {
                     }
                 }, (err)=>{ console.warn('incoming chats subscribe error', err); });
             }catch(e){ console.warn('startIncomingMessageBanner failed', e); }
+        }
+
+        // --- Unread chat banner (below People You May Know) ---
+        let __unreadBannerUnsub = null;
+        let __lastShownByChat = {};
+        const __unreadMsgUnsubs = new Map();
+        function loadUnreadState(){ try{ __lastShownByChat = JSON.parse(localStorage.getItem('nuvia_unread_banner_shown')||'{}')||{}; }catch(_){ __lastShownByChat={}; } }
+        function saveUnreadState(){ try{ localStorage.setItem('nuvia_unread_banner_shown', JSON.stringify(__lastShownByChat)); }catch(_){ } }
+        function showUnreadBanner({ senderId, senderName, messageId, text }){
+            const wrap = document.getElementById('unreadChatBanner');
+            if (!wrap) return;
+            const textEl = document.getElementById('unreadBannerText');
+            const name = senderName || 'Friend';
+            const preview = (text||'').replace(/\s+/g,' ').slice(0, 120);
+            if (textEl) textEl.textContent = `New message from ${name}: ${preview}`;
+            const card = wrap.querySelector('.banner-card');
+            const open = ()=>{ window.location.href = `/chat.html?partnerId=${encodeURIComponent(senderId)}#msg-${encodeURIComponent(messageId)}`; hide(); };
+            if (card) {
+                card.onclick = open;
+                card.onkeydown = (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); open(); } };
+            }
+            wrap.style.display = 'block';
+            clearTimeout(wrap.__hideTimer); wrap.__hideTimer = setTimeout(hide, 60000);
+            function hide(){ wrap.style.display = 'none'; }
+        }
+        function startUnreadChatBanner(){
+            try{
+                loadUnreadState();
+                if (!isAuthReady || !currentUser) return;
+                if (__unreadBannerUnsub) { try{ __unreadBannerUnsub(); }catch(_){ } __unreadBannerUnsub=null; }
+                const chatsCol = collection(db, 'artifacts', appId, 'public', 'data', 'chats');
+                const qChats = query(chatsCol, where('participants', 'array-contains', currentUser.uid));
+                __unreadBannerUnsub = onSnapshot(qChats, (snap)=>{
+                    const presentIds = new Set();
+                    snap.forEach(docSnap => {
+                        const chatId = docSnap.id; presentIds.add(chatId);
+                        if (!__unreadMsgUnsubs.has(chatId)) {
+                            try{
+                                const messagesCol = collection(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'messages');
+                                const qLast = query(messagesCol, orderBy('timestamp','desc'), limit(1));
+                                const unsubMsg = onSnapshot(qLast, async (msnap)=>{
+                                    if (msnap.empty) return;
+                                    const lastDoc = msnap.docs[0];
+                                    const m = lastDoc.data()||{};
+                                    const tsMs = m.timestamp?.toMillis?.() || Date.now();
+                                    if (m.senderId === currentUser.uid) { __lastShownByChat[chatId] = tsMs; saveUnreadState(); return; }
+                                    let readAtMs = 0;
+                                    try {
+                                        const receiptsRef = doc(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'presence', 'receipts');
+                                        const rs = await getDoc(receiptsRef);
+                                        const ra = rs.exists() ? (rs.data()?.readAt?.[currentUser.uid]) : null;
+                                        if (ra) { readAtMs = typeof ra.toMillis === 'function' ? ra.toMillis() : (typeof ra === 'number' ? ra : 0); }
+                                    } catch(_) { readAtMs = 0; }
+                                    const lastSeen = Number(__lastShownByChat[chatId]||0);
+                                    const seenCutoff = Math.max(lastSeen, readAtMs);
+                                    if (tsMs <= seenCutoff) return;
+                                    __lastShownByChat[chatId] = tsMs; saveUnreadState();
+                                    let name = 'Friend';
+                                    try { const pref = doc(db, 'artifacts', appId, 'public', 'data', 'users', m.senderId); const ps = await getDoc(pref); const pd = ps.exists()? (ps.data()||{}) : {}; name = pd.displayName || pd.username || name; } catch(_){ }
+                                    showUnreadBanner({ senderId: m.senderId, senderName: name, messageId: lastDoc.id, text: (m.text||m.fileName||'') });
+                                }, (err)=>{ /* silent */ });
+                                __unreadMsgUnsubs.set(chatId, unsubMsg);
+                            }catch(_){ }
+                        }
+                    });
+                    for (const [cid, unsub] of __unreadMsgUnsubs.entries()) {
+                        if (!presentIds.has(cid)) { try{ unsub(); }catch(_){ } __unreadMsgUnsubs.delete(cid); }
+                    }
+                    if (!window.__unreadCGUnsub) {
+                        try{
+                            const msgsGroup = collectionGroup(db, 'messages');
+                            const q = query(msgsGroup, where('receiverId','==', currentUser.uid), orderBy('timestamp','desc'), limit(1));
+                            window.__unreadCGUnsub = onSnapshot(q, async (gsnap)=>{
+                                if (gsnap.empty) return;
+                                const lastDoc = gsnap.docs[0];
+                                const m = lastDoc.data()||{};
+                                const chatId = m.chatId || chatIdFor(m.senderId||'', currentUser.uid);
+                                const tsMs = m.timestamp?.toMillis?.() || Date.now();
+                                if (m.senderId === currentUser.uid) { __lastShownByChat[chatId] = tsMs; saveUnreadState(); return; }
+                                let readAtMs = 0;
+                                try { const rref = doc(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'presence', 'receipts'); const rs = await getDoc(rref); const ra = rs.exists()? (rs.data()?.readAt?.[currentUser.uid]) : null; if (ra) readAtMs = typeof ra.toMillis === 'function' ? ra.toMillis() : (typeof ra==='number' ? ra : 0); } catch(_){ }
+                                const lastSeen = Number(__lastShownByChat[chatId]||0);
+                                const seenCutoff = Math.max(lastSeen, readAtMs);
+                                if (tsMs <= seenCutoff) return;
+                                __lastShownByChat[chatId] = tsMs; saveUnreadState();
+                                let name = 'Friend';
+                                try { const pref = doc(db, 'artifacts', appId, 'public', 'data', 'users', m.senderId); const ps = await getDoc(pref); const pd = ps.exists()? (ps.data()||{}) : {}; name = pd.displayName || pd.username || name; } catch(_){ }
+                                showUnreadBanner({ senderId: m.senderId, senderName: name, messageId: lastDoc.id, text: (m.text||m.fileName||'') });
+                            }, (err)=>{ console.warn('unread collectionGroup listener error', err); });
+                        }catch(e){ console.warn('unread CG setup failed', e); }
+                    }
+                }, (err)=>{ console.warn('unread chats subscribe error', err); });
+            }catch(e){ console.warn('startUnreadChatBanner failed', e); }
         }
 
         async function ensureChatDocForHome(chatId, friendId) {
