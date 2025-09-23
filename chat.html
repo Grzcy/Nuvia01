@@ -382,7 +382,8 @@
                     <video id="localVideo" autoplay muted playsinline style="position:absolute; right:8px; bottom:8px; width:120px; border-radius:6px; box-shadow:0 6px 16px rgba(0,0,0,.5);"></video>
                 </div>
                 <div id="voiceWrap" style="display:none; text-align:center; padding:24px;">
-                    <i class="fas fa-phone" style="font-size:36px; color:var(--accent-color);"></i>
+                    <img id="voiceAvatarPlaceholder" alt="Contact" style="width:120px; height:120px; border-radius:50%; border:2px solid var(--border-light); box-shadow:0 6px 16px rgba(0,0,0,.5); object-fit:cover; display:none;" />
+                    <i class="fas fa-phone" style="font-size:36px; color:var(--accent-color); margin-top:8px;"></i>
                     <div id="callStatus" style="margin-top:8px; color:var(--text-light);">Connecting…</div>
                     <audio id="remoteAudio" autoplay playsinline style="display:none"></audio>
                 </div>
@@ -655,6 +656,7 @@
         const localVideo = document.getElementById('localVideo');
         const remoteVideo = document.getElementById('remoteVideo');
         const remoteAvatarPlaceholder = document.getElementById('remoteAvatarPlaceholder');
+        const voiceAvatarPlaceholder = document.getElementById('voiceAvatarPlaceholder');
         const remoteAudio = document.getElementById('remoteAudio');
         const incomingActions = document.getElementById('incomingActions');
         const acceptCallBtn = document.getElementById('acceptCallBtn');
@@ -670,6 +672,7 @@
         let ringTimeoutId = null;
         let incomingRingTimeoutId = null;
         let currentUserProfile = null;
+        let callTimerInterval = null;
 
         function startRingtone(){
             try{
@@ -1007,8 +1010,7 @@
                     const rstream = e.streams[0];
                     if (!callStartMs) {
                         callStartMs = Date.now();
-                        const cs = document.getElementById('callStatus');
-                        if (cs) cs.textContent = 'Connected';
+                        startCallTimer();
                     }
                     if (isVideo) {
                         remoteVideo.srcObject = rstream;
@@ -1017,6 +1019,7 @@
                         remoteAudio.srcObject = rstream;
                         remoteAudio.style.display = 'block';
                         try { remoteAudio.play().catch(() => {}); } catch {}
+                        if (voiceAvatarPlaceholder) voiceAvatarPlaceholder.style.display = 'none';
                     }
                 };
 
@@ -1135,8 +1138,7 @@
                     const rstream = e.streams[0];
                     if (!callStartMs) {
                         callStartMs = Date.now();
-                        const cs = document.getElementById('callStatus');
-                        if (cs) cs.textContent = 'Connected';
+                        startCallTimer();
                     }
                     if (desiredVideo) {
                         remoteVideo.srcObject = rstream;
@@ -1145,6 +1147,7 @@
                         remoteAudio.srcObject = rstream;
                         remoteAudio.style.display = 'block';
                         try { remoteAudio.play().catch(() => {}); } catch {}
+                        if (voiceAvatarPlaceholder) voiceAvatarPlaceholder.style.display = 'none';
                     }
                 };
                 const calleeCandCol = collection(callDocRef, 'calleeCandidates');
@@ -1192,6 +1195,23 @@
             } else if (remoteAvatarPlaceholder) {
                 remoteAvatarPlaceholder.style.display = 'none';
             }
+            if (!isVideo && voiceAvatarPlaceholder) {
+                try{
+                    let url = '';
+                    if (currentPartner) {
+                        const initial = (currentPartner.displayName || 'U').charAt(0).toUpperCase();
+                        if (currentPartner.profilePicId) {
+                            url = getCloudinaryImageUrl(currentPartner.profilePicId, 'w_240,h_240,c_fill,g_face,r_max');
+                        } else {
+                            url = `https://placehold.co/240x240/00d5ff/ffffff?text=${initial}`;
+                        }
+                        voiceAvatarPlaceholder.src = url;
+                    }
+                    voiceAvatarPlaceholder.style.display = 'block';
+                }catch(_){ }
+            } else if (voiceAvatarPlaceholder) {
+                voiceAvatarPlaceholder.style.display = 'none';
+            }
         }
 
         async function endCall() {
@@ -1199,6 +1219,7 @@
             try{ clearTimeout(incomingRingTimeoutId); }catch(_){ }
             stopRingtone();
             stopCallerRingtone();
+            stopCallTimer();
             try { pc && pc.getSenders().forEach(s => s.track && s.track.stop()); } catch {}
             try { pc && pc.close(); } catch {}
             const endedAtMs = Date.now();
@@ -1220,6 +1241,7 @@
             if (endCallBtn) endCallBtn.style.display = 'inline-flex';
             if (incomingActions) incomingActions.style.display = 'none';
             if (remoteAvatarPlaceholder) { remoteAvatarPlaceholder.style.display = 'none'; remoteAvatarPlaceholder.src=''; }
+            if (voiceAvatarPlaceholder) { voiceAvatarPlaceholder.style.display = 'none'; voiceAvatarPlaceholder.src=''; }
             callModal.style.display = 'none';
         }
 
@@ -1483,6 +1505,36 @@
             const s = totalSec % 60;
             if (h > 0) return `${h}h ${m}m ${s}s`;
             return `${m}m ${s}s`;
+        }
+
+        function formatClock(ms) {
+            const totalSec = Math.max(0, Math.floor(ms / 1000));
+            const h = Math.floor(totalSec / 3600);
+            const m = Math.floor((totalSec % 3600) / 60);
+            const s = totalSec % 60;
+            const mm = String(m).padStart(2, '0');
+            const ss = String(s).padStart(2, '0');
+            return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+        }
+
+        function startCallTimer() {
+            try {
+                const cs = document.getElementById('callStatus');
+                if (!cs) return;
+                stopCallTimer();
+                cs.textContent = '00:00';
+                callTimerInterval = setInterval(() => {
+                    if (typeof callStartMs === 'number') {
+                        const elapsed = Date.now() - callStartMs;
+                        cs.textContent = formatClock(elapsed);
+                    }
+                }, 1000);
+            } catch {}
+        }
+
+        function stopCallTimer() {
+            try { if (callTimerInterval) clearInterval(callTimerInterval); } catch {}
+            callTimerInterval = null;
         }
 
         function escapeHtml(text) {
