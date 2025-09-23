@@ -782,9 +782,25 @@
                 incomingRingTimeoutId = setTimeout(async ()=>{ try{ await declineIncomingCall(); }catch(_){ } }, 60000);
                 if (acceptCallBtn){
                     acceptCallBtn.onclick = async () => {
-                        try{ stopRingtone(); if (incomingActions) incomingActions.style.display = 'none'; clearTimeout(incomingRingTimeoutId); // detach the ringing doc listener before accepting
+                        try{
+                            stopRingtone();
+                            if (incomingActions) incomingActions.style.display = 'none';
+                            clearTimeout(incomingRingTimeoutId);
+                            // grab the doc and mark accept-in-progress to avoid race with listeners
+                            const docToAccept = currentIncomingDoc;
+                            if (!docToAccept) return;
+                            acceptInProgressDocId = docToAccept.id;
+                            // detach ringing listener immediately
                             try{ if (unsubRingingCallDoc) { unsubRingingCallDoc(); unsubRingingCallDoc = null; } }catch(_){ }
-                            await acceptIncomingCall(currentIncomingDoc); isIncoming = false; currentIncomingDoc = null; }catch(e){ endCall(); }
+                            // clear main currentIncoming so other listeners won't treat this as 'same'
+                            currentIncomingDoc = null;
+                            isIncoming = false;
+                            await acceptIncomingCall(docToAccept);
+                            acceptInProgressDocId = null;
+                        }catch(e){
+                            acceptInProgressDocId = null;
+                            endCall();
+                        }
                     };
                 }
                 if (declineCallBtn){
