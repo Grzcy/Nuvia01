@@ -11819,6 +11819,14 @@ async function fetchAndDisplayPosts() {
                 const mediaEl = document.getElementById('sharePostPopoverMedia');
                 if(contentEl) contentEl.textContent = content || '';
                 if(mediaEl){ mediaEl.innerHTML = ''; if(mediaUrl){ if(/\.(png|jpe?g|gif|webp)$/i.test(mediaUrl)) mediaEl.innerHTML = `<img src="${mediaUrl}" style="max-width:100%;border-radius:8px;">`; else if(/\.(mp4|webm|ogg)$/i.test(mediaUrl)) mediaEl.innerHTML = `<video src="${mediaUrl}" controls style="max-width:100%;border-radius:8px;"></video>`; else mediaEl.innerHTML = `<a href="${mediaUrl}" target="_blank" rel="noopener">Open</a>`; } }
+                // Add pink & yellow glow to the preview when there is content or media
+                try{
+                    const previewEl = document.getElementById('sharePostPopoverPreview');
+                    if(previewEl){
+                        if((content||'').trim() || mediaUrl) previewEl.classList.add('share-preview-glow');
+                        else previewEl.classList.remove('share-preview-glow');
+                    }
+                }catch(_){ }
                 // Position popover near anchor if provided
                 if(anchor){
                     const rect = anchor.getBoundingClientRect();
