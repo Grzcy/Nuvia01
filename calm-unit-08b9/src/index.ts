@@ -42,7 +42,7 @@ function shareHtml(origin: string, id: string, post: any) {
   const canonical = `${origin}/share/${encodeURIComponent(id)}`;
   const title = post?.title || "Nuvia";
   const desc = post?.description || "Shared from Nuvia";
-  const img = (post?.imageUrl || (post?.mediaType?.startsWith("video") ? null : post?.mediaUrl)) || `${origin}/assets/nuvia-share-fallback.png`;
+  const img = (post?.imageUrl || (post?.mediaType?.startsWith("video") ? null : post?.mediaUrl)) || logo;
   const hasVideo = !!(post?.mediaUrl && /\.(mp4|webm|ogg)(\?|$)/i.test(post.mediaUrl));
   const video = hasVideo ? post.mediaUrl : null;
   const siteName = "Nuvia";
