@@ -1389,6 +1389,11 @@
             text-shadow: 0 0 10px rgba(0, 213, 255, 0.7), 0 0 15px rgba(0, 170, 255, 0.5);
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
         }
+        /* Inline SVG chat icon styles */
+        .chat-icon-svg { width: 24px; height: 24px; display: block; }
+        .chat-icon-svg .chat-bubble-body { transition: fill 160ms ease; fill: #003f7f; }
+        .chat-icon-svg .chat-dots { fill: #ffffff; }
+        #headerChatLink:hover .chat-icon-svg .chat-bubble-body { fill: #005fb5; }
 
         .notification-icon-wrapper a:hover i {
             transform: rotate(10deg) scale(1.05);
