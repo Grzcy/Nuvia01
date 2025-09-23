@@ -1486,6 +1486,66 @@
             }catch(e){ /* ignore */ }
         }
 
+        async function handleMissedByCaller(){
+            try{
+                if (!callDocRef || callStartMs) return;
+                const snap = await getDoc(callDocRef);
+                const data = snap.exists() ? snap.data() : null;
+                if (!data || data.status !== 'ringing') return;
+                await updateDoc(callDocRef, { status: 'missed', missedAt: Date.now() });
+                await logMissedCall(callKind);
+                await createMissedNotificationForCallee(callKind);
+            }catch(_){ } finally {
+                endCall();
+            }
+        }
+
+        async function logMissedCall(kind){
+            try{
+                if (!currentUser || !currentPartner) return;
+                const chatId = chatIdFor(currentUser.uid, currentPartner.id);
+                const messagesRef = collection(db, "artifacts", appId, "public", "data", "chats", chatId, "messages");
+                await ensureChatDoc(chatId);
+                const text = `Missed ${kind === 'video' ? 'video' : 'voice'} call`;
+                await addDoc(messagesRef, {
+                    type: 'call',
+                    callKind: kind,
+                    durationMs: 0,
+                    text,
+                    missed: true,
+                    senderId: currentUser.uid,
+                    receiverId: currentPartner.id,
+                    timestamp: serverTimestamp(),
+                    status: 'sent',
+                    chatId
+                });
+            }catch(_){ }
+        }
+
+        async function createMissedNotificationForCallee(kind){
+            try{
+                if (!currentUser || !currentPartner) return;
+                const ncol = collection(db, 'artifacts', appId, 'users', currentPartner.id, 'notifications');
+                const callerName = (currentUserProfile && currentUserProfile.displayName) || currentUser.displayName || currentUser.email || 'JCHAT User';
+                const callerPic = (currentUserProfile && currentUserProfile.profilePicId) || currentUser.photoURL || null;
+                const chatId = chatIdFor(currentUser.uid, currentPartner.id);
+                const msg = `Missed ${kind === 'video' ? 'video' : 'voice'} call from ${callerName}`;
+                await addDoc(ncol, {
+                    type: 'messages',
+                    category: 'messages',
+                    message: msg,
+                    senderUsername: callerName,
+                    senderProfilePicId: callerPic,
+                    partnerId: currentUser.uid,
+                    chatId,
+                    targetUrl: `/chat.html?partnerId=${currentUser.uid}`,
+                    read: false,
+                    timestamp: serverTimestamp(),
+                    meta: { subtype: 'missed_call', callKind: kind }
+                });
+            }catch(_){ }
+        }
+
         // Notification sound helper
         let soundPlayedLock = false;
         function playNotificationSoundOnce() {
