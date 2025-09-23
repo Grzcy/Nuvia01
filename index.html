@@ -5457,32 +5457,34 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         // Currency detection and exchange rate management
         async function detectUserCurrency() {
             try {
-                // Try to get user's country from IP
-                const response = await fetch('https://ipapi.co/json/');
-                const data = await response.json();
-                
-                if (data.country_code && CURRENCIES[data.country_code]) {
-                    userCurrency = CURRENCIES[data.country_code];
-                    console.log(`Currency detected: ${userCurrency.name} (${userCurrency.code})`);
-                }
-                
-                // Store user's currency preference
-                localStorage.setItem('nuvia-user-currency', userCurrency.code);
-                
-                // Fetch exchange rates
-                await fetchExchangeRates();
-                
-            } catch (error) {
-                console.log('Currency detection failed, using USD as default:', error);
-                // Fallback to stored preference or USD
+                // Use stored preference if available
                 const storedCurrency = localStorage.getItem('nuvia-user-currency');
                 if (storedCurrency) {
-                    const currencyEntry = Object.values(CURRENCIES).find(c => c.code === storedCurrency);
-                    if (currencyEntry) userCurrency = currencyEntry;
+                    const entry = Object.values(CURRENCIES).find(c => c.code === storedCurrency);
+                    if (entry) userCurrency = entry;
                 }
-                
-                // Still try to fetch exchange rates even if detection failed
-                await fetchExchangeRates();
+
+                // If offline, keep stored/default currency
+                if (!navigator.onLine) {
+                    return;
+                }
+
+                // Fetch country with timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
+                const response = await fetch('https://ipapi.co/json/', { signal: controller.signal, cache: 'no-store' });
+                clearTimeout(timeoutId);
+                if (response && response.ok) {
+                    const data = await response.json();
+                    if (data && data.country_code && CURRENCIES[data.country_code]) {
+                        userCurrency = CURRENCIES[data.country_code];
+                        console.log(`Currency detected: ${userCurrency.name} (${userCurrency.code})`);
+                    }
+                }
+
+                try { localStorage.setItem('nuvia-user-currency', userCurrency.code); } catch (_) {}
+            } catch (error) {
+                console.warn('Currency detection skipped:', error && (error.name || error.message || error));
             }
         }
 
@@ -5501,6 +5503,11 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                         }
                     }
                 } catch (_) {}
+
+                // If offline, skip network fetches
+                if (!navigator.onLine) {
+                    return;
+                }
 
                 // Fetch with timeout and multiple fallbacks (NGN base)
                 const controller = new AbortController();
@@ -5542,16 +5549,16 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 if (fetchedRates) {
                     exchangeRates = fetchedRates;
                     try { localStorage.setItem('nuvia-exchange-rates', JSON.stringify({ rates: exchangeRates, ts: Date.now() })); } catch (_) {}
-                    console.log('Exchange rates updated successfully');
                     if (document.querySelector('.theme-picker')) {
                         updateThemePickerPrices();
                     }
                     return;
                 }
 
+                // No exchange rates from any endpoint
                 throw new Error('No exchange rates from any endpoint');
             } catch (error) {
-                console.error('Failed to fetch exchange rates:', error);
+                console.warn('Exchange rates unavailable, using cache/fallback:', error && (error.name || error.message || error));
                 // Use cached rates if any, else fallback to approximate (NGN base)
                 try {
                     const cachedRaw = localStorage.getItem('nuvia-exchange-rates');
@@ -5659,13 +5666,17 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
 
         // Initialize theme switcher
         async function initializeThemeSwitcher() {
-            // Detect user currency and fetch exchange rates
-            await detectUserCurrency();
-            await fetchExchangeRates();
-            
+            // Detect user currency and fetch exchange rates (safe)
+            try {
+                await detectUserCurrency();
+                await fetchExchangeRates();
+            } catch (e) {
+                console.warn('Theme currency init skipped:', e && (e.name || e.message || e));
+            }
+
             // Load saved theme from localStorage
             const savedTheme = localStorage.getItem('nuvia-theme') || 'theme-dark-mode';
-            
+
             // Check if the saved theme is locked
             if (isThemeLocked(savedTheme)) {
                 // If locked, fall back to a free theme
@@ -5673,13 +5684,13 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             } else {
                 setTheme(savedTheme, false);
             }
-            
+
             // Add event listener to theme switcher button
             themeSwitcherBtn = document.getElementById('themeSwitcherBtn');
             if (themeSwitcherBtn) {
                 themeSwitcherBtn.addEventListener('click', openThemePicker);
             }
-            
+
             // Subscribe to real-time theme unlocks for authenticated users
             if (typeof onAuthStateChanged !== 'undefined') {
                 onAuthStateChanged(auth, (user) => {
@@ -8648,7 +8659,7 @@ async function checkAndStartDailyBonusTimer() {
                         "Laugh at the tiny stumbles; they make great stories and soften the day.",
                         "Share a cheerful note or a meme with a friend who could use a smile right now.",
                         "Remember: perfection is overrated—progress with a grin beats delay with a frown.",
-                        "Drink water, stretch, and keep your sense of humor; it’s portable resilience.",
+                        "Drink water, stretch, and keep your sense of humor; it��s portable resilience.",
                     ],
                     prayers: [
                         "Ask plainly for what you need, thank God for what you have, and rest the outcome in His care.",
