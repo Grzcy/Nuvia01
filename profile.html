@@ -8025,7 +8025,7 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
                 // Update header UI
                 const usernameInitial = (profileData.username || "J").charAt(0).toUpperCase();
                 displayProfilePicture(headerProfilePic, headerAvatarIcon, profileData?.profilePicId, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
-                headerDisplayName.textContent = profileData.username || "JCHAT User";
+                if (headerDisplayName) headerDisplayName.textContent = profileData.username || "JCHAT User";
                 if (headerNavLinkProfile) headerNavLinkProfile.href = `/profile.html?userId=${user.uid}`; // Ensure header nav link is correct, null check
 
                 // Show Admin Icon if current user is admin
