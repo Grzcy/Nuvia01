@@ -7487,8 +7487,8 @@ function generateProceduralQuote(type) { const t = quoteTemplates[type] || quote
 
         // --- NEW: Pending Activity Reward Creation Function ---
         /**
-         * Creates a pending activity reward document for admin review.
-         * This system allows for manual approval of XP/JCoin rewards, preventing abuse.
+         * Creates a pending activity reward for admin review OR instantly credits it based on developer toggle.
+         * When auto-approve is enabled in system settings, users receive rewards immediately after performing the activity.
          * @param {string} userId - The ID of the user who performed the activity.
          * @param {string} username - The username of the user.
          * @param {string} activityType - The type of activity (e.g., 'daily_login', 'react_like', 'post_comment', 'post_creation', 'post_deletion').
@@ -7507,23 +7507,59 @@ function generateProceduralQuote(type) { const t = quoteTemplates[type] || quote
             postId = null
         ) {
             try {
-                const pendingRewardsCollectionRef = collection(db, "artifacts", appId, "public", "data", "pending_activity_rewards");
+                const autoApproveOn = !!(currentSystemSettings && (currentSystemSettings.autoApproveRewards === true || (currentSystemSettings.autoApproveMaster && currentSystemSettings.autoApproveRewards)));
+                if (autoApproveOn) {
+                    const userProfileRef = doc(db, "artifacts", appId, "users", userId, "profiles", "user_profile");
+                    const userPublicProfileRef = doc(db, "artifacts", appId, "public", "data", "users", userId);
+                    await runTransaction(db, async (trx) => {
+                        const snap = await trx.get(userProfileRef);
+                        let currentXp = 0;
+                        let currentJCoins = 0;
+                        let totalPosts = 0;
+                        let totalGasEarned = 0;
+                        if (snap.exists()) {
+                            const d = snap.data();
+                            currentXp = d.gas || 0;
+                            currentJCoins = d.jCoins || 0;
+                            totalPosts = d.totalPosts || 0;
+                            totalGasEarned = d.totalGasEarned || 0;
+                        }
+                        currentXp += (suggestedXpReward || 0);
+                        currentJCoins += (suggestedJCoinReward || 0);
+                        totalGasEarned += (suggestedXpReward || 0);
+                        if (activityType === 'post_creation') { totalPosts += 1; }
+                        trx.set(userProfileRef, {
+                            gas: currentXp,
+                            jCoins: currentJCoins,
+                            totalPosts: totalPosts,
+                            totalGasEarned: totalGasEarned,
+                            updatedAt: serverTimestamp()
+                        }, { merge: true });
+                        trx.set(userPublicProfileRef, {
+                            totalPosts: totalPosts,
+                            totalGasEarned: totalGasEarned,
+                            updatedAt: serverTimestamp()
+                        }, { merge: true });
+                    });
+                    console.log('Nuvia_DEBUG: Reward instantly credited (auto-approve ON).', { userId, activityType, suggestedXpReward, suggestedJCoinReward });
+                    return;
+                }
 
+                const pendingRewardsCollectionRef = collection(db, "artifacts", appId, "public", "data", "pending_activity_rewards");
                 const newRewardDocRef = await addDoc(pendingRewardsCollectionRef, {
                     userId: userId,
                     username: username,
                     activityType: activityType,
                     suggestedXpReward: suggestedXpReward,
                     suggestedJCoinReward: suggestedJCoinReward,
-                    status: 'pending', // Always pending for admin review
+                    status: 'pending',
                     timestamp: serverTimestamp(),
-                    activityId: activityId, // Store activity ID if relevant
-                    postId: postId // Store postId if relevant
+                    activityId: activityId,
+                    postId: postId
                 });
-
                 console.log(`Nuvia_DEBUG: Pending activity reward created with ID: ${newRewardDocRef.id}`);
             } catch (error) {
-                console.error("Nuvia_ERROR: Error creating pending activity reward:", error);
+                console.error("Nuvia_ERROR: Error creating or crediting activity reward:", error);
             }
         }
 
