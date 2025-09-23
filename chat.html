@@ -872,8 +872,10 @@
             cleanupIncoming(){ try{ this.unsubIncomingDoc && this.unsubIncomingDoc(); }catch{} this.unsubIncomingDoc=null; this.incomingDoc=null; }
         }
 
-        let callManager = new CallManager();
-        function startIncomingListener(){ return callManager.listenForIncoming(); }
+        let callManager = null;
+        function startIncomingListener(){ if(!callManager) callManager = new CallManager(); return callManager.listenForIncoming(); }
+        voiceCallBtn?.addEventListener('click', ()=>{ if(!callManager) callManager = new CallManager(); callManager.start('voice'); });
+        videoCallBtn?.addEventListener('click', ()=>{ if(!callManager) callManager = new CallManager(); callManager.start('video'); });
 
         // Emoji setup with categories and ~500 emojis
         const emojiCategories = [
