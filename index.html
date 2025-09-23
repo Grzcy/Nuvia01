@@ -11875,6 +11875,30 @@ async function fetchAndDisplayPosts() {
                     for (const [cid, unsub] of __chatMsgUnsubs.entries()) {
                         if (!presentIds.has(cid)) { try{ unsub(); }catch(_){ } __chatMsgUnsubs.delete(cid); }
                     }
+                    // Fallback listener: collectionGroup for messages addressed to me (covers chats without participants array)
+                    if (!window.__incomingCGUnsub) {
+                        try{
+                            const msgsGroup = collectionGroup(db, 'messages');
+                            const q = query(msgsGroup, where('receiverId','==', currentUser.uid), orderBy('timestamp','desc'), limit(1));
+                            window.__incomingCGUnsub = onSnapshot(q, async (gsnap)=>{
+                                if (gsnap.empty) return;
+                                const lastDoc = gsnap.docs[0];
+                                const m = lastDoc.data()||{};
+                                const chatId = m.chatId || chatIdFor(m.senderId||'', currentUser.uid);
+                                const tsMs = m.timestamp?.toMillis?.() || Date.now();
+                                if (m.senderId === currentUser.uid) { __lastIncomingByChat[chatId] = tsMs; saveLastIncomingState(); return; }
+                                let readAtMs = 0;
+                                try { const rref = doc(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'presence', 'receipts'); const rs = await getDoc(rref); const ra = rs.exists()? (rs.data()?.readAt?.[currentUser.uid]) : null; if (ra) readAtMs = typeof ra.toMillis === 'function' ? ra.toMillis() : (typeof ra === 'number' ? ra : 0); } catch(_){ }
+                                const lastSeen = Number(__lastIncomingByChat[chatId]||0);
+                                const seenCutoff = Math.max(lastSeen, readAtMs);
+                                if (tsMs <= seenCutoff) return;
+                                __lastIncomingByChat[chatId] = tsMs; saveLastIncomingState();
+                                let name = 'Friend';
+                                try { const pref = doc(db, 'artifacts', appId, 'public', 'data', 'users', m.senderId); const ps = await getDoc(pref); const pd = ps.exists()? (ps.data()||{}) : {}; name = pd.displayName || pd.username || name; } catch(_){ }
+                                showIncomingTicker({ senderId: m.senderId, senderName: name, messageId: lastDoc.id, text: (m.text||m.fileName||'') });
+                            }, (err)=>{ console.warn('incoming collectionGroup listener error', err); });
+                        }catch(e){ console.warn('collectionGroup setup failed', e); }
+                    }
                 }, (err)=>{ console.warn('incoming chats subscribe error', err); });
             }catch(e){ console.warn('startIncomingMessageBanner failed', e); }
         }
