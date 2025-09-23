@@ -6320,7 +6320,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 'maintenance': '🔧 Maintenance',
                 'update': '🆕 Update'
             };
-            return typeLabels[type] || 'ℹ����� Information';
+            return typeLabels[type] || 'ℹ������� Information';
         }
 
         /**
@@ -11908,35 +11908,47 @@ async function fetchAndDisplayPosts() {
 
         async function sendPostToFriend(friendId, postId, content, mediaUrl){
             try{
-                if(!isAuthReady || !currentUser){ showMessageBox('Please log in.','warning'); return; }
+                if(!isAuthReady || !currentUser){ showMessageBox('Please log in.','warning'); return false; }
                 const chatId = chatIdFor(currentUser.uid, friendId);
                 const messagesRef = collection(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'messages');
-                await ensureChatDocForHome(chatId, friendId);
+                const ok = await ensureChatDocForHome(chatId, friendId);
+                if (!ok) return false;
                 // If mediaUrl is provided and appears to be an image/video/audio, send as a file-type message so chat can render it inline
                 const url = mediaUrl || null;
                 const viewLink = `${location.origin}/index.html#post-${encodeURIComponent(postId)}`;
                 const baseText = (content||'').trim();
-                if (url) {
-                    const lower = url.toLowerCase();
-                    const fileName = url.split('/').pop()?.split('?')[0] || '';
-                    if (/\.(png|jpe?g|gif|webp)$/i.test(lower)) {
-                        await addDoc(messagesRef, { text: baseText || '', senderId: currentUser.uid, receiverId: friendId, timestamp: serverTimestamp(), status: 'sent', chatId, type: 'file', fileUrl: url, fileName, viewLink });
-                    } else if (/\.(mp4|webm|ogg)$/i.test(lower)) {
-                        await addDoc(messagesRef, { text: baseText || '', senderId: currentUser.uid, receiverId: friendId, timestamp: serverTimestamp(), status: 'sent', chatId, type: 'file', fileUrl: url, fileName, viewLink });
-                    } else if (/\.(mp3|wav|m4a|aac)$/i.test(lower) || url.includes('audio')) {
-                        await addDoc(messagesRef, { text: baseText || '', senderId: currentUser.uid, receiverId: friendId, timestamp: serverTimestamp(), status: 'sent', chatId, type: 'audio', fileUrl: url, fileName, viewLink });
+                try{
+                    if (url) {
+                        const lower = url.toLowerCase();
+                        const fileName = url.split('/').pop()?.split('?')[0] || '';
+                        if (/\.(png|jpe?g|gif|webp)$/i.test(lower)) {
+                            await addDoc(messagesRef, { text: baseText || '', senderId: currentUser.uid, receiverId: friendId, timestamp: serverTimestamp(), status: 'sent', chatId, type: 'file', fileUrl: url, fileName, viewLink });
+                        } else if (/\.(mp4|webm|ogg)$/i.test(lower)) {
+                            await addDoc(messagesRef, { text: baseText || '', senderId: currentUser.uid, receiverId: friendId, timestamp: serverTimestamp(), status: 'sent', chatId, type: 'file', fileUrl: url, fileName, viewLink });
+                        } else if (/\.(mp3|wav|m4a|aac)$/i.test(lower) || url.includes('audio')) {
+                            await addDoc(messagesRef, { text: baseText || '', senderId: currentUser.uid, receiverId: friendId, timestamp: serverTimestamp(), status: 'sent', chatId, type: 'audio', fileUrl: url, fileName, viewLink });
+                        } else {
+                            // Unknown media type: send as text + link
+                            const text = `${baseText}${baseText? '\n\n':''}${url}\n\nView: ${viewLink}`.trim();
+                            await addDoc(messagesRef, { text, senderId: currentUser.uid, receiverId: friendId, timestamp: serverTimestamp(), status: 'sent', chatId });
+                        }
                     } else {
-                        // Unknown media type: send as text + link
-                        const text = `${baseText}${baseText? '\n\n':''}${url}\n\nView: ${viewLink}`.trim();
+                        const text = `${baseText}${baseText? '\n\n':''}View: ${viewLink}`.trim();
                         await addDoc(messagesRef, { text, senderId: currentUser.uid, receiverId: friendId, timestamp: serverTimestamp(), status: 'sent', chatId });
                     }
-                } else {
-                    const text = `${baseText}${baseText? '\n\n':''}View: ${viewLink}`.trim();
-                    await addDoc(messagesRef, { text, senderId: currentUser.uid, receiverId: friendId, timestamp: serverTimestamp(), status: 'sent', chatId });
+                }catch(err){
+                    console.error('Failed to write message', err);
+                    if (err && (err.code === 'permission-denied' || (err.message && err.message.toLowerCase().includes('permission')))){
+                        showMessageBox('You do not have permission to send messages to this user.','error');
+                        return false;
+                    }
+                    showMessageBox('Failed to send message. Try again.', 'error');
+                    return false;
                 }
 
                 showMessageBox('Post sent to friend!','success');
-            }catch(e){ console.error('sendPostToFriend failed', e); showMessageBox('Failed to send post.','error'); }
+                return true;
+            }catch(e){ console.error('sendPostToFriend failed', e); showMessageBox('Failed to send post.','error'); return false; }
         }
 
         async function openFriendPickerAndSendPost(postId, content, mediaUrl){
