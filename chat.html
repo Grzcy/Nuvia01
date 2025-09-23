@@ -657,6 +657,9 @@
         let ringtoneTimer = null;
         let ringtoneOsc = null;
         let ringtoneCtx = null;
+        let isCaller = false;
+        let callKind = 'voice';
+        let callStartMs = null;
 
         function startRingtone(){
             try{
