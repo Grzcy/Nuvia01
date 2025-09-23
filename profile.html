@@ -6808,7 +6808,33 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
             // Log completion details for debugging
             console.log(`JCHAT_DEBUG: Profile completion: ${completionPercentage}% (${completedFields.length}/${completionFields.length} fields)`);
             console.log('JCHAT_DEBUG: Completed fields:', completedFields);
-            
+
+            // One-time reward: 50 Gas when profile reaches 100% completion (owner only)
+            try {
+                if (completionPercentage === 100 && typeof currentUser !== 'undefined' && currentUser && typeof displayedUserId !== 'undefined' && displayedUserId === currentUser.uid) {
+                    const alreadyClaimed = !!(currentUserProfileData && (currentUserProfileData.profileCompletionRewardClaimed || currentUserProfileData.profileCompletion100Rewarded));
+                    if (!alreadyClaimed) {
+                        (async () => {
+                            try {
+                                const username = (currentUserProfileData && currentUserProfileData.username) || 'User';
+                                // Mark as claimed to prevent repeated triggers
+                                const privateProfileDocRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profiles', 'user_profile');
+                                await updateDoc(privateProfileDocRef, { profileCompletionRewardClaimed: true, profileCompletionRewardedAt: serverTimestamp() });
+                                if (!currentUserProfileData) currentUserProfileData = {};
+                                currentUserProfileData.profileCompletionRewardClaimed = true;
+                                // Create pending reward for admin approval
+                                await createPendingActivityReward(currentUser.uid, username, 'profile_complete_100', 50, 0);
+                                if (typeof showEnhancedSmartSuccess === 'function') {
+                                    showEnhancedSmartSuccess('Profile complete! +50 Gas has been requested and will be added after review.', 'achievement');
+                                }
+                            } catch (e) {
+                                console.error('JCHAT_ERROR: Failed to queue profile completion reward:', e);
+                            }
+                        })();
+                    }
+                }
+            } catch (_) {}
+
             return completionPercentage;
         }
 
