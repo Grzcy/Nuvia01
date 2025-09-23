@@ -1190,6 +1190,8 @@
                                     if (incomingActions) incomingActions.style.display = 'none';
                                     if (endCallBtn) endCallBtn.style.display = 'inline-flex';
                                     callModal.style.display = 'none';
+                                    // cleanup ringing listener if present
+                                    try{ if (unsubRingingCallDoc) { unsubRingingCallDoc(); unsubRingingCallDoc = null; } }catch(_){ }
                                     isIncoming = false; currentIncomingDoc = null;
                                 }
                             }
