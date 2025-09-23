@@ -4329,6 +4329,32 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         .posts-feed-section .post-card .love-count,
         .posts-feed-section .post-card .haha-count { color: #fff !important; font-weight:700; }
     </style>
+<style id="secondary-header-styles">
+  /* Secondary header bar under main header (steel look using existing variables) */
+  .secondary-header-bar {
+    position: sticky;
+    top: 55px;
+    z-index: 9;
+    background: var(--header-background);
+    border-bottom: 1px solid var(--border-light);
+    backdrop-filter: saturate(140%) blur(6px);
+  }
+  .secondary-header-bar .header-content-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    max-width: 1200px;
+    padding: 6px 30px;
+    position: relative;
+    margin: 0 auto;
+  }
+  /* Hidden by default; JS will display:flex when data is ready */
+  #homeChipsRow { display: none; }
+  /* Ensure progress starts empty until JS updates */
+  #levelChipProgressFill { width: 0%; }
+  .chip-title-row { display:flex; align-items:baseline; gap:8px; }
+</style>
 </head>
 <body class="theme-dark-mode">
     <!-- Nuvia Pink & Blue Glowing Loader -->
@@ -4477,6 +4503,34 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             </div>
         </div>
     </header>
+    <div class="secondary-header-bar" role="region" aria-label="Level, JCoins and rate">
+      <div class="header-content-wrapper">
+        <div id="homeChipsRow" class="home-chips-row" aria-live="polite">
+          <div class="chip level-chip" aria-label="Level progress">
+            <i id="levelChipIcon" class="fas fa-star" aria-hidden="true"></i>
+            <div class="chip-text">
+              <div class="chip-title-row">
+                <span id="levelChipName">Level 1</span>
+                <span id="levelChipPercent">0%</span>
+              </div>
+              <div class="chip-progress" aria-hidden="true">
+                <div id="levelChipProgressFill"></div>
+              </div>
+            </div>
+          </div>
+          <a id="walletChipLink" href="/wallet.html" class="chip wallet-chip" aria-label="Wallet balance and JCoin rate">
+            <i class="fas fa-coins" aria-hidden="true"></i>
+            <div class="chip-text">
+              <div class="chip-title-row">
+                <span class="chip-title">JCoins</span>
+                <span id="walletChipAmount">0</span>
+              </div>
+              <div class="chip-sub">Rate: <span id="jcoinRate">0.000</span></div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
 
 
     <a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">Skip to main content</a>
