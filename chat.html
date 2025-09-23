@@ -372,7 +372,7 @@
                     <div id="callTitle" style="font-weight:600;">Call</div>
                     <button id="endCallBtn" class="icon-btn" title="End Call" style="color:#ff4d4f"><i class="fas fa-phone-slash"></i></button>
                 </div>
-                <div id="incomingActions" style="display:none; gap:12px; justify-content:center; margin:10px 0; display:flex;">
+                <div id="incomingActions" style="display:none; gap:12px; justify-content:center; margin:10px 0;">
                     <button id="acceptCallBtn" class="icon-btn" title="Accept Call" style="background: var(--input-background); border:1px solid var(--border-light); color:#2ed573"><i class="fas fa-phone"></i></button>
                     <button id="declineCallBtn" class="icon-btn" title="Decline Call" style="background: var(--input-background); border:1px solid var(--border-light); color:#ff4d4f"><i class="fas fa-phone-slash"></i></button>
                 </div>
@@ -709,7 +709,7 @@
             try{
                 stopRingtone();
                 if (incomingActions) incomingActions.style.display = 'none';
-                if (callDocRef) { try { await updateDoc(callDocRef, { status: 'ended' }); } catch(_){} }
+                if (callDocRef) { try { await updateDoc(callDocRef, { status: 'declined' }); } catch(_){} }
             } finally {
                 callDocRef = null;
                 callModal.style.display = 'none';
@@ -957,7 +957,11 @@
 
         async function startCall(isVideo) {
             if (!currentPartner) return;
+            isIncoming = false;
+            if (incomingActions) incomingActions.style.display = 'none';
             openCallUI(isVideo);
+            const csEl = document.getElementById('callStatus');
+            if (csEl) csEl.textContent = 'Calling…';
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
                 if (isVideo) localVideo.srcObject = stream;
@@ -1000,7 +1004,7 @@
                         const answerDesc = new RTCSessionDescription(data.answer);
                         await pc.setRemoteDescription(answerDesc);
                     }
-                    if (data?.status === 'ended') endCall();
+                    if (data?.status === 'ended' || data?.status === 'declined') endCall();
                 });
 
                 // Listen for callee ICE
