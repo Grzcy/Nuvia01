@@ -1832,7 +1832,7 @@
         main {
             flex-grow: 1;
             padding: 40px 0;
-            padding-top: 55px; /* Back to original header spacing */
+            padding-top: calc(55px + var(--secondary-header-height)); /* account for fixed secondary header */
             width: 100%;
             display: flex;
             flex-direction: column;
@@ -4330,14 +4330,21 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         .posts-feed-section .post-card .haha-count { color: #fff !important; font-weight:700; }
     </style>
 <style id="secondary-header-styles">
+  :root { --secondary-header-height: 54px; }
   /* Secondary header bar under main header (steel look using existing variables) */
   .secondary-header-bar {
-    position: sticky;
+    position: fixed;
     top: 55px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: var(--secondary-header-height);
     z-index: 9;
     background: var(--header-background);
     border-bottom: 1px solid var(--border-light);
     backdrop-filter: saturate(140%) blur(6px);
+    display: flex;
+    align-items: center;
   }
   .secondary-header-bar .header-content-wrapper {
     display: flex;
@@ -4345,10 +4352,13 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
     justify-content: flex-start;
     width: 100%;
     max-width: 1200px;
-    padding: 6px 30px;
+    padding: 0 30px;
     position: relative;
     margin: 0 auto;
+    height: 100%;
   }
+  /* Ensure any prior sticky/grid rules don't affect header chips */
+  .secondary-header-bar #homeChipsRow { position: static !important; }
   /* Hidden by default; JS will display:flex when data is ready */
   #homeChipsRow { display: none; }
   /* Ensure progress starts empty until JS updates */
