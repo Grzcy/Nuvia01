@@ -847,6 +847,7 @@
                 coIncomingControls.classList.toggle('hidden', !incoming);
                 coActiveControls.classList.toggle('hidden', incoming);
                 coEndBtn.style.display = incoming ? 'none' : 'flex';
+                coToggleVideo.style.display = (type==='video') ? 'flex' : 'none';
                 callOverlay.classList.remove('hidden');
                 this.setStatus(incoming ? 'Ringing…' : 'Calling…');
                 coTimer.textContent='';
