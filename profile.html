@@ -9908,12 +9908,23 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
                     if (!user) return;
 
                     // Get current display values
-                    const displayName = document.getElementById('displayNameValue').textContent;
-                    const location = document.getElementById('locationValue').textContent;
-                    const school = document.getElementById('schoolValue').textContent;
-                    const work = document.getElementById('workValue').textContent;
-                    const bio = document.getElementById('bioValue').textContent;
-                    const interests = document.getElementById('interestsValue').textContent;
+                    const displayNameEl = document.getElementById('displayNameValue');
+                    const emailEl = document.getElementById('emailValue');
+                    const phoneEl = document.getElementById('phoneValue');
+                    const locationEl = document.getElementById('locationValue');
+                    const schoolEl = document.getElementById('schoolValue');
+                    const workEl = document.getElementById('workValue');
+                    const bioEl = document.getElementById('bioValue');
+                    const interestsEl = document.getElementById('interestsValue');
+
+                    const displayName = displayNameEl ? displayNameEl.textContent : '';
+                    const email = emailEl ? emailEl.textContent : '';
+                    const phone = phoneEl ? phoneEl.textContent : '';
+                    const location = locationEl ? locationEl.textContent : '';
+                    const school = schoolEl ? schoolEl.textContent : '';
+                    const work = workEl ? workEl.textContent : '';
+                    const bio = bioEl ? bioEl.textContent : '';
+                    const interests = interestsEl ? interestsEl.textContent : '';
 
                     // Populate form fields (only if not "Not set") with null checks
                     const editDisplayName = document.getElementById('editDisplayName');
