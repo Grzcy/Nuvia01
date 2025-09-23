@@ -53,7 +53,7 @@ async function answerGlobalCall(callerId){ try{ window.location.href = `/chat.ht
 async function declineGlobalCall(callId){ try{ const db = getFirestore(); const callDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'calls', callId); await updateDoc(callDocRef, { status: 'declined', endedAt: serverTimestamp() }); removeOverlay(); }catch(e){ console.error('JCHAT_ERROR declineGlobalCall', e); } }
 
 function clearRealtime(){ try{ if(realtimeUnsub){ realtimeUnsub(); realtimeUnsub = null; } }catch(e){} }
-function clearPoll(){ try{ if(pollIntervalId){ clearInterval(pollIntervalId); pollIntervalId = null; } }catch(e){}
+function clearPoll(){ try{ if(pollIntervalId){ clearInterval(pollIntervalId); pollIntervalId = null; } }catch(e){} }
 
 async function pollForCalls(uid){ try{
   const db = getFirestore();
