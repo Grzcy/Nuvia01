@@ -975,7 +975,6 @@
             if (csEl) csEl.textContent = 'Calling…';
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
-                startRingtone();
                 try{ clearTimeout(ringTimeoutId); }catch(_){ }
                 ringTimeoutId = setTimeout(async ()=>{ try{ await handleMissedByCaller(); }catch(_){ } }, 60000);
                 if (isVideo) localVideo.srcObject = stream;
