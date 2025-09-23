@@ -392,8 +392,10 @@
 
     <!-- Notification sound -->
     <audio id="newMessageSound" src="/ne.mp3" preload="auto"></audio>
-    <!-- Call ringtone (voice/video) -->
+    <!-- Call ringtone (receiver, incoming) -->
     <audio id="callRingtone" src="https://cdn.builder.io/o/assets%2F3f14f04ff8a54369ac87bbf78bc0bfa8%2F8fea597eec7d4ecbb3ac55e4af28cd5a?alt=media&token=83131226-e1cb-4f00-9695-bef7d195d72b&apiKey=3f14f04ff8a54369ac87bbf78bc0bfa8" preload="auto" loop style="display:none"></audio>
+    <!-- Outgoing ringback tone (caller) -->
+    <audio id="callerRingtone" src="https://cdn.builder.io/o/assets%2F3f14f04ff8a54369ac87bbf78bc0bfa8%2Fe112f6355fab4b3db3335bb1e557b08a?alt=media&token=bd369f6a-4112-4620-a5a5-492eead04095&apiKey=3f14f04ff8a54369ac87bbf78bc0bfa8" preload="auto" loop style="display:none"></audio>
 
     <script type="module">
         // Fetch retry wrapper to reduce transient "Failed to fetch" errors (used by Firestore and other libs)
@@ -681,6 +683,23 @@
         function stopRingtone(){
             try{
                 const el = document.getElementById('callRingtone');
+                if (!el) return;
+                el.pause();
+                el.currentTime = 0;
+            }catch(_){ }
+        }
+        function startCallerRingtone(){
+            try{
+                const el = document.getElementById('callerRingtone');
+                if (!el) return;
+                el.volume = 0.7;
+                el.currentTime = 0;
+                el.play().catch(()=>{});
+            }catch(_){ }
+        }
+        function stopCallerRingtone(){
+            try{
+                const el = document.getElementById('callerRingtone');
                 if (!el) return;
                 el.pause();
                 el.currentTime = 0;
@@ -975,6 +994,7 @@
             if (csEl) csEl.textContent = 'Calling…';
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
+                startCallerRingtone();
                 try{ clearTimeout(ringTimeoutId); }catch(_){ }
                 ringTimeoutId = setTimeout(async ()=>{ try{ await handleMissedByCaller(); }catch(_){ } }, 60000);
                 if (isVideo) localVideo.srcObject = stream;
@@ -1023,10 +1043,11 @@
                         const answerDesc = new RTCSessionDescription(data.answer);
                         await pc.setRemoteDescription(answerDesc);
                         stopRingtone();
+                        stopCallerRingtone();
                         try{ clearTimeout(ringTimeoutId); }catch(_){ }
                     }
-                    if (data?.status === 'accepted') { stopRingtone(); try{ clearTimeout(ringTimeoutId); }catch(_){ } }
-                    if (data?.status === 'ended' || data?.status === 'declined' || data?.status === 'missed') { stopRingtone(); try{ clearTimeout(ringTimeoutId); }catch(_){ } endCall(); }
+                    if (data?.status === 'accepted') { stopRingtone(); stopCallerRingtone(); try{ clearTimeout(ringTimeoutId); }catch(_){ } }
+                    if (data?.status === 'ended' || data?.status === 'declined' || data?.status === 'missed') { stopRingtone(); stopCallerRingtone(); try{ clearTimeout(ringTimeoutId); }catch(_){ } endCall(); }
                 });
 
                 // Listen for callee ICE
@@ -1172,6 +1193,7 @@
             try{ clearTimeout(ringTimeoutId); }catch(_){ }
             try{ clearTimeout(incomingRingTimeoutId); }catch(_){ }
             stopRingtone();
+            stopCallerRingtone();
             try { pc && pc.getSenders().forEach(s => s.track && s.track.stop()); } catch {}
             try { pc && pc.close(); } catch {}
             const endedAtMs = Date.now();
