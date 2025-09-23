@@ -11775,7 +11775,16 @@ async function fetchAndDisplayPosts() {
                 } else {
                     await updateDoc(chatDocRef, { updatedAt: serverTimestamp() });
                 }
-            } catch {}
+                return true;
+            } catch (err) {
+                console.error('ensureChatDocForHome failed', err);
+                if (err && (err.code === 'permission-denied' || (err.message && err.message.toLowerCase().includes('permission')))) {
+                    showMessageBox('Unable to create chat: missing permissions. Ask the recipient to allow messages or contact support.', 'error');
+                    return false;
+                }
+                showMessageBox('Failed to ensure chat exists. Try again later.', 'error');
+                return false;
+            }
         }
 
         // --- Per-post share popover anchored at click location ---
