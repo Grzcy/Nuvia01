@@ -8195,9 +8195,9 @@ async function checkAndStartDailyBonusTimer() {
                 button.disabled = !finalEnableState;
             });
             // The delete-post-button is removed from here as per user request.
-            document.querySelectorAll('.share-post-button').forEach(button => {
-                button.disabled = !finalEnableState;
-            });
+            // Do not globally disable share buttons here; share buttons are controlled individually in applySystemSettings
+            // so that sharing existing posts remains available even during maintenance/post-creation toggles.
+            // document.querySelectorAll('.share-post-button').forEach(button => { button.disabled = !finalEnableState; });
             document.querySelectorAll('.delete-comment-button').forEach(button => {
                 button.disabled = !finalEnableState;
             });
