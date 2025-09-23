@@ -5541,7 +5541,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 el.innerHTML = `
                     <div class="offline-banner-inner">
                         <span class="offline-icon"><i class="fas fa-wifi"></i></span>
-                        <span class="offline-text">No internet connection. We’ll reconnect when you���re back online.</span>
+                        <span class="offline-text">No internet connection. We���ll reconnect when you���re back online.</span>
                     </div>`;
                 document.body.appendChild(el);
             }
@@ -5631,6 +5631,9 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         let showSavedOnlyCheckbox, showFollowedOnlyCheckbox, trendingHashtagsDiv, editPostModal, editPostContentInput;
         let editPostMediaUpload, editMediaImagePreview, editMediaVideoPreview, removeEditMediaButton;
         let cancelEditPostButton, saveEditedPostButton;
+        // Video thumbnail state for post composer
+        let videoThumbnailControls, openThumbnailModalButton, videoThumbnailPreview;
+        let selectedThumbnailBlob = null; let selectedThumbnailDataUrl = null;
         // Theme switcher functionality
         let currentTheme = 'theme-dark-mode'; // Default theme
         const themeSwitcherThemes = [
