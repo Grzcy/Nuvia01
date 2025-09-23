@@ -1233,6 +1233,8 @@
                             type: m.type || 'text',
                             fileUrl: m.fileUrl || null,
                             fileName: m.fileName || null,
+                            callKind: m.callKind || null,
+                            durationMs: typeof m.durationMs === 'number' ? m.durationMs : null,
                             sender: m.senderId === currentUser.uid ? 'current' : 'partner',
                             timestamp: m.timestamp?.toMillis?.() || Date.now(),
                             status: m.status || 'delivered'
