@@ -11874,7 +11874,7 @@ async function fetchAndDisplayPosts() {
 
             }catch(e){ console.error('openSharePostModal failed', e); }
         }
-        function closeSharePostModal(){ const m=document.getElementById('sharePostPopover'); if(!m) return; m.classList.remove('active'); setTimeout(()=>{ try{ m.style.display='none'; }catch(_){} },200); }
+        function closeSharePostModal(){ const m=document.getElementById('sharePostPopover'); if(!m) return; try{ const prev = document.getElementById('sharePostPopoverPreview'); if(prev) prev.classList.remove('share-preview-glow'); }catch(_){} m.classList.remove('active'); setTimeout(()=>{ try{ m.style.display='none'; }catch(_){} },200); }
 
         // Render friend picker inside provided container (for per-post popover)
         async function renderFriendPickerInside(containerEl, postId, content, mediaUrl){
