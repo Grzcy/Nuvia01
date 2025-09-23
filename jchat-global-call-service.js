@@ -103,6 +103,36 @@ function setupRealtimeThenPollFallback(uid){
     }catch(e){ console.warn('JCHAT_WARN realtime setup failed, starting poll', e); if(!pollIntervalId){ pollIntervalId = setInterval(()=>pollForCalls(uid), 2500); } }
 
   }catch(e){ console.error('JCHAT_ERROR setupRealtimeThenPollFallback', e); }
+
+  // Additional backup listener: separate onSnapshot with explicit presence check
+  try{
+    const dbBackup = getFirestore();
+    const callsColBackup = collection(dbBackup, 'artifacts', appId, 'public', 'data', 'calls');
+    const qBackup = query(callsColBackup, where('calleeId','==',uid), where('status','==','ringing'));
+    const backupUnsub = onSnapshot(qBackup, async (snap) => {
+      if (!snap.empty) {
+        for (const change of snap.docChanges()) {
+          if (change.type === 'added') {
+            const data = change.doc.data();
+            try {
+              const presRef = doc(dbBackup, 'artifacts', appId, 'public', 'data', 'users', data.calleeId);
+              const presSnap = await getDoc(presRef);
+              const pres = presSnap.exists() ? presSnap.data() : null;
+              const isOnline = pres ? Boolean(pres.online) : true;
+              if (isOnline) {
+                createNotificationOverlay(change.doc.id, data);
+                try{ playRingtone(); }catch(_){}
+              }
+            } catch (e) {
+              console.error('JCHAT_ERROR backup listener', e);
+              createNotificationOverlay(change.doc.id, data);
+              try{ playRingtone(); }catch(_){}
+            }
+          }
+        }
+      }
+    });
+  }catch(e){}
 }
 
 function cleanupAll(){ try{ clearRealtime(); clearPoll(); removeOverlay(); }catch(e){}
