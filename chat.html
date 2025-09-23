@@ -372,6 +372,10 @@
                     <div id="callTitle" style="font-weight:600;">Call</div>
                     <button id="endCallBtn" class="icon-btn" title="End Call" style="color:#ff4d4f"><i class="fas fa-phone-slash"></i></button>
                 </div>
+                <div id="incomingActions" style="display:none; gap:12px; justify-content:center; margin:10px 0; display:flex;">
+                    <button id="acceptCallBtn" class="icon-btn" title="Accept Call" style="background: var(--input-background); border:1px solid var(--border-light); color:#2ed573"><i class="fas fa-phone"></i></button>
+                    <button id="declineCallBtn" class="icon-btn" title="Decline Call" style="background: var(--input-background); border:1px solid var(--border-light); color:#ff4d4f"><i class="fas fa-phone-slash"></i></button>
+                </div>
                 <div id="videoWrap" style="display:none; position:relative; background:#000; border-radius:8px; overflow:hidden;">
                     <video id="remoteVideo" autoplay playsinline style="width:100%; height:auto;"></video>
                     <video id="localVideo" autoplay muted playsinline style="position:absolute; right:8px; bottom:8px; width:120px; border-radius:6px; box-shadow:0 6px 16px rgba(0,0,0,.5);"></video>
@@ -645,6 +649,73 @@
         const localVideo = document.getElementById('localVideo');
         const remoteVideo = document.getElementById('remoteVideo');
         const remoteAudio = document.getElementById('remoteAudio');
+        const incomingActions = document.getElementById('incomingActions');
+        const acceptCallBtn = document.getElementById('acceptCallBtn');
+        const declineCallBtn = document.getElementById('declineCallBtn');
+        let isIncoming = false;
+        let currentIncomingDoc = null;
+        let ringtoneTimer = null;
+        let ringtoneOsc = null;
+        let ringtoneCtx = null;
+
+        function startRingtone(){
+            try{
+                stopRingtone();
+                ringtoneCtx = new (window.AudioContext || window.webkitAudioContext)();
+                ringtoneOsc = ringtoneCtx.createOscillator();
+                const gain = ringtoneCtx.createGain();
+                ringtoneOsc.type = 'sine';
+                ringtoneOsc.frequency.value = 880;
+                gain.gain.value = 0.0015; // very soft
+                ringtoneOsc.connect(gain).connect(ringtoneCtx.destination);
+                ringtoneOsc.start();
+                ringtoneTimer = setInterval(()=>{
+                    if(!ringtoneOsc) return;
+                    ringtoneOsc.frequency.setValueAtTime(880, ringtoneCtx.currentTime);
+                    ringtoneOsc.frequency.setValueAtTime(660, ringtoneCtx.currentTime + 0.25);
+                }, 800);
+            }catch(e){ /* ignore */ }
+        }
+        function stopRingtone(){
+            try{ if(ringtoneTimer) { clearInterval(ringtoneTimer); ringtoneTimer = null; } }catch(_){ }
+            try{ if(ringtoneOsc){ ringtoneOsc.stop(); ringtoneOsc.disconnect(); ringtoneOsc = null; } }catch(_){ }
+            try{ if(ringtoneCtx){ ringtoneCtx.close(); ringtoneCtx = null; } }catch(_){ }
+        }
+
+        async function showIncomingPrompt(docSnap){
+            try{
+                currentIncomingDoc = docSnap;
+                const data = docSnap.data();
+                const isVideo = !!data.video;
+                isIncoming = true;
+                openCallUI(isVideo);
+                callTitle.textContent = isVideo ? 'Incoming Video Call' : 'Incoming Voice Call';
+                const cs = document.getElementById('callStatus');
+                if (cs) cs.textContent = 'Ringing…';
+                if (incomingActions) incomingActions.style.display = 'flex';
+                startRingtone();
+                if (acceptCallBtn){
+                    acceptCallBtn.onclick = async () => {
+                        try{ stopRingtone(); if (incomingActions) incomingActions.style.display = 'none'; await acceptIncomingCall(currentIncomingDoc); isIncoming = false; currentIncomingDoc = null; }catch(e){ endCall(); }
+                    };
+                }
+                if (declineCallBtn){
+                    declineCallBtn.onclick = async () => { await declineIncomingCall(); };
+                }
+            }catch(e){ endCall(); }
+        }
+
+        async function declineIncomingCall(){
+            try{
+                stopRingtone();
+                if (incomingActions) incomingActions.style.display = 'none';
+                if (callDocRef) { try { await updateDoc(callDocRef, { status: 'ended' }); } catch(_){} }
+            } finally {
+                callDocRef = null;
+                callModal.style.display = 'none';
+                isIncoming = false; currentIncomingDoc = null;
+            }
+        }
         
         // --- WebRTC signaling (Firestore) ---
         let pc = null;
@@ -956,7 +1027,9 @@
                 unsubIncoming = onSnapshot(q, async (snap) => {
                     snap.docChanges().forEach(async change => {
                         if (change.type === 'added' && !pc) {
-                            await acceptIncomingCall(change.doc);
+                            // Show accept/decline UI instead of auto-answer
+                            callDocRef = change.doc.ref;
+                            await showIncomingPrompt(change.doc);
                         }
                     });
                 });
@@ -1027,6 +1100,8 @@
             try { if (localVideo && localVideo.srcObject) { localVideo.srcObject.getTracks().forEach(t => t.stop()); localVideo.srcObject = null; } } catch {}
             if (callDocRef) { try { await updateDoc(callDocRef, { status: 'ended' }); } catch {} }
             callDocRef = null;
+            stopRingtone();
+            if (incomingActions) incomingActions.style.display = 'none';
             callModal.style.display = 'none';
         }
 
