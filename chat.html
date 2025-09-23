@@ -1278,13 +1278,31 @@
             const startedAtMs = callStartMs;
             const shouldLog = isCaller && typeof startedAtMs === 'number' && endedAtMs >= startedAtMs;
             pc = null;
-            try { unsubCallDoc && unsubCallDoc(); } catch {}
+            try { if (unsubCallDoc) { try{ unsubCallDoc(); }catch(_){} } } catch {}
             try { unsubCallerCand && unsubCallerCand(); } catch {}
             try { unsubCalleeCand && unsubCalleeCand(); } catch {}
             try { if (remoteVideo) remoteVideo.srcObject = null; } catch {}
             try { if (remoteAudio) { remoteAudio.pause(); remoteAudio.srcObject = null; remoteAudio.style.display = 'none'; } } catch {}
             try { if (localVideo && localVideo.srcObject) { localVideo.srcObject.getTracks().forEach(t => t.stop()); localVideo.srcObject = null; } } catch {}
-            if (callDocRef) { try { await updateDoc(callDocRef, { status: 'ended', endedAt: endedAtMs, durationMs: (startedAtMs ? (endedAtMs - startedAtMs) : null) }); } catch {} }
+
+            if (callDocRef) {
+                try {
+                    await updateDoc(callDocRef, { status: 'ended', endedAt: endedAtMs, endedBy: currentUser?.uid || null, signaledEnd: true, durationMs: (startedAtMs ? (endedAtMs - startedAtMs) : null) });
+                } catch (e) { console.error('JCHAT_ERROR updating call doc on endCall', e); }
+                try {
+                    // notify callee directly as backup signal
+                    try{
+                        const latest = await getDoc(callDocRef);
+                        const cd = latest.exists() ? latest.data() : {};
+                        const calleeId = (currentPartner && currentPartner.id) ? currentPartner.id : (cd && cd.calleeId ? cd.calleeId : null);
+                        if (calleeId) {
+                            const calleePubRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', calleeId);
+                            await updateDoc(calleePubRef, { incomingCallClearedId: callDocRef.id, incomingCallClearedAt: serverTimestamp() }).catch(()=>{});
+                        }
+                    }catch(_){ }
+                } catch (e) { console.error('JCHAT_ERROR notifying callee on endCall', e); }
+            }
+
             if (shouldLog) {
                 try { await logCallSummary(callKind, startedAtMs, endedAtMs); } catch {}
             }
