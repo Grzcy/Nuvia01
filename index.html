@@ -4478,10 +4478,6 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 <a href="/admin.html" id="adminIconLink" aria-label="Admin Dashboard" style="display: none;">
                     <i class="fas fa-user-cog"></i>
                 </a>
-                <!-- Chips Toggle Button -->
-                <button id="chipsToggleBtn" class="toggle-chips-btn" aria-label="Toggle quick stats" aria-pressed="false" title="Toggle quick stats">
-                    <i class="fas fa-eye-slash" aria-hidden="true"></i>
-                </button>
                 <!-- Notification Icon with Badge -->
                 <div class="notification-icon-wrapper">
                     <a href="/notifications.html" id="notificationToggle" aria-label="Notifications">
@@ -4566,24 +4562,6 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
 
     <a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">Skip to main content</a>
 
-    <script>
-(function(){
-  try{
-    var btn = document.getElementById('chipsToggleBtn');
-    if (!btn) return;
-    var update = function(hidden){
-      btn.setAttribute('aria-pressed', hidden ? 'true' : 'false');
-      var ic = btn.querySelector('i');
-      if (ic) ic.className = hidden ? 'fas fa-eye' : 'fas fa-eye-slash';
-    };
-    btn.addEventListener('click', function(){
-      var hidden = document.body.classList.toggle('secondary-header-hidden');
-      update(hidden);
-    });
-    update(false);
-  }catch(_){ }
-})();
-</script>
 <main id="main-content">
         <div class="content-wrapper">
             <!-- Daily Inspiration Section -->
@@ -5122,6 +5100,10 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             </button>
         </div>
         <div class="sidebar-links">
+            <button id="chipsToggleBtn" class="sidebar-nav-item" type="button" aria-label="Toggle quick stats" aria-pressed="false">
+                <i class="fas fa-eye-slash"></i>
+                <span>Quick Stats</span>
+            </button>
             <a href="/index.html" class="sidebar-nav-item active" aria-current="page">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
@@ -14467,6 +14449,7 @@ async function fetchAndDisplayPosts() {
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
 </script>
+<script>(function(){function init(){try{var btn=document.getElementById('chipsToggleBtn');if(!btn)return;var ic=btn.querySelector('i');function setState(h){btn.setAttribute('aria-pressed',h?'true':'false');if(ic) ic.className=h?'fas fa-eye':'fas fa-eye-slash';}btn.addEventListener('click',function(e){try{e.preventDefault();var h=document.body.classList.toggle('secondary-header-hidden');setState(h);}catch(_){}});setState(document.body.classList.contains('secondary-header-hidden'));}catch(_){}}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();}})();</script>
 </body>
 </html>
 <!-- test update -->
