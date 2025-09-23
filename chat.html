@@ -381,6 +381,13 @@
                     <div id="callStatus" style="margin-top:8px; color:var(--text-light);">Connecting…</div>
                     <audio id="remoteAudio" autoplay playsinline style="display:none"></audio>
                 </div>
+
+                <!-- Incoming call controls (Answer / Reject) -->
+                <div id="incomingControls" style="display:none; margin-top:12px; text-align:center;">
+                    <button id="answerCallBtn" class="btn-primary" style="margin-right:10px; padding:8px 14px; border-radius:999px;">Answer</button>
+                    <button id="rejectCallBtn" class="icon-btn" style="background:#fff1f0; color:#d32f2f; padding:8px 12px; border-radius:8px;">Reject</button>
+                </div>
+
             </div>
         </div>
     </div>
@@ -645,6 +652,12 @@
         const localVideo = document.getElementById('localVideo');
         const remoteVideo = document.getElementById('remoteVideo');
         const remoteAudio = document.getElementById('remoteAudio');
+        const incomingControls = document.getElementById('incomingControls');
+        const answerCallBtn = document.getElementById('answerCallBtn');
+        const rejectCallBtn = document.getElementById('rejectCallBtn');
+
+        let incomingCallDoc = null;
+        let unsubIncomingCallDoc = null;
         
         // --- WebRTC signaling (Firestore) ---
         let pc = null;
@@ -973,10 +986,11 @@
                 const q = query(callsCol, where('calleeId', '==', currentUser.uid), where('status', '==', 'ringing'));
                 unsubIncoming = onSnapshot(q, async (snap) => {
                     snap.docChanges().forEach(async change => {
-                        if (change.type === 'added' && !pc) {
-                            await acceptIncomingCall(change.doc);
-                        }
-                    });
+                    if (change.type === 'added' && !pc && !incomingCallDoc) {
+                        // Show incoming prompt to user; do not auto-answer
+                        showIncomingPrompt(change.doc);
+                    }
+                });
                 });
             } catch {}
         }
@@ -989,6 +1003,9 @@
                 const data = docSnap.data();
                 const isVideo = !!data.video;
                 openCallUI(isVideo);
+                // Hide incoming controls since user has answered
+                if (incomingControls) incomingControls.style.display = 'none';
+                if (endCallBtn) endCallBtn.style.display = '';
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
                 if (isVideo) localVideo.srcObject = stream;
                 pc = new RTCPeerConnection(rtcConfig);
@@ -1010,7 +1027,7 @@
                 await pc.setRemoteDescription(offerDesc);
                 const answer = await pc.createAnswer();
                 await pc.setLocalDescription(answer);
-                await updateDoc(callDocRef, { answer: { sdp: answer.sdp, type: answer.type } });
+                await updateDoc(callDocRef, { answer: { sdp: answer.sdp, type: answer.type }, status: 'active', answeredAt: serverTimestamp(), answeredBy: currentUser.uid });
                 // Listen caller ICE
                 const callerCandCol = collection(callDocRef, 'callerCandidates');
                 unsubCallerCand = onSnapshot(callerCandCol, (snap) => {
@@ -1023,6 +1040,10 @@
                 });
             } catch (e) {
                 endCall();
+            } finally {
+                // cleanup incoming doc tracking
+                if (unsubIncomingCallDoc) try { unsubIncomingCallDoc(); } catch(_){}
+                incomingCallDoc = null;
             }
         }
 
@@ -1032,6 +1053,63 @@
             voiceWrap.style.display = isVideo ? 'none' : 'block';
             videoWrap.style.display = isVideo ? 'block' : 'none';
         }
+
+        // Show incoming prompt (caller not auto-accepted)
+        async function showIncomingPrompt(docSnap) {
+            try {
+                incomingCallDoc = docSnap;
+                const data = docSnap.data();
+                const isVideo = !!data.video;
+                // Fetch caller name if possible
+                let callerName = 'Caller';
+                try { const p = await loadFriendProfile(data.callerId); if (p) callerName = p.displayName || 'Caller'; } catch(_){}
+                callTitle.textContent = `Incoming ${isVideo ? 'Video' : 'Voice'} Call — ${callerName}`;
+                if (voiceWrap) voiceWrap.style.display = isVideo ? 'none' : 'block';
+                if (videoWrap) videoWrap.style.display = isVideo ? 'block' : 'none';
+                // Show incoming controls
+                if (incomingControls) incomingControls.style.display = 'block';
+                if (endCallBtn) endCallBtn.style.display = 'none';
+                callModal.style.display = 'flex';
+
+                // Listen for remote cancellation/ended
+                try { if (unsubIncomingCallDoc) { unsubIncomingCallDoc(); unsubIncomingCallDoc = null; } } catch(_){}
+                unsubIncomingCallDoc = onSnapshot(docSnap.ref, (snap) => {
+                    const d = snap.data();
+                    if (!d) return;
+                    if (d.status === 'ended' || d.status === 'rejected') {
+                        // Caller cancelled or call rejected/ended
+                        try { if (incomingControls) incomingControls.style.display = 'none'; } catch(_){}
+                        callModal.style.display = 'none';
+                        if (unsubIncomingCallDoc) try { unsubIncomingCallDoc(); } catch(_){}
+                        incomingCallDoc = null;
+                        unsubIncomingCallDoc = null;
+                    }
+                });
+            } catch(e) { console.warn('showIncomingPrompt failed', e); }
+        }
+
+        async function rejectIncomingCall() {
+            try {
+                if (!incomingCallDoc) return;
+                await updateDoc(incomingCallDoc.ref, { status: 'rejected', processedBy: currentUser.uid, processedAt: serverTimestamp() });
+            } catch(e){ console.warn('rejectIncomingCall', e); }
+            try { if (incomingControls) incomingControls.style.display = 'none'; } catch(_){}
+            callModal.style.display = 'none';
+            if (unsubIncomingCallDoc) try { unsubIncomingCallDoc(); } catch(_){}
+            incomingCallDoc = null;
+            unsubIncomingCallDoc = null;
+        }
+
+        // Answer button handler
+        answerCallBtn?.addEventListener('click', async () => {
+            try {
+                if (!incomingCallDoc) return;
+                await acceptIncomingCall(incomingCallDoc);
+            } catch(e){ console.warn('Answer failed', e); }
+        });
+
+        // Reject button handler
+        rejectCallBtn?.addEventListener('click', async () => { await rejectIncomingCall(); });
 
         async function endCall() {
             try { pc && pc.getSenders().forEach(s => s.track && s.track.stop()); } catch {}
