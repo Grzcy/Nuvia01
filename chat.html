@@ -715,8 +715,6 @@
                 coRejectBtn?.addEventListener('click', () => this.decline());
                 coToggleMute?.addEventListener('click', () => this.toggleMute());
                 coToggleVideo?.addEventListener('click', () => this.toggleVideo());
-                voiceCallBtn?.addEventListener('click', () => this.start('voice'));
-                videoCallBtn?.addEventListener('click', () => this.start('video'));
             }
             async start(type){
                 if (!currentPartner) return;
