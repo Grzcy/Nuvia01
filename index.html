@@ -6185,7 +6185,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             document.getElementById('annDismissBtn').onclick = () => { dismissAnnouncementById(annId); modal.style.display = 'none'; };
             document.getElementById('annSnooze1h').onclick = () => { snoozeAnnouncementById(annId, 60*60*1000); modal.style.display = 'none'; showMessageBox('Will remind you in 1 hour', 'success'); };
             document.getElementById('annSnooze1d').onclick = () => { snoozeAnnouncementById(annId, 24*60*60*1000); modal.style.display = 'none'; showMessageBox('Will remind you in 24 hours', 'success'); };
-            document.getElementById('annShareBtn').onclick = async () => { try{ await navigator.clipboard.writeText(`${announcementData.message}\n— JCHAT`); showMessageBox('Announcement copied to clipboard', 'success'); }catch(e){ showMessageBox('Copy failed', 'error'); } };
+            document.getElementById('annShareBtn').onclick = async () => { try{ await safeCopyText(`${announcementData.message}\n— JCHAT`); showMessageBox('Announcement copied to clipboard', 'success'); }catch(e){ showMessageBox('Copy failed', 'error'); } };
 
             // focus
             setTimeout(()=>{ const btn = document.getElementById('closeAnnModal'); if(btn) btn.focus(); }, 80);
@@ -7734,6 +7734,40 @@ async function checkAndStartDailyBonusTimer() {
             ringingPattern.stop();
         }
         // --- Utility Functions ---
+        /**
+         * Safe clipboard copy helper. Tries navigator.clipboard.writeText and falls back to execCommand textarea copy when blocked.
+         * @param {string} text
+         * @returns {Promise<boolean>} resolves true if copy succeeded
+         */
+        async function safeCopyText(text){
+            try{
+                if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function'){
+                    await safeCopyText(String(text));
+                    return true;
+                }
+            }catch(e){
+                // swallow and fallback
+                console.warn('clipboard.writeText failed, falling back to textarea execCommand', e);
+            }
+            try{
+                const ta = document.createElement('textarea');
+                ta.value = String(text);
+                // Avoid scrolling to bottom
+                ta.style.position = 'fixed';
+                ta.style.left = '-9999px';
+                ta.style.top = '0';
+                ta.setAttribute('readonly','');
+                document.body.appendChild(ta);
+                ta.select();
+                ta.setSelectionRange(0, ta.value.length);
+                const ok = document.execCommand('copy');
+                document.body.removeChild(ta);
+                return !!ok;
+            }catch(e){
+                console.warn('Fallback copy failed', e);
+                return false;
+            }
+        }
         /**
          * Displays a custom message box with a given message, type, and persistence.
          * @param {string} message - The message to display.
@@ -11692,7 +11726,7 @@ async function fetchAndDisplayPosts() {
         }
         async function copyCurrentInspirationToClipboard() {
             const text = `${inspirationQuoteElement ? inspirationQuoteElement.textContent : ''} ${inspirationAuthorElement ? inspirationAuthorElement.textContent : ''}`.trim();
-            try { await navigator.clipboard.writeText(text); showMessageBox('Copied to clipboard!', 'success'); }
+            try { await safeCopyText(text); showMessageBox('Copied to clipboard!', 'success'); }
             catch { showMessageBox('Copy failed. Select and copy manually.', 'warning'); }
         }
         async function shareInspirationToFriends(){
@@ -11705,7 +11739,7 @@ async function fetchAndDisplayPosts() {
                 if (navigator.share) {
                     await navigator.share({ title: 'Daily inspiration', text, url });
                 } else {
-                    await navigator.clipboard.writeText(`${text} ${url}`.trim());
+                    await safeCopyText(`${text} ${url}`.trim());
                     try { const btn = document.getElementById('sendToFriendBtn'); if (btn){ btn.classList.add('copied'); setTimeout(()=>btn.classList.remove('copied'), 1000); } } catch(_){ }
                     showMessageBox('Copied. Share it anywhere.', 'success');
                 }
@@ -12321,7 +12355,7 @@ async function fetchAndDisplayPosts() {
                         const text = 'Join me on Nuvia! Use my link to sign up.';
                         try {
                             if (navigator.share) { await navigator.share({ title: 'Join Nuvia', text, url: link }); }
-                            else { await navigator.clipboard.writeText(link); shareRefBtn.classList.add('copied'); setTimeout(()=>shareRefBtn.classList.remove('copied'), 1000); }
+                            else { await safeCopyText(link); shareRefBtn.classList.add('copied'); setTimeout(()=>shareRefBtn.classList.remove('copied'), 1000); }
                             showMessageBox('Referral link shared.', 'success');
                         } catch(e){ console.error(e); showMessageBox('Share failed.', 'error'); }
                     } catch (e) {
@@ -13542,7 +13576,7 @@ async function fetchAndDisplayPosts() {
                 if (navigator.share) {
                     await navigator.share({ title: 'Nuvia', text, url });
                 } else {
-                    await navigator.clipboard.writeText(url);
+                    await safeCopyText(url);
                     try {
                         const btn = document.querySelector(`.post-action-btn.share-btn[onclick="sharePost('${postId}')"]`) || document.querySelector(`.share-post-button[data-post-id="${postId}"]`);
                         if (btn) { btn.classList.add('copied'); setTimeout(()=>btn.classList.remove('copied'), 1000); }
