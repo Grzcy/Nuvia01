@@ -6307,10 +6307,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 else { showAnnouncementModal(announcementData, annId); }
             };
 
-            // Auto-open urgent as bottom sheet
-            if (announcementData.priority === 'urgent') {
-                showAnnouncementBottomSheet(announcementData, annId);
-            }
+            // Do not auto-open urgent bottom sheet; keep only banner visible by default.
         }
 
         // show modal with full announcement and actions
