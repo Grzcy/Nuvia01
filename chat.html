@@ -699,13 +699,15 @@
                 if (cs) cs.textContent = 'Ringing…';
                 if (incomingActions) incomingActions.style.display = 'flex';
                 startRingtone();
+                try{ clearTimeout(incomingRingTimeoutId); }catch(_){ }
+                incomingRingTimeoutId = setTimeout(async ()=>{ try{ await declineIncomingCall(); }catch(_){ } }, 60000);
                 if (acceptCallBtn){
                     acceptCallBtn.onclick = async () => {
-                        try{ stopRingtone(); if (incomingActions) incomingActions.style.display = 'none'; await acceptIncomingCall(currentIncomingDoc); isIncoming = false; currentIncomingDoc = null; }catch(e){ endCall(); }
+                        try{ stopRingtone(); if (incomingActions) incomingActions.style.display = 'none'; clearTimeout(incomingRingTimeoutId); await acceptIncomingCall(currentIncomingDoc); isIncoming = false; currentIncomingDoc = null; }catch(e){ endCall(); }
                     };
                 }
                 if (declineCallBtn){
-                    declineCallBtn.onclick = async () => { await declineIncomingCall(); };
+                    declineCallBtn.onclick = async () => { clearTimeout(incomingRingTimeoutId); await declineIncomingCall(); };
                 }
             }catch(e){ endCall(); }
         }
