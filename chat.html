@@ -1056,44 +1056,58 @@
             const q = query(messagesRef, orderBy('timestamp', 'asc'));
             if (unsubscribeMessages) { try { unsubscribeMessages(); } catch {} }
             unsubscribeMessages = onSnapshot(q, (snap) => {
-                // Preserve optimistic messages until real data arrives
-                messagesEl.querySelectorAll('.msg:not([data-optimistic-id])').forEach(node => node.remove());
-                const emptyLabel = document.getElementById('emptyLabel');
-                if (emptyLabel) emptyLabel.style.display = snap.empty ? 'block' : 'none';
-                let newestMsInSnap = latestSeenMessageMs;
-                const newPartnerMessages = [];
-                snap.forEach(docSnap => {
-                    const m = docSnap.data();
-                    const tsMs = m.timestamp?.toMillis?.() || Date.now();
-                    if (tsMs > newestMsInSnap) newestMsInSnap = tsMs;
-                    if (!messagesInitialLoad && m.senderId !== currentUser.uid && tsMs > latestSeenMessageMs) {
-                        newPartnerMessages.push(m);
-                    }
-                    renderMessage({
-                        id: docSnap.id,
-                        text: m.text,
-                        type: m.type || 'text',
-                        fileUrl: m.fileUrl || null,
-                        fileName: m.fileName || null,
-                        sender: m.senderId === currentUser.uid ? 'current' : 'partner',
-                        timestamp: m.timestamp?.toMillis?.() || Date.now(),
-                        status: m.status || 'delivered'
+                try{
+                    // Preserve optimistic messages until real data arrives
+                    messagesEl.querySelectorAll('.msg:not([data-optimistic-id])').forEach(node => node.remove());
+                    const emptyLabel = document.getElementById('emptyLabel');
+                    if (emptyLabel) emptyLabel.style.display = snap.empty ? 'block' : 'none';
+                    let newestMsInSnap = latestSeenMessageMs;
+                    const newPartnerMessages = [];
+                    snap.forEach(docSnap => {
+                        const m = docSnap.data();
+                        const tsMs = m.timestamp?.toMillis?.() || Date.now();
+                        if (tsMs > newestMsInSnap) newestMsInSnap = tsMs;
+                        if (!messagesInitialLoad && m.senderId !== currentUser.uid && tsMs > latestSeenMessageMs) {
+                            newPartnerMessages.push(m);
+                        }
+                        renderMessage({
+                            id: docSnap.id,
+                            text: m.text,
+                            type: m.type || 'text',
+                            fileUrl: m.fileUrl || null,
+                            fileName: m.fileName || null,
+                            sender: m.senderId === currentUser.uid ? 'current' : 'partner',
+                            timestamp: m.timestamp?.toMillis?.() || Date.now(),
+                            status: m.status || 'delivered'
+                        });
                     });
-                });
-                // If we received any real messages, remove optimistic placeholders
-                if (!snap.empty) {
-                    messagesEl.querySelectorAll('[data-optimistic-id]').forEach(node => node.remove());
-                }
-                messagesEl.scrollTop = messagesEl.scrollHeight;
+                    // If we received any real messages, remove optimistic placeholders
+                    if (!snap.empty) {
+                        messagesEl.querySelectorAll('[data-optimistic-id]').forEach(node => node.remove());
+                    }
+                    messagesEl.scrollTop = messagesEl.scrollHeight;
 
-                // Play sound for new partner messages (skip initial load)
-                if (!messagesInitialLoad && newPartnerMessages.length > 0) {
-                    playNotificationSoundOnce();
-                }
+                    // Play sound for new partner messages (skip initial load)
+                    if (!messagesInitialLoad && newPartnerMessages.length > 0) {
+                        playNotificationSoundOnce();
+                    }
 
-                // Update latest seen marker
-                latestSeenMessageMs = newestMsInSnap;
-                messagesInitialLoad = false;
+                    // Update latest seen marker
+                    latestSeenMessageMs = newestMsInSnap;
+                    messagesInitialLoad = false;
+                }catch(err){
+                    console.error('Error processing messages snapshot', err);
+                }
+            }, (err)=>{
+                console.error('Messages snapshot listener error', err);
+                // Unsubscribe to avoid repeated uncaught errors
+                try{ if (unsubscribeMessages) unsubscribeMessages(); }catch(_){ }
+                // Specific handling for permission errors
+                if (err && err.code === 'permission-denied'){
+                    showMessageBox('You do not have permission to access these messages. Please check your account permissions or contact support.','error');
+                } else {
+                    showMessageBox('Failed to load messages. Please refresh the page.','error');
+                }
             });
             // Typing listener (presence doc under chat)
             const typingDocRef = doc(db, "artifacts", appId, "public", "data", "chats", chatId, "presence", "typing");
