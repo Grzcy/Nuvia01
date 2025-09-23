@@ -715,6 +715,7 @@
         async function declineIncomingCall(){
             try{
                 stopRingtone();
+                try{ clearTimeout(incomingRingTimeoutId); }catch(_){ }
                 if (incomingActions) incomingActions.style.display = 'none';
                 if (callDocRef) { try { await updateDoc(callDocRef, { status: 'declined' }); } catch(_){} }
             } finally {
