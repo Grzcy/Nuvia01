@@ -796,17 +796,27 @@
             box-shadow: 0 8px 25px rgba(0, 0, 0, .3);
             padding: 2rem;
             width: 90%;
-            max-width: 600px; /* Max width for consistency */
+            max-width: 900px; /* Wider on desktop for less cramped look */
             margin: 20px auto;
             display: flex;
             flex-direction: column;
-            align-items: center; /* Center content */
+            align-items: center; /* Center content on mobile */
             gap: 1.5rem;
             text-align: center;
             position: relative;
             transition: all 0.3s ease;
             overflow: visible; /* Allow content to overflow for proper display */
         }
+        /* Desktop layout refinements */
+        @media (min-width: 900px){
+            .profile-section{ text-align: left; }
+            .profile-header-area{ flex-direction: row; align-items: center; justify-content: space-between; }
+            .profile-name, .profile-bio, .profile-info-item{ text-align: left; }
+            .profile-actions{ justify-content: flex-start; }
+        }
+        /* Cover banner extracted from inline styles */
+        .profile-cover{ width:100%; height:180px; border-radius:14px; overflow:hidden; position:relative; margin-bottom:12px; background: rgba(255,255,255,0.05); border:1px solid var(--border-light); }
+        @media (min-width: 900px){ .profile-cover{ height:260px; } }
 
         .profile-section::before {
             content: '';
@@ -4441,7 +4451,7 @@
 
         .profile-display-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 1rem;
         }
 
@@ -5197,7 +5207,7 @@
             <div class="smart-success-message" id="smartSuccessMessage">Operation completed successfully.</div>
             <div class="smart-success-footer">
                 <div class="smart-success-timestamp" id="smartSuccessTimestamp"></div>
-                <div class="smart-success-sound-indicator">��</div>
+                <div class="smart-success-sound-indicator">����</div>
             </div>
         </div>
     </div>
@@ -5253,7 +5263,7 @@
     <main>
         <div class="content-wrapper">
                             <div class="profile-section">
-                <div id="profileCoverWrapper" style="width:100%;height:180px;border-radius:14px;overflow:hidden;position:relative;margin-bottom:12px;background:rgba(255,255,255,0.05);border:1px solid var(--border-light);">
+                <div id="profileCoverWrapper" class="profile-cover">
                     <img id="profileCoverImg" alt="Cover" style="width:100%;height:100%;object-fit:cover;display:none;">
                     <input type="file" id="profileCoverUploadInput" accept="image/*" style="display:none;">
                     <label for="profileCoverUploadInput" id="editCoverOverlay" style="position:absolute;right:10px;bottom:10px;background:rgba(0,0,0,0.5);padding:6px 10px;border-radius:8px;cursor:pointer;display:none;"><i class="fas fa-camera"></i> Edit Cover</label>
