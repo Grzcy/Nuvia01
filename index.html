@@ -7046,7 +7046,7 @@ const simpleCategoryTemplates = {
   ]
 };
         const quoteTemplates = {
-            motivational: { openers:["Keep going","Start small","Believe in yourself","Stay consistent","Trust the process"], bridges:["�������"," because ",": ",", and ","; "], endings:["every step counts.","tomorrow thanks you for today's effort.","progress loves momentum.","you're closer than you think.","discipline builds destiny."] },
+            motivational: { openers:["Keep going","Start small","Believe in yourself","Stay consistent","Trust the process"], bridges:["�����"," because ",": ",", and ","; "], endings:["every step counts.","tomorrow thanks you for today's effort.","progress loves momentum.","you're closer than you think.","discipline builds destiny."] },
             peaceful: { openers:["Breathe","Slow down","Be gentle","Find quiet","Let go"], bridges:["—"," and ",", then "," as ",": "], endings:["clarity will meet you.","peace finds its way in.","the heart softens.","the mind untangles.","you return to yourself."] },
             funny: { openers:["Reminder","Breaking news","Pro tip","True story","PSA"], bridges:[": "," — "," ���� ",": "], endings:["motivation will arrive after snacks.","I'm on a seafood diet����I see food and I code.","sleep is a patch we never apply.","tomorrow is just today with a wig.","coffee is my personality driver."] },
             wisdom: { openers:["Growth","Curiosity","Patience","Listening","Kindness"], bridges:[" reveals that "," teaches that "," reminds us "," shows that ",": "], endings:["there's more to learn than to prove.","small habits shape great outcomes.","the quietest lessons echo the longest.","consistency outlives talent.","clarity follows attention."] },
@@ -9312,7 +9312,12 @@ const lex = inspirationLexicon[type];
                     mediaUrl = await uploadMediaToCloudinary(fileToUpload);
                     if (mediaUrl) {
                         mediaType = currentMediaFile.type.startsWith('image/') ? 'image' : 'video';
+                        let videoThumbnailUrl = null;
+                        if (mediaType === 'video' && selectedThumbnailBlob) {
+                            try { videoThumbnailUrl = await uploadMediaToCloudinary(selectedThumbnailBlob); } catch(e) { console.warn('Thumbnail upload failed', e); }
+                        }
                         showMessageBox('Media uploaded!', 'success');
+                        if (!window.postDataExtras) window.postDataExtras = {}; const postDataExtras = window.postDataExtras; postDataExtras.videoThumbnailUrl = videoThumbnailUrl || null;
                     } else {
                         throw new Error("Failed to upload media."); // Throw error if Cloudinary upload fails.
                     }
@@ -11359,7 +11364,7 @@ async function fetchAndDisplayPosts() {
                     const computedRate = (jCoinsBal * 0.005).toFixed(3);
                     jcoinRateSpan.textContent = computedRate;
                 // Also update wallet.html oneJcoinRateDisplay if opened in same session/window (best-effort)
-                try { if (window.parent && window.parent.document) { const oneEl = window.parent.document.getElementById('oneJcoinRateDisplay'); if (oneEl && currentSystemSettings?.jcoinNairaRate) oneEl.textContent = `���${(1/currentSystemSettings.jcoinNairaRate).toFixed(2)} NGN`; } } catch(e) {}
+                try { if (window.parent && window.parent.document) { const oneEl = window.parent.document.getElementById('oneJcoinRateDisplay'); if (oneEl && currentSystemSettings?.jcoinNairaRate) oneEl.textContent = `�����${(1/currentSystemSettings.jcoinNairaRate).toFixed(2)} NGN`; } } catch(e) {}
                     homeChipsRow.style.display = 'flex';
                 }
                 // Wallet chip click: gate by walletUnlocked
