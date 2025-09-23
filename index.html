@@ -9869,8 +9869,8 @@ const lex = inspirationLexicon[type];
                     <span><span class="comments-count">${post.commentsCount || 0}</span> Comments</span>
                 </div>
                 <div class="post-actions-row">
-                    <button class="post-action-button share-referral-button" data-post-id="${postId}" aria-label="Share Referral">
-                        <i class="fas fa-share"></i> Share
+                    <button class="post-action-button share-post-button" data-post-id="${postId}" aria-label="Share Post">
+                        <i class="fas fa-share"></i>
                     </button>
                     <button class="post-action-button react-button" data-post-id="${postId}" data-reaction-type="like" ${!isAuthReady || (!currentSystemSettings.enablePublicChat && currentUser.uid !== ADMIN_UID) ? 'disabled' : ''} aria-label="Like Post">
                         <i class="fas fa-thumbs-up"></i> Like
