@@ -4033,7 +4033,8 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
                 snap.forEach(d => {
                     const r = d.data();
                     const ts = r.timestamp && r.timestamp.toDate ? r.timestamp.toDate().getTime() : (typeof r.timestamp === 'number' ? r.timestamp : 0);
-                    if (ts && ts <= cutoff) stale.push({ id: d.id, data: r });
+                    const requiresReceipt = !!(r.receiptUrl || r.receiptImageUrl || r.requiresReceipt === true || (typeof r.activityType === 'string' && /receipt|payment|purchase|order|gas|shop/i.test(r.activityType)));
+                    if (ts && ts <= cutoff && !requiresReceipt) stale.push({ id: d.id, data: r });
                 });
                 if (!stale.length) return;
                 const batch = writeBatch(db);
