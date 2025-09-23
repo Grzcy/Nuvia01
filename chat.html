@@ -1128,6 +1128,9 @@
         async function endCall() {
             try { pc && pc.getSenders().forEach(s => s.track && s.track.stop()); } catch {}
             try { pc && pc.close(); } catch {}
+            const endedAtMs = Date.now();
+            const startedAtMs = callStartMs;
+            const shouldLog = isCaller && typeof startedAtMs === 'number' && endedAtMs >= startedAtMs;
             pc = null;
             try { unsubCallDoc && unsubCallDoc(); } catch {}
             try { unsubCallerCand && unsubCallerCand(); } catch {}
@@ -1135,7 +1138,10 @@
             try { if (remoteVideo) remoteVideo.srcObject = null; } catch {}
             try { if (remoteAudio) { remoteAudio.pause(); remoteAudio.srcObject = null; remoteAudio.style.display = 'none'; } } catch {}
             try { if (localVideo && localVideo.srcObject) { localVideo.srcObject.getTracks().forEach(t => t.stop()); localVideo.srcObject = null; } } catch {}
-            if (callDocRef) { try { await updateDoc(callDocRef, { status: 'ended' }); } catch {} }
+            if (callDocRef) { try { await updateDoc(callDocRef, { status: 'ended', endedAt: endedAtMs, durationMs: (startedAtMs ? (endedAtMs - startedAtMs) : null) }); } catch {} }
+            if (shouldLog) {
+                try { await logCallSummary(callKind, startedAtMs, endedAtMs); } catch {}
+            }
             callDocRef = null;
             stopRingtone();
             if (incomingActions) incomingActions.style.display = 'none';
