@@ -961,6 +961,9 @@
         async function startCall(isVideo) {
             if (!currentPartner) return;
             isIncoming = false;
+            isCaller = true;
+            callKind = isVideo ? 'video' : 'voice';
+            callStartMs = null;
             if (incomingActions) incomingActions.style.display = 'none';
             openCallUI(isVideo);
             const csEl = document.getElementById('callStatus');
