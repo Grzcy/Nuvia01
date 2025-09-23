@@ -10613,12 +10613,14 @@ async function fetchAndDisplayPosts() {
                     button.disabled = !isAuthReady || (!currentSystemSettings.enablePublicChat && !isCurrentUserAdmin) || (!isCommentOwner && !isCurrentUserAdmin);
                 });
 
-                // Post options (edit, share).
-                postCard.querySelectorAll('.post-options-button, .edit-post-button, .share-post-button').forEach(button => {
-                    // Only enable if current user is the author OR if current user is admin AND the feature is enabled.
-                    // The isAuthor check is handled in renderPost, here we just control the disabled state based on settings and admin.
+                // Post options (edit) - keep existing restrictions
+                postCard.querySelectorAll('.post-options-button, .edit-post-button').forEach(button => {
                     const isButtonAuthor = currentUser && currentUser.uid === postAuthorId;
                     button.disabled = !isAuthReady || ((!settings.enablePostCreation && !isCurrentUserAdmin) || (!isButtonAuthor && !isCurrentUserAdmin));
+                });
+                // Share button should be available to authenticated users regardless of post creation toggle
+                postCard.querySelectorAll('.share-post-button').forEach(button => {
+                    button.disabled = !isAuthReady;
                 });
             });
 
