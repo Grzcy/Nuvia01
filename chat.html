@@ -717,6 +717,7 @@
                 const cs = document.getElementById('callStatus');
                 if (cs) cs.textContent = 'Ringing…';
                 if (incomingActions) incomingActions.style.display = 'flex';
+                if (endCallBtn) endCallBtn.style.display = 'none';
                 startRingtone();
                 try{ clearTimeout(incomingRingTimeoutId); }catch(_){ }
                 incomingRingTimeoutId = setTimeout(async ()=>{ try{ await declineIncomingCall(); }catch(_){ } }, 60000);
