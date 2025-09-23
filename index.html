@@ -4365,6 +4365,23 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
   #levelChipProgressFill { width: 0%; }
   .chip-title-row { display:flex; align-items:baseline; gap:8px; }
 </style>
+<style id="chips-toggle-styles">
+  .toggle-chips-btn {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.06));
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    color: #ffffff; display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; margin-right: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15), 0 0 20px rgba(255, 255, 255, 0.05);
+  }
+  .toggle-chips-btn:hover { transform: translateY(-2px) scale(1.05); border-color: rgba(255, 215, 0, 0.7);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08));
+    box-shadow: 0 6px 20px rgba(255, 215, 0, 0.3), 0 0 30px rgba(255, 142, 83, 0.2), 0 2px 12px rgba(0, 0, 0, 0.15);
+  }
+  .toggle-chips-btn i { font-size: 1.1rem; color: #ffffff; text-shadow: 0 0 10px rgba(0, 213, 255, 0.7), 0 0 15px rgba(255, 46, 146, 0.6); }
+  .secondary-header-hidden .secondary-header-bar { display: none; }
+  .secondary-header-hidden main { padding-top: 55px !important; }
+</style>
 </head>
 <body class="theme-dark-mode">
     <!-- Nuvia Pink & Blue Glowing Loader -->
@@ -4461,6 +4478,10 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 <a href="/admin.html" id="adminIconLink" aria-label="Admin Dashboard" style="display: none;">
                     <i class="fas fa-user-cog"></i>
                 </a>
+                <!-- Chips Toggle Button -->
+                <button id="chipsToggleBtn" class="toggle-chips-btn" aria-label="Toggle quick stats" aria-pressed="false" title="Toggle quick stats">
+                    <i class="fas fa-eye-slash" aria-hidden="true"></i>
+                </button>
                 <!-- Notification Icon with Badge -->
                 <div class="notification-icon-wrapper">
                     <a href="/notifications.html" id="notificationToggle" aria-label="Notifications">
@@ -4545,7 +4566,25 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
 
     <a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">Skip to main content</a>
 
-    <main id="main-content">
+    <script>
+(function(){
+  try{
+    var btn = document.getElementById('chipsToggleBtn');
+    if (!btn) return;
+    var update = function(hidden){
+      btn.setAttribute('aria-pressed', hidden ? 'true' : 'false');
+      var ic = btn.querySelector('i');
+      if (ic) ic.className = hidden ? 'fas fa-eye' : 'fas fa-eye-slash';
+    };
+    btn.addEventListener('click', function(){
+      var hidden = document.body.classList.toggle('secondary-header-hidden');
+      update(hidden);
+    });
+    update(false);
+  }catch(_){ }
+})();
+</script>
+<main id="main-content">
         <div class="content-wrapper">
             <!-- Daily Inspiration Section -->
             <div class="daily-inspiration-section">
