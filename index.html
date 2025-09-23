@@ -9347,6 +9347,7 @@ const lex = inspirationLexicon[type];
                     reactions: { like: 0, love: 0, haha: 0 },
                     mediaUrl: mediaUrl,
                     mediaType: mediaType,
+                    videoThumbnailUrl: (window.postDataExtras && window.postDataExtras.videoThumbnailUrl) ? window.postDataExtras.videoThumbnailUrl : null,
                     visibility: (document.getElementById('postVisibilitySelect')?.value || 'public'),
                     tags: [],
                     location: {},
@@ -11364,7 +11365,7 @@ async function fetchAndDisplayPosts() {
                     const computedRate = (jCoinsBal * 0.005).toFixed(3);
                     jcoinRateSpan.textContent = computedRate;
                 // Also update wallet.html oneJcoinRateDisplay if opened in same session/window (best-effort)
-                try { if (window.parent && window.parent.document) { const oneEl = window.parent.document.getElementById('oneJcoinRateDisplay'); if (oneEl && currentSystemSettings?.jcoinNairaRate) oneEl.textContent = `�����${(1/currentSystemSettings.jcoinNairaRate).toFixed(2)} NGN`; } } catch(e) {}
+                try { if (window.parent && window.parent.document) { const oneEl = window.parent.document.getElementById('oneJcoinRateDisplay'); if (oneEl && currentSystemSettings?.jcoinNairaRate) oneEl.textContent = `���${(1/currentSystemSettings.jcoinNairaRate).toFixed(2)} NGN`; } } catch(e) {}
                     homeChipsRow.style.display = 'flex';
                 }
                 // Wallet chip click: gate by walletUnlocked
