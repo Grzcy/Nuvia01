@@ -4479,7 +4479,7 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
             if (enableCallsToggle) enableCallsToggle.checked = settings.enableCalls ?? true;
 
             if (maintenanceModeToggle) maintenanceModeToggle.checked = settings.maintenanceMode ?? false;
-
+            if (autoApproveRewardsToggle) autoApproveRewardsToggle.checked = settings.autoApproveRewards ?? false;
         }
 
         /**
@@ -5933,7 +5933,7 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
                 if (autoApproveFeatureOrdersToggle) autoApproveFeatureOrdersToggle.checked = localStorage.getItem('dev_auto_approve_orders') === '1';
             } catch(_) {}
 
-            autoApproveRewardsToggle?.addEventListener('change', (e)=>{ localStorage.setItem('dev_auto_approve_rewards', e.target.checked ? '1':'0'); setAutoApproveRewardsRunning(e.target.checked); });
+            autoApproveRewardsToggle?.addEventListener('change', async (e)=>{ const checked = e.target.checked; localStorage.setItem('dev_auto_approve_rewards', checked ? '1':'0'); setAutoApproveRewardsRunning(checked); try { await setDoc(SYSTEM_SETTINGS_DOC_REF, { autoApproveRewards: checked, updatedAt: serverTimestamp() }, { merge: true }); } catch(err){ console.warn('JCHAT_WARN: Failed to persist autoApproveRewards to settings:', err); } });
             autoApproveJcoinToggle?.addEventListener('change', (e)=>{ localStorage.setItem('dev_auto_approve_jcoin', e.target.checked ? '1':'0'); setAutoApproveJCoinsRunning(e.target.checked); });
             autoApproveShopPaymentsToggle?.addEventListener('change', (e)=>{ localStorage.setItem('dev_auto_approve_shop', e.target.checked ? '1':'0'); setAutoApproveShopRunning(e.target.checked); });
             autoApproveWalletUnlockToggle?.addEventListener('change', (e)=>{ localStorage.setItem('dev_auto_approve_wallet', e.target.checked ? '1':'0'); setAutoApproveWalletRunning(e.target.checked); });
