@@ -7888,7 +7888,7 @@ async function checkAndStartDailyBonusTimer() {
         function showEnhancedSmartSuccess(message, style = 'default', duration = 4000) {
             let title = 'Success!';
             switch (style) {
-                case 'achievement': title = '🎉 Achievement Unlocked!'; break;
+                case 'achievement': title = '��� Achievement Unlocked!'; break;
                 case 'update': title = '✅ Update Complete!'; break;
                 case 'celebration': title = '🎊 Celebration!'; break;
                 default: title = 'Success!';
@@ -11909,7 +11909,29 @@ async function fetchAndDisplayPosts() {
                 const toFriends = document.getElementById('refShareToFriendsBtn');
                 const linkBtn = document.getElementById('refShareLinkBtn');
                 const closeBtn = document.getElementById('refShareCloseBtn');
-                if (toFriends) { toFriends.onclick = async ()=>{ closeReferralShareOptions(); openFriendPickerAndSendReferral(); }; }
+                if (toFriends) {
+                    toFriends.onclick = async ()=>{
+                        try{
+                            // Close small options and open the full share modal, prefill with referral preview
+                            closeReferralShareOptions();
+                            // Prepare referral preview in share modal
+                            const qEl = document.getElementById('sharePreviewQuote');
+                            const aEl = document.getElementById('sharePreviewAuthor');
+                            const privRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profiles', 'user_profile');
+                            let privSnap = await getDoc(privRef);
+                            if (!privSnap.exists()) { await setDoc(privRef, { referralId: currentUser.uid, successfulReferrals: 0, updatedAt: serverTimestamp() }, { merge: true }); privSnap = await getDoc(privRef); }
+                            const pdata = privSnap.exists() ? (privSnap.data() || {}) : {};
+                            const referralId = (pdata.referralId || currentUser.uid);
+                            const link = `${location.origin.replace(/\/$/, '')}/login.html?ref=${encodeURIComponent(referralId)}`;
+                            const text = `Join me on Nuvia! ${link}`;
+                            if (qEl) qEl.textContent = text;
+                            if (aEl) aEl.textContent = '';
+                            openShareInspirationModal();
+                            // After opening the share modal, open the friend picker and hook send buttons to sendReferralToFriend
+                            await openFriendPickerAndSendReferral();
+                        }catch(e){ console.error('toFriends click failed', e); showMessageBox('Failed to open friend picker.','error'); }
+                    };
+                }
                 if (linkBtn) { linkBtn.onclick = async ()=>{ closeReferralShareOptions(); await shareReferralLinkViaSystem(); }; }
                 if (closeBtn) closeBtn.onclick = closeReferralShareOptions;
             }catch(e){ console.error('openReferralShareOptions', e); }
