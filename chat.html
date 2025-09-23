@@ -1168,6 +1168,20 @@
                         }
                     });
                 });
+
+                // Listen for call document updates (ended/declined) so receiver can react when caller ends the call
+                try {
+                    unsubCallDoc = onSnapshot(callDocRef, (docSnap) => {
+                        try {
+                            const d = docSnap.data() || {};
+                            if (d.status === 'ended' || d.status === 'declined' || d.status === 'missed') {
+                                // Remote side ended the call — clean up
+                                endCall();
+                            }
+                        } catch (e) { /* ignore */ }
+                    });
+                } catch (_) { }
+
             } catch (e) {
                 endCall();
             }
