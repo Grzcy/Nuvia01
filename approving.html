@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JCHAT - Auto Approval Control</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" onload="this.rel='stylesheet'" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /></noscript>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    :root{
+      --pink: #ff2e92; --blue:#00d5ff; --radius: 20px; --transition:.3s ease;
+      --white:#fff; --text-light: rgba(255,255,255,.7); --background-main:#1a1a2e;
+      --background-gradient-1:#16213e; --background-gradient-2:#0f3460;
+      --card-background: rgba(25,25,40,.7); --header-background: linear-gradient(135deg, rgba(10,10,20,.85), rgba(10,10,20,.75));
+      --border-light: rgba(255,255,255,.08); --input-background: rgba(255,255,255,.08);
+      --button-background: linear-gradient(90deg, var(--blue), var(--pink)); --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+      --background-color-primary: #121212; --background-color-secondary:#1e1e1e; --text-color-primary:#e0e0e0; --text-color-secondary:#b0b0d0; --border-color:#3a3a5a;
+      --status-online:#28a745; --status-offline:#6c757d; --status-away:#ffc107;
+    }
+    html{ overflow-y: scroll; }
+    body{ min-height:100vh; margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background-color: var(--background-main);
+      background-image: radial-gradient(circle at top left, var(--background-gradient-1), transparent 100px), radial-gradient(circle at bottom right, var(--background-gradient-2), transparent 150px);
+      color: var(--white); display:flex; flex-direction:column; align-items:center; }
+    header{ background: var(--header-background); border-bottom:1px solid var(--border-light); padding:10px 0; position:fixed; top:0; left:0; width:100%; height:55px; z-index:10; display:flex; justify-content:center; box-shadow:0 4px 15px rgba(0,0,0,.2); }
+    .header-inner{ display:flex; justify-content:space-between; align-items:center; width:100%; max-width:1200px; padding:0 30px; }
+    .brand-link{ display:flex; align-items:center; gap:10px; text-decoration:none; }
+    .brand-logo{ height:24px; width:auto; }
+    .brand-text{ font-family:Poppins, sans-serif; font-size:1.8rem; font-weight:800; background-image: linear-gradient(90deg, var(--blue), var(--pink)); background-clip:text; -webkit-background-clip:text; color:transparent; letter-spacing:-.03em; }
+    .header-actions{ display:flex; align-items:center; gap:10px; }
+    .logout-btn{ background: var(--button-background); border:none; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.3); transition: transform .2s ease, box-shadow .2s ease, opacity .3s ease; opacity:.85; }
+    .logout-btn:hover{ transform: scale(1.08); box-shadow: var(--button-shadow); opacity:1; }
+    main{ flex:1; width:100%; padding-top:80px; display:flex; flex-direction:column; align-items:center; }
+    .page-wrapper{ width:100%; max-width:1000px; padding:20px; display:flex; flex-direction:column; gap:24px; align-items:center; }
+    .card{ width:95%; max-width:900px; background: var(--card-background); border:1px solid var(--border-color); border-radius: var(--radius); box-shadow:0 8px 25px rgba(0,0,0,.3); padding:24px; display:flex; flex-direction:column; gap:16px; }
+    .title-xl{ font-family:Poppins, sans-serif; font-weight:800; font-size:2.2rem; margin:0; background-image: linear-gradient(90deg, var(--blue), var(--pink)); background-clip:text; -webkit-background-clip:text; color:transparent; text-align:center; }
+    .subtitle{ color: var(--text-color-secondary); text-align:center; margin-top:-6px; }
+    .toggles-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:16px; }
+    .toggle-item{ background: var(--input-background); border:1px solid var(--border-light); border-radius:12px; padding:14px; display:flex; gap:12px; align-items:center; }
+    .toggle-label{ font-weight:700; }
+    .toggle-sub{ font-size:.85rem; color: var(--text-light); }
+    .toggle-col{ display:flex; flex-direction:column; gap:4px; }
+    .switch{ position:relative; display:inline-block; width:56px; height:30px; }
+    .switch input{ opacity:0; width:0; height:0; }
+    .slider{ position:absolute; inset:0; border-radius:30px; background: rgba(255,255,255,.12); border:1px solid var(--border-light); transition:.3s; }
+    .slider:before{ content:""; position:absolute; height:24px; width:24px; left:3px; top:3px; background:#bdbdbd; border-radius:50%; transition:.3s; }
+    .switch input:checked + .slider{ background: linear-gradient(90deg, var(--blue), var(--pink)); border-color: var(--blue); }
+    .switch input:checked + .slider:before{ transform: translateX(26px); background:#fff; }
+    .stats-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:12px; }
+    .stat-card{ background: rgba(255,255,255,.06); border:1px solid var(--border-light); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:6px; }
+    .stat-label{ color: var(--text-light); font-size:.85rem; }
+    .stat-value{ font-size:1.3rem; font-weight:800; background-image: linear-gradient(90deg, var(--blue), var(--pink)); background-clip:text; -webkit-background-clip:text; color:transparent; }
+    .table-wrap{ width:100%; overflow:auto; border-radius:10px; border:1px solid var(--border-light); }
+    .simple-table{ width:100%; border-collapse: collapse; }
+    .simple-table th, .simple-table td{ padding:10px 12px; border-bottom:1px solid var(--border-light); color: var(--text-light); text-align:left; font-size:.92rem; }
+    .simple-table th{ color:#fff; background: rgba(0,0,0,.25); text-transform: uppercase; font-weight:700; letter-spacing:.04em; position:sticky; top:0; z-index:1; }
+    .message-box{ position: fixed; top: 20px; right: 20px; background: var(--card-background); border:1px solid var(--border-light); border-radius:12px; padding:12px 14px; display:none; opacity:0; transition: opacity .25s ease; box-shadow:0 8px 25px rgba(0,0,0,.3); z-index:1000; }
+    .message-box.show{ display:flex; opacity:1; align-items:center; gap:10px; }
+    .message-box.success{ background-image: linear-gradient(45deg, var(--pink), var(--blue)); color:#fff; border:none; }
+    .badge{ display:inline-flex; align-items:center; gap:6px; padding:4px 8px; font-size:.8rem; border-radius:999px; background: rgba(255,255,255,.08); border:1px solid var(--border-light); }
+    .badge.ok{ background: rgba(40,167,69,.2); border-color: rgba(40,167,69,.35); color:#d1ffd8; }
+    .hint-row{ display:flex; gap:8px; align-items:center; color: var(--text-light); font-size:.9rem; }
+    .offline-banner{ position:fixed; left:0; right:0; bottom:0; background: rgba(10,10,10,.85); border-top:1px solid rgba(255,255,255,.08); display:none; padding:10px 14px; z-index:999; }
+    .offline-inner{ max-width:1000px; margin:0 auto; display:flex; align-items:center; gap:10px; color:#fff; }
+    @media (max-width:600px){ .header-inner{ padding:0 20px; } .title-xl{ font-size:1.8rem; } .card{ padding:16px; } }
+  </style>
+</head>
+<body class="theme-dark-mode">
+  <header>
+    <div class="header-inner">
+      <a class="brand-link" href="/index.html" aria-label="Home">
+        <img class="brand-logo" src="assets/security.png" alt="JCHAT Security" onerror="this.style.display='none'">
+        <span class="brand-text">Nuvia</span>
+      </a>
+      <div class="header-actions">
+        <button id="logoutButton" class="logout-btn" aria-label="Logout"><i class="fas fa-sign-out-alt" aria-hidden="true"></i></button>
+      </div>
+    </div>
+  </header>
+  <main>
+    <div class="page-wrapper">
+      <div class="card">
+        <h1 class="title-xl">Auto Approval Control</h1>
+        <p class="subtitle">Toggle to automatically approve pending user activities. When enabled, approvals run in real-time (works offline and syncs when online).</p>
+        <div class="toggles-grid" id="togglesGrid">
+          <div class="toggle-item">
+            <label class="switch"><input type="checkbox" id="toggleMaster"><span class="slider"></span></label>
+            <div class="toggle-col">
+              <div class="toggle-label">Master Auto-Approve</div>
+              <div class="toggle-sub">Controls all categories below.</div>
+            </div>
+          </div>
+          <div class="toggle-item">
+            <label class="switch"><input type="checkbox" id="toggleRewards"><span class="slider"></span></label>
+            <div class="toggle-col">
+              <div class="toggle-label">Activity Rewards</div>
+              <div class="toggle-sub">Approve pending_activity_rewards instantly.</div>
+            </div>
+          </div>
+          <div class="toggle-item">
+            <label class="switch"><input type="checkbox" id="toggleJcoin"><span class="slider"></span></label>
+            <div class="toggle-col">
+              <div class="toggle-label">JCoin Buy Requests</div>
+              <div class="toggle-sub">Credit JCoins and approve jcoin_buy_requests.</div>
+            </div>
+          </div>
+          <div class="toggle-item">
+            <label class="switch"><input type="checkbox" id="toggleWallet"><span class="slider"></span></label>
+            <div class="toggle-col">
+              <div class="toggle-label">Wallet Unlock</div>
+              <div class="toggle-sub">Unlock wallets and mark requests approved.</div>
+            </div>
+          </div>
+          <div class="toggle-item">
+            <label class="switch"><input type="checkbox" id="toggleShop"><span class="slider"></span></label>
+            <div class="toggle-col">
+              <div class="toggle-label">Shop Payments</div>
+              <div class="toggle-sub">Deliver items and approve shop_payment_requests.</div>
+            </div>
+          </div>
+          <div class="toggle-item">
+            <label class="switch"><input type="checkbox" id="toggleVerify"><span class="slider"></span></label>
+            <div class="toggle-col">
+              <div class="toggle-label">Verification Badge</div>
+              <div class="toggle-sub">Approve verification_requests and set verified.</div>
+            </div>
+          </div>
+          <div class="toggle-item">
+            <label class="switch"><input type="checkbox" id="toggleSkipReceipts" checked><span class="slider"></span></label>
+            <div class="toggle-col">
+              <div class="toggle-label">Skip Receipt-Required Rewards</div>
+              <div class="toggle-sub">For activity rewards that include receipts, skip auto-approval.</div>
+            </div>
+          </div>
+        </div>
+        <div class="hint-row"><span class="badge ok"><i class="fas fa-key"></i> ADMIN ONLY</span><span>Only the authorized admin can use this page.</span></div>
+      </div>
+
+      <div class="card">
+        <h2 class="title-xl" style="font-size:1.6rem;">Live Approvals & Stats</h2>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-label">Today Approved</div><div class="stat-value" id="statApprovedToday">0</div></div>
+          <div class="stat-card"><div class="stat-label">Rewards Approved</div><div class="stat-value" id="statRewards">0</div></div>
+          <div class="stat-card"><div class="stat-label">JCoin Requests</div><div class="stat-value" id="statJcoin">0</div></div>
+          <div class="stat-card"><div class="stat-label">Wallet Unlocks</div><div class="stat-value" id="statWallet">0</div></div>
+          <div class="stat-card"><div class="stat-label">Shop Payments</div><div class="stat-value" id="statShop">0</div></div>
+          <div class="stat-card"><div class="stat-label">Verifications</div><div class="stat-value" id="statVerify">0</div></div>
+        </div>
+        <div class="table-wrap">
+          <table class="simple-table" aria-label="Recent auto approvals">
+            <thead><tr><th>Time</th><th>User</th><th>Type</th><th>Details</th></tr></thead>
+            <tbody id="recentApprovalsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="message-box" id="messageBox" role="status" aria-live="polite"><i class="fas fa-circle-info"></i><span id="messageText"></span></div>
+  <div class="offline-banner" id="offlineBanner"><div class="offline-inner"><i class="fas fa-wifi" aria-hidden="true"></i><span>Offline. Actions will sync when back online.</span></div></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, onSnapshot, addDoc, runTransaction, writeBatch, serverTimestamp, enableMultiTabIndexedDbPersistence, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+      apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+      authDomain: "jchat-1.firebaseapp.com",
+      databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+      projectId: "jchat-1",
+      storageBucket: "jchat-1.firebasestorage.app",
+      messagingSenderId: "328479683167",
+      appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
+      measurementId: "G-S6Z9GG0R9P"
+    };
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    (async ()=>{ try{ await enableMultiTabIndexedDbPersistence(db); } catch(e){ try{ await enableIndexedDbPersistence(db); }catch(_){} } })();
+
+    const ADMIN_UID = 'cc96gdhCRPO72NFZtleRCujHvIq2';
+    const SYSTEM_SETTINGS_DOC_REF = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'system_settings');
+
+    const logoutButton = document.getElementById('logoutButton');
+    const messageBox = document.getElementById('messageBox');
+    const messageText = document.getElementById('messageText');
+    const offlineBanner = document.getElementById('offlineBanner');
+
+    const toggleMaster = document.getElementById('toggleMaster');
+    const toggleRewards = document.getElementById('toggleRewards');
+    const toggleJcoin = document.getElementById('toggleJcoin');
+    const toggleWallet = document.getElementById('toggleWallet');
+    const toggleShop = document.getElementById('toggleShop');
+    const toggleVerify = document.getElementById('toggleVerify');
+    const toggleSkipReceipts = document.getElementById('toggleSkipReceipts');
+
+    const statApprovedToday = document.getElementById('statApprovedToday');
+    const statRewards = document.getElementById('statRewards');
+    const statJcoin = document.getElementById('statJcoin');
+    const statWallet = document.getElementById('statWallet');
+    const statShop = document.getElementById('statShop');
+    const statVerify = document.getElementById('statVerify');
+    const recentApprovalsBody = document.getElementById('recentApprovalsBody');
+
+    let currentUser = null;
+    let settings = { autoApproveMaster:false, autoApproveRewards:false, autoApproveJcoin:false, autoApproveWallet:false, autoApproveShop:false, autoApproveVerify:false, skipReceiptRewards:true };
+
+    let unsubs = { rewards:null, jcoin:null, wallet:null, shop:null, verify:null };
+    const processing = { rewards:new Set(), jcoin:new Set(), wallet:new Set(), shop:new Set(), verify:new Set() };
+
+    const stats = { today:0, rewards:0, jcoin:0, wallet:0, shop:0, verify:0 };
+
+    function showMsg(text, type='info', ms=2200){
+      messageText.textContent = text; messageBox.className = 'message-box show' + (type==='success' ? ' success' : '');
+      setTimeout(()=>{ messageBox.classList.remove('show'); }, ms);
+    }
+    function pushRecent(userId, type, details){
+      const tr = document.createElement('tr');
+      const time = new Date().toLocaleTimeString();
+      tr.innerHTML = `<td>${time}</td><td>${userId||'-'}</td><td>${type}</td><td>${details||''}</td>`;
+      recentApprovalsBody.insertBefore(tr, recentApprovalsBody.firstChild);
+      const rows = recentApprovalsBody.querySelectorAll('tr'); if (rows.length > 50) rows[rows.length-1]?.remove();
+    }
+    function bumpStat(key){ stats[key]++; stats.today++; renderStats(); }
+    function renderStats(){
+      statApprovedToday.textContent = stats.today;
+      statRewards.textContent = stats.rewards;
+      statJcoin.textContent = stats.jcoin;
+      statWallet.textContent = stats.wallet;
+      statShop.textContent = stats.shop;
+      statVerify.textContent = stats.verify;
+    }
+
+    function syncOfflineUI(){ offlineBanner.style.display = navigator.onLine ? 'none' : 'block'; }
+    window.addEventListener('online', ()=>{ syncOfflineUI(); processApprovalQueue(); });
+    window.addEventListener('offline', ()=>{ syncOfflineUI(); });
+    syncOfflineUI();
+
+    function saveSettingsLocal(){ try{ localStorage.setItem('approving.settings', JSON.stringify(settings)); }catch(_){} }
+    function loadSettingsLocal(){ try{ const raw = localStorage.getItem('approving.settings'); if (raw){ settings = { ...settings, ...JSON.parse(raw) }; } }catch(_){} }
+
+    async function loadSettingsCloud(){
+      try{
+        const snap = await getDoc(SYSTEM_SETTINGS_DOC_REF);
+        if (snap.exists()){
+          const d = snap.data() || {};
+          settings.autoApproveMaster = !!d.autoApproveMaster;
+          settings.autoApproveRewards = !!d.autoApproveRewards;
+          settings.autoApproveJcoin = !!d.autoApproveJcoin;
+          settings.autoApproveWallet = !!d.autoApproveWallet;
+          settings.autoApproveShop = !!d.autoApproveShop;
+          settings.autoApproveVerify = !!d.autoApproveVerify;
+          settings.skipReceiptRewards = d.skipReceiptRewards !== false;
+        }
+      }catch(e){ /* ignore - offline allowed */ }
+    }
+    async function saveSettingsCloud(){
+      try{ await setDoc(SYSTEM_SETTINGS_DOC_REF, {
+        autoApproveMaster: settings.autoApproveMaster,
+        autoApproveRewards: settings.autoApproveRewards,
+        autoApproveJcoin: settings.autoApproveJcoin,
+        autoApproveWallet: settings.autoApproveWallet,
+        autoApproveShop: settings.autoApproveShop,
+        autoApproveVerify: settings.autoApproveVerify,
+        skipReceiptRewards: settings.skipReceiptRewards,
+        updatedAt: serverTimestamp()
+      }, { merge:true }); }catch(e){ /* offline OK */ }
+    }
+
+    function applyTogglesToUI(){
+      toggleMaster.checked = settings.autoApproveMaster;
+      toggleRewards.checked = settings.autoApproveRewards;
+      toggleJcoin.checked = settings.autoApproveJcoin;
+      toggleWallet.checked = settings.autoApproveWallet;
+      toggleShop.checked = settings.autoApproveShop;
+      toggleVerify.checked = settings.autoApproveVerify;
+      toggleSkipReceipts.checked = settings.skipReceiptRewards;
+    }
+
+    function attachToggleHandlers(){
+      const handle = async ()=>{ settings.autoApproveRewards = toggleRewards.checked; settings.autoApproveJcoin = toggleJcoin.checked; settings.autoApproveWallet = toggleWallet.checked; settings.autoApproveShop = toggleShop.checked; settings.autoApproveVerify = toggleVerify.checked; settings.autoApproveMaster = toggleMaster.checked; settings.skipReceiptRewards = toggleSkipReceipts.checked; saveSettingsLocal(); saveSettingsCloud(); refreshListeners(); };
+      [toggleMaster, toggleRewards, toggleJcoin, toggleWallet, toggleShop, toggleVerify, toggleSkipReceipts].forEach(el=> el.addEventListener('change', handle));
+    }
+
+    function shouldRun(cat){ return settings.autoApproveMaster && settings[cat]; }
+
+    function stopListener(key){ try{ if (unsubs[key]){ unsubs[key](); unsubs[key] = null; } }catch(_){} }
+    function stopAll(){ ['rewards','jcoin','wallet','shop','verify'].forEach(stopListener); }
+
+    function refreshListeners(){
+      // Rewards
+      stopListener('rewards');
+      if (shouldRun('autoApproveRewards')){
+        const qRef = query(collection(db, 'artifacts', appId, 'public', 'data', 'pending_activity_rewards'), where('status','==','pending'));
+        unsubs.rewards = onSnapshot(qRef, (qs)=>{
+          qs.forEach(d=> autoApproveRewardDoc(d.id, d.data()));
+        });
+      }
+      // JCoin buy requests
+      stopListener('jcoin');
+      if (shouldRun('autoApproveJcoin')){
+        const qRef = query(collection(db, 'artifacts', appId, 'public', 'data', 'jcoin_buy_requests'), where('status','==','pending'));
+        unsubs.jcoin = onSnapshot(qRef, (qs)=>{
+          qs.forEach(d=> autoApproveJcoinRequest(d.id, d.data()));
+        });
+      }
+      // Wallet unlock
+      stopListener('wallet');
+      if (shouldRun('autoApproveWallet')){
+        const qRef = query(collection(db, 'artifacts', appId, 'public', 'data', 'wallet_unlock_requests'), where('status','==','pending'));
+        unsubs.wallet = onSnapshot(qRef, (qs)=>{ qs.forEach(d=> autoApproveWalletUnlock(d.id, d.data())); });
+      }
+      // Shop payments
+      stopListener('shop');
+      if (shouldRun('autoApproveShop')){
+        const qRef = query(collection(db, 'artifacts', appId, 'public', 'data', 'shop_payment_requests'), where('status','==','pending'));
+        unsubs.shop = onSnapshot(qRef, (qs)=>{ qs.forEach(d=> autoApproveShopPayment(d.id, d.data())); });
+      }
+      // Verification
+      stopListener('verify');
+      if (shouldRun('autoApproveVerify')){
+        const qRef = query(collection(db, 'artifacts', appId, 'public', 'data', 'verification_requests'), where('status','==','pending'));
+        unsubs.verify = onSnapshot(qRef, (qs)=>{ qs.forEach(d=> autoApproveVerification(d.id, d.data())); });
+      }
+    }
+
+    async function approveBatchUpdateProfile(userId, updates){
+      const userProfileRef = doc(db, 'artifacts', appId, 'users', userId, 'profiles', 'user_profile');
+      await runTransaction(db, async (tx)=>{
+        const snap = await tx.get(userProfileRef);
+        if (!snap.exists()) throw new Error('Profile not found');
+        tx.set(userProfileRef, { ...updates, updatedAt: serverTimestamp() }, { merge:true });
+      });
+    }
+
+    async function autoApproveRewardDoc(rewardId, r){
+      if (processing.rewards.has(rewardId)) return; processing.rewards.add(rewardId);
+      try{
+        const requiresReceipt = !!(r.receiptUrl || r.receiptImageUrl || r.requiresReceipt === true || (typeof r.activityType === 'string' && /receipt|payment|purchase|order|gas|shop/i.test(r.activityType)));
+        if (requiresReceipt && settings.skipReceiptRewards){ processing.rewards.delete(rewardId); return; }
+        const userId = r.userId; const xp = Number(r.suggestedXpReward||0); const jc = Number(r.suggestedJCoinReward||0);
+        const batch = writeBatch(db);
+        const pendingRef = doc(db, 'artifacts', appId, 'public', 'data', 'pending_activity_rewards', rewardId);
+        const userRef = doc(db, 'artifacts', appId, 'users', userId, 'profiles', 'user_profile');
+        const publicRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', userId);
+        const userSnap = await getDoc(userRef); if (!userSnap.exists()) throw new Error('Profile missing');
+        const d = userSnap.data() || {}; const gas = Number(d.gas||0) + xp; const jCoins = Number(d.jCoins||0) + jc; const totalGasEarned = Number(d.totalGasEarned||0) + xp; let totalPosts = Number(d.totalPosts||0);
+        if ((r.activityType||'') === 'post_creation') totalPosts++;
+        batch.update(userRef, { gas, jCoins, totalGasEarned, totalPosts });
+        batch.set(publicRef, { jCoins: jCoins, level: d.level||1 }, { merge:true });
+        batch.delete(pendingRef);
+        await batch.commit();
+        bumpStat('rewards'); pushRecent(userId, 'reward', `${xp} XP, ${jc} J`);
+      }catch(e){ queueApproval({ t:'reward', id:rewardId, data:r }); }
+      finally{ processing.rewards.delete(rewardId); }
+    }
+
+    async function autoApproveJcoinRequest(reqId, req){
+      if (processing.jcoin.has(reqId)) return; processing.jcoin.add(reqId);
+      try{
+        await runTransaction(db, async (tx)=>{
+          const reqRef = doc(db, 'artifacts', appId, 'public', 'data', 'jcoin_buy_requests', reqId);
+          const profRef = doc(db, 'artifacts', appId, 'users', req.userId, 'profiles', 'user_profile');
+          const rs = await tx.get(reqRef); const ps = await tx.get(profRef);
+          if (!rs.exists() || (rs.data().status!=='pending')) return;
+          if (!ps.exists()) throw new Error('Profile not found');
+          const cur = Number(ps.data().jCoins||0); const add = Number(req.requestedJCoins||req.jcoinAmount||0);
+          tx.update(profRef, { jCoins: cur + add, updatedAt: serverTimestamp() });
+          tx.update(reqRef, { status:'approved', approvedBy: currentUser?.uid||null, processedAt: serverTimestamp() });
+        });
+        bumpStat('jcoin'); pushRecent(req.userId, 'jcoin', `+${Number(req.requestedJCoins||0)} J`);
+      }catch(e){ queueApproval({ t:'jcoin', id:reqId, data:req }); }
+      finally{ processing.jcoin.delete(reqId); }
+    }
+
+    async function autoApproveWalletUnlock(reqId, req){
+      if (processing.wallet.has(reqId)) return; processing.wallet.add(reqId);
+      try{
+        await runTransaction(db, async (tx)=>{
+          const reqRef = doc(db, 'artifacts', appId, 'public', 'data', 'wallet_unlock_requests', reqId);
+          const profRef = doc(db, 'artifacts', appId, 'users', req.userId, 'profiles', 'user_profile');
+          const rs = await tx.get(reqRef); const ps = await tx.get(profRef);
+          if (!rs.exists() || (rs.data().status!=='pending')) return;
+          if (!ps.exists()) throw new Error('Profile not found');
+          tx.update(profRef, { walletUnlocked: true, updatedAt: serverTimestamp() });
+          tx.update(reqRef, { status:'approved', processedBy: currentUser?.uid||null, processedAt: serverTimestamp() });
+        });
+        bumpStat('wallet'); pushRecent(req.userId, 'wallet_unlock', 'approved');
+      }catch(e){ queueApproval({ t:'wallet', id:reqId, data:req }); }
+      finally{ processing.wallet.delete(reqId); }
+    }
+
+    async function autoApproveShopPayment(reqId, req){
+      if (processing.shop.has(reqId)) return; processing.shop.add(reqId);
+      try{
+        await runTransaction(db, async (tx)=>{
+          const reqRef = doc(db, 'artifacts', appId, 'public', 'data', 'shop_payment_requests', reqId);
+          const rs = await tx.get(reqRef); if (!rs.exists() || (rs.data().status!=='pending')) return;
+          const userId = rs.data().userId;
+          const entA = doc(db, 'artifacts', appId, 'users', userId, 'profiles', 'user_entitlements');
+          const entB = doc(db, 'artifacts', appId, 'users', userId, 'user_entitlements');
+          const profRef = doc(db, 'artifacts', appId, 'users', userId, 'profiles', 'user_profile');
+          const items = Array.isArray(req.items) ? req.items : [];
+          const vipPass = !!req.vipPass;
+          const themeItems = items.filter(i=> i.category==='premium_theme');
+          const jcoinPackItems = items.filter(i=> i.category==='jcoin_pack');
+          const gasPackItems = items.filter(i=> i.category==='gas_pack');
+          if (vipPass){
+            const updates = { all_premium_themes_unlocked: true, updatedAt: serverTimestamp() };
+            tx.set(entA, updates, { merge:true }); tx.set(entB, updates, { merge:true });
+          }
+          if (themeItems.length){
+            const updates = { updatedAt: serverTimestamp() };
+            themeItems.forEach(t=> { updates.themes = (updates.themes||[]); updates.themes.push(t.themeKey||t.id); updates[`theme_${t.themeKey||t.id}_purchased`] = true; });
+            tx.set(entA, updates, { merge:true }); tx.set(entB, updates, { merge:true });
+          }
+          if (gasPackItems.length){
+            const profSnap = await tx.get(profRef); const d = profSnap.exists()? profSnap.data():{};
+            const addGas = gasPackItems.reduce((s,it)=> s + Number(it.gasAmount||0), 0);
+            tx.set(profRef, { gas: Number(d.gas||0)+addGas, totalGasEarned: Number(d.totalGasEarned||0)+addGas, updatedAt: serverTimestamp() }, { merge:true });
+          }
+          let totalJc = Number(req.jcoinAmount||0);
+          if (jcoinPackItems.length){ totalJc += jcoinPackItems.reduce((s,it)=> s + Number(it.jcoinAmount||it.coins||0), 0); }
+          if (totalJc>0){ const ps = await tx.get(profRef); const d = ps.exists()? ps.data():{}; tx.set(profRef, { jCoins: Number(d.jCoins||0)+totalJc, updatedAt: serverTimestamp() }, { merge:true }); }
+          tx.update(reqRef, { status:'approved', approvedAt: serverTimestamp(), approvedBy: currentUser?.uid||null });
+        });
+        bumpStat('shop'); pushRecent(req.userId, 'shop_payment', 'approved');
+      }catch(e){ queueApproval({ t:'shop', id:reqId, data:req }); }
+      finally{ processing.shop.delete(reqId); }
+    }
+
+    async function autoApproveVerification(reqId, req){
+      if (processing.verify.has(reqId)) return; processing.verify.add(reqId);
+      try{
+        await runTransaction(db, async (tx)=>{
+          const reqRef = doc(db, 'artifacts', appId, 'public', 'data', 'verification_requests', reqId);
+          const profRef = doc(db, 'artifacts', appId, 'users', req.userId, 'profiles', 'user_profile');
+          const rs = await tx.get(reqRef); const ps = await tx.get(profRef);
+          if (!rs.exists() || (rs.data().status!=='pending')) return; if (!ps.exists()) throw new Error('Profile not found');
+          tx.update(profRef, { verified: true, updatedAt: serverTimestamp() });
+          tx.update(reqRef, { status:'approved', approvedAt: serverTimestamp(), approvedBy: currentUser?.uid||null });
+        });
+        bumpStat('verify'); pushRecent(req.userId, 'verification', 'approved');
+      }catch(e){ queueApproval({ t:'verify', id:reqId, data:req }); }
+      finally{ processing.verify.delete(reqId); }
+    }
+
+    function queueApproval(item){ try{ const raw = localStorage.getItem('approving.queue'); const arr = raw? JSON.parse(raw): []; arr.push({ ...item, ts: Date.now() }); localStorage.setItem('approving.queue', JSON.stringify(arr)); }catch(_){} }
+    function loadQueue(){ try{ const raw = localStorage.getItem('approving.queue'); return raw? JSON.parse(raw): []; }catch(_){ return []; } }
+    function saveQueue(arr){ try{ localStorage.setItem('approving.queue', JSON.stringify(arr)); }catch(_){} }
+    async function processApprovalQueue(){ if (!navigator.onLine) return; const arr = loadQueue(); if (!arr.length) return; const rest=[]; for (const it of arr){ try{ if (it.t==='reward') await autoApproveRewardDoc(it.id, it.data); else if (it.t==='jcoin') await autoApproveJcoinRequest(it.id, it.data); else if (it.t==='wallet') await autoApproveWalletUnlock(it.id, it.data); else if (it.t==='shop') await autoApproveShopPayment(it.id, it.data); else if (it.t==='verify') await autoApproveVerification(it.id, it.data); }catch(e){ rest.push(it); } } saveQueue(rest); }
+
+    async function ensureAuthAdmin(){
+      return new Promise((resolve)=>{
+        onAuthStateChanged(auth, async (user)=>{
+          if (user){
+            if (user.uid !== ADMIN_UID){ showMsg('Unauthorized. Redirecting...', 'info', 1500); setTimeout(()=>{ window.location.href = '/index.html'; }, 1500); resolve(false); return; }
+            currentUser = user; resolve(true);
+          } else {
+            try {
+              if (initialAuthToken) await signInWithCustomToken(auth, initialAuthToken); else await signInAnonymously(auth);
+            } catch (e) {
+              window.location.href = '/login.html'; resolve(false); return;
+            }
+          }
+        });
+      });
+    }
+
+    logoutButton.addEventListener('click', async ()=>{ try{ await signOut(auth); window.location.href='/login.html'; }catch(_){ } });
+
+    loadSettingsLocal(); await loadSettingsCloud(); applyTogglesToUI(); attachToggleHandlers();
+
+    const ok = await ensureAuthAdmin();
+    if (ok){
+      refreshListeners(); showMsg('Auto Approval Control ready', 'success');
+      processApprovalQueue();
+      try { onSnapshot(SYSTEM_SETTINGS_DOC_REF, (snap)=>{ if (snap.exists()){ const d = snap.data()||{}; const next = {
+        autoApproveMaster: !!d.autoApproveMaster,
+        autoApproveRewards: !!d.autoApproveRewards,
+        autoApproveJcoin: !!d.autoApproveJcoin,
+        autoApproveWallet: !!d.autoApproveWallet,
+        autoApproveShop: !!d.autoApproveShop,
+        autoApproveVerify: !!d.autoApproveVerify,
+        skipReceiptRewards: d.skipReceiptRewards !== false
+      }; const changed = JSON.stringify(next) !== JSON.stringify({ autoApproveMaster: settings.autoApproveMaster, autoApproveRewards: settings.autoApproveRewards, autoApproveJcoin: settings.autoApproveJcoin, autoApproveWallet: settings.autoApproveWallet, autoApproveShop: settings.autoApproveShop, autoApproveVerify: settings.autoApproveVerify, skipReceiptRewards: settings.skipReceiptRewards }); settings = { ...settings, ...next }; applyTogglesToUI(); if (changed) refreshListeners(); } }); }catch(_){ }
+    }
+  </script>
+</body>
+</html>
