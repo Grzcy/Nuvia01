@@ -735,6 +735,23 @@
                 const data = docSnap.data();
                 const isVideo = !!data.video;
                 isIncoming = true;
+
+                // Try to show caller avatar while connecting
+                try{
+                    const callerId = data.callerId;
+                    if (callerId) {
+                        const callerPubRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', callerId);
+                        const callerSnap = await getDoc(callerPubRef);
+                        const callerData = callerSnap.exists() ? callerSnap.data() : null;
+                        const initial = (callerData?.username || 'U').charAt(0).toUpperCase();
+                        let avatarUrl = '';
+                        if (callerData?.profilePicId) avatarUrl = getCloudinaryImageUrl(callerData.profilePicId, 'w_240,h_240,c_fill,g_face,r_max');
+                        else avatarUrl = `https://placehold.co/240x240/00d5ff/ffffff?text=${initial}`;
+                        try{ if (remoteAvatarPlaceholder) { remoteAvatarPlaceholder.src = avatarUrl; remoteAvatarPlaceholder.style.display = 'block'; } }catch(_){ }
+                        try{ if (voiceAvatarPlaceholder) { voiceAvatarPlaceholder.src = avatarUrl; voiceAvatarPlaceholder.style.display = 'block'; } }catch(_){ }
+                    }
+                }catch(e){ console.warn('JCHAT_WARN: failed to load caller avatar', e); }
+
                 openCallUI(isVideo);
                 callTitle.textContent = isVideo ? 'Incoming Video Call' : 'Incoming Voice Call';
                 const cs = document.getElementById('callStatus');
