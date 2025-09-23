@@ -730,6 +730,9 @@
         }
 
         async function showIncomingPrompt(docSnap){
+            // Attach a per-call snapshot listener for ringing state to detect remote hangup even before acceptance
+            try{ if (unsubRingingCallDoc) { try{ unsubRingingCallDoc(); }catch(_){} } }catch(_){}
+            unsubRingingCallDoc = null;
             try{
                 currentIncomingDoc = docSnap;
                 const data = docSnap.data();
@@ -776,12 +779,33 @@
                 incomingRingTimeoutId = setTimeout(async ()=>{ try{ await declineIncomingCall(); }catch(_){ } }, 60000);
                 if (acceptCallBtn){
                     acceptCallBtn.onclick = async () => {
-                        try{ stopRingtone(); if (incomingActions) incomingActions.style.display = 'none'; clearTimeout(incomingRingTimeoutId); await acceptIncomingCall(currentIncomingDoc); isIncoming = false; currentIncomingDoc = null; }catch(e){ endCall(); }
+                        try{ stopRingtone(); if (incomingActions) incomingActions.style.display = 'none'; clearTimeout(incomingRingTimeoutId); // detach the ringing doc listener before accepting
+                            try{ if (unsubRingingCallDoc) { unsubRingingCallDoc(); unsubRingingCallDoc = null; } }catch(_){ }
+                            await acceptIncomingCall(currentIncomingDoc); isIncoming = false; currentIncomingDoc = null; }catch(e){ endCall(); }
                     };
                 }
                 if (declineCallBtn){
                     declineCallBtn.onclick = async () => { clearTimeout(incomingRingTimeoutId); await declineIncomingCall(); };
                 }
+                // start a direct listener on the call doc so we catch remote hangup while still ringing
+                try{
+                    const docRef = docSnap.ref;
+                    unsubRingingCallDoc = onSnapshot(docRef, (s)=>{
+                        try{
+                            const d = s.data() || {};
+                            if (d.signaledEnd || (d.status && d.status !== 'ringing')){
+                                // remote ended/cancelled call while we were ringing
+                                try{ if (incomingRingTimeoutId) clearTimeout(incomingRingTimeoutId); }catch(_){ }
+                                stopRingtone();
+                                if (incomingActions) incomingActions.style.display = 'none';
+                                if (endCallBtn) endCallBtn.style.display = 'inline-flex';
+                                callModal.style.display = 'none';
+                                isIncoming = false; currentIncomingDoc = null;
+                                try{ if (unsubRingingCallDoc) { unsubRingingCallDoc(); unsubRingingCallDoc = null; } }catch(_){ }
+                            }
+                        }catch(_){ }
+                    });
+                }catch(_){ }
             }catch(e){ endCall(); }
         }
 
@@ -793,6 +817,8 @@
                 if (callDocRef) { try { await updateDoc(callDocRef, { status: 'declined' }); } catch(_){} }
             } finally {
                 callDocRef = null;
+                // cleanup ringing doc listener
+                try{ if (unsubRingingCallDoc) { unsubRingingCallDoc(); unsubRingingCallDoc = null; } }catch(_){ }
                 if (endCallBtn) endCallBtn.style.display = 'inline-flex';
                 callModal.style.display = 'none';
                 isIncoming = false; currentIncomingDoc = null;
@@ -1332,6 +1358,8 @@
                     }catch(_){ }
                 } catch (e) { console.error('JCHAT_ERROR notifying callee on endCall', e); }
             }
+            // ensure we also cleanup any ringing-listener on this client
+            try{ if (unsubRingingCallDoc) { unsubRingingCallDoc(); unsubRingingCallDoc = null; } }catch(_){ }
 
             if (shouldLog) {
                 try { await logCallSummary(callKind, startedAtMs, endedAtMs); } catch {}
@@ -1887,7 +1915,7 @@
                     const dot = document.querySelector(`[data-presence-id="${f.id}"]`);
                     const text = document.querySelector(`[data-presence-text-id="${f.id}"]`);
                     if (dot) dot.className = 'friend-dot ' + (cached.state === 'online' ? 'online' : cached.state === 'away' ? 'away' : '');
-                    if (text) text.textContent = cached.state === 'online' ? 'Online' : (cached.state === 'away' ? `Away • ${formatRelativeTime(cached.lastMs)}` : `Offline • ${formatRelativeTime(cached.lastMs)}`);
+                    if (text) text.textContent = cached.state === 'online' ? 'Online' : (cached.state === 'away' ? `Away • ${formatRelativeTime(cached.lastMs)}` : `Offline �� ${formatRelativeTime(cached.lastMs)}`);
                 }
             });
             // Blur messages while menu open
