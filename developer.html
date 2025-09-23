@@ -1858,6 +1858,13 @@
 
                         <!-- Pending JCoin Requests Section -->
                         <h3>Pending JCoin Requests</h3>
+                        <div class="input-group">
+                            <label for="autoApproveJcoinToggle">Auto-approve JCoin Requests</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="autoApproveJcoinToggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
                         <div id="pendingRequestsList">
                             <p class="no-requests-message" id="noPendingRequestsMessage">No pending JCoin requests.</p>
                             <!-- Pending requests will be dynamically loaded here -->
@@ -1865,6 +1872,13 @@
 
                         <!-- Pending Activity Rewards Section -->
                         <h3>Pending Activity Rewards</h3>
+                        <div class="input-group">
+                            <label for="autoApproveRewardsToggle">Auto-approve Activity Rewards</label>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="autoApproveRewardsToggle">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
                         <div class="bulk-actions-container">
                             <button id="approveSelectedBtn" disabled aria-label="Approve Selected Rewards">
                                 <span class="button-text"><i class="fas fa-check-double"></i> Approve Selected</span>
@@ -1947,6 +1961,13 @@
                 </div>
                 <div id="featureOrdersContent">
                     <h2>Feature Orders</h2>
+                    <div class="input-group">
+                        <label for="autoApproveFeatureOrdersToggle">Auto-approve Feature Orders</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="autoApproveFeatureOrdersToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
                     <div class="input-group orders-toolbar">
                         <label for="ordersStatusFilter" style="margin:0;">Filter:</label>
                         <select id="ordersStatusFilter" style="padding:8px 10px; border-radius:8px; border:1px solid var(--border-light); background:var(--input-background); color:var(--white);">
@@ -1968,6 +1989,13 @@
                 </div>
                 <div id="shopPaymentsContent">
                     <h2>Shop Payment Requests</h2>
+                    <div class="input-group">
+                        <label for="autoApproveShopPaymentsToggle">Auto-approve Shop Payments</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="autoApproveShopPaymentsToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
                     <div class="input-group orders-toolbar">
                         <label for="shopPaymentsStatusFilter" style="margin:0;">Filter:</label>
                         <select id="shopPaymentsStatusFilter">
@@ -1991,6 +2019,13 @@
                 </div>
                 <div id="walletUnlockRequestsContent">
                     <h2><i class="fas fa-unlock"></i> Wallet Unlock Requests</h2>
+                    <div class="input-group">
+                        <label for="autoApproveWalletUnlockToggle">Auto-approve Wallet Unlocks</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="autoApproveWalletUnlockToggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
                     <div class="input-group orders-toolbar">
                         <label for="walletUnlockStatusFilter" style="margin:0;">Filter:</label>
                         <select id="walletUnlockStatusFilter">
@@ -2239,6 +2274,23 @@ const unverifyUserButton = document.getElementById('unverifyUserButton');
         const approveSelectedBtn = document.getElementById('approveSelectedBtn');
         const pendingRewardsTableBody = document.getElementById('pendingRewardsTableBody');
         const noRewardsMessage = document.getElementById('noRewardsMessage');
+        const autoApproveRewardsToggle = document.getElementById('autoApproveRewardsToggle');
+        const autoApproveJcoinToggle = document.getElementById('autoApproveJcoinToggle');
+        const autoApproveShopPaymentsToggle = document.getElementById('autoApproveShopPaymentsToggle');
+        const autoApproveWalletUnlockToggle = document.getElementById('autoApproveWalletUnlockToggle');
+        const autoApproveFeatureOrdersToggle = document.getElementById('autoApproveFeatureOrdersToggle');
+
+        let __autoApprovingRewards = false;
+        let __autoApprovingJCoins = false;
+        let __autoApprovingShop = false;
+        let __autoApprovingWallet = false;
+        let __autoApprovingOrders = false;
+
+        let __autoApproveRewardsInterval = null;
+        let __autoApproveJCoinInterval = null;
+        let __autoApproveShopInterval = null;
+        let __autoApproveWalletInterval = null;
+        let __autoApproveOrdersInterval = null;
         const confirmationModal = document.getElementById('confirmationModal');
         const confirmationTitle = document.getElementById('confirmationTitle');
         const confirmationMessage = document.getElementById('confirmationMessage');
@@ -4063,6 +4115,114 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
         }
         function startAutoApproveRewards(){ if (__autoApproveRewardsTimer) return; autoApproveStaleRewards(); __autoApproveRewardsTimer = setInterval(autoApproveStaleRewards, 60000); }
 
+        async function processAutoApproveAllRewards(){
+            if (__autoApprovingRewards) return;
+            if (!currentUser || currentUser.uid !== ADMIN_UID) return;
+            __autoApprovingRewards = true;
+            try{
+                const pendingRef = collection(db, 'artifacts', appId, 'public', 'data', 'pending_activity_rewards');
+                const q = query(pendingRef, where('status','==','pending'));
+                const snap = await getDocs(q);
+                if (snap.empty) return;
+                const batch = writeBatch(db);
+                const usersToUpdate = new Set();
+                snap.forEach(d => {
+                    const r = d.data();
+                    approveSingleRewardInBatch(d.id, r, batch);
+                    if (r && r.userId) usersToUpdate.add(r.userId);
+                });
+                await batch.commit();
+                for (const uid of usersToUpdate){
+                    try{
+                        const userProfileDocRef = doc(db, 'artifacts', appId, 'users', uid, 'profiles', 'user_profile');
+                        const userProfileSnap = await getDoc(userProfileDocRef);
+                        if (userProfileSnap.exists()){
+                            const userData = userProfileSnap.data();
+                            await checkAndApplyLevelUps(uid, userData.level || 1, userData.totalGasEarned || 0);
+                        }
+                    }catch(_){}
+                }
+            }catch(e){ console.warn('Auto-approve all rewards error', e); }
+            finally{ __autoApprovingRewards = false; }
+        }
+
+        async function processAutoApproveAllJCoinRequests(){
+            if (__autoApprovingJCoins) return;
+            if (!currentUser || currentUser.uid !== ADMIN_UID) return;
+            __autoApprovingJCoins = true;
+            try{
+                const qRef = query(collection(db, 'artifacts', appId, 'public', 'data', 'jcoin_buy_requests'), where('status','==','pending'));
+                const snap = await getDocs(qRef);
+                for (const d of snap.docs){
+                    const req = d.data();
+                    const jcoins = Number(req.requestedJCoins || req.jcoinAmount || 0);
+                    await approveJCoinRequest(d.id, req.userId, jcoins, null);
+                }
+            }catch(e){ console.warn('Auto-approve JCoin requests error', e); }
+            finally{ __autoApprovingJCoins = false; }
+        }
+
+        async function processAutoApproveAllShopPayments(){
+            if (__autoApprovingShop) return;
+            if (!currentUser || currentUser.uid !== ADMIN_UID) return;
+            __autoApprovingShop = true;
+            try{
+                let qRef = query(collection(db, 'artifacts', appId, 'public', 'data', 'shop_payment_requests'), where('status','==','pending'), where('assignedAdminId','==', ADMIN_UID));
+                const snap = await getDocs(qRef);
+                for (const d of snap.docs){ await approveShopPayment(d.id, null); }
+            }catch(e){ console.warn('Auto-approve shop payments error', e); }
+            finally{ __autoApprovingShop = false; }
+        }
+
+        async function processAutoApproveAllWalletUnlocks(){
+            if (__autoApprovingWallet) return;
+            if (!currentUser || currentUser.uid !== ADMIN_UID) return;
+            __autoApprovingWallet = true;
+            try{
+                const qRef = query(collection(db, 'artifacts', appId, 'public', 'data', 'wallet_unlock_requests'), where('status','==','pending'));
+                const snap = await getDocs(qRef);
+                for (const d of snap.docs){ await approveWalletUnlock(d.id, null); }
+            }catch(e){ console.warn('Auto-approve wallet unlocks error', e); }
+            finally{ __autoApprovingWallet = false; }
+        }
+
+        async function processAutoApproveAllFeatureOrders(){
+            if (__autoApprovingOrders) return;
+            if (!currentUser || currentUser.uid !== ADMIN_UID) return;
+            __autoApprovingOrders = true;
+            try{
+                const qRef = query(collection(db, 'artifacts', appId, 'public', 'data', 'orders'), where('status','==','pending'));
+                const snap = await getDocs(qRef);
+                for (const d of snap.docs){
+                    const order = d.data();
+                    if (!order || !order.userId || !order.itemType) continue;
+                    await approveFeatureOrder(d.id, order.userId, order.itemType, order.itemId || '', null);
+                }
+            }catch(e){ console.warn('Auto-approve feature orders error', e); }
+            finally{ __autoApprovingOrders = false; }
+        }
+
+        function setAutoApproveRewardsRunning(isOn){
+            if (isOn){ if (!__autoApproveRewardsInterval){ processAutoApproveAllRewards(); __autoApproveRewardsInterval = setInterval(()=>processAutoApproveAllRewards(), 20000); } }
+            else { if (__autoApproveRewardsInterval){ clearInterval(__autoApproveRewardsInterval); __autoApproveRewardsInterval = null; } }
+        }
+        function setAutoApproveJCoinsRunning(isOn){
+            if (isOn){ if (!__autoApproveJCoinInterval){ processAutoApproveAllJCoinRequests(); __autoApproveJCoinInterval = setInterval(()=>processAutoApproveAllJCoinRequests(), 20000); } }
+            else { if (__autoApproveJCoinInterval){ clearInterval(__autoApproveJCoinInterval); __autoApproveJCoinInterval = null; } }
+        }
+        function setAutoApproveShopRunning(isOn){
+            if (isOn){ if (!__autoApproveShopInterval){ processAutoApproveAllShopPayments(); __autoApproveShopInterval = setInterval(()=>processAutoApproveAllShopPayments(), 25000); } }
+            else { if (__autoApproveShopInterval){ clearInterval(__autoApproveShopInterval); __autoApproveShopInterval = null; } }
+        }
+        function setAutoApproveWalletRunning(isOn){
+            if (isOn){ if (!__autoApproveWalletInterval){ processAutoApproveAllWalletUnlocks(); __autoApproveWalletInterval = setInterval(()=>processAutoApproveAllWalletUnlocks(), 25000); } }
+            else { if (__autoApproveWalletInterval){ clearInterval(__autoApproveWalletInterval); __autoApproveWalletInterval = null; } }
+        }
+        function setAutoApproveOrdersRunning(isOn){
+            if (isOn){ if (!__autoApproveOrdersInterval){ processAutoApproveAllFeatureOrders(); __autoApproveOrdersInterval = setInterval(()=>processAutoApproveAllFeatureOrders(), 25000); } }
+            else { if (__autoApproveOrdersInterval){ clearInterval(__autoApproveOrdersInterval); __autoApproveOrdersInterval = null; } }
+        }
+
         /**
          * Handles approving a pending activity reward.
          * Updates user profile and deletes the pending reward.
@@ -5668,6 +5828,12 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
                     });
                     unsubscribeListeners.push(unsubscribeSystemSettingsListener); // Add to global unsubscribe list
 
+                    if (autoApproveRewardsToggle?.checked) setAutoApproveRewardsRunning(true);
+                    if (autoApproveJcoinToggle?.checked) setAutoApproveJCoinsRunning(true);
+                    if (autoApproveShopPaymentsToggle?.checked) setAutoApproveShopRunning(true);
+                    if (autoApproveWalletUnlockToggle?.checked) setAutoApproveWalletRunning(true);
+                    if (autoApproveFeatureOrdersToggle?.checked) setAutoApproveOrdersRunning(true);
+
                     /* removed per admin request: welcome toast */
 
                 } else {
@@ -5758,6 +5924,20 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
             // Announcement System
             if (publishAnnouncementButton) publishAnnouncementButton.addEventListener('click', publishGlobalAnnouncement);
             if (clearAnnouncementButton) clearAnnouncementButton.addEventListener('click', clearGlobalAnnouncement);
+
+            try {
+                if (autoApproveRewardsToggle) autoApproveRewardsToggle.checked = localStorage.getItem('dev_auto_approve_rewards') === '1';
+                if (autoApproveJcoinToggle) autoApproveJcoinToggle.checked = localStorage.getItem('dev_auto_approve_jcoin') === '1';
+                if (autoApproveShopPaymentsToggle) autoApproveShopPaymentsToggle.checked = localStorage.getItem('dev_auto_approve_shop') === '1';
+                if (autoApproveWalletUnlockToggle) autoApproveWalletUnlockToggle.checked = localStorage.getItem('dev_auto_approve_wallet') === '1';
+                if (autoApproveFeatureOrdersToggle) autoApproveFeatureOrdersToggle.checked = localStorage.getItem('dev_auto_approve_orders') === '1';
+            } catch(_) {}
+
+            autoApproveRewardsToggle?.addEventListener('change', (e)=>{ localStorage.setItem('dev_auto_approve_rewards', e.target.checked ? '1':'0'); setAutoApproveRewardsRunning(e.target.checked); });
+            autoApproveJcoinToggle?.addEventListener('change', (e)=>{ localStorage.setItem('dev_auto_approve_jcoin', e.target.checked ? '1':'0'); setAutoApproveJCoinsRunning(e.target.checked); });
+            autoApproveShopPaymentsToggle?.addEventListener('change', (e)=>{ localStorage.setItem('dev_auto_approve_shop', e.target.checked ? '1':'0'); setAutoApproveShopRunning(e.target.checked); });
+            autoApproveWalletUnlockToggle?.addEventListener('change', (e)=>{ localStorage.setItem('dev_auto_approve_wallet', e.target.checked ? '1':'0'); setAutoApproveWalletRunning(e.target.checked); });
+            autoApproveFeatureOrdersToggle?.addEventListener('change', (e)=>{ localStorage.setItem('dev_auto_approve_orders', e.target.checked ? '1':'0'); setAutoApproveOrdersRunning(e.target.checked); });
             const _ga = document.getElementById('globalAnnouncementInput');
             const _gt = document.getElementById('announcementTypeSelect');
             const _gp = document.getElementById('announcementPrioritySelect');
@@ -5984,6 +6164,11 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
 
             console.log("JCHAT_DEBUG: All Firestore listeners detached on Admin page unload.");
             try { if (__autoApproveRewardsTimer) { clearInterval(__autoApproveRewardsTimer); __autoApproveRewardsTimer = null; } } catch(_) {}
+            try { if (__autoApproveRewardsInterval) { clearInterval(__autoApproveRewardsInterval); __autoApproveRewardsInterval = null; } } catch(_) {}
+            try { if (__autoApproveJCoinInterval) { clearInterval(__autoApproveJCoinInterval); __autoApproveJCoinInterval = null; } } catch(_) {}
+            try { if (__autoApproveShopInterval) { clearInterval(__autoApproveShopInterval); __autoApproveShopInterval = null; } } catch(_) {}
+            try { if (__autoApproveWalletInterval) { clearInterval(__autoApproveWalletInterval); __autoApproveWalletInterval = null; } } catch(_) {}
+            try { if (__autoApproveOrdersInterval) { clearInterval(__autoApproveOrdersInterval); __autoApproveOrdersInterval = null; } } catch(_) {}
         });
 
         // Listen for changes in local storage (e.g., theme changes from other tabs).
@@ -6132,6 +6317,12 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
                         showMessageBox("Failed to get real-time settings updates.", 'error', true);
                     });
                     unsubscribeListeners.push(unsubscribeSystemSettingsListener); // Add to global unsubscribe list
+
+                    if (autoApproveRewardsToggle?.checked) setAutoApproveRewardsRunning(true);
+                    if (autoApproveJcoinToggle?.checked) setAutoApproveJCoinsRunning(true);
+                    if (autoApproveShopPaymentsToggle?.checked) setAutoApproveShopRunning(true);
+                    if (autoApproveWalletUnlockToggle?.checked) setAutoApproveWalletRunning(true);
+                    if (autoApproveFeatureOrdersToggle?.checked) setAutoApproveOrdersRunning(true);
 
                     /* removed per admin request: welcome toast */
 
