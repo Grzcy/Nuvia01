@@ -671,26 +671,20 @@
 
         function startRingtone(){
             try{
-                stopRingtone();
-                ringtoneCtx = new (window.AudioContext || window.webkitAudioContext)();
-                ringtoneOsc = ringtoneCtx.createOscillator();
-                const gain = ringtoneCtx.createGain();
-                ringtoneOsc.type = 'sine';
-                ringtoneOsc.frequency.value = 880;
-                gain.gain.value = 0.0015; // very soft
-                ringtoneOsc.connect(gain).connect(ringtoneCtx.destination);
-                ringtoneOsc.start();
-                ringtoneTimer = setInterval(()=>{
-                    if(!ringtoneOsc) return;
-                    ringtoneOsc.frequency.setValueAtTime(880, ringtoneCtx.currentTime);
-                    ringtoneOsc.frequency.setValueAtTime(660, ringtoneCtx.currentTime + 0.25);
-                }, 800);
-            }catch(e){ /* ignore */ }
+                const el = document.getElementById('callRingtone');
+                if (!el) return;
+                el.volume = 0.8;
+                el.currentTime = 0;
+                el.play().catch(()=>{});
+            }catch(_){ }
         }
         function stopRingtone(){
-            try{ if(ringtoneTimer) { clearInterval(ringtoneTimer); ringtoneTimer = null; } }catch(_){ }
-            try{ if(ringtoneOsc){ ringtoneOsc.stop(); ringtoneOsc.disconnect(); ringtoneOsc = null; } }catch(_){ }
-            try{ if(ringtoneCtx){ ringtoneCtx.close(); ringtoneCtx = null; } }catch(_){ }
+            try{
+                const el = document.getElementById('callRingtone');
+                if (!el) return;
+                el.pause();
+                el.currentTime = 0;
+            }catch(_){ }
         }
 
         async function showIncomingPrompt(docSnap){
