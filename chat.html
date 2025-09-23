@@ -1158,6 +1158,9 @@
         }
 
         async function endCall() {
+            try{ clearTimeout(ringTimeoutId); }catch(_){ }
+            try{ clearTimeout(incomingRingTimeoutId); }catch(_){ }
+            stopRingtone();
             try { pc && pc.getSenders().forEach(s => s.track && s.track.stop()); } catch {}
             try { pc && pc.close(); } catch {}
             const endedAtMs = Date.now();
