@@ -10406,12 +10406,22 @@ async function fetchAndDisplayPosts() {
                 if (!isAuthReady) { showMessageBox("Please log in to share posts.", 'error'); return; }
                 if (!currentSystemSettings.enablePostCreation && currentUser.uid !== ADMIN_UID) { showMessageBox("Post sharing is currently disabled by administrators.", 'warning'); return; }
                 const postId = button.dataset.postId;
-                const content = button.dataset.content;
                 const dropdown = document.getElementById(`dropdown-${postId}`);
                 if (dropdown) dropdown.classList.remove('active'); // Close dropdown after selecting share.
-                // Open per-post share popover to share the actual post content/media instead of just the link
+                // Gather exactly what appears on the post (visible content and media) from the DOM
+                let content = '';
+                let mediaUrl = '';
                 try {
-                    openSharePostModal(button, postId || '', button.dataset.content || '', button.dataset.mediaUrl || '');
+                    const card = button.closest('.post-card') || (postId ? document.querySelector(`.post-card[data-post-id="${postId}"]`) : null);
+                    if (card) {
+                        const txtEl = card.querySelector('.post-content p, .post-content-text p, .post-text');
+                        if (txtEl) content = txtEl.textContent || '';
+                        const img = card.querySelector('.post-media img');
+                        const vid = card.querySelector('.post-media video');
+                        if (img && img.src) mediaUrl = img.src;
+                        else if (vid && vid.src) mediaUrl = vid.src;
+                    }
+                    openSharePostModal(button, postId || '', content, mediaUrl);
                 } catch (e) { console.error('Failed to open share popover', e); }
             }
             // Handle Delete Comment Button
