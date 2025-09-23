@@ -9518,7 +9518,9 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
 
 
 
-                    showEnhancedSmartSuccess("Profile loaded!", 'update');
+                    if (typeof window !== 'undefined' && window.location && window.location.pathname && window.location.pathname.toLowerCase().includes('profile.html')) {
+                        showEnhancedSmartSuccess("Profile loaded!", 'update');
+                    }
                     
 
 
