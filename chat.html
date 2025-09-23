@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>JCHAT - Messages</title>
+    <title>Nuvia - Messages</title>
     <link rel="canonical" href="https://nuvia.app/chat.html">
     <meta property="og:title" content="Nuvia - Chat">
     <meta property="og:description" content="Private and group chats. Share videos, photos, and calls on Nuvia.">
@@ -21,7 +21,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://placehold.co/192x192/1a1a2e/ffffff?text=J">
-    <meta name="apple-mobile-web-app-title" content="JCHAT">
+    <meta name="apple-mobile-web-app-title" content="Nuvia">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -206,16 +206,16 @@
         .status-away { background: #FFC107; box-shadow: 0 0 6px rgba(255,193,7,.8); animation: onlinePulse 2s ease-in-out infinite; }
         .status-offline { background: #6c757d; }
         @keyframes onlinePulse { 0%,100%{ transform: scale(1)} 50%{ transform: scale(1.2)} }
-        .gradient-title { 
-            font-family: 'Poppins', sans-serif; 
-            font-weight: 900; 
-            background-image: linear-gradient(90deg, var(--blue), var(--pink)); 
-            -webkit-background-clip: text; 
-            background-clip: text; 
-            color: transparent; 
+        .gradient-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 900;
+            background-image: linear-gradient(90deg, var(--pink), #ff874d, var(--yellow));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
             letter-spacing: -0.02em;
             font-size: 1.25rem;
-            text-shadow: 0 2px 0 rgba(0,0,0,0.25), 0 6px 12px rgba(0, 213, 255, 0.25), 0 6px 12px rgba(255, 46, 146, 0.25);
+            text-shadow: 0 2px 0 rgba(0,0,0,0.25), 0 6px 12px rgba(255, 135, 77, 0.25), 0 6px 12px rgba(255, 212, 0, 0.25);
         }
 
         .input-bar { display: flex; align-items: flex-end; gap: 10px; padding: 12px 16px; background: var(--header-background); border-top: 1px solid var(--border-light); }
@@ -309,7 +309,7 @@
                 <button class="back-btn" id="backBtn" title="Back"><i class="fas fa-arrow-left"></i></button>
                 <div class="partner">
                     <div>
-                        <div class="name gradient-title" id="partnerName">JCHAT</div>
+                        <div class="name gradient-title" id="partnerName">Nuvia</div>
                         <div class="status status-pill" id="partnerStatus" style="display:none"><span id="statusDot" class="status-dot status-offline"></span><span id="statusText">Offline</span></div>
                     </div>
                 </div>
@@ -478,7 +478,7 @@
             const d = snap.data();
             return {
                 id: friendId,
-                displayName: d.displayName || d.username || 'JCHAT User',
+                displayName: d.displayName || d.username || 'Nuvia User',
                 profilePicId: d.profilePicId || null,
                 lastSeen: d.lastSeen || Date.now()
             };
@@ -554,7 +554,7 @@
         async function setupHeader(user) {
             const userProfileRef = doc(db, "artifacts", appId, "users", user.uid, "profiles", "user_profile");
             const snap = await getDoc(userProfileRef);
-            const displayName = snap.exists() ? (snap.data().displayName || snap.data().username || user.email || 'JCHAT User') : (user.displayName || user.email || 'JCHAT User');
+            const displayName = snap.exists() ? (snap.data().displayName || snap.data().username || user.email || 'Nuvia User') : (user.displayName || user.email || 'Nuvia User');
             const profilePicId = snap.exists() ? (snap.data().profilePicId || user.photoURL || null) : (user.photoURL || null);
             const initial = displayName.charAt(0).toUpperCase();
             displayProfilePicture(document.getElementById('headerProfilePic'), document.getElementById('headerProfileIcon'), profilePicId, initial, "w_36,h_36,c_fill,g_face,r_max");
@@ -572,7 +572,7 @@
 
             // 1) Set title area (left) to friend's name (hide JCHAT)
             if (nameEl) {
-                nameEl.textContent = partner.displayName || 'JCHAT User';
+                nameEl.textContent = partner.displayName || 'Nuvia User';
                 nameEl.classList.add('gradient-title');
             }
             // Live presence subscription
