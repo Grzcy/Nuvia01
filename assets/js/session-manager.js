@@ -44,10 +44,13 @@ export async function registerSession(auth, db, appId){
       lastSeen: serverTimestamp()
     }, { merge: true });
   }catch(e){
-    console.error('registerSession: initial write failed', e);
     // If permission denied, bail out silently to avoid noisy errors and fallback to local-only session
-    if(e && (e.code === 'permission-denied' || (e.message && e.message.toLowerCase().includes('permission')))) return null;
-    // For other errors, attempt a transaction as a fallback
+    if(e && (e.code === 'permission-denied' || (e.message && e.message.toLowerCase().includes('permission')))) {
+      console.warn('registerSession: initial write permission denied, skipping session registration');
+      return null;
+    }
+    // Log other unexpected errors and attempt a transaction as a fallback
+    console.error('registerSession: initial write failed', e);
     try{
       await runTransaction(db, async (tx)=>{
         tx.set(sessionDocRef, {
