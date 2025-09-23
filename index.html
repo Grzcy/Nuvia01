@@ -1073,7 +1073,7 @@
             100% { transform: scale(1) rotate(0deg); }
         }
 
-        /* 5. ���������� Temporal Paradox - Premium Time Manipulation Interface */
+        /* 5. ����������� Temporal Paradox - Premium Time Manipulation Interface */
         body.theme-temporal-paradox {
             background: 
                 conic-gradient(from 0deg at 50% 50%, 
@@ -6320,7 +6320,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 'maintenance': '🔧 Maintenance',
                 'update': '🆕 Update'
             };
-            return typeLabels[type] || 'ℹ��� Information';
+            return typeLabels[type] || 'ℹ����� Information';
         }
 
         /**
@@ -12631,7 +12631,7 @@ async function fetchAndDisplayPosts() {
                         const m = onclickStr.match(/sharePost\(['"]([^'"]+)['"]\)/);
                         if (m) postId = m[1];
                     }
-                    openSharePostModal(postId || '', content || '', mediaUrl || '');
+                    openSharePostModal(postShareBtn, postId || '', content || '', mediaUrl || '');
                 }catch(e){ console.error('postShareBtn handler error', e); }
                 return;
             }
