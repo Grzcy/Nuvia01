@@ -4427,6 +4427,12 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                         </div>
                     </div>
                 </div>
+                <!-- Chat Icon in Header -->
+                <div class="notification-icon-wrapper">
+                    <a href="/chat.html" id="headerChatLink" aria-label="Chat">
+                        <i class="fas fa-comment-dots"></i>
+                    </a>
+                </div>
                 <!-- Premium Request Button -->
                 <button id="premiumRequestBtn" class="premium-request-btn" aria-label="Request Premium Access" style="display:none;">
                     <i class="fas fa-crown"></i>
@@ -4977,10 +4983,6 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             <a href="/profile.html" class="sidebar-nav-item">
                 <i class="fas fa-user"></i>
                 <span>Profile</span>
-            </a>
-            <a href="/chat.html" class="sidebar-nav-item" id="chatLink">
-                <i class="fas fa-comment-dots"></i>
-                <span>Chat</span>
             </a>
             <a href="/find_friends.html" class="sidebar-nav-item" id="findFriendsLink">
                 <i class="fas fa-users"></i>
@@ -7928,7 +7930,7 @@ async function checkAndStartDailyBonusTimer() {
         function showEnhancedSmartSuccess(message, style = 'default', duration = 4000) {
             let title = 'Success!';
             switch (style) {
-                case 'achievement': title = '🎉 Achievement Unlocked!'; break;
+                case 'achievement': title = '�� Achievement Unlocked!'; break;
                 case 'update': title = '✅ Update Complete!'; break;
                 case 'celebration': title = '🎊 Celebration!'; break;
                 default: title = 'Success!';
