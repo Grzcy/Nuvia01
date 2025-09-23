@@ -6295,6 +6295,9 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
 
             // attach data-id for tracking
             announcementsSection.setAttribute('data-ann-id', annId);
+            // Set announcement source to Nuvia (override admin label)
+            const announcementSourceEl = document.getElementById('announcementSource');
+            if (announcementSourceEl) announcementSourceEl.textContent = 'From: Nuvia';
             announcementsSection.style.display = 'block';
 
             // clicking banner opens modal with full details
