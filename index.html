@@ -10409,7 +10409,10 @@ async function fetchAndDisplayPosts() {
                 const content = button.dataset.content;
                 const dropdown = document.getElementById(`dropdown-${postId}`);
                 if (dropdown) dropdown.classList.remove('active'); // Close dropdown after selecting share.
-                sharePost(postId);
+                // Open per-post share popover to share the actual post content/media instead of just the link
+                try {
+                    openSharePostModal(button, postId || '', button.dataset.content || '', button.dataset.mediaUrl || '');
+                } catch (e) { console.error('Failed to open share popover', e); }
             }
             // Handle Delete Comment Button
             else if (event.target.closest('.delete-comment-button')) {
