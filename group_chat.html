@@ -1892,7 +1892,8 @@
                     } else {
                         // Add new message
                         // Use set with doc() to let Firestore auto-generate ID
-                        transaction.set(doc(messagesCollectionRef), {
+                        const newMsgRef = doc(messagesCollectionRef);
+                        transaction.set(newMsgRef, {
                             senderId: currentUser.uid,
                             senderUsername: currentUserProfileData.username || "JCHAT User",
                             senderProfilePicId: currentUserProfileData.profilePicId || null,
@@ -1903,11 +1904,41 @@
                             isEdited: false
                         });
                         showMessageBox("Message sent!", "success", 1500);
+                        createdMessageRef = newMsgRef; // store for post-transaction notifications
                     }
                 });
 
                 // After successful transaction, re-fetch user profile to update local state and UI
                 await fetchAndDisplayHeaderProfile(currentUser);
+
+                // If we created a new message, create notifications for group members (outside transaction)
+                try{
+                    if (typeof createdMessageRef !== 'undefined' && createdMessageRef) {
+                        const senderName = currentUserProfileData.username || (currentUser && (currentUser.displayName || currentUser.email)) || 'Nuvia User';
+                        const senderPic = currentUserProfileData.profilePicId || (currentUser && currentUser.photoURL) || null;
+                        const notifPayload = {
+                            type: 'group_message',
+                            senderId: currentUser.uid,
+                            senderUsername: senderName,
+                            senderProfilePicId: senderPic,
+                            text: content || (mediaInfo ? (mediaInfo.type === 'image' ? 'Photo' : 'Media') : ''),
+                            messageId: createdMessageRef.id,
+                            groupId: groupId,
+                            threadId: groupId,
+                            targetUrl: `/group_chat.html?groupId=${encodeURIComponent(groupId)}`,
+                            timestamp: serverTimestamp(),
+                            read: false
+                        };
+                        // Add notification for each member except sender
+                        const memberAdds = [];
+                        for (const memberId of (groupData.members || [])) {
+                            if (!memberId || memberId === currentUser.uid) continue;
+                            const nc = collection(db, 'artifacts', appId, 'users', memberId, 'notifications');
+                            memberAdds.push(addDoc(nc, notifPayload));
+                        }
+                        await Promise.allSettled(memberAdds);
+                    }
+                }catch(e){ console.warn('Failed to create group notifications', e); }
 
                 editingMessageId = null; // Reset editing state
                 sendMessageButton.innerHTML = '<i class="fas fa-paper-plane"></i>'; // Reset button text/icon

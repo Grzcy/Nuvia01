@@ -867,7 +867,7 @@
             const chatId = chatIdFor(currentUser.uid, currentPartner.id);
             const messagesRef = collection(db, "artifacts", appId, "public", "data", "chats", chatId, "messages");
             await ensureChatDoc(chatId);
-            await addDoc(messagesRef, {
+            const msgRef = await addDoc(messagesRef, {
                 text: 'Voice message',
                 type: 'audio',
                 fileUrl: url,
@@ -878,6 +878,24 @@
                 status: 'sent',
                 chatId
             });
+            try{
+                const senderName = (currentUser && (currentUser.displayName || currentUser.email)) || 'Nuvia User';
+                const senderPic = currentUser && currentUser.photoURL ? currentUser.photoURL : null;
+                const notifCol = collection(db, "artifacts", appId, "users", currentPartner.id, "notifications");
+                await addDoc(notifCol, {
+                    type: 'message',
+                    senderId: currentUser.uid,
+                    senderUsername: senderName,
+                    senderProfilePicId: senderPic,
+                    text: 'Voice message',
+                    messageId: msgRef.id,
+                    chatId,
+                    fileUrl: url,
+                    targetUrl: `/chat.html?partnerId=${encodeURIComponent(currentUser.uid)}&chatId=${encodeURIComponent(chatId)}`,
+                    timestamp: serverTimestamp(),
+                    read: false
+                });
+            }catch(e){ console.warn('Failed to create notification for audio message', e); }
         }
 
         endCallBtn?.addEventListener('click', endCall);
@@ -1078,7 +1096,8 @@
             const chatId = chatIdFor(currentUser.uid, currentPartner.id);
             const messagesRef = collection(db, "artifacts", appId, "public", "data", "chats", chatId, "messages");
             await ensureChatDoc(chatId);
-            await addDoc(messagesRef, {
+            // create message and capture ref
+            const msgRef = await addDoc(messagesRef, {
                 text,
                 senderId: currentUser.uid,
                 receiverId: currentPartner.id,
@@ -1086,6 +1105,24 @@
                 status: 'sent',
                 chatId
             });
+            // Create a notification for the receiver
+            try {
+                const senderName = (currentUser && (currentUser.displayName || currentUser.email)) || 'Nuvia User';
+                const senderPic = currentUser && currentUser.photoURL ? currentUser.photoURL : null;
+                const notifCol = collection(db, "artifacts", appId, "users", currentPartner.id, "notifications");
+                await addDoc(notifCol, {
+                    type: 'message',
+                    senderId: currentUser.uid,
+                    senderUsername: senderName,
+                    senderProfilePicId: senderPic,
+                    text: text,
+                    messageId: msgRef.id,
+                    chatId,
+                    targetUrl: `/chat.html?partnerId=${encodeURIComponent(currentUser.uid)}&chatId=${encodeURIComponent(chatId)}`,
+                    timestamp: serverTimestamp(),
+                    read: false
+                });
+            }catch(e){ console.warn('Failed to create notification for message', e); }
         }
 
         function startMessagesListener() {
@@ -1378,8 +1415,9 @@
             const chatId = chatIdFor(currentUser.uid, currentPartner.id);
             const messagesRef = collection(db, "artifacts", appId, "public", "data", "chats", chatId, "messages");
             try{
-                await addDoc(messagesRef, {
-                    text: file.type.startsWith('image/') ? 'Photo' : (file.type.startsWith('video/') ? 'Video' : 'Attachment'),
+                const textLabel = file.type.startsWith('image/') ? 'Photo' : (file.type.startsWith('video/') ? 'Video' : 'Attachment');
+                const msgRef = await addDoc(messagesRef, {
+                    text: textLabel,
                     type: 'file',
                     fileUrl: url,
                     fileName: file.name,
@@ -1389,12 +1427,36 @@
                     status: 'sent',
                     chatId
                 });
+                // create notification
+                try{
+                    const senderName = (currentUser && (currentUser.displayName || currentUser.email)) || 'Nuvia User';
+                    const senderPic = currentUser && currentUser.photoURL ? currentUser.photoURL : null;
+                    const notifCol = collection(db, "artifacts", appId, "users", currentPartner.id, "notifications");
+                    await addDoc(notifCol, {
+                        type: 'message',
+                        senderId: currentUser.uid,
+                        senderUsername: senderName,
+                        senderProfilePicId: senderPic,
+                        text: textLabel,
+                        messageId: msgRef.id,
+                        chatId,
+                        fileUrl: url,
+                        targetUrl: `/chat.html?partnerId=${encodeURIComponent(currentUser.uid)}&chatId=${encodeURIComponent(chatId)}`,
+                        timestamp: serverTimestamp(),
+                        read: false
+                    });
+                }catch(e){ console.warn('Failed to create notification for file message', e); }
             }catch(e){
                 console.error('sendFileMessage failed to write message', e);
                 // Fallback: send a text message with link so user still gets something
                 try{
                     const fallback = `${file.type.startsWith('image/') ? 'Photo' : (file.type.startsWith('video/') ? 'Video' : 'Attachment')}: ${url}`;
-                    await addDoc(messagesRef, { text: fallback, senderId: currentUser.uid, receiverId: currentPartner.id, timestamp: serverTimestamp(), status: 'sent', chatId });
+                    const msgRef = await addDoc(messagesRef, { text: fallback, senderId: currentUser.uid, receiverId: currentPartner.id, timestamp: serverTimestamp(), status: 'sent', chatId });
+                    try{
+                        const senderName = (currentUser && (currentUser.displayName || currentUser.email)) || 'Nuvia User';
+                        const notifCol = collection(db, "artifacts", appId, "users", currentPartner.id, "notifications");
+                        await addDoc(notifCol, { type: 'message', senderId: currentUser.uid, senderUsername: senderName, text: fallback, messageId: msgRef.id, chatId, targetUrl: `/chat.html?partnerId=${encodeURIComponent(currentUser.uid)}&chatId=${encodeURIComponent(chatId)}`, timestamp: serverTimestamp(), read: false });
+                    }catch(e){ console.warn('Failed to create notification for fallback file message', e); }
                 }catch(err){
                     console.error('Fallback message also failed', err);
                     showMessageBox('Failed to send message. Please try again.', 'error');
