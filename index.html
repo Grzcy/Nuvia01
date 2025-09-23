@@ -4601,15 +4601,34 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             <!-- Unread Chat Banner (below People You May Know) -->
             <style>
                 .unread-chat-banner { display:none; margin: 16px auto; max-width: 900px; }
-                .unread-chat-banner .banner-card { display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--border-light); background: var(--card-background); color: var(--white); border-radius:12px; cursor:pointer; }
+                /* Banner card layout remains compatible with existing JS that selects .banner-card */
+                .unread-chat-banner .banner-card { display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--border-light); background: var(--card-background); color: var(--white); border-radius:12px; cursor:pointer; overflow:hidden; }
                 .unread-chat-banner .badge-dot { width:10px; height:10px; border-radius:50%; background: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); flex: 0 0 auto; }
-                .unread-chat-banner .banner-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-                @media (max-width:520px){ .unread-chat-banner .banner-card { padding:8px 10px; } }
+
+                /* Marquee wrapper holds the visible area; marquee-content is translated to create scroll */
+                .unread-chat-banner .marquee-wrapper { flex:1 1 auto; min-width:0; overflow:hidden; position:relative; }
+                .unread-chat-banner .banner-text { display:inline-block; white-space:nowrap; padding-left:8px; }
+                .unread-chat-banner .marquee-content { display:inline-block; will-change: transform; }
+
+                /* Keyframes use CSS variables so JS can compute pixel-perfect start/end positions */
+                @keyframes unreadMarquee { from { transform: translateX(var(--marquee-start, 100%)); } to { transform: translateX(var(--marquee-end, -100%)); } }
+
+                /* Pause on hover for easy reading */
+                .unread-chat-banner .banner-card:hover .marquee-content { animation-play-state: paused; }
+
+                /* Respect reduced motion preference */
+                @media (prefers-reduced-motion: reduce) {
+                    .unread-chat-banner .marquee-content { animation: none !important; }
+                }
+
+                @media (max-width:520px){ .unread-chat-banner .banner-card { padding:8px 10px; } .unread-chat-banner .badge-dot{ width:8px;height:8px; } }
             </style>
             <div id="unreadChatBanner" class="unread-chat-banner" role="region" aria-live="polite">
                 <div class="banner-card" tabindex="0" aria-label="New message" title="Open message">
                     <span class="badge-dot" aria-hidden="true"></span>
-                    <span id="unreadBannerText" class="banner-text"></span>
+                    <div class="marquee-wrapper" aria-hidden="false">
+                        <span id="unreadBannerText" class="banner-text marquee-content"></span>
+                    </div>
                 </div>
             </div>
 
@@ -11942,8 +11961,28 @@ async function fetchAndDisplayPosts() {
             if (!wrap) return;
             const textEl = document.getElementById('unreadBannerText');
             const name = senderName || 'Friend';
-            const preview = (text||'').replace(/\s+/g,' ').slice(0, 120);
-            if (textEl) textEl.textContent = `New message from ${name}: ${preview}`;
+            const preview = (text||'').replace(/\s+/g,' ').slice(0, 300);
+            if (textEl) {
+                textEl.textContent = `New message from ${name}: ${preview}`;
+                // Reset any previous animation
+                try{ textEl.style.animation = 'none'; }catch(_){ }
+                // Setup marquee animation after DOM paints so measurements are accurate
+                requestAnimationFrame(()=>{
+                    try{
+                        const marqueeWrapper = textEl.closest('.marquee-wrapper') || textEl.parentElement;
+                        const wrapperWidth = marqueeWrapper ? marqueeWrapper.clientWidth : (wrap.clientWidth - 40);
+                        const textWidth = textEl.scrollWidth || (String(textEl.textContent||'').length * 8);
+                        // Compute distance to travel (start just outside right edge to fully leave left edge)
+                        const distance = Math.max(20, wrapperWidth + textWidth);
+                        const pxPerSec = 80; // speed: pixels per second
+                        const duration = Math.max(4, Math.ceil(distance / pxPerSec));
+                        textEl.style.setProperty('--marquee-start', `${wrapperWidth}px`);
+                        textEl.style.setProperty('--marquee-end', `${-textWidth}px`);
+                        // Apply animation using the keyframes defined in CSS; duration set dynamically
+                        textEl.style.animation = `unreadMarquee ${duration}s linear infinite`;
+                    }catch(_){ /* ignore measurement errors */ }
+                });
+            }
             const card = wrap.querySelector('.banner-card');
             const open = ()=>{ window.location.href = `/chat.html?partnerId=${encodeURIComponent(senderId)}#msg-${encodeURIComponent(messageId)}`; hide(); };
             if (card) {
@@ -11952,7 +11991,10 @@ async function fetchAndDisplayPosts() {
             }
             wrap.style.display = 'block';
             clearTimeout(wrap.__hideTimer); wrap.__hideTimer = setTimeout(hide, 60000);
-            function hide(){ wrap.style.display = 'none'; }
+            function hide(){
+                try{ const textEl = document.getElementById('unreadBannerText'); if(textEl) textEl.style.animation = 'none'; }catch(_){ }
+                wrap.style.display = 'none';
+            }
         }
         function startUnreadChatBanner(){
             try{
