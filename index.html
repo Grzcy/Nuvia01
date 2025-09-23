@@ -5279,6 +5279,26 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             });
         }
 
+        // Lightweight fetch retry wrapper used by the page and by SDKs (reduces transient network errors)
+        (function(){
+            try{
+                const _origFetch = window.fetch.bind(window);
+                window.fetch = async function(input, init){
+                    const maxRetries = 2; let attempt = 0;
+                    while(true){
+                        try{ return await _origFetch(input, init); }
+                        catch(err){
+                            attempt++;
+                            if (attempt > maxRetries) throw err;
+                            await new Promise(r => setTimeout(r, 350 * attempt));
+                        }
+                    }
+                };
+            }catch(e){ console.warn('fetch-retry-wrap failed', e); }
+        })();
+        window.addEventListener('error', (ev)=>{ console.error('Global error caught:', ev.error || ev.message, ev); });
+        window.addEventListener('unhandledrejection', (ev)=>{ console.error('Unhandled rejection:', ev.reason); });
+
         // Import Firebase modules (Updated to v11.8.0 - Latest Stable)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
