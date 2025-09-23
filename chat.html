@@ -1088,6 +1088,7 @@
                                     stopRingtone();
                                     try{ clearTimeout(incomingRingTimeoutId); }catch(_){ }
                                     if (incomingActions) incomingActions.style.display = 'none';
+                                    if (endCallBtn) endCallBtn.style.display = 'inline-flex';
                                     callModal.style.display = 'none';
                                     isIncoming = false; currentIncomingDoc = null;
                                 }
