@@ -1055,33 +1055,55 @@
         
         async function acceptIncomingCall(docSnap) {
             try {
+                isCaller = false;
+                callKind = (docSnap.data()?.video ? 'video' : 'voice');
+                callStartMs = null;
                 callDocRef = docSnap.ref;
-                const data = docSnap.data();
-                const isVideo = !!data.video;
-                openCallUI(isVideo);
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
-                if (isVideo) localVideo.srcObject = stream;
+                const desiredVideo = !!(docSnap.data()?.video);
+                openCallUI(desiredVideo);
+                if (incomingActions) incomingActions.style.display = 'none';
+                stopRingtone();
+                const csEl = document.getElementById('callStatus');
+                if (csEl) csEl.textContent = 'Connecting…';
+
+                let latest = await getDoc(callDocRef);
+                let data = latest.data() || {};
+                if (!data.offer) {
+                    await new Promise((resolve, reject) => {
+                        const timeout = setTimeout(()=>{ try{unsub && unsub();}catch(_){} reject(new Error('Offer timeout')); }, 12000);
+                        const unsub = onSnapshot(callDocRef, (snap)=>{
+                            const d = snap.data() || {};
+                            if (d.offer) { clearTimeout(timeout); try{unsub();}catch(_){} data = d; resolve(); }
+                        }, (err)=>{ clearTimeout(timeout); reject(err); });
+                    });
+                }
+
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: desiredVideo });
+                if (desiredVideo) localVideo.srcObject = stream;
                 pc = new RTCPeerConnection(rtcConfig);
                 stream.getTracks().forEach(t => pc.addTrack(t, stream));
                 pc.ontrack = (e) => {
-                const stream = e.streams[0];
-                if (isVideo) {
-                    remoteVideo.srcObject = stream;
-                } else if (remoteAudio) {
-                    remoteAudio.srcObject = stream;
-                    remoteAudio.style.display = 'block';
-                    try { remoteAudio.play().catch(() => {}); } catch {}
-                }
-            };
+                    const rstream = e.streams[0];
+                    if (!callStartMs) {
+                        callStartMs = Date.now();
+                        const cs = document.getElementById('callStatus');
+                        if (cs) cs.textContent = 'Connected';
+                    }
+                    if (desiredVideo) {
+                        remoteVideo.srcObject = rstream;
+                    } else if (remoteAudio) {
+                        remoteAudio.srcObject = rstream;
+                        remoteAudio.style.display = 'block';
+                        try { remoteAudio.play().catch(() => {}); } catch {}
+                    }
+                };
                 const calleeCandCol = collection(callDocRef, 'calleeCandidates');
                 pc.onicecandidate = (e) => { if (e.candidate) addDoc(calleeCandCol, e.candidate.toJSON()); };
-                // Set remote offer
                 const offerDesc = new RTCSessionDescription(data.offer);
                 await pc.setRemoteDescription(offerDesc);
                 const answer = await pc.createAnswer();
                 await pc.setLocalDescription(answer);
-                await updateDoc(callDocRef, { answer: { sdp: answer.sdp, type: answer.type } });
-                // Listen caller ICE
+                await updateDoc(callDocRef, { answer: { sdp: answer.sdp, type: answer.type }, status: 'accepted' });
                 const callerCandCol = collection(callDocRef, 'callerCandidates');
                 unsubCallerCand = onSnapshot(callerCandCol, (snap) => {
                     snap.docChanges().forEach(change => {
