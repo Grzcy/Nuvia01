@@ -1510,7 +1510,6 @@
                 await addDoc(messagesRef, {
                     type: 'call',
                     callKind: kind,
-                    durationMs: 0,
                     text,
                     missed: true,
                     senderId: currentUser.uid,
