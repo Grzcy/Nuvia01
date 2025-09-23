@@ -5260,7 +5260,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         // Import Firebase modules (Updated to v11.8.0 - Latest Stable)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
-        import { initializeFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, orderBy, where, getDocs, addDoc, runTransaction, writeBatch, serverTimestamp, arrayUnion, arrayRemove, onSnapshot, documentId, limit } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+        import { initializeFirestore, enableNetwork, disableNetwork, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, query, orderBy, where, getDocs, addDoc, runTransaction, writeBatch, serverTimestamp, arrayUnion, arrayRemove, onSnapshot, documentId, limit } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
     import { registerSession, unregisterSession } from './assets/js/session-manager.js';
 
         // --- Firebase & Canvas Environment Configuration ---
@@ -5311,8 +5311,8 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         function showOfflineBanner() { const el = ensureOfflineBanner(); el.style.display = 'block'; }
         function hideOfflineBanner() { const el = document.getElementById('offlineStatusBanner'); if (el) el.style.display = 'none'; }
         if (!isOnline) { showOfflineBanner(); }
-        window.addEventListener('online', () => { isOnline = true; hideOfflineBanner(); console.log('Nuvia_DEBUG: Back online'); });
-        window.addEventListener('offline', () => { isOnline = false; showOfflineBanner(); console.log('Nuvia_DEBUG: Gone offline'); });
+        window.addEventListener('online', () => { isOnline = true; hideOfflineBanner(); console.log('Nuvia_DEBUG: Back online'); try { enableNetwork(db).catch(()=>{}); } catch(_) {} });
+        window.addEventListener('offline', () => { isOnline = false; showOfflineBanner(); console.log('Nuvia_DEBUG: Gone offline'); try { disableNetwork(db).catch(()=>{}); } catch(_) {} });
 
         // Global Error Handling - Temporarily disabled for debugging
         window.addEventListener('error', (event) => {
@@ -5330,6 +5330,17 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             // if (typeof showMessageBox === 'function' && messageBox && event.error) {
             //     showMessageBox('An unexpected error occurred. Please refresh if issues persist.', 'error');
             // }
+        });
+
+        // Suppress unhandled fetch rejections (e.g., network/CORS) to avoid noisy global errors
+        window.addEventListener('unhandledrejection', (event) => {
+            try {
+                const msg = String(event.reason && (event.reason.message || event.reason)).toLowerCase();
+                if (msg.includes('failed to fetch') || msg.includes('networkerror') || msg.includes('load failed')) {
+                    event.preventDefault();
+                    console.warn('Nuvia_WARN: Suppressed network fetch rejection:', event.reason);
+                }
+            } catch (_) {}
         });
 
         // Performance Monitoring
@@ -5351,6 +5362,8 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         // Ensure auth sessions persist across reloads by default
         try { setPersistence(auth, browserLocalPersistence).catch(()=>{}); } catch(_) {}
         const db = initializeFirestore(app, { experimentalForceLongPolling: true, useFetchStreams: false });
+        // Respect offline status to avoid fetch errors in instrumented environments
+        try { if (!navigator.onLine) { disableNetwork(db).catch(()=>{}); } } catch(_) {}
         // If a user is already signed in (session persisted), mark as authenticated early to prevent guest UI flashes.
         try {
             if (auth && auth.currentUser) {
