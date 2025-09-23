@@ -11968,8 +11968,32 @@ async function fetchAndDisplayPosts() {
                 friendPicker.innerHTML = '';
                 const search = document.createElement('input'); search.type='text'; search.placeholder='Search friends'; search.style.cssText='width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border-light);margin-bottom:6px;background:var(--input-background);color:var(--white)'; friendPicker.appendChild(search);
                 const listWrap = document.createElement('div'); friendPicker.appendChild(listWrap);
-                function renderList(filter=''){ listWrap.innerHTML=''; profiles.filter(f => (f.displayName||'').toLowerCase().includes(filter.toLowerCase()) || (f.username||'').toLowerCase().includes(filter.toLowerCase())).forEach(f => { const initial = (f.displayName||'U').charAt(0).toUpperCase(); const imgUrl = f.profilePicId ? getCloudinaryImageUrl(f.profilePicId, 'w_60,h_60,c_fill,g_face,r_max') : `https://placehold.co/40x40/ff2e92/ffffff?text=${initial}`; const row = document.createElement('div'); row.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.05);margin-bottom:6px;gap:10px;'; row.innerHTML = `<div style="display:flex;align-items:center;gap:10px;"><img src="${imgUrl}" alt="${f.displayName}" loading="lazy" decoding="async" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid var(--border-light);"><span>${f.displayName}</span></div><button class="btn" data-fid="${f.id}">Send</button>`; row.querySelector('button').addEventListener('click', async (e)=>{ const btn=e.currentTarget; btn.disabled=true; try{ await sendPostToFriend(f.id, postId, content, mediaUrl); btn.textContent='Sent'; } catch(err){ btn.disabled=false; showMessageBox('Failed to send.', 'error'); } }); listWrap.appendChild(row); }); }
-                renderList(''); search.addEventListener('input', ()=> renderList(search.value));
+                function renderList(filter=''){
+                    listWrap.innerHTML = '';
+                    profiles.filter(f => (f.displayName||'').toLowerCase().includes(filter.toLowerCase()) || (f.username||'').toLowerCase().includes(filter.toLowerCase())).forEach(f => {
+                        const initial = (f.displayName||'U').charAt(0).toUpperCase();
+                        const imgUrl = f.profilePicId ? getCloudinaryImageUrl(f.profilePicId, 'w_60,h_60,c_fill,g_face,r_max') : `https://placehold.co/40x40/ff2e92/ffffff?text=${initial}`;
+                        const row = document.createElement('div');
+                        row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.05);margin-bottom:6px;gap:10px;';
+                        row.innerHTML = `<div style="display:flex;align-items:center;gap:10px;"><img src="${imgUrl}" alt="${f.displayName}" loading="lazy" decoding="async" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid var(--border-light);"><span>${f.displayName}</span></div><button class="btn" data-fid="${f.id}">Send</button>`;
+                        const btn = row.querySelector('button');
+                        btn.addEventListener('click', async (e) => {
+                            btn.disabled = true;
+                            try{
+                                const ok = await sendPostToFriend(f.id, postId, content, mediaUrl);
+                                if (ok) btn.textContent = 'Sent';
+                                else btn.disabled = false;
+                            }catch(err){
+                                console.error('sendPostToFriend handler error', err);
+                                btn.disabled = false;
+                                showMessageBox('Failed to send.', 'error');
+                            }
+                        });
+                        listWrap.appendChild(row);
+                    });
+                }
+                renderList('');
+                search.addEventListener('input', ()=> renderList(search.value));
             }catch(e){ friendPicker.innerHTML = '<div style="color:salmon;">Failed to load friends.</div>'; console.error('Friend picker load failed', e); }
         }
         async function sendQuoteToFriend(friendId) {
