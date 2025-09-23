@@ -1117,6 +1117,8 @@
                 const answer = await pc.createAnswer();
                 await pc.setLocalDescription(answer);
                 await updateDoc(callDocRef, { answer: { sdp: answer.sdp, type: answer.type }, status: 'accepted' });
+                stopRingtone();
+                try{ clearTimeout(incomingRingTimeoutId); }catch(_){ }
                 const callerCandCol = collection(callDocRef, 'callerCandidates');
                 unsubCallerCand = onSnapshot(callerCandCol, (snap) => {
                     snap.docChanges().forEach(change => {
