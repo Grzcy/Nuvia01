@@ -6144,6 +6144,9 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
         const copyReferralLinkBtn = document.getElementById('copyReferralLinkBtn');
         const shareReferralBtn = document.getElementById('shareReferralBtn');
         const jcoinUSDValue = document.getElementById('jcoinUSDValue'); // Added for USD value
+        const referralInviteSection = document.getElementById('referralInviteSection'); // Invite & Earn section wrapper
+        const gasStatItem = document.getElementById('gasStatItem'); // Gas stat item wrapper
+        const friendsStatItemEl = document.getElementById('friendsStatItem'); // Friends button/stat wrapper
 
         // XP Level Elements
         const gasValue = document.getElementById('gasValue'); // Gas (XP) value
@@ -9136,6 +9139,9 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
                         } else {
                             // Hide JCoins and exchange rate for other users
                             if (jCoinsSpan.closest('.stat-item')) jCoinsSpan.closest('.stat-item').style.display = 'none';
+                            if (referralInviteSection) referralInviteSection.style.display = 'none';
+                            if (gasStatItem) gasStatItem.style.display = 'none';
+                            if (friendsStatItemEl) { friendsStatItemEl.style.pointerEvents = 'none'; friendsStatItemEl.style.cursor = 'not-allowed'; friendsStatItemEl.setAttribute('aria-disabled', 'true'); }
                         }
                     }
                     
@@ -10041,18 +10047,19 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
             
             if (friendsStatItem && friendsButtonIcon && selectFriendModal) {
                 friendsStatItem.addEventListener('click', () => {
+                    if (!isCurrentUserProfile) return; // Disable for viewers of other users
                     // Add button press effect
                     friendsStatItem.style.transform = 'scale(0.95)';
                     setTimeout(() => {
                         friendsStatItem.style.transform = '';
                     }, 150);
-                    
+
                     // Show modal
                     selectFriendModal.classList.add('active');
-                    
+
                     // Set up online status tracking
                     setupOnlineStatusTracking();
-                    
+
                     // Fetch and display friends in modal
                     fetchAndDisplayFriendsInModal();
                 });
