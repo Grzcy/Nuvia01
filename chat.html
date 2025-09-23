@@ -378,6 +378,7 @@
                 </div>
                 <div id="videoWrap" style="display:none; position:relative; background:#000; border-radius:8px; overflow:hidden;">
                     <video id="remoteVideo" autoplay playsinline style="width:100%; height:auto;"></video>
+                    <img id="remoteAvatarPlaceholder" alt="Contact" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:120px; height:120px; border-radius:50%; border:2px solid var(--border-light); box-shadow:0 6px 16px rgba(0,0,0,.5); object-fit:cover; display:none;" />
                     <video id="localVideo" autoplay muted playsinline style="position:absolute; right:8px; bottom:8px; width:120px; border-radius:6px; box-shadow:0 6px 16px rgba(0,0,0,.5);"></video>
                 </div>
                 <div id="voiceWrap" style="display:none; text-align:center; padding:24px;">
@@ -648,6 +649,7 @@
         const videoWrap = document.getElementById('videoWrap');
         const localVideo = document.getElementById('localVideo');
         const remoteVideo = document.getElementById('remoteVideo');
+        const remoteAvatarPlaceholder = document.getElementById('remoteAvatarPlaceholder');
         const remoteAudio = document.getElementById('remoteAudio');
         const incomingActions = document.getElementById('incomingActions');
         const acceptCallBtn = document.getElementById('acceptCallBtn');
@@ -982,6 +984,7 @@
                     }
                     if (isVideo) {
                         remoteVideo.srcObject = rstream;
+                        if (remoteAvatarPlaceholder) remoteAvatarPlaceholder.style.display = 'none';
                     } else if (remoteAudio) {
                         remoteAudio.srcObject = rstream;
                         remoteAudio.style.display = 'block';
@@ -1091,6 +1094,7 @@
                     }
                     if (desiredVideo) {
                         remoteVideo.srcObject = rstream;
+                        if (remoteAvatarPlaceholder) remoteAvatarPlaceholder.style.display = 'none';
                     } else if (remoteAudio) {
                         remoteAudio.srcObject = rstream;
                         remoteAudio.style.display = 'block';
@@ -1123,6 +1127,23 @@
             callTitle.textContent = isVideo ? 'Video Call' : 'Voice Call';
             voiceWrap.style.display = isVideo ? 'none' : 'block';
             videoWrap.style.display = isVideo ? 'block' : 'none';
+            if (isVideo && remoteAvatarPlaceholder) {
+                try{
+                    let url = '';
+                    if (currentPartner) {
+                        const initial = (currentPartner.displayName || 'U').charAt(0).toUpperCase();
+                        if (currentPartner.profilePicId) {
+                            url = getCloudinaryImageUrl(currentPartner.profilePicId, 'w_240,h_240,c_fill,g_face,r_max');
+                        } else {
+                            url = `https://placehold.co/240x240/00d5ff/ffffff?text=${initial}`;
+                        }
+                        remoteAvatarPlaceholder.src = url;
+                    }
+                    remoteAvatarPlaceholder.style.display = 'block';
+                }catch(_){ }
+            } else if (remoteAvatarPlaceholder) {
+                remoteAvatarPlaceholder.style.display = 'none';
+            }
         }
 
         async function endCall() {
@@ -1145,6 +1166,7 @@
             callDocRef = null;
             stopRingtone();
             if (incomingActions) incomingActions.style.display = 'none';
+            if (remoteAvatarPlaceholder) { remoteAvatarPlaceholder.style.display = 'none'; remoteAvatarPlaceholder.src=''; }
             callModal.style.display = 'none';
         }
 
