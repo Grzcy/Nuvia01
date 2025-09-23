@@ -1177,7 +1177,9 @@
                             } else if (change.type === 'modified') {
                                 // Only treat as cancellation if status changed away from 'ringing' or signaledEnd flag set
                                 const same = currentIncomingDoc && (docSnap.id === currentIncomingDoc.id);
-                                if (same) {
+                                // If acceptance is in progress for this doc, ignore this modification (race)
+                                const acceptRace = acceptInProgressDocId && (acceptInProgressDocId === docSnap.id);
+                                if (same && !acceptRace) {
                                     if (d.signaledEnd || (d.status && d.status !== 'ringing')) {
                                         // Call cancelled/ended by remote while ringing
                                         stopRingtone();
