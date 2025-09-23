@@ -389,6 +389,27 @@
     <audio id="newMessageSound" src="/ne.mp3" preload="auto"></audio>
 
     <script type="module">
+        // Fetch retry wrapper to reduce transient "Failed to fetch" errors (used by Firestore and other libs)
+        (function(){
+            try{
+                const _origFetch = window.fetch.bind(window);
+                window.fetch = async function(input, init){
+                    const maxRetries = 2; let attempt = 0;
+                    while(true){
+                        try{ return await _origFetch(input, init); }
+                        catch(err){
+                            attempt++;
+                            if (attempt > maxRetries) throw err;
+                            await new Promise(r => setTimeout(r, 300 * attempt));
+                        }
+                    }
+                };
+            }catch(e){ console.warn('fetch-retry-wrap failed', e); }
+        })();
+        // Global error & rejection handlers for clearer debugging
+        window.addEventListener('error', (ev)=>{ console.error('Global error caught:', ev.error || ev.message, ev); });
+        window.addEventListener('unhandledrejection', (ev)=>{ console.error('Unhandled rejection:', ev.reason); });
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where, getDocs } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
