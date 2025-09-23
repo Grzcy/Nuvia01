@@ -2114,7 +2114,7 @@
         // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, runTransaction, writeBatch, serverTimestamp, onSnapshot, addDoc, deleteDoc, Timestamp, arrayUnion, arrayRemove, orderBy, enableMultiTabIndexedDbPersistence, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+        import { getFirestore, initializeFirestore, enableNetwork, disableNetwork, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, runTransaction, writeBatch, serverTimestamp, onSnapshot, addDoc, deleteDoc, Timestamp, arrayUnion, arrayRemove, orderBy, enableMultiTabIndexedDbPersistence, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
         import { getStorage, ref, getDownloadURL, deleteObject, uploadBytes } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js";
 import { renderVerifiedBadge } from './assets/js/verification-utils.js';
 
@@ -2141,12 +2141,33 @@ import { renderVerifiedBadge } from './assets/js/verification-utils.js';
         // Initialize Firebase services
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = getFirestore(app);
+        const db = initializeFirestore(app, { experimentalForceLongPolling: true, useFetchStreams: false });
         (async ()=>{
             try { await enableMultiTabIndexedDbPersistence(db); }
             catch (e) { try { await enableIndexedDbPersistence(db); } catch(_) {} }
         })();
         const storage = getStorage(app);
+
+        // Offline banner and Firestore network toggling
+        (function(){
+            let isOnline = navigator.onLine;
+            function ensureOfflineBanner(){
+                let el = document.getElementById('offlineStatusBanner');
+                if (!el){
+                    el = document.createElement('div');
+                    el.id = 'offlineStatusBanner';
+                    el.className = 'offline-status-banner';
+                    el.innerHTML = '<div class="offline-banner-inner"><span class="offline-icon"><i class="fas fa-wifi"></i></span><span class="offline-text">No internet connection. We\u2019ll reconnect when you\u2019re back online.</span></div>';
+                    document.body.appendChild(el);
+                }
+                return el;
+            }
+            function showOffline(){ const el = ensureOfflineBanner(); el.style.display='block'; try{ disableNetwork(db).catch(()=>{}); }catch(_){} }
+            function hideOffline(){ const el = document.getElementById('offlineStatusBanner'); if (el) el.style.display='none'; try{ enableNetwork(db).catch(()=>{}); }catch(_){} }
+            if (!isOnline) showOffline();
+            window.addEventListener('online', ()=>{ isOnline=true; hideOffline(); });
+            window.addEventListener('offline', ()=>{ isOnline=false; showOffline(); });
+        })();
 
         // Re-fetch on network restore
         window.addEventListener('online', async () => {
