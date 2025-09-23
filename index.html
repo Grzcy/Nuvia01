@@ -9835,8 +9835,8 @@ const lex = inspirationLexicon[type];
                     <span><span class="comments-count">${post.commentsCount || 0}</span> Comments</span>
                 </div>
                 <div class="post-actions-row">
-                    <button class="post-action-button save-post-button" data-post-id="${postId}" aria-label="Save Post">
-                        <i class="fas fa-bookmark"></i> Save
+                    <button class="post-action-button share-referral-button" data-post-id="${postId}" aria-label="Share Referral">
+                        <i class="fas fa-share"></i> Share
                     </button>
                     <button class="post-action-button react-button" data-post-id="${postId}" data-reaction-type="like" ${!isAuthReady || (!currentSystemSettings.enablePublicChat && currentUser.uid !== ADMIN_UID) ? 'disabled' : ''} aria-label="Like Post">
                         <i class="fas fa-thumbs-up"></i> Like
@@ -12304,14 +12304,31 @@ async function fetchAndDisplayPosts() {
             }
         }
 
-        // Hook into document click for save and hashtag
+        // Hook into document click for share referral and hashtag
         document.addEventListener('click', (ev) => {
-            const saveBtn = ev.target.closest('.save-post-button');
-            if (saveBtn) {
-                const pid = saveBtn.dataset.postId;
-                const saved = saveBtn.classList.toggle('saved');
-                localStorage.setItem(`saved-post-${pid}`, saved ? '1' : '0');
-                toggleSavePost(pid, saved);
+            const shareRefBtn = ev.target.closest('.share-referral-button');
+            if (shareRefBtn) {
+                (async ()=>{
+                    try {
+                        if(!isAuthReady || !currentUser){ showMessageBox('Please log in.', 'warning'); return; }
+                        const privRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profiles', 'user_profile');
+                        let privSnap = await getDoc(privRef);
+                        if (!privSnap.exists()) { await setDoc(privRef, { referralId: currentUser.uid, successfulReferrals: 0, updatedAt: serverTimestamp() }, { merge: true }); privSnap = await getDoc(privRef); }
+                        const pdata = privSnap.exists() ? (privSnap.data() || {}) : {};
+                        if (!pdata.referralId) { try{ await updateDoc(privRef, { referralId: currentUser.uid, updatedAt: serverTimestamp() }); }catch(_){} }
+                        const referralId = (pdata.referralId || currentUser.uid);
+                        const link = `${location.origin.replace(/\/$/, '')}/login.html?ref=${encodeURIComponent(referralId)}`;
+                        const text = 'Join me on Nuvia! Use my link to sign up.';
+                        try {
+                            if (navigator.share) { await navigator.share({ title: 'Join Nuvia', text, url: link }); }
+                            else { await navigator.clipboard.writeText(link); shareRefBtn.classList.add('copied'); setTimeout(()=>shareRefBtn.classList.remove('copied'), 1000); }
+                            showMessageBox('Referral link shared.', 'success');
+                        } catch(e){ console.error(e); showMessageBox('Share failed.', 'error'); }
+                    } catch (e) {
+                        console.error('shareReferral failed', e);
+                        showMessageBox('Could not prepare referral link.', 'error');
+                    }
+                })();
                 return;
             }
             const tagLink = ev.target.closest('.hashtag-link');
@@ -13508,6 +13525,14 @@ async function fetchAndDisplayPosts() {
 
         // Inject premium post styles
         document.head.insertAdjacentHTML('beforeend', premiumPostStyles);
+        // Share referral button styles (pink → yellow)
+        const shareReferralStyles = `
+            <style>
+                .post-action-button.share-referral-button { display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background: linear-gradient(90deg, var(--pink), #ffd400); color: #111; font-weight:700; }
+                .post-action-button.share-referral-button .fas { color: #fff; }
+                .post-action-button.share-referral-button.copied { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255,46,99,0.16); }
+            </style>`;
+        document.head.insertAdjacentHTML('beforeend', shareReferralStyles);
 
         // Share a post and award small coins (uses same share logic as login referral share)
         async function sharePost(postId){
