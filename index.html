@@ -11851,8 +11851,17 @@ async function fetchAndDisplayPosts() {
                                     const m = lastDoc.data()||{};
                                     const tsMs = m.timestamp?.toMillis?.() || Date.now();
                                     if (m.senderId === currentUser.uid) { __lastIncomingByChat[chatId] = tsMs; saveLastIncomingState(); return; }
+                                    // Compare against both local lastSeen and Firestore read receipts
+                                    let readAtMs = 0;
+                                    try {
+                                        const receiptsRef = doc(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'presence', 'receipts');
+                                        const rs = await getDoc(receiptsRef);
+                                        const ra = rs.exists() ? (rs.data()?.readAt?.[currentUser.uid]) : null;
+                                        if (ra) { readAtMs = typeof ra.toMillis === 'function' ? ra.toMillis() : (typeof ra === 'number' ? ra : 0); }
+                                    } catch(_) { readAtMs = 0; }
                                     const lastSeen = Number(__lastIncomingByChat[chatId]||0);
-                                    if (tsMs <= lastSeen) return;
+                                    const seenCutoff = Math.max(lastSeen, readAtMs);
+                                    if (tsMs <= seenCutoff) return;
                                     __lastIncomingByChat[chatId] = tsMs; saveLastIncomingState();
                                     let name = 'Friend';
                                     try { const pref = doc(db, 'artifacts', appId, 'public', 'data', 'users', m.senderId); const ps = await getDoc(pref); const pd = ps.exists()? (ps.data()||{}) : {}; name = pd.displayName || pd.username || name; } catch(_){ }
