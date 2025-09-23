@@ -439,10 +439,17 @@
         }
       }
 
+      let __notifAudio = null;
       function notify(msg, type='info'){
         try{ if (window.showMessageBox && typeof window.showMessageBox === 'function') { window.showMessageBox(msg, type); return; } }catch(_){ }
         toastEl.textContent = msg; toastEl.style.display = 'block'; setTimeout(()=>{ toastEl.style.display='none'; },2200);
-        try{ if(prefs.sound && !prefs.dnd){ Tone.start(); new Tone.Synth().toDestination().triggerAttackRelease('C6','8n'); } }catch(_){ }
+        try{
+          if (prefs.sound && !prefs.dnd){
+            if (!__notifAudio) { __notifAudio = new Audio('ne.mp3'); __notifAudio.preload = 'auto'; __notifAudio.volume = 0.7; }
+            __notifAudio.currentTime = 0;
+            __notifAudio.play().catch(()=>{});
+          }
+        }catch(_){ }
       }
 
       function debounce(fn,ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); } }
