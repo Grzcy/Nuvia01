@@ -4444,8 +4444,23 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         </div>
     </header>
 
-
-
+    <style>
+        /* New Message Ticker (below header) */
+        .incoming-message-container { display:none; position: relative; z-index: 9; }
+        .incoming-message-ticker {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 14px; border-bottom: 1px solid var(--border-light);
+            background: var(--card-background); color: var(--white); cursor: pointer;
+            overflow: hidden; white-space: nowrap; user-select: none;
+        }
+        .incoming-message-ticker .tick-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent-color); box-shadow: 0 0 10px var(--accent-color); flex: 0 0 auto; }
+        .incoming-message-ticker .tick-text { display:inline-block; animation: ticker-slide 14s linear infinite; }
+        @keyframes ticker-slide { 0% { transform: translateX(-10%); } 100% { transform: translateX(110%); } }
+        @media (max-width: 520px){ .incoming-message-ticker { padding: 8px 10px; } }
+    </style>
+    <div id="incomingMessageTickerContainer" class="incoming-message-container" role="region" aria-live="polite">
+        <div id="incomingMessageTicker" class="incoming-message-ticker" tabindex="0" aria-label="New message" title="Open message"></div>
+    </div>
 
     <a href="#main-content" class="skip-link" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">Skip to main content</a>
 
@@ -11259,6 +11274,7 @@ async function fetchAndDisplayPosts() {
                 } catch(e) { console.warn('saved widget load', e); }
                 await fetchAndDisplayPosts(); // This will setup all real-time listeners for posts and comments.
                 fetchNotificationCount(user.uid);
+                startIncomingMessageBanner();
 
             } else {
                 window.location.href = '/login.html'; return;
@@ -11773,6 +11789,60 @@ async function fetchAndDisplayPosts() {
             window.location.href = url.toString();
         }
         function chatIdFor(u1, u2) { return [u1, u2].sort().join('_'); }
+
+        // --- Incoming message ticker (below header) ---
+        let __incomingTickerUnsub = null;
+        let __lastIncomingByChat = {};
+        function loadLastIncomingState(){ try{ __lastIncomingByChat = JSON.parse(localStorage.getItem('nuvia_last_incoming_by_chat')||'{}')||{}; }catch(_){ __lastIncomingByChat={}; } }
+        function saveLastIncomingState(){ try{ localStorage.setItem('nuvia_last_incoming_by_chat', JSON.stringify(__lastIncomingByChat)); }catch(_){ } }
+        function showIncomingTicker({ senderId, senderName, messageId, text }){
+            const cont = document.getElementById('incomingMessageTickerContainer');
+            const el = document.getElementById('incomingMessageTicker');
+            if (!cont || !el) return;
+            const safeName = (senderName||'Someone');
+            const preview = (text||'').replace(/\s+/g,' ').slice(0, 120);
+            el.innerHTML = `<span class="tick-dot" aria-hidden="true"></span><span class="tick-text">New message from ${safeName}: ${preview} — tap to open</span>`;
+            const open = ()=>{ window.location.href = `/chat.html?partnerId=${encodeURIComponent(senderId)}#msg-${encodeURIComponent(messageId)}`; hideTicker(); };
+            el.onclick = open; el.onkeydown = (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); open(); } };
+            cont.style.display = 'block';
+            // Auto-hide after a while to avoid sticking
+            clearTimeout(el.__hideTimer); el.__hideTimer = setTimeout(()=> hideTicker(), 15000);
+            function hideTicker(){ cont.style.display = 'none'; }
+        }
+        function startIncomingMessageBanner(){
+            try{
+                loadLastIncomingState();
+                if (!isAuthReady || !currentUser) return;
+                if (__incomingTickerUnsub) { try{ __incomingTickerUnsub(); }catch(_){ } __incomingTickerUnsub=null; }
+                // Listen to my chats via array-contains, then inspect latest message per changed chat
+                const chatsCol = collection(db, 'artifacts', appId, 'public', 'data', 'chats');
+                const qChats = query(chatsCol, where('participants', 'array-contains', currentUser.uid));
+                __incomingTickerUnsub = onSnapshot(qChats, async (snap)=>{
+                    try{
+                        const changes = snap.docChanges();
+                        for (const ch of changes){
+                            if (ch.type !== 'added' && ch.type !== 'modified') continue;
+                            const chatId = ch.doc.id;
+                            const messagesCol = collection(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'messages');
+                            const lastSnap = await getDocs(query(messagesCol, orderBy('timestamp','desc'), limit(1)));
+                            if (lastSnap.empty) continue;
+                            const lastDoc = lastSnap.docs[0];
+                            const m = lastDoc.data()||{};
+                            const tsMs = m.timestamp?.toMillis?.() || Date.now();
+                            const lastSeen = Number(__lastIncomingByChat[chatId]||0);
+                            if (m.senderId === currentUser.uid) { __lastIncomingByChat[chatId] = tsMs; saveLastIncomingState(); continue; }
+                            if (tsMs <= lastSeen) continue;
+                            __lastIncomingByChat[chatId] = tsMs; saveLastIncomingState();
+                            // Load sender displayName
+                            let name = 'Friend';
+                            try { const pref = doc(db, 'artifacts', appId, 'public', 'data', 'users', m.senderId); const ps = await getDoc(pref); const pd = ps.exists()? (ps.data()||{}) : {}; name = pd.displayName || pd.username || name; } catch(_){ }
+                            showIncomingTicker({ senderId: m.senderId, senderName: name, messageId: lastDoc.id, text: (m.text||m.fileName||'') });
+                        }
+                    }catch(err){ console.warn('incoming banner listener error', err); }
+                }, (err)=>{ console.warn('incoming chats subscribe error', err); });
+            }catch(e){ console.warn('startIncomingMessageBanner failed', e); }
+        }
+
         async function ensureChatDocForHome(chatId, friendId) {
             try {
                 const chatDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'chats', chatId);
@@ -13841,7 +13911,7 @@ async function fetchAndDisplayPosts() {
                     ${postData.premiumOptions ? `
                         <div class="premium-post-indicators">
                             ${postData.premiumOptions.priority ? '<span class="premium-indicator priority">⭐ Priority</span>' : ''}
-                            ${postData.premiumOptions.exclusive ? '<span class="premium-indicator exclusive">���� Exclusive</span>' : ''}
+                            ${postData.premiumOptions.exclusive ? '<span class="premium-indicator exclusive">����� Exclusive</span>' : ''}
                             ${postData.premiumOptions.custom ? '<span class="premium-indicator custom">✨ Custom</span>' : ''}
                         </div>
                     ` : ''}
