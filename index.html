@@ -6837,7 +6837,7 @@ const simpleCategoryTemplates = {
         const quoteTemplates = {
             motivational: { openers:["Keep going","Start small","Believe in yourself","Stay consistent","Trust the process"], bridges:["�����"," because ",": ",", and ","; "], endings:["every step counts.","tomorrow thanks you for today's effort.","progress loves momentum.","you're closer than you think.","discipline builds destiny."] },
             peaceful: { openers:["Breathe","Slow down","Be gentle","Find quiet","Let go"], bridges:["—"," and ",", then "," as ",": "], endings:["clarity will meet you.","peace finds its way in.","the heart softens.","the mind untangles.","you return to yourself."] },
-            funny: { openers:["Reminder","Breaking news","Pro tip","True story","PSA"], bridges:[": "," — "," ��� ",": "], endings:["motivation will arrive after snacks.","I'm on a seafood diet���I see food and I code.","sleep is a patch we never apply.","tomorrow is just today with a wig.","coffee is my personality driver."] },
+            funny: { openers:["Reminder","Breaking news","Pro tip","True story","PSA"], bridges:[": "," — "," ���� ",": "], endings:["motivation will arrive after snacks.","I'm on a seafood diet���I see food and I code.","sleep is a patch we never apply.","tomorrow is just today with a wig.","coffee is my personality driver."] },
             wisdom: { openers:["Growth","Curiosity","Patience","Listening","Kindness"], bridges:[" reveals that "," teaches that "," reminds us "," shows that ",": "], endings:["there's more to learn than to prove.","small habits shape great outcomes.","the quietest lessons echo the longest.","consistency outlives talent.","clarity follows attention."] },
             love: { openers:["Love","Compassion","Care","Gratitude","Warmth"], bridges:[" grows where "," lives when "," begins when "," multiplies when ",": "], endings:["we show up for each other.","we choose patience.","we listen before we speak.","small gestures carry big meaning.","we forgive and rebuild."] }
         };
@@ -11860,7 +11860,7 @@ async function fetchAndDisplayPosts() {
                         else { pickerContainer.style.display='block'; renderFriendPickerInside(pickerContainer, postId, content, mediaUrl); }
                     }catch(e){ console.error(e); showMessageBox('Failed to open friend picker.','error'); } };
                 if(sysBtn) sysBtn.onclick = async ()=>{ try{ const url = `${location.origin}/index.html#post-${encodeURIComponent(postId)}`; const text = ((content||'') + (mediaUrl? '\n'+mediaUrl : '') + '\n\n' + url).trim(); if(navigator.share){ await navigator.share({ title: 'Check this post', text }); } else { await safeCopyText(text); showMessageBox('Post copied to clipboard.','success'); } }catch(e){ console.error(e); showMessageBox('Share failed.','error'); } };
-                if(closeBtn) closeBtn.onclick = ()=>{ try{ pop.style.display='none'; pop.classList.remove('active'); pickerContainer.style.display='none'; pickerContainer.innerHTML=''; }catch(_){} };
+                if(closeBtn) closeBtn.onclick = ()=>{ try{ const prev = document.getElementById('sharePostPopoverPreview'); if(prev) prev.classList.remove('share-preview-glow'); pop.style.display='none'; pop.classList.remove('active'); pickerContainer.style.display='none'; pickerContainer.innerHTML=''; }catch(_){} };
 
                 // Close popover when clicking outside
                 setTimeout(()=>{
