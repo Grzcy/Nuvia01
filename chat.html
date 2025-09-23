@@ -297,6 +297,10 @@
         .msg .bubble,
         .msg .time { color: #fff !important; }
     </style>
+    <style>
+        /* Highlight target message when navigated via hash */
+        .hash-highlight { outline: 2px solid var(--accent-color); outline-offset: 2px; }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -1099,7 +1103,8 @@
                     if (!snap.empty) {
                         messagesEl.querySelectorAll('[data-optimistic-id]').forEach(node => node.remove());
                     }
-                    messagesEl.scrollTop = messagesEl.scrollHeight;
+                    if ((location.hash || '').startsWith('#msg-')) { scrollToMessageHashOnce(); }
+                    else { messagesEl.scrollTop = messagesEl.scrollHeight; }
 
                     // Play sound for new partner messages (skip initial load)
                     if (!messagesInitialLoad && newPartnerMessages.length > 0) {
@@ -1153,6 +1158,13 @@
         function renderMessage(m) {
             const wrap = document.createElement('div');
             wrap.className = `msg ${m.sender === 'current' ? 'sent' : 'recv'}`;
+            // Attach stable identifiers to enable deep-linking and sharing lookups
+            if (m.id) {
+                wrap.setAttribute('data-message-id', m.id);
+                wrap.id = `msg-${m.id}`;
+            } else {
+                wrap.setAttribute('data-message-id', '');
+            }
             const bubble = document.createElement('div');
             bubble.className = 'bubble';
             const timeStr = new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
@@ -1214,6 +1226,24 @@
             if (status === 'sent') return '⏺';
             return '';
         }
+
+        // Smooth scroll to hash-targeted message once
+        let __hashScrolled = false;
+        function scrollToMessageHashOnce() {
+            try {
+                const h = (location.hash || '').trim();
+                if (!h || !h.startsWith('#msg-')) return;
+                const id = h.slice(5);
+                const node = document.getElementById(`msg-${id}`) || document.querySelector(`[data-message-id="${id}"]`);
+                if (node && !__hashScrolled) {
+                    node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    node.classList.add('hash-highlight');
+                    setTimeout(() => { try { node.classList.remove('hash-highlight'); } catch(_){} }, 1600);
+                    __hashScrolled = true;
+                }
+            } catch(_){}
+        }
+        window.addEventListener('hashchange', () => { __hashScrolled = false; scrollToMessageHashOnce(); });
 
         function formatRelativeTime(tsMs) {
             if (!tsMs) return 'unknown';
