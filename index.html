@@ -10125,7 +10125,7 @@ const lex = inspirationLexicon[type];
                 <div class="post-media">
                     ${post.mediaType === 'image' ?
                         `<img src="${post.mediaUrl}" alt="Post Media" onerror="this.style.display='none';">` :
-                        `<video src="${post.mediaUrl}" controls onerror="this.style.display='none';"></video>`
+                        `<video src="${post.mediaUrl}" ${post.videoThumbnailUrl ? `poster='${post.videoThumbnailUrl}'` : ''} controls preload="metadata" playsinline onerror="this.style.display='none';"></video>`
                     }
                 </div>` : ''}
                 <div class="post-reactions-summary">
