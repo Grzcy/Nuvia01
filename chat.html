@@ -996,6 +996,7 @@
             if (csEl) csEl.textContent = 'Calling…';
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
+                if (endCallBtn) endCallBtn.style.display = 'inline-flex';
                 startCallerRingtone();
                 try{ clearTimeout(ringTimeoutId); }catch(_){ }
                 ringTimeoutId = setTimeout(async ()=>{ try{ await handleMissedByCaller(); }catch(_){ } }, 60000);
