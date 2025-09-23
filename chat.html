@@ -1083,7 +1083,10 @@
                 startCallerRingtone();
                 try{ clearTimeout(ringTimeoutId); }catch(_){ }
                 ringTimeoutId = setTimeout(async ()=>{ try{ await handleMissedByCaller(); }catch(_){ } }, 60000);
-                if (isVideo) localVideo.srcObject = stream;
+                if (isVideo) {
+                    localVideo.srcObject = stream;
+                    try { localVideo.play().catch(()=>{}); } catch(_){}
+                }
                 pc = new RTCPeerConnection(rtcConfig);
                 stream.getTracks().forEach(t => pc.addTrack(t, stream));
                 pc.ontrack = (e) => {
@@ -1094,6 +1097,7 @@
                     }
                     if (isVideo) {
                         remoteVideo.srcObject = rstream;
+                        try { remoteVideo.play().catch(()=>{}); } catch(_){}
                         if (remoteAvatarPlaceholder) remoteAvatarPlaceholder.style.display = 'none';
                     } else if (remoteAudio) {
                         remoteAudio.srcObject = rstream;
@@ -1128,6 +1132,9 @@
                     if (data?.answer && pc && !pc.currentRemoteDescription) {
                         const answerDesc = new RTCSessionDescription(data.answer);
                         await pc.setRemoteDescription(answerDesc);
+                        // try to play video elements after remote description applied
+                        try { remoteVideo.play().catch(()=>{}); } catch(_){}
+                        try { localVideo.play().catch(()=>{}); } catch(_){}
                         stopRingtone();
                         stopCallerRingtone();
                         try{ clearTimeout(ringTimeoutId); }catch(_){ }
@@ -1230,7 +1237,10 @@
                 }
 
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: desiredVideo });
-                if (desiredVideo) localVideo.srcObject = stream;
+                if (desiredVideo) {
+                    localVideo.srcObject = stream;
+                    try { localVideo.play().catch(()=>{}); } catch(_){}
+                }
                 pc = new RTCPeerConnection(rtcConfig);
                 stream.getTracks().forEach(t => pc.addTrack(t, stream));
                 pc.ontrack = (e) => {
@@ -1241,6 +1251,7 @@
                     }
                     if (desiredVideo) {
                         remoteVideo.srcObject = rstream;
+                        try { remoteVideo.play().catch(()=>{}); } catch(_){}
                         if (remoteAvatarPlaceholder) remoteAvatarPlaceholder.style.display = 'none';
                     } else if (remoteAudio) {
                         remoteAudio.srcObject = rstream;
