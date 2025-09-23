@@ -11929,68 +11929,37 @@ async function fetchAndDisplayPosts() {
                 loadUnreadState();
                 if (!isAuthReady || !currentUser) return;
                 if (__unreadBannerUnsub) { try{ __unreadBannerUnsub(); }catch(_){ } __unreadBannerUnsub=null; }
-                const chatsCol = collection(db, 'artifacts', appId, 'public', 'data', 'chats');
-                const qChats = query(chatsCol, where('participants', 'array-contains', currentUser.uid));
-                __unreadBannerUnsub = onSnapshot(qChats, (snap)=>{
-                    const presentIds = new Set();
-                    snap.forEach(docSnap => {
-                        const chatId = docSnap.id; presentIds.add(chatId);
-                        if (!__unreadMsgUnsubs.has(chatId)) {
-                            try{
-                                const messagesCol = collection(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'messages');
-                                const qLast = query(messagesCol, orderBy('timestamp','desc'), limit(1));
-                                const unsubMsg = onSnapshot(qLast, async (msnap)=>{
-                                    if (msnap.empty) return;
-                                    const lastDoc = msnap.docs[0];
-                                    const m = lastDoc.data()||{};
-                                    const tsMs = m.timestamp?.toMillis?.() || Date.now();
-                                    if (m.senderId === currentUser.uid) { __lastShownByChat[chatId] = tsMs; saveUnreadState(); return; }
-                                    let readAtMs = 0;
-                                    try {
-                                        const receiptsRef = doc(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'presence', 'receipts');
-                                        const rs = await getDoc(receiptsRef);
-                                        const ra = rs.exists() ? (rs.data()?.readAt?.[currentUser.uid]) : null;
-                                        if (ra) { readAtMs = typeof ra.toMillis === 'function' ? ra.toMillis() : (typeof ra === 'number' ? ra : 0); }
-                                    } catch(_) { readAtMs = 0; }
-                                    const lastSeen = Number(__lastShownByChat[chatId]||0);
-                                    const seenCutoff = Math.max(lastSeen, readAtMs);
-                                    if (tsMs <= seenCutoff) return;
-                                    __lastShownByChat[chatId] = tsMs; saveUnreadState();
-                                    let name = 'Friend';
-                                    try { const pref = doc(db, 'artifacts', appId, 'public', 'data', 'users', m.senderId); const ps = await getDoc(pref); const pd = ps.exists()? (ps.data()||{}) : {}; name = pd.displayName || pd.username || name; } catch(_){ }
-                                    showUnreadBanner({ senderId: m.senderId, senderName: name, messageId: lastDoc.id, text: (m.text||m.fileName||'') });
-                                }, (err)=>{ /* silent */ });
-                                __unreadMsgUnsubs.set(chatId, unsubMsg);
-                            }catch(_){ }
-                        }
+                const notifCol = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'notifications');
+                const qNotif = query(notifCol, where('read','==', false));
+                __unreadBannerUnsub = onSnapshot(qNotif, (snap)=>{
+                    let latest = null;
+                    snap.forEach(ds=>{
+                        const d = ds.data()||{};
+                        const t = d.createdAt?.toMillis?.() || d.timestamp?.toMillis?.() || (typeof d.createdAt==='number'? d.createdAt : 0) || (typeof d.timestamp==='number'? d.timestamp : 0);
+                        if (!latest || t > latest._ts) latest = { id: ds.id, ...d, _ts: t };
                     });
-                    for (const [cid, unsub] of __unreadMsgUnsubs.entries()) {
-                        if (!presentIds.has(cid)) { try{ unsub(); }catch(_){ } __unreadMsgUnsubs.delete(cid); }
+                    if (!latest) return;
+                    const type = String(latest.type||'').toLowerCase();
+                    if (type==='message' || type==='messages' || type==='new_message'){
+                        const senderId = latest.senderId || latest.fromId || latest.userId || '';
+                        if (!senderId) return;
+                        const text = latest.preview || latest.text || latest.body || latest.message || '';
+                        const name = latest.senderUsername || latest.senderName || latest.fromName || latest.username || 'Friend';
+                        const chatKey = chatIdFor(senderId, currentUser.uid);
+                        const tsMs = latest._ts || Date.now();
+                        const lastSeen = Number(__lastShownByChat[chatKey]||0);
+                        if (tsMs <= lastSeen) return;
+                        __lastShownByChat[chatKey] = tsMs; saveUnreadState();
+                        showUnreadBanner({ senderId, senderName: name, messageId: latest.messageId || latest.id, text });
                     }
-                    if (!window.__unreadCGUnsub) {
-                        try{
-                            const msgsGroup = collectionGroup(db, 'messages');
-                            const q = query(msgsGroup, where('receiverId','==', currentUser.uid), orderBy('timestamp','desc'), limit(1));
-                            window.__unreadCGUnsub = onSnapshot(q, async (gsnap)=>{
-                                if (gsnap.empty) return;
-                                const lastDoc = gsnap.docs[0];
-                                const m = lastDoc.data()||{};
-                                const chatId = m.chatId || chatIdFor(m.senderId||'', currentUser.uid);
-                                const tsMs = m.timestamp?.toMillis?.() || Date.now();
-                                if (m.senderId === currentUser.uid) { __lastShownByChat[chatId] = tsMs; saveUnreadState(); return; }
-                                let readAtMs = 0;
-                                try { const rref = doc(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'presence', 'receipts'); const rs = await getDoc(rref); const ra = rs.exists()? (rs.data()?.readAt?.[currentUser.uid]) : null; if (ra) readAtMs = typeof ra.toMillis === 'function' ? ra.toMillis() : (typeof ra==='number' ? ra : 0); } catch(_){ }
-                                const lastSeen = Number(__lastShownByChat[chatId]||0);
-                                const seenCutoff = Math.max(lastSeen, readAtMs);
-                                if (tsMs <= seenCutoff) return;
-                                __lastShownByChat[chatId] = tsMs; saveUnreadState();
-                                let name = 'Friend';
-                                try { const pref = doc(db, 'artifacts', appId, 'public', 'data', 'users', m.senderId); const ps = await getDoc(pref); const pd = ps.exists()? (ps.data()||{}) : {}; name = pd.displayName || pd.username || name; } catch(_){ }
-                                showUnreadBanner({ senderId: m.senderId, senderName: name, messageId: lastDoc.id, text: (m.text||m.fileName||'') });
-                            }, (err)=>{ console.warn('unread collectionGroup listener error', err); });
-                        }catch(e){ console.warn('unread CG setup failed', e); }
+                }, (err)=>{
+                    if (err && err.code === 'permission-denied'){
+                        console.warn('Unread notifications permission denied; hiding banner');
+                        try { const wrap=document.getElementById('unreadChatBanner'); if(wrap) wrap.style.display='none'; } catch(_){ }
+                    } else {
+                        console.warn('Unread notifications listener error', err);
                     }
-                }, (err)=>{ console.warn('unread chats subscribe error', err); });
+                });
             }catch(e){ console.warn('startUnreadChatBanner failed', e); }
         }
 
