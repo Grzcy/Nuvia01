@@ -8299,6 +8299,52 @@ async function checkAndStartDailyBonusTimer() {
          * @param {File|Blob} file - The file to upload.
          * @returns {Promise<string|null>} The secure URL of the uploaded media, or null if upload fails.
          */
+        // --- Video Thumbnail Helpers ---
+        function resetSelectedThumbnail(){ try{ selectedThumbnailBlob = null; selectedThumbnailDataUrl = null; if (videoThumbnailPreview){ videoThumbnailPreview.src=''; videoThumbnailPreview.classList.add('hidden'); } }catch(_){} }
+        function drawCoverToCanvas(canvas, source, sw, sh){
+            const ctx = canvas.getContext('2d'); const tw = canvas.width, th = canvas.height; const targetAR = tw/th; const sourceAR = sw/sh;
+            let sx=0, sy=0, sWidth=sw, sHeight=sh;
+            if (sourceAR > targetAR){ // source wider → crop horizontally
+                sWidth = Math.floor(sh * targetAR); sx = Math.floor((sw - sWidth)/2);
+            } else if (sourceAR < targetAR){ // source taller → crop vertically
+                sHeight = Math.floor(sw / targetAR); sy = Math.floor((sh - sHeight)/2);
+            }
+            ctx.clearRect(0,0,tw,th); ctx.drawImage(source, sx, sy, sWidth, sHeight, 0, 0, tw, th);
+        }
+        function openThumbnailModal(){
+            try{
+                const modal = document.getElementById('videoThumbnailModal'); const thumbVid = document.getElementById('thumbnailVideo'); const slider = document.getElementById('thumbnailTimeSlider');
+                if (!currentMediaFile || !currentMediaFile.type.startsWith('video/')) { showMessageBox('Select a video first.', 'info'); return; }
+                if (thumbVid && mediaVideoPreview && mediaVideoPreview.src){ thumbVid.src = mediaVideoPreview.src; }
+                if (thumbVid){ thumbVid.onloadedmetadata = ()=>{ try{ slider.max = String(thumbVid.duration||0); }catch(_){}}; }
+                if (modal){ modal.style.display = 'block'; setTimeout(()=>modal.classList.add('active'), 0); }
+            }catch(e){ console.error('openThumbnailModal', e); }
+        }
+        function closeThumbnailModal(){ try{ const modal = document.getElementById('videoThumbnailModal'); if (modal){ modal.classList.remove('active'); setTimeout(()=>{ modal.style.display='none'; }, 150); } }catch(_){} }
+        function bindThumbnailModal(){
+            try{
+                const thumbVid = document.getElementById('thumbnailVideo');
+                const slider = document.getElementById('thumbnailTimeSlider');
+                const captureBtn = document.getElementById('captureFrameBtn');
+                const fileInput = document.getElementById('thumbnailImageInput');
+                const canvas = document.getElementById('thumbnailCanvas');
+                const cancelBtn = document.getElementById('thumbnailCancelBtn');
+                const saveBtn = document.getElementById('thumbnailSaveBtn');
+                if (!canvas.getContext) return;
+                if (slider && thumbVid){ slider.addEventListener('input', ()=>{ try{ thumbVid.currentTime = Number(slider.value||0); }catch(_){ } }); }
+                if (captureBtn){ captureBtn.addEventListener('click', ()=>{
+                    try{ drawCoverToCanvas(canvas, thumbVid, thumbVid.videoWidth||1280, thumbVid.videoHeight||720); }catch(e){ console.error('captureFrame', e); showMessageBox('Failed to capture frame.', 'error'); }
+                }); }
+                if (fileInput){ fileInput.addEventListener('change', ()=>{
+                    try{ const f = fileInput.files && fileInput.files[0]; if (!f) return; const url = URL.createObjectURL(f); const img = new Image(); img.onload = ()=>{ try{ drawCoverToCanvas(canvas, img, img.naturalWidth, img.naturalHeight); URL.revokeObjectURL(url); }catch(e){ URL.revokeObjectURL(url); } }; img.onerror = ()=>{ try{ URL.revokeObjectURL(url); }catch(_){ } }; img.src = url; }catch(e){ console.error('thumb image load', e); }
+                }); }
+                if (cancelBtn){ cancelBtn.addEventListener('click', ()=>{ closeThumbnailModal(); }); }
+                if (saveBtn){ saveBtn.addEventListener('click', ()=>{
+                    try{ canvas.toBlob((blob)=>{ if (!blob){ showMessageBox('Failed to generate thumbnail.', 'error'); return; } selectedThumbnailBlob = new Blob([blob], { type: 'image/jpeg' }); selectedThumbnailDataUrl = canvas.toDataURL('image/jpeg', 0.9); if (videoThumbnailPreview){ videoThumbnailPreview.src = selectedThumbnailDataUrl; videoThumbnailPreview.classList.remove('hidden'); } closeThumbnailModal(); }, 'image/jpeg', 0.9); }catch(e){ console.error('thumb save', e); showMessageBox('Failed to save thumbnail.', 'error'); }
+                }); }
+            }catch(e){ console.error('bindThumbnailModal', e); }
+        }
+
         async function uploadMediaToCloudinary(file) {
             try {
                 const formData = new FormData();
