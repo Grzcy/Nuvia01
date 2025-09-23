@@ -1121,9 +1121,7 @@
         }
 
         // Call events handled by CallManager
-
-        // Removed old startCall implementation; replaced by CallManager.start(type)
-        async function startCall(isVideo) {
+        async function startCall(isVideo) { }
             if (!currentPartner) return;
             openCallUI(isVideo);
             try {
@@ -1187,15 +1185,11 @@
         }
 
         // Incoming listener handled by CallManager
-        async function acceptIncomingCall(docSnap) { /* Replaced by CallManager.accept() */ }
-
-        function openCallUI(isVideo) { /* Replaced by CallManager.openUI() */ }
-
-        async function showIncomingPrompt(docSnap) { /* Replaced by CallManager.showIncoming() */ }
-
-        async function rejectIncomingCall() { /* Replaced by CallManager.decline() */ }
-
-        async function endCall() { /* Replaced by CallManager.end() */ }
+        async function acceptIncomingCall(docSnap) {}
+        function openCallUI(isVideo) {}
+        async function showIncomingPrompt(docSnap) {}
+        async function rejectIncomingCall() {}
+        async function endCall() {}
 
         inputEl.addEventListener('input', () => {
             inputEl.style.height = 'auto';
