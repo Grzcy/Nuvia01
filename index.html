@@ -4680,6 +4680,33 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
 
 
             <!-- People You May Know Strip -->
+
+            <!-- Global Announcements Section (populated by system settings) -->
+            <div id="globalAnnouncementsSection" class="global-announcements-section" style="display:none; margin: 16px auto; max-width: 900px; padding:12px; border-radius:12px; border:1px solid var(--border-light); background: var(--card-background);">
+                <div class="announcement-header" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <i class="fas fa-bullhorn announcement-icon" aria-hidden="true"></i>
+                        <div>
+                            <div class="announcement-title" id="announcementTitle">Announcement</div>
+                            <div style="display:flex;gap:8px;align-items:center;margin-top:4px;">
+                                <span id="announcementTypeBadge" class="announcement-type-badge"></span>
+                                <span id="announcementPriorityBadge" class="announcement-priority-badge" data-priority="medium"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <button id="dismissAnnouncementBtn" class="announcement-dismiss-btn" aria-label="Dismiss announcement">Dismiss</button>
+                    </div>
+                </div>
+                <div class="announcement-content" style="display:flex;flex-direction:column;gap:8px;">
+                    <div id="announcementMessage" class="announcement-message">Announcement message body will appear here.</div>
+                    <div class="announcement-meta" style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+                        <div id="announcementTimestamp" class="announcement-timestamp">Published: --</div>
+                        <div id="announcementSource" class="announcement-source">From: Admin</div>
+                    </div>
+                </div>
+            </div>
+
             <div id="peopleMayKnow" style="display:none; margin: 16px auto; max-width: 900px;">
                 <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
                     <div style="font-family: 'Poppins', sans-serif; font-weight:700; color: var(--white);">People you may know</div>
@@ -7050,7 +7077,7 @@ const simpleBibleQuotes = [
     { text: "Trust in the Lord with all your heart; do not rely only on your own understanding.", ref: "Proverbs 3:5 (KJV)" },
     { text: "Blessed are the peacemakers; they will be called children of God.", ref: "Matthew 5:9 (KJV)" },
     { text: "Come to me if you are tired, and I will give you rest.", ref: "Matthew 11:28 (KJV)" },
-    { text: "I know the plans I have for you��plans for good and hope for the future.", ref: "Jeremiah 29:11 (KJV)" },
+    { text: "I know the plans I have for you—plans for good and hope for the future.", ref: "Jeremiah 29:11 (KJV)" },
     { text: "Those who hope in the Lord will renew their strength and rise up like eagles.", ref: "Isaiah 40:31 (KJV)" },
     { text: "God is our refuge and strength; He helps in trouble.", ref: "Psalm 46:1 (KJV)" },
     { text: "This is the day the Lord has made; be glad and rejoice in it.", ref: "Psalm 118:24 (KJV)" },
@@ -7078,7 +7105,7 @@ const simpleBibleQuotes = [
 const simpleQuranQuotes = [
     { text: "Remember Me, and I will remember you.", ref: "Al‑Baqarah 2:152" },
     { text: "Whoever does good, it is for his own soul.", ref: "Al���An'am 6:160" },
-    { text: "Allah does not burden a soul beyond its capacity.", ref: "Al���Baqarah 2:286" },
+    { text: "Allah does not burden a soul beyond its capacity.", ref: "Al‑Baqarah 2:286" },
     { text: "In the remembrance of Allah hearts find rest.", ref: "Ar‑Ra'd 13:28" },
     { text: "Seek help through patience and prayer.", ref: "Al‑Baqarah 2:45" },
     { text: "God loves those who do good.", ref: "Al‑Baqarah 2:195" },
