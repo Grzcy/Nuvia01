@@ -301,6 +301,27 @@
         /* Highlight target message when navigated via hash */
         .hash-highlight { outline: 2px solid var(--accent-color); outline-offset: 2px; }
     </style>
+    <style>
+        /* WhatsApp-like Call UI */
+        .hidden{ display:none !important; }
+        .call-overlay{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,.6); backdrop-filter:blur(4px); z-index:300; }
+        .call-card{ width:90%; max-width:520px; background:var(--card-background); border:1px solid var(--border-light); border-radius:12px; padding:12px; box-sizing:border-box; }
+        .call-header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+        .call-title{ display:flex; align-items:center; gap:10px; font-weight:600; }
+        .call-timer{ font-size:12px; color:var(--text-light); }
+        .video-area{ display:none; position:relative; background:#000; border-radius:8px; overflow:hidden; }
+        .video-area video{ width:100%; height:auto; display:block; }
+        .pip-video{ position:absolute; right:8px; bottom:8px; width:120px; border-radius:6px; box-shadow:0 6px 16px rgba(0,0,0,.5); }
+        .voice-area{ display:none; text-align:center; padding:24px; }
+        .voice-area .voice-icon{ font-size:36px; color:var(--accent-color); margin-bottom:8px; }
+        .call-status{ color:var(--text-light); }
+        .call-controls{ margin-top:12px; display:flex; align-items:center; justify-content:center; gap:16px; }
+        .call-btn{ width:48px; height:48px; border-radius:50%; border:1px solid var(--border-light); background:var(--input-background); color:var(--white); cursor:pointer; display:flex; align-items:center; justify-content:center; }
+        .call-btn:hover{ background:var(--border-light); }
+        .call-btn.accept{ background:var(--button-background); border:0; color:#fff; box-shadow:var(--button-shadow); }
+        .call-btn.decline{ background:linear-gradient(135deg,#ff4757,#ff3838); border:0; color:#fff; box-shadow:0 12px 24px rgba(255,56,56,.25); }
+        .call-btn.end{ background:linear-gradient(135deg,#ff4757,#ff3838); border:0; color:#fff; }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -365,29 +386,37 @@
                 </div>
             </div>
         </div>
-        <!-- Call Modal -->
-        <div id="callModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter: blur(4px); z-index:300; align-items:center; justify-content:center;">
-            <div style="background:var(--card-background); border:1px solid var(--border-light); border-radius:12px; padding:12px; width:90%; max-width:520px;">
-                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-                    <div id="callTitle" style="font-weight:600;">Call</div>
-                    <button id="endCallBtn" class="icon-btn" title="End Call" style="color:#ff4d4f"><i class="fas fa-phone-slash"></i></button>
-                </div>
-                <div id="videoWrap" style="display:none; position:relative; background:#000; border-radius:8px; overflow:hidden;">
-                    <video id="remoteVideo" autoplay playsinline style="width:100%; height:auto;"></video>
-                    <video id="localVideo" autoplay muted playsinline style="position:absolute; right:8px; bottom:8px; width:120px; border-radius:6px; box-shadow:0 6px 16px rgba(0,0,0,.5);"></video>
-                </div>
-                <div id="voiceWrap" style="display:none; text-align:center; padding:24px;">
-                    <i class="fas fa-phone" style="font-size:36px; color:var(--accent-color);"></i>
-                    <div id="callStatus" style="margin-top:8px; color:var(--text-light);">Connecting…</div>
-                    <audio id="remoteAudio" autoplay playsinline style="display:none"></audio>
+        <!-- Call Overlay (WhatsApp-like) -->
+        <div id="callOverlay" class="call-overlay hidden">
+            <div class="call-card">
+                <div class="call-header">
+                    <div class="call-title">
+                        <span id="coTitle">Call</span>
+                        <span id="coTimer" class="call-timer" aria-live="polite"></span>
+                    </div>
+                    <button id="coEndBtn" class="call-btn end" title="End Call"><i class="fas fa-phone-slash"></i></button>
                 </div>
 
-                <!-- Incoming call controls (Answer / Reject) -->
-                <div id="incomingControls" style="display:none; margin-top:12px; text-align:center;">
-                    <button id="answerCallBtn" class="btn-primary" style="margin-right:10px; padding:8px 14px; border-radius:999px;">Answer</button>
-                    <button id="rejectCallBtn" class="icon-btn" style="background:#fff1f0; color:#d32f2f; padding:8px 12px; border-radius:8px;">Reject</button>
+                <div id="coVideoArea" class="video-area" aria-hidden="true">
+                    <video id="coRemoteVideo" autoplay playsinline></video>
+                    <video id="coLocalVideo" autoplay muted playsinline class="pip-video"></video>
                 </div>
 
+                <div id="coVoiceArea" class="voice-area" aria-hidden="true">
+                    <div class="voice-icon"><i class="fas fa-phone"></i></div>
+                    <div id="coStatus" class="call-status">Ringing…</div>
+                    <audio id="coRemoteAudio" autoplay playsinline class="hidden"></audio>
+                </div>
+
+                <div id="coIncomingControls" class="call-controls hidden">
+                    <button id="coAnswerBtn" class="call-btn accept" title="Accept"><i class="fas fa-phone"></i></button>
+                    <button id="coRejectBtn" class="call-btn decline" title="Decline"><i class="fas fa-phone-slash"></i></button>
+                </div>
+
+                <div id="coActiveControls" class="call-controls hidden">
+                    <button id="coToggleMute" class="call-btn" title="Mute/Unmute"><i class="fas fa-microphone"></i></button>
+                    <button id="coToggleVideo" class="call-btn" title="Camera On/Off"><i class="fas fa-video"></i></button>
+                </div>
             </div>
         </div>
     </div>
@@ -644,29 +673,208 @@
         const voiceMsgBtn = document.getElementById('voiceMsgBtn');
         const voiceCallBtn = document.getElementById('voiceCallBtn');
         const videoCallBtn = document.getElementById('videoCallBtn');
-        const callModal = document.getElementById('callModal');
-        const callTitle = document.getElementById('callTitle');
-        const endCallBtn = document.getElementById('endCallBtn');
-        const voiceWrap = document.getElementById('voiceWrap');
-        const videoWrap = document.getElementById('videoWrap');
-        const localVideo = document.getElementById('localVideo');
-        const remoteVideo = document.getElementById('remoteVideo');
-        const remoteAudio = document.getElementById('remoteAudio');
-        const incomingControls = document.getElementById('incomingControls');
-        const answerCallBtn = document.getElementById('answerCallBtn');
-        const rejectCallBtn = document.getElementById('rejectCallBtn');
+        const callOverlay = document.getElementById('callOverlay');
+        const coTitle = document.getElementById('coTitle');
+        const coTimer = document.getElementById('coTimer');
+        const coEndBtn = document.getElementById('coEndBtn');
+        const coVideoArea = document.getElementById('coVideoArea');
+        const coVoiceArea = document.getElementById('coVoiceArea');
+        const coLocalVideo = document.getElementById('coLocalVideo');
+        const coRemoteVideo = document.getElementById('coRemoteVideo');
+        const coRemoteAudio = document.getElementById('coRemoteAudio');
+        const coIncomingControls = document.getElementById('coIncomingControls');
+        const coActiveControls = document.getElementById('coActiveControls');
+        const coAnswerBtn = document.getElementById('coAnswerBtn');
+        const coRejectBtn = document.getElementById('coRejectBtn');
+        const coToggleMute = document.getElementById('coToggleMute');
+        const coToggleVideo = document.getElementById('coToggleVideo');
 
-        let incomingCallDoc = null;
-        let unsubIncomingCallDoc = null;
-        
-        // --- WebRTC signaling (Firestore) ---
-        let pc = null;
-        let callDocRef = null;
-        let unsubCallDoc = null;
-        let unsubCallerCand = null;
-        let unsubCalleeCand = null;
-        const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
         backBtn.onclick = () => history.back();
+
+        class CallManager {
+            constructor(){
+                this.pc = null;
+                this.callRef = null;
+                this.unsubDoc = null;
+                this.unsubCallerCand = null;
+                this.unsubCalleeCand = null;
+                this.callType = 'voice';
+                this.localStream = null;
+                this.isMuted = false;
+                this.videoOff = false;
+                this.timerId = null;
+                this.seconds = 0;
+                this.incomingDoc = null;
+                this.unsubIncomingDoc = null;
+                this.rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+                this.bindControls();
+            }
+            bindControls(){
+                coEndBtn?.addEventListener('click', () => this.end(true));
+                coAnswerBtn?.addEventListener('click', () => this.accept());
+                coRejectBtn?.addEventListener('click', () => this.decline());
+                coToggleMute?.addEventListener('click', () => this.toggleMute());
+                coToggleVideo?.addEventListener('click', () => this.toggleVideo());
+                voiceCallBtn?.addEventListener('click', () => this.start('voice'));
+                videoCallBtn?.addEventListener('click', () => this.start('video'));
+            }
+            async start(type){
+                if (!currentPartner) return;
+                this.callType = type;
+                this.openUI(type, 'Calling…');
+                try{
+                    this.localStream = await navigator.mediaDevices.getUserMedia({ audio:true, video: type==='video' });
+                    if (type==='video') coLocalVideo.srcObject = this.localStream;
+                    this.pc = new RTCPeerConnection(this.rtcConfig);
+                    this.localStream.getTracks().forEach(t=> this.pc.addTrack(t, this.localStream));
+                    this.pc.ontrack = (e)=>{
+                        const s = e.streams[0];
+                        if (type==='video'){ coRemoteVideo.srcObject = s; }
+                        else { coRemoteAudio.srcObject = s; coRemoteAudio.classList.remove('hidden'); try{ coRemoteAudio.play().catch(()=>{});}catch{} }
+                    };
+                    const callsCol = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
+                    this.callRef = await addDoc(callsCol, {
+                        callerId: currentUser.uid,
+                        calleeId: currentPartner.id,
+                        type,
+                        status: 'ringing',
+                        createdAt: serverTimestamp()
+                    });
+                    const callerCandCol = collection(this.callRef, 'callerCandidates');
+                    this.pc.onicecandidate = (e)=>{ if(e.candidate) addDoc(callerCandCol, e.candidate.toJSON()); };
+                    const offer = await this.pc.createOffer();
+                    await this.pc.setLocalDescription(offer);
+                    await updateDoc(this.callRef, { offer: { sdp: offer.sdp, type: offer.type } });
+                    this.unsubDoc = onSnapshot(this.callRef, async (snap)=>{
+                        const d = snap.data(); if(!d) return;
+                        if (d.answer && this.pc && !this.pc.currentRemoteDescription){
+                            await this.pc.setRemoteDescription(new RTCSessionDescription(d.answer));
+                            this.startTimer();
+                            this.setStatus('Connected');
+                        }
+                        if (d.status === 'ended' || d.status === 'declined') this.end(false);
+                    });
+                    const calleeCandCol = collection(this.callRef, 'calleeCandidates');
+                    this.unsubCalleeCand = onSnapshot(calleeCandCol, (qs)=>{
+                        qs.docChanges().forEach(ch=>{ if(ch.type==='added'){ try{ this.pc.addIceCandidate(new RTCIceCandidate(ch.doc.data())); }catch{} } });
+                    });
+                }catch(err){ this.end(true); }
+            }
+            listenForIncoming(){
+                try{
+                    const callsCol = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
+                    const qy = query(callsCol, where('calleeId','==', currentUser.uid), where('status','==','ringing'));
+                    return onSnapshot(qy, (snap)=>{
+                        snap.docChanges().forEach(ch=>{
+                            if (ch.type==='added' && !this.pc && !this.incomingDoc){ this.showIncoming(ch.doc); }
+                        });
+                    });
+                }catch{}
+            }
+            async showIncoming(docSnap){
+                this.incomingDoc = docSnap;
+                const d = docSnap.data();
+                const type = (d.type || (d.video? 'video':'voice'));
+                const callerProfile = await loadFriendProfile(d.callerId).catch(()=>null);
+                const name = callerProfile?.displayName || 'Caller';
+                this.callType = type;
+                this.openUI(type, `Incoming ${type==='video'?'Video':'Voice'} Call — ${name}`, true);
+                if (this.unsubIncomingDoc) try{ this.unsubIncomingDoc(); }catch{}
+                this.unsubIncomingDoc = onSnapshot(docSnap.ref, (s)=>{
+                    const cd = s.data(); if(!cd) return;
+                    if (cd.status==='ended' || cd.status==='declined'){ this.hideUI(); this.cleanupIncoming(); }
+                });
+            }
+            async accept(){
+                if (!this.incomingDoc) return;
+                const data = this.incomingDoc.data();
+                const type = this.callType;
+                try{
+                    this.localStream = await navigator.mediaDevices.getUserMedia({ audio:true, video: type==='video' });
+                    if (type==='video') coLocalVideo.srcObject = this.localStream;
+                    this.pc = new RTCPeerConnection(this.rtcConfig);
+                    this.localStream.getTracks().forEach(t=> this.pc.addTrack(t, this.localStream));
+                    this.pc.ontrack = (e)=>{
+                        const s = e.streams[0];
+                        if (type==='video'){ coRemoteVideo.srcObject = s; }
+                        else { coRemoteAudio.srcObject = s; coRemoteAudio.classList.remove('hidden'); try{ coRemoteAudio.play().catch(()=>{});}catch{} }
+                    };
+                    const calleeCandCol = collection(this.incomingDoc.ref, 'calleeCandidates');
+                    this.pc.onicecandidate = (e)=>{ if(e.candidate) addDoc(calleeCandCol, e.candidate.toJSON()); };
+                    await this.pc.setRemoteDescription(new RTCSessionDescription(data.offer));
+                    const answer = await this.pc.createAnswer();
+                    await this.pc.setLocalDescription(answer);
+                    await updateDoc(this.incomingDoc.ref, { status:'active', answer:{ type:answer.type, sdp:answer.sdp }, answeredAt: serverTimestamp(), answeredBy: currentUser.uid });
+                    const callerCandCol = collection(this.incomingDoc.ref, 'callerCandidates');
+                    this.unsubCallerCand = onSnapshot(callerCandCol, (qs)=>{
+                        qs.docChanges().forEach(ch=>{ if(ch.type==='added'){ try{ this.pc.addIceCandidate(new RTCIceCandidate(ch.doc.data())); }catch{} } });
+                    });
+                    this.startTimer();
+                    this.setStatus('Connected');
+                    coIncomingControls.classList.add('hidden');
+                    coActiveControls.classList.remove('hidden');
+                }catch(err){ this.end(true); }
+            }
+            async decline(){
+                try{ if (this.incomingDoc) await updateDoc(this.incomingDoc.ref, { status:'declined', lastActivity: serverTimestamp() }); }catch{}
+                this.hideUI();
+                this.cleanupIncoming();
+            }
+            async end(updateRemote){
+                try{ this.localStream && this.localStream.getTracks().forEach(t=> t.stop()); }catch{}
+                try{ this.pc && this.pc.getSenders().forEach(s=> s.track && s.track.stop()); }catch{}
+                try{ this.pc && this.pc.close(); }catch{}
+                if (updateRemote && this.callRef) { try{ await updateDoc(this.callRef, { status:'ended' }); }catch{} }
+                this.teardown();
+                this.hideUI();
+            }
+            toggleMute(){
+                if (!this.localStream) return;
+                this.isMuted = !this.isMuted;
+                this.localStream.getAudioTracks().forEach(t=> t.enabled = !this.isMuted);
+                coToggleMute.innerHTML = this.isMuted ? '<i class="fas fa-microphone-slash"></i>' : '<i class="fas fa-microphone"></i>';
+            }
+            toggleVideo(){
+                if (this.callType !== 'video' || !this.localStream) return;
+                this.videoOff = !this.videoOff;
+                this.localStream.getVideoTracks().forEach(t=> t.enabled = !this.videoOff);
+                coToggleVideo.innerHTML = this.videoOff ? '<i class="fas fa-video-slash"></i>' : '<i class="fas fa-video"></i>';
+            }
+            openUI(type, title, incoming=false){
+                coTitle.textContent = title || (type==='video' ? 'Video Call' : 'Voice Call');
+                coVideoArea.style.display = (type==='video') ? 'block' : 'none';
+                coVoiceArea.style.display = (type==='video') ? 'none' : 'block';
+                coIncomingControls.classList.toggle('hidden', !incoming);
+                coActiveControls.classList.toggle('hidden', incoming);
+                coEndBtn.style.display = incoming ? 'none' : 'flex';
+                callOverlay.classList.remove('hidden');
+                this.setStatus(incoming ? 'Ringing…' : 'Calling…');
+                coTimer.textContent='';
+            }
+            hideUI(){ callOverlay.classList.add('hidden'); }
+            setStatus(text){ const el = document.getElementById('coStatus'); if(el) el.textContent = text; }
+            startTimer(){
+                this.seconds = 0; if(this.timerId) clearInterval(this.timerId);
+                this.timerId = setInterval(()=>{ this.seconds++; coTimer.textContent = this.formatTime(this.seconds); }, 1000);
+            }
+            formatTime(s){ const m = Math.floor(s/60).toString().padStart(2,'0'); const ss=(s%60).toString().padStart(2,'0'); return `${m}:${ss}`; }
+            teardown(){
+                try{ this.unsubDoc && this.unsubDoc(); }catch{} this.unsubDoc=null;
+                try{ this.unsubCallerCand && this.unsubCallerCand(); }catch{} this.unsubCallerCand=null;
+                try{ this.unsubCalleeCand && this.unsubCalleeCand(); }catch{} this.unsubCalleeCand=null;
+                try{ this.unsubIncomingDoc && this.unsubIncomingDoc(); }catch{} this.unsubIncomingDoc=null;
+                this.pc=null; this.callRef=null; this.incomingDoc=null; this.localStream=null;
+                if(this.timerId){ clearInterval(this.timerId); this.timerId=null; coTimer.textContent=''; }
+                try{ coRemoteVideo.srcObject=null; }catch{} try{ coLocalVideo.srcObject=null; }catch{} try{ coRemoteAudio.pause(); coRemoteAudio.srcObject=null; coRemoteAudio.classList.add('hidden'); }catch{}
+                this.isMuted=false; this.videoOff=false;
+                coToggleMute.innerHTML='<i class="fas fa-microphone"></i>';
+                coToggleVideo.innerHTML='<i class="fas fa-video"></i>';
+            }
+            cleanupIncoming(){ try{ this.unsubIncomingDoc && this.unsubIncomingDoc(); }catch{} this.unsubIncomingDoc=null; this.incomingDoc=null; }
+        }
+
+        let callManager = new CallManager();
+        function startIncomingListener(){ return callManager.listenForIncoming(); }
 
         // Emoji setup with categories and ~500 emojis
         const emojiCategories = [
@@ -911,10 +1119,9 @@
             }catch(e){ console.warn('Failed to create notification for audio message', e); }
         }
 
-        endCallBtn?.addEventListener('click', endCall);
-        voiceCallBtn?.addEventListener('click', () => startCall(false));
-        videoCallBtn?.addEventListener('click', () => startCall(true));
+        // Call events handled by CallManager
 
+        // Removed old startCall implementation; replaced by CallManager.start(type)
         async function startCall(isVideo) {
             if (!currentPartner) return;
             openCallUI(isVideo);
@@ -978,153 +1185,16 @@
             }
         }
 
-        // Incoming call listener (basic)
-        let unsubIncoming = null;
-        function startIncomingListener() {
-            try {
-                const callsCol = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
-                const q = query(callsCol, where('calleeId', '==', currentUser.uid), where('status', '==', 'ringing'));
-                unsubIncoming = onSnapshot(q, async (snap) => {
-                    snap.docChanges().forEach(async change => {
-                    if (change.type === 'added' && !pc && !incomingCallDoc) {
-                        // Show incoming prompt to user; do not auto-answer
-                        showIncomingPrompt(change.doc);
-                    }
-                });
-                });
-            } catch {}
-        }
-        // Start incoming listener on auth
-        // (after currentUser is set)
-        
-        async function acceptIncomingCall(docSnap) {
-            try {
-                callDocRef = docSnap.ref;
-                const data = docSnap.data();
-                const isVideo = !!data.video;
-                openCallUI(isVideo);
-                // Hide incoming controls since user has answered
-                if (incomingControls) incomingControls.style.display = 'none';
-                if (endCallBtn) endCallBtn.style.display = '';
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
-                if (isVideo) localVideo.srcObject = stream;
-                pc = new RTCPeerConnection(rtcConfig);
-                stream.getTracks().forEach(t => pc.addTrack(t, stream));
-                pc.ontrack = (e) => {
-                const stream = e.streams[0];
-                if (isVideo) {
-                    remoteVideo.srcObject = stream;
-                } else if (remoteAudio) {
-                    remoteAudio.srcObject = stream;
-                    remoteAudio.style.display = 'block';
-                    try { remoteAudio.play().catch(() => {}); } catch {}
-                }
-            };
-                const calleeCandCol = collection(callDocRef, 'calleeCandidates');
-                pc.onicecandidate = (e) => { if (e.candidate) addDoc(calleeCandCol, e.candidate.toJSON()); };
-                // Set remote offer
-                const offerDesc = new RTCSessionDescription(data.offer);
-                await pc.setRemoteDescription(offerDesc);
-                const answer = await pc.createAnswer();
-                await pc.setLocalDescription(answer);
-                await updateDoc(callDocRef, { answer: { sdp: answer.sdp, type: answer.type }, status: 'active', answeredAt: serverTimestamp(), answeredBy: currentUser.uid });
-                // Listen caller ICE
-                const callerCandCol = collection(callDocRef, 'callerCandidates');
-                unsubCallerCand = onSnapshot(callerCandCol, (snap) => {
-                    snap.docChanges().forEach(change => {
-                        if (change.type === 'added') {
-                            const cand = new RTCIceCandidate(change.doc.data());
-                            try { pc.addIceCandidate(cand); } catch {}
-                        }
-                    });
-                });
-            } catch (e) {
-                endCall();
-            } finally {
-                // cleanup incoming doc tracking
-                if (unsubIncomingCallDoc) try { unsubIncomingCallDoc(); } catch(_){}
-                incomingCallDoc = null;
-            }
-        }
+        // Incoming listener handled by CallManager
+        async function acceptIncomingCall(docSnap) { /* Replaced by CallManager.accept() */ }
 
-        function openCallUI(isVideo) {
-            callModal.style.display = 'flex';
-            callTitle.textContent = isVideo ? 'Video Call' : 'Voice Call';
-            voiceWrap.style.display = isVideo ? 'none' : 'block';
-            videoWrap.style.display = isVideo ? 'block' : 'none';
-        }
+        function openCallUI(isVideo) { /* Replaced by CallManager.openUI() */ }
 
-        // Show incoming prompt (caller not auto-accepted)
-        async function showIncomingPrompt(docSnap) {
-            try {
-                incomingCallDoc = docSnap;
-                const data = docSnap.data();
-                const isVideo = !!data.video;
-                // Fetch caller name if possible
-                let callerName = 'Caller';
-                try { const p = await loadFriendProfile(data.callerId); if (p) callerName = p.displayName || 'Caller'; } catch(_){}
-                callTitle.textContent = `Incoming ${isVideo ? 'Video' : 'Voice'} Call — ${callerName}`;
-                if (voiceWrap) voiceWrap.style.display = isVideo ? 'none' : 'block';
-                if (videoWrap) videoWrap.style.display = isVideo ? 'block' : 'none';
-                // Show incoming controls
-                if (incomingControls) incomingControls.style.display = 'block';
-                if (endCallBtn) endCallBtn.style.display = 'none';
-                callModal.style.display = 'flex';
+        async function showIncomingPrompt(docSnap) { /* Replaced by CallManager.showIncoming() */ }
 
-                // Listen for remote cancellation/ended
-                try { if (unsubIncomingCallDoc) { unsubIncomingCallDoc(); unsubIncomingCallDoc = null; } } catch(_){}
-                unsubIncomingCallDoc = onSnapshot(docSnap.ref, (snap) => {
-                    const d = snap.data();
-                    if (!d) return;
-                    if (d.status === 'ended' || d.status === 'rejected') {
-                        // Caller cancelled or call rejected/ended
-                        try { if (incomingControls) incomingControls.style.display = 'none'; } catch(_){}
-                        callModal.style.display = 'none';
-                        if (unsubIncomingCallDoc) try { unsubIncomingCallDoc(); } catch(_){}
-                        incomingCallDoc = null;
-                        unsubIncomingCallDoc = null;
-                    }
-                });
-            } catch(e) { console.warn('showIncomingPrompt failed', e); }
-        }
+        async function rejectIncomingCall() { /* Replaced by CallManager.decline() */ }
 
-        async function rejectIncomingCall() {
-            try {
-                if (!incomingCallDoc) return;
-                await updateDoc(incomingCallDoc.ref, { status: 'rejected', processedBy: currentUser.uid, processedAt: serverTimestamp() });
-            } catch(e){ console.warn('rejectIncomingCall', e); }
-            try { if (incomingControls) incomingControls.style.display = 'none'; } catch(_){}
-            callModal.style.display = 'none';
-            if (unsubIncomingCallDoc) try { unsubIncomingCallDoc(); } catch(_){}
-            incomingCallDoc = null;
-            unsubIncomingCallDoc = null;
-        }
-
-        // Answer button handler
-        answerCallBtn?.addEventListener('click', async () => {
-            try {
-                if (!incomingCallDoc) return;
-                await acceptIncomingCall(incomingCallDoc);
-            } catch(e){ console.warn('Answer failed', e); }
-        });
-
-        // Reject button handler
-        rejectCallBtn?.addEventListener('click', async () => { await rejectIncomingCall(); });
-
-        async function endCall() {
-            try { pc && pc.getSenders().forEach(s => s.track && s.track.stop()); } catch {}
-            try { pc && pc.close(); } catch {}
-            pc = null;
-            try { unsubCallDoc && unsubCallDoc(); } catch {}
-            try { unsubCallerCand && unsubCallerCand(); } catch {}
-            try { unsubCalleeCand && unsubCalleeCand(); } catch {}
-            try { if (remoteVideo) remoteVideo.srcObject = null; } catch {}
-            try { if (remoteAudio) { remoteAudio.pause(); remoteAudio.srcObject = null; remoteAudio.style.display = 'none'; } } catch {}
-            try { if (localVideo && localVideo.srcObject) { localVideo.srcObject.getTracks().forEach(t => t.stop()); localVideo.srcObject = null; } } catch {}
-            if (callDocRef) { try { await updateDoc(callDocRef, { status: 'ended' }); } catch {} }
-            callDocRef = null;
-            callModal.style.display = 'none';
-        }
+        async function endCall() { /* Replaced by CallManager.end() */ }
 
         inputEl.addEventListener('input', () => {
             inputEl.style.height = 'auto';
