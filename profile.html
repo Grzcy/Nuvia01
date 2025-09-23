@@ -5946,6 +5946,56 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
         })();
         const storage = getStorage(app);
 
+        // --- Global network error handling and safe fetch wrapper ---
+        // Lightweight non-blocking banner to show network errors to users
+        (function(){
+            const banner = document.createElement('div');
+            banner.id = 'networkErrorBanner';
+            banner.style.cssText = 'position:fixed;top:12px;left:50%;transform:translateX(-50%);background:#ff4d4f;color:#fff;padding:10px 16px;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,0.2);z-index:99999;display:none;font-weight:600;font-family:Inter, sans-serif;';
+            document.addEventListener('DOMContentLoaded', ()=> document.body.appendChild(banner));
+            window._showNetworkError = (msg = 'Network error: Failed to fetch. Some features may be unavailable.') => {
+                try { banner.textContent = msg; banner.style.display = 'block'; setTimeout(()=>{ banner.style.display = 'none'; }, 8000); } catch(_){}
+            };
+        })();
+
+        // Wrap native fetch to provide a retry and friendly message when network fails
+        (function(){
+            if (!window.fetch) return; // environment without fetch
+            const _nativeFetch = window.fetch.bind(window);
+            window.fetch = async function(...args) {
+                try {
+                    return await _nativeFetch(...args);
+                } catch (err) {
+                    console.error('Network fetch failed:', err);
+                    try { window._showNetworkError && window._showNetworkError('Network error: Failed to fetch. Retrying...'); } catch(_){}
+                    // Retry once after a short delay
+                    try {
+                        await new Promise(r => setTimeout(r, 1000));
+                        return await _nativeFetch(...args);
+                    } catch (err2) {
+                        console.error('Network fetch retry failed:', err2);
+                        try { window._showNetworkError && window._showNetworkError('Network error: Failed to fetch. Please check your connection.'); } catch(_){}
+                        throw err2;
+                    }
+                }
+            };
+
+            // Global handlers to surface fetch-related unhandled errors
+            window.addEventListener('unhandledrejection', (ev) => {
+                const reason = ev.reason || {};
+                const msg = reason.message || String(reason);
+                if (msg && msg.toLowerCase().includes('failed to fetch')) {
+                    try { window._showNetworkError && window._showNetworkError('Network error: Failed to fetch. Some features may be unavailable.'); } catch(_){}
+                }
+            });
+            window.addEventListener('error', (ev) => {
+                const msg = ev && ev.message ? ev.message : '';
+                if (msg && msg.toLowerCase().includes('failed to fetch')) {
+                    try { window._showNetworkError && window._showNetworkError('Network error: Failed to fetch. Some features may be unavailable.'); } catch(_){}
+                }
+            });
+        })();
+
         // --- JCHAT Loader Management ---
         const jchatLoader = document.getElementById('jchatLoader');
         let loaderTimeout;
