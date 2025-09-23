@@ -12548,6 +12548,41 @@ async function fetchAndDisplayPosts() {
                 openReferralShareOptions(shareRefBtn);
                 return;
             }
+            // Per-post share button: open post share modal (uses .share-post-button, .share-btn, or post-action-btn.share-btn)
+            const postShareBtn = ev.target.closest('.share-post-button, .share-btn, .post-action-btn.share-btn, [data-action="share"]');
+            if (postShareBtn) {
+                try{
+                    // Determine postId
+                    let postId = postShareBtn.dataset.postId || postShareBtn.getAttribute('data-post-id');
+                    if(!postId){
+                        const card = postShareBtn.closest('.post-card');
+                        if(card) postId = card.dataset.postId;
+                    }
+                    // Attempt to pull content/media from DOM if available
+                    let content = '';
+                    let mediaUrl = '';
+                    if (postId) {
+                        const card = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+                        if (card) {
+                            const txtEl = card.querySelector('.post-content p, .post-content-text p, .post-text');
+                            if (txtEl) content = txtEl.textContent || '';
+                            const img = card.querySelector('.post-media img');
+                            const vid = card.querySelector('.post-media video');
+                            if (img && img.src) mediaUrl = img.src;
+                            else if (vid && vid.src) mediaUrl = vid.src;
+                        }
+                    }
+                    // If no postId found, fallback to invoking sharePost logic that shares link if possible
+                    if (!postId) {
+                        // fallback: use old sharePost behavior
+                        const onclickStr = postShareBtn.getAttribute('onclick') || '';
+                        const m = onclickStr.match(/sharePost\(['"]([^'"]+)['"]\)/);
+                        if (m) postId = m[1];
+                    }
+                    openSharePostModal(postId || '', content || '', mediaUrl || '');
+                }catch(e){ console.error('postShareBtn handler error', e); }
+                return;
+            }
             const tagLink = ev.target.closest('.hashtag-link');
             if (tagLink) {
                 const tag = tagLink.dataset.tag;
