@@ -571,7 +571,9 @@
                     try{
                         const d = snap.data() || {};
                         if (d.incomingCallClearedId && d.incomingCallClearedAt) {
-                            if (callDocRef && callDocRef.id === d.incomingCallClearedId) {
+                            const signaledId = d.incomingCallClearedId;
+                            const matches = (callDocRef && callDocRef.id === signaledId) || (currentIncomingDoc && currentIncomingDoc.id === signaledId);
+                            if (matches) {
                                 endCall();
                             }
                             try{ updateDoc(myPub, { incomingCallClearedId: null, incomingCallClearedAt: null }); }catch(_){ }
