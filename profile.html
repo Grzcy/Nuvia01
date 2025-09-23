@@ -6492,6 +6492,7 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
         let isAuthReady = false; // Flag to indicate if auth state has been checked
         const ADMIN_UID = 'cc96gdhCRPO72NFZtleRCujHvIq2'; // Admin's User ID
         let currentSystemSettings = {}; // To store system settings (like exchange rates)
+        let isProfileOwner = false; // True if the displayed profile belongs to the current user
 
         // NEW: Online Status Tracking (exactly like Chat.html)
         let userOnlineStatus = new Map(); // Track online status of users
@@ -8962,11 +8963,13 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
                 // Displaying current user's profile (private data)
                 profileDocRef = doc(db, "artifacts", appId, "users", userIdToDisplay, "profiles", "user_profile");
                 isCurrentUserProfile = true;
+                isProfileOwner = true;
                 if (profilePicWrapper) profilePicWrapper.classList.add('owner'); // Null check
             } else {
                 // Displaying another user's profile (public data)
                 profileDocRef = doc(db, "artifacts", appId, "public", "data", "users", userIdToDisplay);
                 isCurrentUserProfile = false;
+                isProfileOwner = false;
                 if (profilePicWrapper) profilePicWrapper.classList.remove('owner'); // Null check
             }
 
@@ -10165,7 +10168,7 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
             
             if (friendsStatItem && friendsButtonIcon && selectFriendModal) {
                 friendsStatItem.addEventListener('click', () => {
-                    if (!isCurrentUserProfile) return; // Disable for viewers of other users
+                    if (!isProfileOwner) return; // Disable for viewers of other users
                     // Add button press effect
                     friendsStatItem.style.transform = 'scale(0.95)';
                     setTimeout(() => {
