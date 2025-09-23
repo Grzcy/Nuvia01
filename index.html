@@ -11793,6 +11793,7 @@ async function fetchAndDisplayPosts() {
         // --- Incoming message ticker (below header) ---
         let __incomingTickerUnsub = null;
         let __lastIncomingByChat = {};
+        const __chatMsgUnsubs = new Map();
         function loadLastIncomingState(){ try{ __lastIncomingByChat = JSON.parse(localStorage.getItem('nuvia_last_incoming_by_chat')||'{}')||{}; }catch(_){ __lastIncomingByChat={}; } }
         function saveLastIncomingState(){ try{ localStorage.setItem('nuvia_last_incoming_by_chat', JSON.stringify(__lastIncomingByChat)); }catch(_){ } }
         function showIncomingTicker({ senderId, senderName, messageId, text }){
@@ -11805,7 +11806,6 @@ async function fetchAndDisplayPosts() {
             const open = ()=>{ window.location.href = `/chat.html?partnerId=${encodeURIComponent(senderId)}#msg-${encodeURIComponent(messageId)}`; hideTicker(); };
             el.onclick = open; el.onkeydown = (e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); open(); } };
             cont.style.display = 'block';
-            // Auto-hide after a while to avoid sticking
             clearTimeout(el.__hideTimer); el.__hideTimer = setTimeout(()=> hideTicker(), 15000);
             function hideTicker(){ cont.style.display = 'none'; }
         }
@@ -11814,31 +11814,38 @@ async function fetchAndDisplayPosts() {
                 loadLastIncomingState();
                 if (!isAuthReady || !currentUser) return;
                 if (__incomingTickerUnsub) { try{ __incomingTickerUnsub(); }catch(_){ } __incomingTickerUnsub=null; }
-                // Listen to my chats via array-contains, then inspect latest message per changed chat
                 const chatsCol = collection(db, 'artifacts', appId, 'public', 'data', 'chats');
                 const qChats = query(chatsCol, where('participants', 'array-contains', currentUser.uid));
-                __incomingTickerUnsub = onSnapshot(qChats, async (snap)=>{
-                    try{
-                        const changes = snap.docChanges();
-                        for (const ch of changes){
-                            if (ch.type !== 'added' && ch.type !== 'modified') continue;
-                            const chatId = ch.doc.id;
-                            const messagesCol = collection(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'messages');
-                            const lastSnap = await getDocs(query(messagesCol, orderBy('timestamp','desc'), limit(1)));
-                            if (lastSnap.empty) continue;
-                            const lastDoc = lastSnap.docs[0];
-                            const m = lastDoc.data()||{};
-                            const tsMs = m.timestamp?.toMillis?.() || Date.now();
-                            const lastSeen = Number(__lastIncomingByChat[chatId]||0);
-                            if (m.senderId === currentUser.uid) { __lastIncomingByChat[chatId] = tsMs; saveLastIncomingState(); continue; }
-                            if (tsMs <= lastSeen) continue;
-                            __lastIncomingByChat[chatId] = tsMs; saveLastIncomingState();
-                            // Load sender displayName
-                            let name = 'Friend';
-                            try { const pref = doc(db, 'artifacts', appId, 'public', 'data', 'users', m.senderId); const ps = await getDoc(pref); const pd = ps.exists()? (ps.data()||{}) : {}; name = pd.displayName || pd.username || name; } catch(_){ }
-                            showIncomingTicker({ senderId: m.senderId, senderName: name, messageId: lastDoc.id, text: (m.text||m.fileName||'') });
+                __incomingTickerUnsub = onSnapshot(qChats, (snap)=>{
+                    const presentIds = new Set();
+                    snap.forEach(docSnap => {
+                        const chatId = docSnap.id;
+                        presentIds.add(chatId);
+                        if (!__chatMsgUnsubs.has(chatId)) {
+                            try{
+                                const messagesCol = collection(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'messages');
+                                const qLast = query(messagesCol, orderBy('timestamp','desc'), limit(1));
+                                const unsubMsg = onSnapshot(qLast, async (msnap)=>{
+                                    if (msnap.empty) return;
+                                    const lastDoc = msnap.docs[0];
+                                    const m = lastDoc.data()||{};
+                                    const tsMs = m.timestamp?.toMillis?.() || Date.now();
+                                    if (m.senderId === currentUser.uid) { __lastIncomingByChat[chatId] = tsMs; saveLastIncomingState(); return; }
+                                    const lastSeen = Number(__lastIncomingByChat[chatId]||0);
+                                    if (tsMs <= lastSeen) return;
+                                    __lastIncomingByChat[chatId] = tsMs; saveLastIncomingState();
+                                    let name = 'Friend';
+                                    try { const pref = doc(db, 'artifacts', appId, 'public', 'data', 'users', m.senderId); const ps = await getDoc(pref); const pd = ps.exists()? (ps.data()||{}) : {}; name = pd.displayName || pd.username || name; } catch(_){ }
+                                    showIncomingTicker({ senderId: m.senderId, senderName: name, messageId: lastDoc.id, text: (m.text||m.fileName||'') });
+                                }, (err)=>{ /* silent */ });
+                                __chatMsgUnsubs.set(chatId, unsubMsg);
+                            }catch(_){ }
                         }
-                    }catch(err){ console.warn('incoming banner listener error', err); }
+                    });
+                    // cleanup for chats no longer present
+                    for (const [cid, unsub] of __chatMsgUnsubs.entries()) {
+                        if (!presentIds.has(cid)) { try{ unsub(); }catch(_){ } __chatMsgUnsubs.delete(cid); }
+                    }
                 }, (err)=>{ console.warn('incoming chats subscribe error', err); });
             }catch(e){ console.warn('startIncomingMessageBanner failed', e); }
         }
@@ -13911,7 +13918,7 @@ async function fetchAndDisplayPosts() {
                     ${postData.premiumOptions ? `
                         <div class="premium-post-indicators">
                             ${postData.premiumOptions.priority ? '<span class="premium-indicator priority">⭐ Priority</span>' : ''}
-                            ${postData.premiumOptions.exclusive ? '<span class="premium-indicator exclusive">����� Exclusive</span>' : ''}
+                            ${postData.premiumOptions.exclusive ? '<span class="premium-indicator exclusive">���� Exclusive</span>' : ''}
                             ${postData.premiumOptions.custom ? '<span class="premium-indicator custom">✨ Custom</span>' : ''}
                         </div>
                     ` : ''}
