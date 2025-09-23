@@ -832,6 +832,7 @@
         let unsubCallerCand = null;
         let unsubCalleeCand = null;
         let unsubCallSignals = null;
+        let unsubRingingCallDoc = null;
         const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
         backBtn.onclick = () => history.back();
 
@@ -1915,7 +1916,7 @@
                     const dot = document.querySelector(`[data-presence-id="${f.id}"]`);
                     const text = document.querySelector(`[data-presence-text-id="${f.id}"]`);
                     if (dot) dot.className = 'friend-dot ' + (cached.state === 'online' ? 'online' : cached.state === 'away' ? 'away' : '');
-                    if (text) text.textContent = cached.state === 'online' ? 'Online' : (cached.state === 'away' ? `Away • ${formatRelativeTime(cached.lastMs)}` : `Offline �� ${formatRelativeTime(cached.lastMs)}`);
+                    if (text) text.textContent = cached.state === 'online' ? 'Online' : (cached.state === 'away' ? `Away • ${formatRelativeTime(cached.lastMs)}` : `Offline • ${formatRelativeTime(cached.lastMs)}`);
                 }
             });
             // Blur messages while menu open
