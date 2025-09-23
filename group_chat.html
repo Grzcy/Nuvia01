@@ -1808,6 +1808,7 @@
                     }
                 }
 
+                let createdMessageRef = null;
                 await runTransaction(db, async (transaction) => {
                     const userProfileRef = doc(db, "artifacts", appId, "users", currentUser.uid, "profiles", "user_profile");
                     const groupDocRef = doc(db, "artifacts", appId, "public", "data", "groups", groupId);
