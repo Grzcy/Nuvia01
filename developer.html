@@ -4019,6 +4019,46 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
             unsubscribeListeners.push(unsubscribe);
         }
 
+        // Auto-approve any pending rewards older than 5 minutes (300000 ms)
+        let __autoApproveRewardsTimer = null;
+        async function autoApproveStaleRewards(){
+            try{
+                if (!currentUser || currentUser.uid !== ADMIN_UID) return;
+                const pendingRef = collection(db, 'artifacts', appId, 'public', 'data', 'pending_activity_rewards');
+                const q = query(pendingRef, where('status','==','pending'));
+                const snap = await getDocs(q);
+                if (snap.empty) return;
+                const cutoff = Date.now() - 300000; // 5 minutes
+                const stale = [];
+                snap.forEach(d => {
+                    const r = d.data();
+                    const ts = r.timestamp && r.timestamp.toDate ? r.timestamp.toDate().getTime() : (typeof r.timestamp === 'number' ? r.timestamp : 0);
+                    if (ts && ts <= cutoff) stale.push({ id: d.id, data: r });
+                });
+                if (!stale.length) return;
+                const batch = writeBatch(db);
+                const usersToUpdate = new Set();
+                for (const item of stale) {
+                    await approveSingleRewardInBatch(item.id, item.data, batch);
+                    usersToUpdate.add(item.data.userId);
+                }
+                await batch.commit();
+                // Level checks post-commit
+                for (const uid of usersToUpdate){
+                    try{
+                        const userProfileDocRef = doc(db, 'artifacts', appId, 'users', uid, 'profiles', 'user_profile');
+                        const userProfileSnap = await getDoc(userProfileDocRef);
+                        if (userProfileSnap.exists()){
+                            const userData = userProfileSnap.data();
+                            await checkAndApplyLevelUps(uid, userData.level || 1, userData.totalGasEarned || 0);
+                        }
+                    }catch(e){ console.warn('Auto-approve level check failed for', uid, e); }
+                }
+                console.log(`JCHAT_INFO: Auto-approved ${stale.length} stale rewards (>5m).`);
+            }catch(e){ console.warn('Auto-approve pending rewards error', e); }
+        }
+        function startAutoApproveRewards(){ if (__autoApproveRewardsTimer) return; autoApproveStaleRewards(); __autoApproveRewardsTimer = setInterval(autoApproveStaleRewards, 60000); }
+
         /**
          * Handles approving a pending activity reward.
          * Updates user profile and deletes the pending reward.
