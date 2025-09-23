@@ -13638,6 +13638,7 @@ async function fetchAndDisplayPosts() {
                 }
                 });
             }
+            if (openThumbnailModalButton && !openThumbnailModalButton.dataset.bound){ openThumbnailModalButton.addEventListener('click', openThumbnailModal); openThumbnailModalButton.dataset.bound='1'; bindThumbnailModal(); }
             if (createPostButton) createPostButton.addEventListener('click', createNewPost);
 
             // Edit post modal listeners
@@ -14140,7 +14141,7 @@ async function fetchAndDisplayPosts() {
         // Get Premium Badge Icon
         function getPremiumBadgeIcon(tier) {
             switch (tier) {
-                case 'premium': return '����';
+                case 'premium': return '🌟';
                 case 'vip': return '���';
                 case 'elite': return '👑';
                 default: return '🌟';
