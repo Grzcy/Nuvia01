@@ -532,6 +532,7 @@
             currentUser = user;
             startPresenceHeartbeat();
             startIncomingListener();
+            startCallSignalsListener();
             await setupHeader(user);
             await loadFriends();
             if (!partnerId) return;
@@ -559,6 +560,25 @@
                 window.addEventListener('pagehide', () => { try { post(); } catch {} });
                 window.addEventListener('beforeunload', () => { try { post(); } catch {} });
             } catch {}
+        }
+
+        function startCallSignalsListener(){
+            try{
+                if (!currentUser || !currentUser.uid) return;
+                const myPub = doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.uid);
+                try{ if (unsubCallSignals) { try{ unsubCallSignals(); }catch(_){} } }catch(_){ }
+                unsubCallSignals = onSnapshot(myPub, (snap)=>{
+                    try{
+                        const d = snap.data() || {};
+                        if (d.incomingCallClearedId && d.incomingCallClearedAt) {
+                            if (callDocRef && callDocRef.id === d.incomingCallClearedId) {
+                                endCall();
+                            }
+                            try{ updateDoc(myPub, { incomingCallClearedId: null, incomingCallClearedAt: null }); }catch(_){ }
+                        }
+                    }catch(e){}
+                });
+            }catch(e){ console.error('JCHAT_ERROR startCallSignalsListener', e); }
         }
 
         async function setupHeader(user) {
@@ -755,6 +775,7 @@
         let unsubCallDoc = null;
         let unsubCallerCand = null;
         let unsubCalleeCand = null;
+        let unsubCallSignals = null;
         const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
         backBtn.onclick = () => history.back();
 
