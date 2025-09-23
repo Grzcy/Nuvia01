@@ -1325,6 +1325,12 @@
                 } else {
                     content = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><i class="fas fa-microphone"></i><span>Voice note</span><i class="fas fa-spinner fa-spin"></i></div>`;
                 }
+            } else if (m.type === 'call') {
+                const kind = (m.callKind || '').toLowerCase();
+                const icon = kind === 'video' ? '<i class="fas fa-video"></i>' : '<i class="fas fa-phone"></i>';
+                const label = kind === 'video' ? 'Video call' : 'Voice call';
+                const dur = typeof m.durationMs === 'number' ? formatDuration(m.durationMs) : (m.text || '');
+                content = `<div style="display:flex;align-items:center;gap:8px">${icon}<span>${label} • ${escapeHtml(dur)}</span></div>`;
             } else {
                 content = escapeHtml(m.text || '');
             }
