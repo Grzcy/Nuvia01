@@ -5541,7 +5541,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 el.innerHTML = `
                     <div class="offline-banner-inner">
                         <span class="offline-icon"><i class="fas fa-wifi"></i></span>
-                        <span class="offline-text">No internet connection. We���ll reconnect when you���re back online.</span>
+                        <span class="offline-text">No internet connection. We’ll reconnect when you���re back online.</span>
                     </div>`;
                 document.body.appendChild(el);
             }
@@ -6853,6 +6853,9 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 postMediaUpload = document.getElementById('postMediaUpload');
                 mediaImagePreview = document.getElementById('mediaImagePreview');
                 mediaVideoPreview = document.getElementById('mediaVideoPreview');
+                videoThumbnailControls = document.getElementById('videoThumbnailControls');
+                openThumbnailModalButton = document.getElementById('openThumbnailModalButton');
+                videoThumbnailPreview = document.getElementById('videoThumbnailPreview');
                 createPostButton = document.getElementById('createPostButton');
                 postsFeed = document.getElementById('postsFeed');
                 loadingPostsMessage = document.getElementById('loadingPostsMessage');
