@@ -447,6 +447,10 @@
         // Global error & rejection handlers for clearer debugging
         window.addEventListener('error', (ev)=>{ console.error('Global error caught:', ev.error || ev.message, ev); });
         window.addEventListener('unhandledrejection', (ev)=>{ console.error('Unhandled rejection:', ev.reason); });
+// Minimal message box used by this page for error/info notifications
+function showMessageBox(message, type = 'info') {
+    try { console.log('[MessageBox]', type, message); } catch(_) {}
+}
 
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
@@ -557,7 +561,7 @@
         });
 
         onAuthStateChanged(auth, async (user) => {
-            if (!user) { window.location.href = '/Login.html'; return; }
+            if (!user) { window.location.href = '/login.html'; return; }
             currentUser = user;
             startPresenceHeartbeat();
             await setupHeader(user);
@@ -635,7 +639,7 @@
                         if (statusText) {
                             if (state === 'online') statusText.textContent = 'Online';
                             else if (state === 'away') statusText.textContent = `Away • ${formatRelativeTime(lastMs)}`;
-                            else statusText.textContent = `Offline �� ${formatRelativeTime(lastMs)}`;
+                            else statusText.textContent = `Offline • ${formatRelativeTime(lastMs)}`;
                         }
                         const pill = document.getElementById('partnerStatus');
                         if (pill) {
@@ -770,7 +774,7 @@ switchCamBtn?.addEventListener('click', async () => { try{ await switchCamera();
                 callTitle.textContent = isVideo ? 'Incoming Video Call' : 'Incoming Voice Call';
                 try{ ensureMediaUnlocked(); }catch(_){ }
                 const cs = document.getElementById('callStatus');
-                if (cs) cs.textContent = 'Ringing���';
+                if (cs) cs.textContent = 'Ringing…';
                 if (incomingActions) incomingActions.style.display = 'flex';
                 if (acceptCallBtn) acceptCallBtn.style.display = 'inline-flex';
                 if (declineCallBtn) declineCallBtn.style.display = 'none';
