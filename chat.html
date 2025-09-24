@@ -1308,7 +1308,7 @@
                     try { localVideo.play().catch(()=>{}); } catch(_){}
                 }
                 pc = new RTCPeerConnection(rtcConfig);
-                try{ pc.oniceconnectionstatechange = () => { const st = pc.iceConnectionState; const cs = document.getElementById('callStatus'); if (st === 'checking') { if (cs) cs.textContent = 'Connecting…'; } else if (st === 'connected' || st === 'completed') { if (!callStartMs) { callStartMs = Date.now(); startCallTimer(); } if (cs) cs.textContent = 'Connected'; } else if (st === 'disconnected') { if (cs) cs.textContent = 'Reconnecting…'; } else if (st === 'failed') { if (cs) cs.textContent = 'Connection failed'; endCall(); } }; }catch(_){ }
+                try{ pc.oniceconnectionstatechange = () => { const st = pc.iceConnectionState; console.log('PC ICE STATE', st); const cs = document.getElementById('callStatus'); if (st === 'checking') { if (cs) cs.textContent = 'Connecting…'; } else if (st === 'connected' || st === 'completed') { if (!callStartMs) { callStartMs = Date.now(); startCallTimer(); } if (cs) cs.textContent = 'Connected'; try { if (pc && pc.getStats) pc.getStats().then(stats => { console.log('PC getStats on connected', stats); }).catch(()=>{}); } catch(e){} } else if (st === 'disconnected') { if (cs) cs.textContent = 'Reconnecting…'; } else if (st === 'failed') { if (cs) cs.textContent = 'Connection failed'; endCall(); } }; }catch(_){ }
                 // Ensure ontrack attached before adding local tracks
                 pc.ontrack = (e) => {
                     try {
