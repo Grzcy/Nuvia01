@@ -5617,7 +5617,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         window.addEventListener('unhandledrejection', (event) => {
             try {
                 const msg = String(event.reason && (event.reason.message || event.reason)).toLowerCase();
-                if (msg.includes('failed to fetch') || msg.includes('networkerror') || msg.includes('load failed')) {
+                if (msg.includes('failed to fetch') || msg.includes('networkerror') || msg.includes('load failed') || msg.includes('client is offline') || msg.includes('could not reach cloud firestore backend') || msg.includes('deadline-exceeded')) {
                     event.preventDefault();
                     console.warn('Nuvia_WARN: Suppressed network fetch rejection:', event.reason);
                 }
