@@ -530,26 +530,7 @@
             } catch {}
         }
 
-        function startCallSignalsListener(){
-            try{
-                if (!currentUser || !currentUser.uid) return;
-                const myPub = doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.uid);
-                try{ if (unsubCallSignals) { try{ unsubCallSignals(); }catch(_){} } }catch(_){ }
-                unsubCallSignals = onSnapshot(myPub, (snap)=>{
-                    try{
-                        const d = snap.data() || {};
-                        if (d.incomingCallClearedId && d.incomingCallClearedAt) {
-                            const signaledId = d.incomingCallClearedId;
-                            const matches = (callDocRef && callDocRef.id === signaledId) || (currentIncomingDoc && currentIncomingDoc.id === signaledId);
-                            if (matches) {
-                                endCall();
-                            }
-                            try{ updateDoc(myPub, { incomingCallClearedId: null, incomingCallClearedAt: null }); }catch(_){ }
-                        }
-                    }catch(e){}
-                });
-            }catch(e){ console.error('JCHAT_ERROR startCallSignalsListener', e); }
-        }
+        function startCallSignalsListener(){}
 
         async function setupHeader(user) {
             const userProfileRef = doc(db, "artifacts", appId, "users", user.uid, "profiles", "user_profile");
@@ -636,65 +617,6 @@
         const emojiGrid = document.getElementById('emojiGrid');
         const emojiTabs = document.getElementById('emojiTabs');
         const voiceMsgBtn = document.getElementById('voiceMsgBtn');
-        const videoCallBtn = document.getElementById('videoCallBtn');
-        const callModal = document.getElementById('callModal');
-        const callTitle = document.getElementById('callTitle');
-        const endCallBtn = document.getElementById('endCallBtn');
-        const videoWrap = document.getElementById('videoWrap');
-        const localVideo = document.getElementById('localVideo');
-        const remoteVideo = document.getElementById('remoteVideo');
-        const remoteAvatarPlaceholder = document.getElementById('remoteAvatarPlaceholder');
-        const incomingActions = document.getElementById('incomingActions');
-        const acceptCallBtn = document.getElementById('acceptCallBtn');
-        const declineCallBtn = document.getElementById('declineCallBtn');
-        let isIncoming = false;
-        let currentIncomingDoc = null;
-        let ringtoneTimer = null;
-        let acceptInProgressDocId = null;
-        let ringtoneOsc = null;
-        let ringtoneCtx = null;
-        let isCaller = false;
-        let callKind = 'video';
-        let callStartMs = null;
-        let ringTimeoutId = null;
-        let incomingRingTimeoutId = null;
-        let currentUserProfile = null;
-        let callTimerInterval = null;
-
-        function startRingtone(){
-            try{
-                const el = document.getElementById('callRingtone');
-                if (!el) return;
-                el.volume = 0.8;
-                el.currentTime = 0;
-                el.play().catch(()=>{});
-            }catch(_){ }
-        }
-        function stopRingtone(){
-            try{
-                const el = document.getElementById('callRingtone');
-                if (!el) return;
-                el.pause();
-                el.currentTime = 0;
-            }catch(_){ }
-        }
-        function startCallerRingtone(){
-            try{
-                const el = document.getElementById('callerRingtone');
-                if (!el) return;
-                el.volume = 0.7;
-                el.currentTime = 0;
-                el.play().catch(()=>{});
-            }catch(_){ }
-        }
-        function stopCallerRingtone(){
-            try{
-                const el = document.getElementById('callerRingtone');
-                if (!el) return;
-                el.pause();
-                el.currentTime = 0;
-            }catch(_){ }
-        }
 
         async function showIncomingPrompt(docSnap){
             // Attach a per-call snapshot listener for ringing state to detect remote hangup even before acceptance
@@ -821,7 +743,7 @@
         const rtcConfig = (window.__ice_servers && Array.isArray(window.__ice_servers) && window.__ice_servers.length)
             ? { iceServers: window.__ice_servers }
             : { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
-        function ensureMediaUnlocked(){
+        function ensureMediaUnlocked(){ return;
             try{ if (typeof AudioContext !== 'undefined') { const ac = new AudioContext(); if (ac.state === 'suspended') ac.resume().catch(()=>{}); } }catch(_){ }
             try{ if (remoteVideo) { remoteVideo.play().catch(()=>{}); } }catch(_){ }
             try{ if (localVideo) { localVideo.muted = true; localVideo.play().catch(()=>{}); } }catch(_){ }
@@ -1054,7 +976,7 @@
         }
 
 
-        async function startCall(isVideo) {
+        async function startCall(isVideo) { return;
             if (!currentPartner) return;
             isIncoming = false;
             isCaller = true;
@@ -1175,7 +1097,7 @@
 
         // Incoming call listener (basic)
         let unsubIncoming = null;
-        function startIncomingListener() {
+        function startIncomingListener() { return;
             try {
                 const callsCol = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
                 const q = query(callsCol, where('calleeId', '==', currentUser.uid), where('status', '==', 'ringing'), where('video', '==', true));
@@ -1227,7 +1149,7 @@
         // Start incoming listener on auth
         // (after currentUser is set)
         
-        async function acceptIncomingCall(docSnap) {
+        async function acceptIncomingCall(docSnap) { return;
             try {
                 isCaller = false;
                 callKind = 'video';
@@ -1340,7 +1262,7 @@
             }
         }
 
-        function openCallUI(isVideo) {
+        function openCallUI(isVideo) { return;
             callModal.style.display = 'flex';
             callTitle.textContent = 'Video Call';
             videoWrap.style.display = 'block';
@@ -1361,7 +1283,7 @@
             }
         }
 
-        async function endCall() {
+        async function endCall() { return;
             try{ clearTimeout(ringTimeoutId); }catch(_){ }
             try{ clearTimeout(incomingRingTimeoutId); }catch(_){ }
             stopRingtone();
@@ -1589,13 +1511,7 @@
                 } else {
                     content = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><i class="fas fa-microphone"></i><span>Voice note</span><i class="fas fa-spinner fa-spin"></i></div>`;
                 }
-            } else if (m.type === 'call') {
-                const kind = (m.callKind || '').toLowerCase();
-                const icon = kind === 'video' ? '<i class="fas fa-video"></i>' : '<i class="fas fa-phone"></i>';
-                const label = kind === 'video' ? 'Video call' : 'Voice call';
-                const dur = typeof m.durationMs === 'number' ? formatDuration(m.durationMs) : (m.text || '');
-                content = `<div style="display:flex;align-items:center;gap:8px">${icon}<span>${label} • ${escapeHtml(dur)}</span></div>`;
-            } else {
+else {
                 content = escapeHtml(m.text || '');
             }
             const actions = m.sender === 'current' ? `<span class="msg-actions"><button class="menu-btn" title="More" data-menu-id="${m.id}"><i class=\"fas fa-ellipsis-v\"></i></button></span>` : '';
@@ -1682,7 +1598,7 @@
             return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
         }
 
-        function startCallTimer() {
+        function startCallTimer() { return;
             try {
                 const cs = document.getElementById('callStatus');
                 if (!cs) return;
@@ -1697,7 +1613,7 @@
             } catch {}
         }
 
-        function stopCallTimer() {
+        function stopCallTimer() { return;
             try { if (callTimerInterval) clearInterval(callTimerInterval); } catch {}
             callTimerInterval = null;
         }
@@ -1718,7 +1634,7 @@
             if (isTyping) typingTimer = setTimeout(() => handleTyping(false), 1200);
         }
 
-        async function logCallSummary(kind, startedAtMs, endedAtMs){
+        async function logCallSummary(kind, startedAtMs, endedAtMs){ return;
             try{
                 if (!currentUser || !currentPartner) return;
                 const chatId = chatIdFor(currentUser.uid, currentPartner.id);
@@ -1742,7 +1658,7 @@
             }catch(e){ /* ignore */ }
         }
 
-        async function handleMissedByCaller(){
+        async function handleMissedByCaller(){ return;
             try{
                 if (!callDocRef || callStartMs) return;
                 const snap = await getDoc(callDocRef);
