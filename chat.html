@@ -435,7 +435,7 @@
             appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
             measurementId: "G-S6Z9GG0R9P"
         };
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'jchat_1_0_0';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
         // Cloudinary config (same shape used in Profile.html)
         const cloudinaryConfig = {
@@ -848,33 +848,13 @@
         
         // --- WebRTC signaling (Firestore) ---
         let pc = null;
-        function preferCodecs(pc){
-            try{
-                const sendCapsAudio = (window.RTCRtpSender && RTCRtpSender.getCapabilities) ? RTCRtpSender.getCapabilities('audio') : null;
-                const sendCapsVideo = (window.RTCRtpSender && RTCRtpSender.getCapabilities) ? RTCRtpSender.getCapabilities('video') : null;
-                const tx = pc.getTransceivers ? pc.getTransceivers() : [];
-                tx.forEach(t => {
-                    if (!t.setCodecPreferences) return;
-                    const kind = t.receiver?.track?.kind || t.sender?.track?.kind;
-                    if (kind === 'audio' && sendCapsAudio && Array.isArray(sendCapsAudio.codecs)){
-                        const opusFirst = sendCapsAudio.codecs.filter(c=>/opus/i.test(c.mimeType)).concat(sendCapsAudio.codecs.filter(c=>!/opus/i.test(c.mimeType)));
-                        t.setCodecPreferences(opusFirst);
-                    } else if (kind === 'video' && sendCapsVideo && Array.isArray(sendCapsVideo.codecs)){
-                        const vp8First = sendCapsVideo.codecs.filter(c=>/vp8/i.test(c.mimeType)).concat(sendCapsVideo.codecs.filter(c=>!/vp8/i.test(c.mimeType)));
-                        t.setCodecPreferences(vp8First);
-                    }
-                });
-            }catch(_){ }
-        }
-        let callDocRef = null;
+                let callDocRef = null;
         let unsubCallDoc = null;
         let unsubCallerCand = null;
         let unsubCalleeCand = null;
         let unsubCallSignals = null;
         let unsubRingingCallDoc = null;
-        const rtcConfig = (window.__ice_servers && Array.isArray(window.__ice_servers) && window.__ice_servers.length)
-        ? { iceServers: window.__ice_servers }
-        : { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+        const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
         backBtn.onclick = () => history.back();
 
         // Emoji setup with categories and ~500 emojis
@@ -1030,7 +1010,7 @@
         voiceMsgBtn?.addEventListener('click', async () => {
             try {
                 if (!mediaRecorder || mediaRecorder.state === 'inactive') {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     recordedChunks = [];
                     mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
                     mediaRecorder.ondataavailable = e => { if (e.data && e.data.size > 0) recordedChunks.push(e.data); };
@@ -1117,10 +1097,7 @@
             const csEl = document.getElementById('callStatus');
             if (csEl) csEl.textContent = 'Calling…';
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-                    video: isVideo ? { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 24, max: 30 }, facingMode: 'user' } : false
-                });
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
                 if (endCallBtn) endCallBtn.style.display = 'inline-flex';
                 startCallerRingtone();
                 try{ clearTimeout(ringTimeoutId); }catch(_){ }
@@ -1130,9 +1107,8 @@
                     try { localVideo.play().catch(()=>{}); } catch(_){}
                 }
                 pc = new RTCPeerConnection(rtcConfig);
-                try{ pc.oniceconnectionstatechange = () => { const st = pc.iceConnectionState; const cs = document.getElementById('callStatus'); if (st === 'checking') { if (cs) cs.textContent = 'Connecting…'; } else if (st === 'connected' || st === 'completed') { if (!callStartMs) { callStartMs = Date.now(); startCallTimer(); } } else if (st === 'disconnected') { if (cs) cs.textContent = 'Reconnecting…'; } else if (st === 'failed') { if (cs) cs.textContent = 'Connection failed'; endCall(); } }; }catch(_){ }
                 stream.getTracks().forEach(t => pc.addTrack(t, stream));
-                preferCodecs(pc);
+                
                 pc.ontrack = (e) => {
                     const rstream = e.streams[0];
                     if (!callStartMs) {
@@ -1282,18 +1258,14 @@
                     });
                 }
 
-                const stream = await navigator.mediaDevices.getUserMedia({
-                audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-                video: desiredVideo ? { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 24, max: 30 }, facingMode: 'user' } : false
-            });
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: desiredVideo });
                 if (desiredVideo) {
                     localVideo.srcObject = stream;
                     try { localVideo.play().catch(()=>{}); } catch(_){}
                 }
                 pc = new RTCPeerConnection(rtcConfig);
-                try{ pc.oniceconnectionstatechange = () => { const st = pc.iceConnectionState; const cs = document.getElementById('callStatus'); if (st === 'checking') { if (cs) cs.textContent = 'Connecting…'; } else if (st === 'connected' || st === 'completed') { if (!callStartMs) { callStartMs = Date.now(); startCallTimer(); } } else if (st === 'disconnected') { if (cs) cs.textContent = 'Reconnecting…'; } else if (st === 'failed') { if (cs) cs.textContent = 'Connection failed'; endCall(); } }; }catch(_){ }
                 stream.getTracks().forEach(t => pc.addTrack(t, stream));
-                preferCodecs(pc);
+                
                 pc.ontrack = (e) => {
                     const rstream = e.streams[0];
                     if (!callStartMs) {
@@ -1998,56 +1970,26 @@
 
         async function loadFriends() {
             if (!currentUser) return;
-            let usedPrimary = false;
-            const useFriendIds = async (ids) => {
-                const loads = ids.map(async (fid) => {
-                    try {
-                        const profRef = doc(db, "artifacts", appId, "users", fid, "profiles", "user_profile");
-                        const ps = await getDoc(profRef);
-                        if (!ps.exists()) return null;
-                        const pd = ps.data();
-                        return { id: fid, displayName: pd.displayName || pd.username || `User_${fid.slice(0,8)}`, username: pd.username || '', profilePicId: pd.profilePicId || null };
-                    } catch { return null; }
+            // Same collection path as Find_Friends.html public friends list
+            const publicFriendsRef = collection(db, "artifacts", appId, "public", "data", "friends");
+            onSnapshot(publicFriendsRef, async (snapshot) => {
+                const friendIds = new Set();
+                snapshot.forEach(docSnap => {
+                    const d = docSnap.data();
+                    if (d.user1Id === currentUser.uid) friendIds.add(d.user2Id);
+                    else if (d.user2Id === currentUser.uid) friendIds.add(d.user1Id);
+                });
+                const loads = Array.from(friendIds).map(async (fid) => {
+                    const profRef = doc(db, "artifacts", appId, "users", fid, "profiles", "user_profile");
+                    const ps = await getDoc(profRef);
+                    if (!ps.exists()) return null;
+                    const pd = ps.data();
+                    return { id: fid, displayName: pd.displayName || pd.username || `User_${fid.slice(0,8)}`, username: pd.username || '', profilePicId: pd.profilePicId || null };
                 });
                 const arr = (await Promise.all(loads)).filter(Boolean);
                 friendsData = arr;
                 renderFriends();
-            };
-            try {
-                const userFriendsRef = collection(db, "artifacts", appId, "users", currentUser.uid, "friends");
-                onSnapshot(userFriendsRef, async (snapshot) => {
-                    const ids = snapshot.docs.map(d => d.id);
-                    if (ids.length > 0) {
-                        usedPrimary = true;
-                        await useFriendIds(ids);
-                    } else if (!usedPrimary) {
-                        const publicFriendsRef = collection(db, "artifacts", appId, "public", "data", "friends");
-                        onSnapshot(publicFriendsRef, async (snap) => {
-                            const set = new Set();
-                            snap.forEach(docSnap => {
-                                const d = docSnap.data();
-                                if (d.user1Id === currentUser.uid) set.add(d.user2Id);
-                                else if (d.user2Id === currentUser.uid) set.add(d.user1Id);
-                            });
-                            await useFriendIds(Array.from(set));
-                        });
-                    } else {
-                        await useFriendIds([]);
-                    }
-                });
-            } catch {
-                // Fallback straight to public edges if user friends ref fails
-                const publicFriendsRef = collection(db, "artifacts", appId, "public", "data", "friends");
-                onSnapshot(publicFriendsRef, async (snap) => {
-                    const set = new Set();
-                    snap.forEach(docSnap => {
-                        const d = docSnap.data();
-                        if (d.user1Id === currentUser.uid) set.add(d.user2Id);
-                        else if (d.user2Id === currentUser.uid) set.add(d.user1Id);
-                    });
-                    await useFriendIds(Array.from(set));
-                });
-            }
+            });
         }
 
         function renderFriends() {
