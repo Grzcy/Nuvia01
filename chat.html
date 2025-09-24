@@ -1112,11 +1112,9 @@ backBtn.onclick = () => history.back();
                             callStartMs = Date.now();
                             startCallTimer();
                         }
-                        if (isVideo) {
-                            remoteVideo.srcObject = remoteMediaStream;
-                            try { remoteVideo.play().catch(()=>{}); } catch(_){ }
-                            if (remoteAvatarPlaceholder) remoteAvatarPlaceholder.style.display = 'none';
-                        }
+                        remoteVideo.srcObject = remoteMediaStream;
+                        try { remoteVideo.play().catch(()=>{}); } catch(_){ }
+                        if (isVideo && remoteAvatarPlaceholder) remoteAvatarPlaceholder.style.display = 'none';
                     } catch (err) { console.warn('CALLER: ontrack handler error', err); }
                 };
                 // Add local tracks after ontrack handler is attached
