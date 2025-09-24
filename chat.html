@@ -775,7 +775,7 @@
                 callTitle.textContent = isVideo ? 'Incoming Video Call' : 'Incoming Voice Call';
                 try{ ensureMediaUnlocked(); }catch(_){ }
                 const cs = document.getElementById('callStatus');
-                if (cs) cs.textContent = 'Ringing…';
+                if (cs) cs.textContent = 'Ringing���';
                 if (incomingActions) incomingActions.style.display = 'flex';
                 if (endCallBtn) endCallBtn.style.display = 'none';
                 startRingtone();
@@ -1345,7 +1345,13 @@
                     }
                 };
                 const offerDesc = new RTCSessionDescription(data.offer);
-                await pc.setRemoteDescription(offerDesc);
+                console.log('CALLEE: setting remote description (offer)');
+                try {
+                    await pc.setRemoteDescription(offerDesc);
+                    console.log('CALLEE: setRemoteDescription(offer) success');
+                } catch (err) {
+                    console.error('CALLEE: setRemoteDescription(offer) failed', err);
+                }
                 const answer = await pc.createAnswer();
                 await pc.setLocalDescription(answer);
                 await updateDoc(callDocRef, { answer: { sdp: answer.sdp, type: answer.type }, status: 'accepted' });
