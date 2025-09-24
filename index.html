@@ -5769,7 +5769,10 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 // Fetch country with timeout
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 3000);
-                const response = await fetch('https://ipapi.co/json/', { signal: controller.signal, cache: 'no-store' });
+                const ac = new AbortController();
+                const to = setTimeout(() => ac.abort('timeout'), 3000);
+                const response = await fetch('https://ipapi.co/json/', { signal: ac.signal, cache: 'no-store' });
+                clearTimeout(to);
                 clearTimeout(timeoutId);
                 if (response && response.ok) {
                     const data = await response.json();
@@ -5781,7 +5784,11 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
 
                 try { localStorage.setItem('nuvia-user-currency', userCurrency.code); } catch (_) {}
             } catch (error) {
-                console.warn('Currency detection skipped:', error && (error.name || error.message || error));
+                if (error && error.name === 'AbortError') {
+                    // Silent timeout
+                } else {
+                    console.warn('Currency detection skipped:', error && (error.name || error.message || error));
+                }
             }
         }
 
@@ -5819,7 +5826,10 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 let fetchedRates = null;
                 for (const url of endpoints) {
                     try {
-                        const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+                        const ac = new AbortController();
+                        const to = setTimeout(() => ac.abort('timeout'), 4000);
+                        const res = await fetch(url, { signal: ac.signal, cache: 'no-store' });
+                        clearTimeout(to);
                         if (!res.ok) throw new Error(`HTTP ${res.status}`);
                         const payload = await res.json();
                         if (payload && payload.rates) {
@@ -5855,7 +5865,9 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 // No exchange rates from any endpoint
                 throw new Error('No exchange rates from any endpoint');
             } catch (error) {
-                console.warn('Exchange rates unavailable, using cache/fallback:', error && (error.name || error.message || error));
+                if (!(error && error.name === 'AbortError')) {
+                    console.warn('Exchange rates unavailable, using cache/fallback:', error && (error.name || error.message || error));
+                }
                 // Use cached rates if any, else fallback to approximate (NGN base)
                 try {
                     const cachedRaw = localStorage.getItem('nuvia-exchange-rates');
