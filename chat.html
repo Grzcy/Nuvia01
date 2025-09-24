@@ -1260,8 +1260,8 @@ backBtn.onclick = () => history.back();
                 const csEl = document.getElementById('callStatus');
                 if (csEl) csEl.textContent = 'Connecting…';
 
-                let latest = await getDoc(callDocRef);
-                let data = latest.data() || {};
+                latest = await getDoc(callDocRef);
+                data = latest.data() || {};
                 if (!data.offer) {
                     await new Promise((resolve, reject) => {
                         const timeout = setTimeout(()=>{ try{unsub && unsub();}catch(_){} reject(new Error('Offer timeout')); }, 12000);
