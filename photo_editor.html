@@ -36,13 +36,14 @@
     .canvas-box{ padding:16px; width:100%; display:flex; flex-direction:column; align-items:center; }
     canvas{ max-width: calc(92vw - 360px); max-height: 80vh; background: rgba(0,0,0,0.2); border: 1px solid var(--border-light, rgba(255,255,255,0.12)); border-radius: 10px; display:block; }
 
-    .controls-pane{ padding:14px; overflow:auto; -webkit-overflow-scrolling: touch; }
+    .controls-pane{ padding:14px; overflow:auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
     .divider{ height:1px; background: var(--border-light, rgba(255,255,255,0.12)); margin:12px 0; }
 
     .value-indicator{ color: var(--text-light, rgba(255,255,255,0.8)); font-variant-numeric: tabular-nums; }
     .range-row{ display:flex; align-items:center; gap:10px; }
     .range-row .label-text{ flex:1; display:flex; justify-content:space-between; align-items:center; }
     .range-row input[type="range"]{ width:100%; touch-action: pan-y; }
+    .accordion-inner select{ width:100%; }
 
     .accordion{ display:flex; flex-direction:column; gap:10px; }
     .accordion-section{ background: rgba(255,255,255,0.04); border:1px solid var(--border-light, rgba(255,255,255,0.12)); border-radius: var(--radius); overflow:hidden; }
@@ -57,7 +58,7 @@
     .chip{ display:flex; align-items:center; justify-content:center; padding:8px; border-radius:10px; background: rgba(255,255,255,0.06); border:1px solid var(--border-light, rgba(255,255,255,0.12)); cursor:pointer; font-weight:700; }
     .chip.active{ outline:2px solid var(--blue); }
 
-    .swatch-grid{ display:grid; grid-template-columns: repeat(8, 1fr); gap:8px; }
+    .swatch-grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(28px, 1fr)); gap:8px; }
     .swatch{ width:28px; height:28px; border-radius:50%; border:1px solid var(--border-light, rgba(255,255,255,0.12)); cursor:pointer; box-shadow: inset 0 0 0 2px rgba(255,255,255,0.15); }
     .swatch.selected{ outline:2px solid var(--blue); }
 
@@ -105,7 +106,7 @@
         <section class="accordion-section" data-section="composition" aria-expanded="true">
           <div class="accordion-header" role="button" tabindex="0" aria-controls="accBodyComposition" aria-expanded="true">
             <div class="accordion-title">Composition</div>
-            <div class="accordion-chev">▼</div>
+            <div class="accordion-chev">���</div>
           </div>
           <div class="accordion-body" id="accBodyComposition" style="max-height: 800px;">
             <div class="accordion-inner">
@@ -285,15 +286,31 @@
   (function(){
     function initAccordion(){
       const sections = document.querySelectorAll('.accordion-section');
+      const updateBody = (body, sec)=>{ if(sec.getAttribute('aria-expanded')==='true'){ body.style.maxHeight = body.scrollHeight + 'px'; } };
+      const ro = (typeof ResizeObserver!== 'undefined') ? new ResizeObserver((entries)=>{
+        entries.forEach(entry=>{ const body = entry.target; const sec = body.closest('.accordion-section'); if(sec){ updateBody(body, sec); } });
+      }) : null;
+
       sections.forEach(sec=>{
         const header = sec.querySelector('.accordion-header');
         const body = sec.querySelector('.accordion-body');
-        function setExpanded(exp){ sec.setAttribute('aria-expanded', exp ? 'true' : 'false'); body.style.maxHeight = exp ? body.scrollHeight + 'px' : '0px'; }
-        const expanded = sec.getAttribute('aria-expanded') === 'true'; setExpanded(expanded);
+        function setExpanded(exp){
+          sec.setAttribute('aria-expanded', exp ? 'true' : 'false');
+          body.style.maxHeight = exp ? (body.scrollHeight + 'px') : '0px';
+          if(exp){ setTimeout(()=>{ header.scrollIntoView({ behavior:'smooth', block:'nearest' }); }, 50); }
+        }
+        const expanded = sec.getAttribute('aria-expanded') === 'true';
+        setExpanded(expanded);
+        if(ro) ro.observe(body);
         header.addEventListener('click', ()=> setExpanded(sec.getAttribute('aria-expanded')!== 'true'));
         header.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); setExpanded(sec.getAttribute('aria-expanded')!== 'true'); }});
-        window.addEventListener('resize', ()=>{ if(sec.getAttribute('aria-expanded')==='true'){ body.style.maxHeight = body.scrollHeight + 'px'; }});
+        window.addEventListener('resize', ()=> updateBody(body, sec));
       });
+
+      const pane = document.querySelector('.controls-pane');
+      if(pane){ const refresh=()=>{ document.querySelectorAll('.accordion-section[aria-expanded="true"] .accordion-body').forEach(b=> b.style.maxHeight = b.scrollHeight + 'px'); };
+        pane.addEventListener('input', refresh); pane.addEventListener('change', refresh);
+      }
     }
 
     function setupSmartTouchRanges(){ try{ const ranges = document.querySelectorAll('.controls-pane input[type="range"]'); ranges.forEach(el=>{
