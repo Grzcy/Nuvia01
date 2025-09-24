@@ -387,7 +387,7 @@
     </style>
     <div id="callModal" class="call-modal">
         <div class="call-window">
-            <div class="call-header"><div class="call-title" id="callTitle">Video Call</div><div class="call-status" id="callStatus">Connecting��</div></div>
+            <div class="call-header"><div class="call-title" id="callTitle">Video Call</div><div class="call-status" id="callStatus">Connecting…</div></div>
             <div class="video-wrap" id="videoWrap">
                 <img id="remoteAvatarPlaceholder" class="remote-avatar" alt="">
                 <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
@@ -751,6 +751,8 @@ cameraBtn?.addEventListener('click', () => {
                 const cs = document.getElementById('callStatus');
                 if (cs) cs.textContent = 'Ringing���';
                 if (incomingActions) incomingActions.style.display = 'flex';
+                if (acceptCallBtn) acceptCallBtn.style.display = 'inline-flex';
+                if (declineCallBtn) declineCallBtn.style.display = 'none';
                 if (endCallBtn) endCallBtn.style.display = 'none';
                 startRingtone();
                 try{ clearTimeout(incomingRingTimeoutId); }catch(_){ }
