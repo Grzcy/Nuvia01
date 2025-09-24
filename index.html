@@ -14650,6 +14650,186 @@ function startPagePresence(){
 startPagePresence();
 </script>
 <script type="module" src="jchat-global-call-service.js" defer></script>
+<!-- Photo Editor Styles and Modal -->
+<style id="photo-editor-styles">
+  #photoEditorModal.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:1200}
+  #photoEditorModal.modal-overlay.show{display:flex}
+  #photoEditorModal .modal-content{background:var(--card-background);border:1px solid var(--border-light);backdrop-filter:blur(10px) saturate(180%);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.5);padding:0;max-width:min(960px,92vw);width:100%;display:flex;flex-direction:column}
+  .photo-editor-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border-light)}
+  .photo-editor-title{font-family:'Poppins',sans-serif;font-weight:800;color:var(--white)}
+  .photo-editor-body{display:grid;grid-template-columns: 1fr 320px; gap:0; align-items:stretch}
+  .photo-editor-canvas-wrap{padding:16px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.03)}
+  #photoEditorCanvas{max-width:100%;max-height:70vh;background:rgba(0,0,0,0.2);border:1px solid var(--border-light);border-radius:10px}
+  .photo-editor-controls{border-left:1px solid var(--border-light);padding:14px;max-height:72vh;overflow:auto}
+  .control-group{margin:10px 0}
+  .control-group label{display:flex;justify-content:space-between;align-items:center;color:var(--white);font-size:.9rem;margin-bottom:6px}
+  .control-group input[type=range], .control-group select{width:100%}
+  .editor-actions{display:flex;gap:10px;justify-content:flex-end;padding:12px 16px;border-top:1px solid var(--border-light)}
+  .editor-btn{background:var(--button-background);color:var(--white);border:none;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer;box-shadow:var(--button-shadow)}
+  .editor-btn.secondary{background:rgba(255,255,255,0.08);border:1px solid var(--border-light)}
+  .editor-btn.danger{background:var(--pink)}
+  .editor-divider{height:1px;background:var(--border-light);margin:10px 0}
+  .photo-editor-launch-btn{margin-left:8px;background:linear-gradient(90deg, var(--blue), var(--pink));color:#fff;border:none;border-radius:10px;padding:6px 10px;font-size:.85rem;cursor:pointer;box-shadow:var(--button-shadow)}
+  @media (max-width:860px){ .photo-editor-body{grid-template-columns:1fr} .photo-editor-controls{border-left:none;border-top:1px solid var(--border-light);max-height:none} }
+</style>
+<div id="photoEditorModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="photoEditorTitle">
+  <div class="modal-content">
+    <div class="photo-editor-header">
+      <div class="photo-editor-title" id="photoEditorTitle">Photo Editor</div>
+      <button id="photoEditorClose" class="editor-btn secondary" aria-label="Close Editor">Close</button>
+    </div>
+    <div class="photo-editor-body">
+      <div class="photo-editor-canvas-wrap">
+        <canvas id="photoEditorCanvas" width="800" height="800" aria-label="Photo preview"></canvas>
+      </div>
+      <div class="photo-editor-controls">
+        <div class="control-group"><label>Aspect Ratio <select id="peAspect">
+          <option value="original">Original</option>
+          <option value="1:1">1:1 Square</option>
+          <option value="4:5">4:5 Portrait</option>
+          <option value="16:9">16:9 Landscape</option>
+          <option value="9:16">9:16 Story</option>
+        </select></label></div>
+        <div class="control-group"><label><span>Zoom</span><span id="peZoomVal">1.00x</span></label><input id="peZoom" type="range" min="1" max="3" step="0.01" value="1"></div>
+        <div class="control-group"><label><span>Offset X</span><span id="peOffsetXVal">0</span></label><input id="peOffsetX" type="range" min="-1" max="1" step="0.01" value="0"></div>
+        <div class="control-group"><label><span>Offset Y</span><span id="peOffsetYVal">0</span></label><input id="peOffsetY" type="range" min="-1" max="1" step="0.01" value="0"></div>
+        <div class="control-group"><label><span>Rotate</span><span id="peRotateVal">0°</span></label><input id="peRotate" type="range" min="-45" max="45" step="1" value="0"></div>
+        <div class="editor-divider"></div>
+        <div class="control-group"><label><span>Brightness</span><span id="peBrightVal">100%</span></label><input id="peBright" type="range" min="50" max="200" step="1" value="100"></div>
+        <div class="control-group"><label><span>Contrast</span><span id="peContrastVal">100%</span></label><input id="peContrast" type="range" min="50" max="200" step="1" value="100"></div>
+        <div class="control-group"><label><span>Saturation</span><span id="peSatVal">100%</span></label><input id="peSat" type="range" min="0" max="200" step="1" value="100"></div>
+        <div class="control-group"><label><span>Hue</span><span id="peHueVal">0°</span></label><input id="peHue" type="range" min="-180" max="180" step="1" value="0"></div>
+        <div class="control-group"><label><span>Sepia</span><span id="peSepiaVal">0%</span></label><input id="peSepia" type="range" min="0" max="100" step="1" value="0"></div>
+        <div class="control-group"><label><span>Grayscale</span><span id="peGrayVal">0%</span></label><input id="peGray" type="range" min="0" max="100" step="1" value="0"></div>
+        <div class="control-group"><label><span>Blur</span><span id="peBlurVal">0px</span></label><input id="peBlur" type="range" min="0" max="8" step="0.25" value="0"></div>
+        <div class="control-group"><label>Frame <select id="peFrame">
+          <option value="none">None</option>
+          <option value="soft">Soft Border</option>
+          <option value="neon">Neon Glow</option>
+          <option value="vignette">Vignette</option>
+        </select></label></div>
+        <div class="editor-actions" style="justify-content:space-between">
+          <button id="peReset" class="editor-btn secondary" aria-label="Reset Adjustments">Reset</button>
+          <div style="display:flex;gap:8px">
+            <button id="peUseOriginal" class="editor-btn secondary" aria-label="Use Original">Use Original</button>
+            <button id="peApply" class="editor-btn" aria-label="Apply Edits">Apply</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  let ctx, cvs, img, meta, contextTarget = 'composer';
+  let st = { aspect:'original', zoom:1, offX:0, offY:0, rot:0, bright:100, contrast:100, sat:100, hue:0, sepia:0, gray:0, blur:0, frame:'none', mime:'image/jpeg' };
+  const modal = document.getElementById('photoEditorModal');
+  const closeBtn = document.getElementById('photoEditorClose');
+  cvs = document.getElementById('photoEditorCanvas'); ctx = cvs.getContext('2d');
+  const el = (id)=>document.getElementById(id);
+  const bind = (id, fmt, key)=>{ const r = el(id); const val = el(id+'Val'); r.addEventListener('input', ()=>{ st[key] = parseFloat(r.value); if(val) val.textContent = typeof fmt==='function'?fmt(r.value):fmt.replace('%v', r.value); render(); }); };
+  const fmtPct = (v)=> Math.round(v)+'%';
+  const fmtDeg = (v)=> Math.round(v)+'°';
+  const fmtPx = (v)=> (parseFloat(v).toFixed(2)+'px');
+  function setDefaults(){ st = { aspect:'original', zoom:1, offX:0, offY:0, rot:0, bright:100, contrast:100, sat:100, hue:0, sepia:0, gray:0, blur:0, frame:'none', mime: st.mime||'image/jpeg' };
+    el('peAspect').value = 'original'; el('peZoom').value = 1; el('peOffsetX').value = 0; el('peOffsetY').value = 0; el('peRotate').value = 0;
+    el('peBright').value = 100; el('peContrast').value = 100; el('peSat').value = 100; el('peHue').value = 0; el('peSepia').value = 0; el('peGray').value = 0; el('peBlur').value = 0;
+    el('peZoomVal').textContent='1.00x'; el('peOffsetXVal').textContent='0'; el('peOffsetYVal').textContent='0'; el('peRotateVal').textContent='0°';
+    el('peBrightVal').textContent='100%'; el('peContrastVal').textContent='100%'; el('peSatVal').textContent='100%'; el('peHueVal').textContent='0°'; el('peSepiaVal').textContent='0%'; el('peGrayVal').textContent='0%'; el('peBlurVal').textContent='0px'; el('peFrame').value='none';
+  }
+  function setCanvasSize(){ try { const wrap = cvs.parentElement; const maxW = Math.min(900, wrap.clientWidth-4); const maxH = Math.min(720, window.innerHeight*0.7);
+      const [aw,ah] = getAspectTarget(st.aspect, img ? img.naturalWidth : 1, img ? img.naturalHeight : 1);
+      let w = maxW, h = w*ah/aw; if(h>maxH){ h = maxH; w = h*aw/ah; }
+      cvs.width = Math.max(200, Math.floor(w)); cvs.height = Math.max(200, Math.floor(h));
+  } catch(e){} }
+  function getAspectTarget(aspect, iw, ih){ if(aspect==='1:1') return [1,1]; if(aspect==='4:5') return [4,5]; if(aspect==='16:9') return [16,9]; if(aspect==='9:16') return [9,16]; return [iw,ih]; }
+  function render(){ if(!img) return; setCanvasSize(); const w=cvs.width,h=cvs.height; ctx.clearRect(0,0,w,h);
+    const iw=img.naturalWidth, ih=img.naturalHeight; const [aw,ah] = getAspectTarget(st.aspect, iw, ih);
+    const targetRatio = aw/ah; const cropW = w, cropH = Math.round(w/targetRatio) > h ? h : Math.round(w); // canvas already sized to aspect
+    // compute scale to cover
+    const scaleBase = Math.max(cropW/iw, cropH/ih); const scale = scaleBase * st.zoom;
+    const drawW = iw*scale, drawH = ih*scale;
+    const centerX = cropW/2 + st.offX * (drawW - cropW)/2; const centerY = cropH/2 + st.offY * (drawH - cropH)/2;
+    ctx.save(); ctx.translate(cropW/2, cropH/2); ctx.rotate(st.rot*Math.PI/180); ctx.translate(-cropW/2, -cropH/2);
+    ctx.filter = `brightness(${st.bright}%) contrast(${st.contrast}%) saturate(${st.sat}%) hue-rotate(${st.hue}deg) sepia(${st.sepia}%) grayscale(${st.gray}%) blur(${st.blur}px)`;
+    const dx = centerX - drawW/2, dy = centerY - drawH/2; ctx.drawImage(img, dx, dy, drawW, drawH);
+    ctx.filter = 'none';
+    // frames
+    if(st.frame === 'soft'){
+      ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = Math.max(6, Math.floor(Math.min(w,h)*0.02)); ctx.strokeRect(ctx.lineWidth/2, ctx.lineWidth/2, w-ctx.lineWidth, h-ctx.lineWidth);
+    } else if(st.frame === 'neon'){
+      const grd = ctx.createLinearGradient(0,0,w,0); grd.addColorStop(0, getCssVar('--blue')||'#00d5ff'); grd.addColorStop(1, getCssVar('--pink')||'#ff2e92');
+      ctx.strokeStyle = grd; ctx.shadowColor = 'rgba(255,255,255,0.35)'; ctx.shadowBlur = 16; ctx.lineWidth = Math.max(8, Math.floor(Math.min(w,h)*0.025)); ctx.strokeRect(ctx.lineWidth/2, ctx.lineWidth/2, w-ctx.lineWidth, h-ctx.lineWidth); ctx.shadowBlur = 0;
+    } else if(st.frame === 'vignette'){
+      const rg = ctx.createRadialGradient(w/2,h/2, Math.min(w,h)*0.4, w/2,h/2, Math.max(w,h)*0.7); rg.addColorStop(0,'rgba(0,0,0,0)'); rg.addColorStop(1,'rgba(0,0,0,0.35)');
+      ctx.fillStyle = rg; ctx.fillRect(0,0,w,h);
+    }
+    ctx.restore();
+  }
+  function getCssVar(name){ try{ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }catch(_){ return null; } }
+  function openEditor(file, target){ contextTarget = target||'composer'; st.mime = (file && file.type && /png/i.test(file.type)) ? 'image/png' : 'image/jpeg'; setDefaults();
+    const reader = new FileReader(); reader.onload = ()=>{ img = new Image(); img.onload = ()=>{ modal.classList.add('show'); modal.style.display='flex'; render(); }; img.src = reader.result; };
+    reader.readAsDataURL(file);
+  }
+  function closeEditor(){ modal.classList.remove('show'); modal.style.display='none'; }
+  function exportBlob(){ return new Promise((resolve,reject)=>{ try{ cvs.toBlob((blob)=>{ if(!blob){ reject(new Error('Export failed')); return; } resolve(new File([blob], 'edited.'+(st.mime==='image/png'?'png':'jpg'), { type: st.mime })); }, st.mime==='image/png'?'image/png':'image/jpeg', st.mime==='image/png'?1:0.92); }catch(e){ reject(e) } }); }
+  function ensureLaunchButtons(){ try{
+    const composerBtnId = 'openPhotoEditorBtn';
+    const up = document.getElementById('postMediaUpload');
+    if(up){ const area = up.closest('.media-upload-area') || up.parentElement; if(area && !document.getElementById(composerBtnId)){
+      const b = document.createElement('button'); b.id = composerBtnId; b.type='button'; b.className='photo-editor-launch-btn'; b.textContent='Edit Photo'; b.style.display='none'; b.addEventListener('click', ()=>{
+        if(window.currentMediaFile && window.currentMediaFile.type && window.currentMediaFile.type.startsWith('image/')) openEditor(window.currentMediaFile, 'composer');
+      }); area.appendChild(b);
+    }}
+    const editUp = document.getElementById('editPostMediaUpload');
+    if(editUp){ const area2 = editUp.closest('.media-upload-area') || editUp.parentElement; if(area2 && !document.getElementById('openPhotoEditorBtnEdit')){
+      const b2 = document.createElement('button'); b2.id='openPhotoEditorBtnEdit'; b2.type='button'; b2.className='photo-editor-launch-btn'; b2.textContent='Edit Photo'; b2.style.display='none'; b2.addEventListener('click', ()=>{
+        if(window.currentEditMediaFile && window.currentEditMediaFile.type && window.currentEditMediaFile.type.startsWith('image/')) openEditor(window.currentEditMediaFile, 'edit');
+      }); area2.appendChild(b2);
+    }}
+  }catch(_){}}
+  function showLaunchBtn(which){ try{ if(which==='composer'){ const b=document.getElementById('openPhotoEditorBtn'); if(b) b.style.display='inline-flex'; } else { const b=document.getElementById('openPhotoEditorBtnEdit'); if(b) b.style.display='inline-flex'; } }catch(_){}}
+
+  // Bind controls
+  el('peAspect').addEventListener('change', ()=>{ st.aspect = el('peAspect').value; render(); });
+  bind('peZoom', (v)=> (parseFloat(v).toFixed(2)+'x'), 'zoom');
+  bind('peOffsetX', (v)=> v, 'offX');
+  bind('peOffsetY', (v)=> v, 'offY');
+  bind('peRotate', fmtDeg, 'rot');
+  bind('peBright', fmtPct, 'bright'); bind('peContrast', fmtPct, 'contrast'); bind('peSat', fmtPct, 'sat'); bind('peHue', fmtDeg, 'hue'); bind('peSepia', fmtPct, 'sepia'); bind('peGray', fmtPct, 'gray'); bind('peBlur', fmtPx, 'blur');
+  el('peFrame').addEventListener('change', ()=>{ st.frame = el('peFrame').value; render(); });
+  el('peReset').addEventListener('click', ()=>{ setDefaults(); render(); });
+  el('peUseOriginal').addEventListener('click', ()=>{ try{ if(contextTarget==='composer'){ const imgPrev = document.getElementById('mediaImagePreview'); if(imgPrev) imgPrev.style.display='block'; showLaunchBtn('composer'); } else { const imgPrev = document.getElementById('editMediaImagePreview'); if(imgPrev) imgPrev.style.display='block'; showLaunchBtn('edit'); } closeEditor(); }catch(_){}});
+  el('peApply').addEventListener('click', async ()=>{
+    try{
+      const file = await exportBlob(); const dataUrl = cvs.toDataURL(st.mime==='image/png'?'image/png':'image/jpeg', st.mime==='image/png'?1:0.92);
+      if(contextTarget==='composer'){
+        window.currentMediaFile = file; const imgPrev = document.getElementById('mediaImagePreview'); if(imgPrev){ imgPrev.src = dataUrl; imgPrev.style.display='block'; }
+        showLaunchBtn('composer');
+      } else {
+        window.currentEditMediaFile = file; const imgPrev = document.getElementById('editMediaImagePreview'); if(imgPrev){ imgPrev.src = dataUrl; imgPrev.style.display='block'; }
+        showLaunchBtn('edit');
+      }
+      closeEditor();
+    }catch(e){ console.error('Photo editor apply failed', e); }
+  });
+  if(closeBtn) closeBtn.addEventListener('click', closeEditor);
+  modal.addEventListener('click', (e)=>{ if(e.target===modal) closeEditor(); });
+
+  // Hook into file inputs (non-destructive: keep original listeners; we just add editing capability)
+  function attachHooks(){ ensureLaunchButtons();
+    const up = document.getElementById('postMediaUpload');
+    if(up && !up.__peHooked){ up.__peHooked = true; up.addEventListener('change', (e)=>{ const f = e.target.files && e.target.files[0]; if(!f) return; if(f.type && f.type.startsWith('image/')){ try{ const imgPrev = document.getElementById('mediaImagePreview'); if(imgPrev) imgPrev.style.display='none'; openEditor(f, 'composer'); }catch(_){ } } else { const b=document.getElementById('openPhotoEditorBtn'); if(b) b.style.display='none'; }
+    }); }
+    const up2 = document.getElementById('editPostMediaUpload');
+    if(up2 && !up2.__peHooked){ up2.__peHooked = true; up2.addEventListener('change', (e)=>{ const f = e.target.files && e.target.files[0]; if(!f) return; if(f.type && f.type.startsWith('image/')){ try{ const imgPrev = document.getElementById('editMediaImagePreview'); if(imgPrev) imgPrev.style.display='none'; openEditor(f, 'edit'); }catch(_){ } } else { const b=document.getElementById('openPhotoEditorBtnEdit'); if(b) b.style.display='none'; }
+    }); }
+  }
+  document.addEventListener('DOMContentLoaded', attachHooks);
+  // In case DOMContentLoaded already fired
+  setTimeout(attachHooks, 0);
+})();
+</script>
 </body>
 </html>
 <!-- test update -->
