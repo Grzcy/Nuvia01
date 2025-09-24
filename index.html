@@ -4382,6 +4382,48 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
   .secondary-header-hidden .secondary-header-bar { display: none; }
   .secondary-header-hidden main { padding-top: 55px !important; }
 </style>
+    <style id="home-responsive-tune">
+        /* Restore neutral palette (revert accidental warm/brown text overrides) */
+        header, .site-subtitle, .about-description, .subtitle { color: var(--white) !important; }
+        .about-description { color: var(--text-light) !important; }
+        /* Feed readability uses original theme variables */
+        .posts-feed-section .post-card .author-name,
+        .posts-feed-section .post-card .post-timestamp,
+        .posts-feed-section .post-card .post-content-text,
+        .posts-feed-section .post-card .post-meta,
+        .posts-feed-section .post-card .post-actions,
+        .posts-feed-section .post-card p,
+        .posts-feed-section .post-card small,
+        .posts-feed-section .post-card a { color: var(--white) !important; }
+        .posts-feed-section .post-card .reaction-count,
+        .posts-feed-section .post-card .like-count,
+        .posts-feed-section .post-card .love-count,
+        .posts-feed-section .post-card .haha-count { color: var(--white) !important; font-weight: 700; }
+
+        /* Desktop/tablet width tuning for a less cramped feel */
+        @media (min-width: 768px) and (max-width: 1023px) {
+          #postCreationSection { max-width: 640px !important; }
+          .posts-feed-section { max-width: 640px !important; }
+        }
+        @media (min-width: 1024px) {
+          .content-wrapper { max-width: 1200px !important; }
+          #postCreationSection { max-width: 760px !important; }
+          .posts-feed-section { max-width: 760px !important; grid-template-columns: 1fr !important; }
+        }
+        @media (min-width: 1280px) {
+          .posts-feed-section { max-width: 820px !important; }
+        }
+        @media (min-width: 1600px) {
+          /* Keep two-up feed but allow a bit wider cards */
+          .posts-feed-section { max-width: 1240px !important; }
+        }
+
+        /* Mobile comfort spacing */
+        @media (max-width: 600px) {
+          .content-wrapper { padding: 12px !important; }
+          .daily-inspiration-section, .global-announcements-section { width: 100% !important; padding: 14px !important; }
+        }
+    </style>
 </head>
 <body class="theme-dark-mode">
     <!-- Nuvia Pink & Blue Glowing Loader -->
