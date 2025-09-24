@@ -1240,10 +1240,12 @@ backBtn.onclick = () => history.back();
         async function acceptIncomingCall(docSnap) {
             try {
                 isCaller = false;
-                callKind = 'video';
                 callStartMs = null;
                 callDocRef = docSnap.ref;
-                const desiredVideo = true;
+                let latest = await getDoc(callDocRef);
+                let data = latest.data() || {};
+                const desiredVideo = !!data.video;
+                callKind = desiredVideo ? 'video' : 'voice';
                 openCallUI(desiredVideo);
                 if (incomingActions) incomingActions.style.display = 'none';
                 if (endCallBtn) endCallBtn.style.display = 'inline-flex';
