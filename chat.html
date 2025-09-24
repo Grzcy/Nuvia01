@@ -1949,6 +1949,15 @@ backBtn.onclick = () => history.back();
             } catch (e) { console.error('uploadToCloudinary unexpected error', e); return null; }
         }
 
+        async function toggleReaction(messageId, emoji){
+            try{
+                const chatId = chatIdFor(currentUser.uid, currentPartner.id);
+                const msgRef = doc(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'messages', messageId);
+                const path = `reactions.${emoji}`;
+                await updateDoc(msgRef, { [path]: arrayUnion(currentUser.uid) });
+            }catch(_){ try{ const chatId = chatIdFor(currentUser.uid, currentPartner.id); const msgRef = doc(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'messages', messageId); const path = `reactions.${emoji}`; await updateDoc(msgRef, { [path]: arrayRemove(currentUser.uid) }); }catch(__){} }
+        }
+
         async function sendFileMessage(file, url) {
             const chatId = chatIdFor(currentUser.uid, currentPartner.id);
             const messagesRef = collection(db, "artifacts", appId, "public", "data", "chats", chatId, "messages");
