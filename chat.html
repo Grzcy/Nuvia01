@@ -852,9 +852,13 @@ switchCamBtn?.addEventListener('click', async () => { try{ await switchCamera();
         let unsubCalleeCand = null;
         let unsubCallSignals = null;
         let unsubRingingCallDoc = null;
-        const rtcConfig = (window.__ice_servers && Array.isArray(window.__ice_servers) && window.__ice_servers.length)
-            ? { iceServers: window.__ice_servers }
-            : { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+        const __localIceRaw = (function(){ try { return localStorage.getItem('jchat-ice'); } catch(_) { return null; } })();
+        const __localIce = (function(){ try { const v = JSON.parse(__localIceRaw||'null'); return Array.isArray(v) ? v : null; } catch(_) { return null; } })();
+        const rtcConfig = (__localIce && __localIce.length)
+            ? { iceServers: __localIce }
+            : ((window.__ice_servers && Array.isArray(window.__ice_servers) && window.__ice_servers.length)
+                ? { iceServers: window.__ice_servers }
+                : { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
         function ensureMediaUnlocked(){
             try{ if (typeof AudioContext !== 'undefined') { const ac = new AudioContext(); if (ac.state === 'suspended') ac.resume().catch(()=>{}); } }catch(_){ }
             try{ if (remoteVideo) { remoteVideo.play().catch(()=>{}); } }catch(_){ }
