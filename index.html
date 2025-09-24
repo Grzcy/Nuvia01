@@ -13755,6 +13755,7 @@ async function fetchAndDisplayPosts() {
                 });
             }
             if (openThumbnailModalButton && !openThumbnailModalButton.dataset.bound){ openThumbnailModalButton.addEventListener('click', openThumbnailModal); openThumbnailModalButton.dataset.bound='1'; bindThumbnailModal(); }
+            if (openImageEditorButton && !openImageEditorButton.dataset.bound){ openImageEditorButton.addEventListener('click', ()=>{ if(window.currentMediaFile && window.currentMediaFile.type && window.currentMediaFile.type.startsWith('image/')) window.nuviaGoToPhotoEditor(window.currentMediaFile, 'composer'); }); openImageEditorButton.dataset.bound='1'; }
             if (createPostButton) createPostButton.addEventListener('click', createNewPost);
 
             // Edit post modal listeners
