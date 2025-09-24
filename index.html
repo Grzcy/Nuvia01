@@ -11503,7 +11503,7 @@ async function fetchAndDisplayPosts() {
                     }
                 }, (error) => {
                     console.error("Nuvia_ERROR: Error listening to system settings:", error);
-                    showMessageBox("Failed to get real-time settings updates.", 'error', true);
+                    if (navigator.onLine) showMessageBox("Failed to get real-time settings updates.", 'error', true);
                 });
                 unsubscribeListeners.push(unsubscribeSettings); // Add to list to unsubscribe on unload.
 
