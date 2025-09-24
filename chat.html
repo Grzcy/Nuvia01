@@ -252,7 +252,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <div class="header-left">
+            <div class="header-left"><button class="back-btn" id="backBtn" title="Back"><i class="fas fa-arrow-left"></i></button>
                 <div class="partner">
                     <div>
                         <div class="name gradient-title" id="partnerName">Nuvia</div>
@@ -538,7 +538,7 @@
         const emojiTabs = document.getElementById('emojiTabs');
         const voiceMsgBtn = document.getElementById('voiceMsgBtn');
 
-        if (backBtn) backBtn.onclick = () => history.back();
+        if (backBtn) backBtn.onclick = () => { if (currentPartner) { window.location.href = 'friends.html'; } else { window.location.href = 'index.html'; } };
 
         // Emoji setup with categories and ~500 emojis
         const emojiCategories = [
@@ -1084,6 +1084,8 @@
                 try { closeFriends(); } catch(_) {}
                 if (emojiPanel) emojiPanel.style.display = 'none';
             }
+            const b = document.getElementById('backBtn');
+            if (b) b.title = hasPartner ? 'Back to Friends' : 'Back to Home';
         }
         const friendsMainPanel = document.getElementById('friendsMainPanel');
         const friendsMainListEl = document.getElementById('friendsMainList');
