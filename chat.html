@@ -1294,11 +1294,9 @@ backBtn.onclick = () => history.back();
                             callStartMs = Date.now();
                             startCallTimer();
                         }
-                        if (desiredVideo) {
-                            remoteVideo.srcObject = remoteMediaStream;
-                            try { remoteVideo.play().catch(()=>{}); } catch(_){ }
-                            if (remoteAvatarPlaceholder) remoteAvatarPlaceholder.style.display = 'none';
-                        }
+                        remoteVideo.srcObject = remoteMediaStream;
+                        try { remoteVideo.play().catch(()=>{}); } catch(_){ }
+                        if (desiredVideo && remoteAvatarPlaceholder) remoteAvatarPlaceholder.style.display = 'none';
                     } catch (err) { console.warn('CALLEE: ontrack handler error', err); }
                 };
                 // Add local tracks after ontrack handler
