@@ -14809,13 +14809,13 @@ startPagePresence();
     const up = document.getElementById('postMediaUpload');
     if(up){ const area = up.closest('.media-upload-area') || up.parentElement; if(area && !document.getElementById(composerBtnId)){
       const b = document.createElement('button'); b.id = composerBtnId; b.type='button'; b.className='photo-editor-launch-btn'; b.textContent='Edit Photo'; b.style.display='none'; b.addEventListener('click', ()=>{
-        if(window.currentMediaFile && window.currentMediaFile.type && window.currentMediaFile.type.startsWith('image/')) openEditor(window.currentMediaFile, 'composer');
+        if(window.currentMediaFile && window.currentMediaFile.type && window.currentMediaFile.type.startsWith('image/')) window.nuviaGoToPhotoEditor(window.currentMediaFile, 'composer');
       }); area.appendChild(b);
     }}
     const editUp = document.getElementById('editPostMediaUpload');
     if(editUp){ const area2 = editUp.closest('.media-upload-area') || editUp.parentElement; if(area2 && !document.getElementById('openPhotoEditorBtnEdit')){
       const b2 = document.createElement('button'); b2.id='openPhotoEditorBtnEdit'; b2.type='button'; b2.className='photo-editor-launch-btn'; b2.textContent='Edit Photo'; b2.style.display='none'; b2.addEventListener('click', ()=>{
-        if(window.currentEditMediaFile && window.currentEditMediaFile.type && window.currentEditMediaFile.type.startsWith('image/')) openEditor(window.currentEditMediaFile, 'edit');
+        if(window.currentEditMediaFile && window.currentEditMediaFile.type && window.currentEditMediaFile.type.startsWith('image/')) window.nuviaGoToPhotoEditor(window.currentEditMediaFile, 'edit');
       }); area2.appendChild(b2);
     }}
   }catch(_){}}
@@ -14848,7 +14848,7 @@ startPagePresence();
   modal.addEventListener('click', (e)=>{ if(e.target===modal) closeEditor(); });
 
   // Hook into file inputs (non-destructive: keep original listeners; we just add editing capability)
-  function attachHooks(){ ensureLaunchButtons();
+  function attachHooks(){ ensureLaunchButtons(); applyResultFromPhotoEditor();
     const up = document.getElementById('postMediaUpload');
     if(up && !up.__peHooked){ up.__peHooked = true; up.addEventListener('change', (e)=>{ const f = e.target.files && e.target.files[0]; if(!f) return; if(f.type && f.type.startsWith('image/')){ try{ window.currentMediaFile = f; const imgPrev = document.getElementById('mediaImagePreview'); if(imgPrev){ const url = URL.createObjectURL(f); imgPrev.onload = ()=> URL.revokeObjectURL(url); imgPrev.src = url; imgPrev.style.display='block'; } const b=document.getElementById('openPhotoEditorBtn'); if(b) b.style.display='inline-flex'; }catch(_){ } } else { const b=document.getElementById('openPhotoEditorBtn'); if(b) b.style.display='none'; }
     }); }
