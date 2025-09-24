@@ -256,8 +256,6 @@
                         <div class="friends-list" id="friendsList"><div style="padding:12px;color:var(--text-light);font-size:12px;">Loading friends...</div></div>
                     </div>
                 </div>
-                <button class="icon-btn" id="voiceCallBtn" title="Voice Call"><i class="fas fa-phone"></i></button>
-                <button class="icon-btn" id="videoCallBtn" title="Video Call"><i class="fas fa-video"></i></button>
                 <button class="icon-btn" id="infoBtn" title="Chat Info"><i class="fas fa-info-circle"></i></button>
                 <button class="icon-btn" id="clearChatBtn" title="Clear chat"><i class="fas fa-trash"></i></button>
                 <div id="headerProfile" title="My Profile" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
@@ -296,23 +294,6 @@
                 <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:14px;">
                     <button id="confirmCancel" class="icon-btn" style="border:1px solid var(--border-light); border-radius:8px; padding:6px 10px;">Cancel</button>
                     <button id="confirmOk" class="icon-btn" style="background: var(--button-background); color:#fff; border-radius:8px; padding:6px 10px;">Delete</button>
-                </div>
-            </div>
-        </div>
-        <!-- Call Modal -->
-        <div id="callModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter: blur(4px); z-index:300; align-items:center; justify-content:center;">
-            <div style="background:var(--card-background); border:1px solid var(--border-light); border-radius:12px; padding:12px; width:90%; max-width:520px;">
-                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-                    <div id="callTitle" style="font-weight:600;">Call</div>
-                    <button id="endCallBtn" class="icon-btn" title="End Call" style="color:#ff4d4f"><i class="fas fa-phone-slash"></i></button>
-                </div>
-                <div id="videoWrap" style="display:none; position:relative; background:#000; border-radius:8px; overflow:hidden;">
-                    <video id="remoteVideo" autoplay playsinline style="width:100%; height:auto;"></video>
-                    <video id="localVideo" autoplay muted playsinline style="position:absolute; right:8px; bottom:8px; width:120px; border-radius:6px; box-shadow:0 6px 16px rgba(0,0,0,.5);"></video>
-                </div>
-                <div id="voiceWrap" style="display:none; text-align:center; padding:24px;">
-                    <i class="fas fa-phone" style="font-size:36px; color:var(--accent-color);"></i>
-                    <div id="callStatus" style="margin-top:8px; color:var(--text-light);">Connecting…</div>
                 </div>
             </div>
         </div>
@@ -433,7 +414,6 @@
             if (!user) { window.location.href = '/Login.html'; return; }
             currentUser = user;
             startPresenceHeartbeat();
-            startIncomingListener();
             await setupHeader(user);
             await loadFriends();
             if (!partnerId) return;
@@ -547,23 +527,7 @@
         const emojiGrid = document.getElementById('emojiGrid');
         const emojiTabs = document.getElementById('emojiTabs');
         const voiceMsgBtn = document.getElementById('voiceMsgBtn');
-        const voiceCallBtn = document.getElementById('voiceCallBtn');
-        const videoCallBtn = document.getElementById('videoCallBtn');
-        const callModal = document.getElementById('callModal');
-        const callTitle = document.getElementById('callTitle');
-        const endCallBtn = document.getElementById('endCallBtn');
-        const voiceWrap = document.getElementById('voiceWrap');
-        const videoWrap = document.getElementById('videoWrap');
-        const localVideo = document.getElementById('localVideo');
-        const remoteVideo = document.getElementById('remoteVideo');
         
-        // --- WebRTC signaling (Firestore) ---
-        let pc = null;
-        let callDocRef = null;
-        let unsubCallDoc = null;
-        let unsubCallerCand = null;
-        let unsubCalleeCand = null;
-        const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
         backBtn.onclick = () => history.back();
 
         // Emoji setup with categories and ~500 emojis
@@ -791,134 +755,6 @@
             });
         }
 
-        endCallBtn?.addEventListener('click', endCall);
-        voiceCallBtn?.addEventListener('click', () => startCall(false));
-        videoCallBtn?.addEventListener('click', () => startCall(true));
-
-        async function startCall(isVideo) {
-            if (!currentPartner) return;
-            openCallUI(isVideo);
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
-                if (isVideo) localVideo.srcObject = stream;
-                pc = new RTCPeerConnection(rtcConfig);
-                stream.getTracks().forEach(t => pc.addTrack(t, stream));
-                pc.ontrack = (e) => { if (isVideo) remoteVideo.srcObject = e.streams[0]; };
-
-                // Create call doc
-                const callsCol = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
-                callDocRef = await addDoc(callsCol, {
-                    callerId: currentUser.uid,
-                    calleeId: currentPartner.id,
-                    video: !!isVideo,
-                    status: 'ringing',
-                    createdAt: serverTimestamp()
-                });
-
-                // ICE
-                const callerCandCol = collection(callDocRef, 'callerCandidates');
-                pc.onicecandidate = (e) => { if (e.candidate) addDoc(callerCandCol, e.candidate.toJSON()); };
-
-                // Offer
-                const offer = await pc.createOffer();
-                await pc.setLocalDescription(offer);
-                await updateDoc(callDocRef, { offer: { sdp: offer.sdp, type: offer.type } });
-
-                // Listen for answer
-                unsubCallDoc = onSnapshot(callDocRef, async (docSnap) => {
-                    const data = docSnap.data();
-                    if (data?.answer && pc && !pc.currentRemoteDescription) {
-                        const answerDesc = new RTCSessionDescription(data.answer);
-                        await pc.setRemoteDescription(answerDesc);
-                    }
-                    if (data?.status === 'ended') endCall();
-                });
-
-                // Listen for callee ICE
-                const calleeCandCol = collection(callDocRef, 'calleeCandidates');
-                unsubCalleeCand = onSnapshot(calleeCandCol, (snap) => {
-                    snap.docChanges().forEach(change => {
-                        if (change.type === 'added') {
-                            const cand = new RTCIceCandidate(change.doc.data());
-                            try { pc.addIceCandidate(cand); } catch {}
-                        }
-                    });
-                });
-            } catch (e) {
-                endCall();
-            }
-        }
-
-        // Incoming call listener (basic)
-        let unsubIncoming = null;
-        function startIncomingListener() {
-            try {
-                const callsCol = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
-                const q = query(callsCol, where('calleeId', '==', currentUser.uid), where('status', '==', 'ringing'));
-                unsubIncoming = onSnapshot(q, async (snap) => {
-                    snap.docChanges().forEach(async change => {
-                        if (change.type === 'added' && !pc) {
-                            await acceptIncomingCall(change.doc);
-                        }
-                    });
-                });
-            } catch {}
-        }
-        // Start incoming listener on auth
-        // (after currentUser is set)
-        
-        async function acceptIncomingCall(docSnap) {
-            try {
-                callDocRef = docSnap.ref;
-                const data = docSnap.data();
-                const isVideo = !!data.video;
-                openCallUI(isVideo);
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
-                if (isVideo) localVideo.srcObject = stream;
-                pc = new RTCPeerConnection(rtcConfig);
-                stream.getTracks().forEach(t => pc.addTrack(t, stream));
-                pc.ontrack = (e) => { if (isVideo) remoteVideo.srcObject = e.streams[0]; };
-                const calleeCandCol = collection(callDocRef, 'calleeCandidates');
-                pc.onicecandidate = (e) => { if (e.candidate) addDoc(calleeCandCol, e.candidate.toJSON()); };
-                // Set remote offer
-                const offerDesc = new RTCSessionDescription(data.offer);
-                await pc.setRemoteDescription(offerDesc);
-                const answer = await pc.createAnswer();
-                await pc.setLocalDescription(answer);
-                await updateDoc(callDocRef, { answer: { sdp: answer.sdp, type: answer.type } });
-                // Listen caller ICE
-                const callerCandCol = collection(callDocRef, 'callerCandidates');
-                unsubCallerCand = onSnapshot(callerCandCol, (snap) => {
-                    snap.docChanges().forEach(change => {
-                        if (change.type === 'added') {
-                            const cand = new RTCIceCandidate(change.doc.data());
-                            try { pc.addIceCandidate(cand); } catch {}
-                        }
-                    });
-                });
-            } catch (e) {
-                endCall();
-            }
-        }
-
-        function openCallUI(isVideo) {
-            callModal.style.display = 'flex';
-            callTitle.textContent = isVideo ? 'Video Call' : 'Voice Call';
-            voiceWrap.style.display = isVideo ? 'none' : 'block';
-            videoWrap.style.display = isVideo ? 'block' : 'none';
-        }
-
-        async function endCall() {
-            try { pc && pc.getSenders().forEach(s => s.track && s.track.stop()); } catch {}
-            try { pc && pc.close(); } catch {}
-            pc = null;
-            try { unsubCallDoc && unsubCallDoc(); } catch {}
-            try { unsubCallerCand && unsubCallerCand(); } catch {}
-            try { unsubCalleeCand && unsubCalleeCand(); } catch {}
-            if (callDocRef) { try { await updateDoc(callDocRef, { status: 'ended' }); } catch {} }
-            callDocRef = null;
-            callModal.style.display = 'none';
-        }
 
         inputEl.addEventListener('input', () => {
             inputEl.style.height = 'auto';
