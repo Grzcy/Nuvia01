@@ -401,6 +401,7 @@
             <div class="call-controls">
                 <button class="call-btn" id="muteBtn" title="Toggle microphone"><i class="fas fa-microphone"></i></button>
                 <button class="call-btn" id="cameraBtn" title="Toggle camera"><i class="fas fa-video"></i></button>
+                <button class="call-btn" id="switchCamBtn" title="Switch camera"><i class="fas fa-sync-alt"></i></button>
                 <button class="end-btn" id="endCallBtn" title="End call"><i class="fas fa-phone-slash"></i></button>
             </div>
         </div>
@@ -674,6 +675,7 @@ const declineCallBtn = document.getElementById('declineCallBtn');
 const endCallBtn = document.getElementById('endCallBtn');
 const muteBtn = document.getElementById('muteBtn');
 const cameraBtn = document.getElementById('cameraBtn');
+const switchCamBtn = document.getElementById('switchCamBtn');
 const videoCallBtn = document.getElementById('videoCallBtn');
 const voiceCallBtn = document.getElementById('voiceCallBtn');
 
@@ -688,6 +690,7 @@ let callStartMs = null;
 let remoteMediaStream = null;
 let acceptInProgressDocId = null;
 let currentIncomingDoc = null;
+let videoFacingMode = 'user';
 
 // Controls wiring
 videoCallBtn?.addEventListener('click', () => {
@@ -707,6 +710,7 @@ muteBtn?.addEventListener('click', () => {
 cameraBtn?.addEventListener('click', () => {
     try{ const stream = localVideo?.srcObject; if (stream) stream.getVideoTracks().forEach(t => t.enabled = !t.enabled); }catch(_){}
 });
+switchCamBtn?.addEventListener('click', async () => { try{ await switchCamera(); }catch(_){ } });
 
         async function showIncomingPrompt(docSnap){
             // Attach a per-call snapshot listener for ringing state to detect remote hangup even before acceptance
@@ -845,6 +849,7 @@ function startRingtone(){ try{ stopRingtone(); ringAudio = new Audio('https://cd
 function stopRingtone(){ try{ if (ringAudio){ ringAudio.pause(); ringAudio.currentTime = 0; ringAudio = null; } }catch(_){}}
 function startCallerRingtone(){ try{ stopCallerRingtone(); callerRingAudio = new Audio('https://cdn.builder.io/o/assets%2Fc5542eb63b564e86810556e73a332186%2F4cbef326171f4fa79b77b66a9b292c50?alt=media&token=1db90849-5140-4702-9888-f35fd41c9d51&apiKey=c5542eb63b564e86810556e73a332186'); callerRingAudio.loop = true; callerRingAudio.volume = 0.5; callerRingAudio.play().catch(()=>{}); }catch(_){}}
 function stopCallerRingtone(){ try{ if (callerRingAudio){ callerRingAudio.pause(); callerRingAudio.currentTime = 0; callerRingAudio = null; } }catch(_){}}
+async function switchCamera(){ try{ if(!pc) return; const oldStream = localVideo && localVideo.srcObject; const audioTracks = oldStream ? oldStream.getAudioTracks() : []; const next = (videoFacingMode === 'user') ? 'environment' : 'user'; let newStream = null; try{ newStream = await navigator.mediaDevices.getUserMedia({ video: { width:{ ideal:640 }, height:{ ideal:480 }, frameRate:{ ideal:24, max:30 }, facingMode: next } }); }catch(e){ try{ newStream = await navigator.mediaDevices.getUserMedia({ video: { width:{ ideal:640 }, height:{ ideal:480 }, frameRate:{ ideal:24, max:30 }, facingMode: { exact: next } } }); }catch(_){ newStream = await navigator.mediaDevices.getUserMedia({ video: true }); } } const newVideoTrack = newStream.getVideoTracks()[0]; const sender = pc.getSenders ? pc.getSenders().find(s => s.track && s.track.kind === 'video') : null; if(sender && newVideoTrack){ await sender.replaceTrack(newVideoTrack); } const combined = new MediaStream([newVideoTrack, ...audioTracks]); if(localVideo){ const prev = localVideo.srcObject; localVideo.srcObject = combined; try{ localVideo.play().catch(()=>{}); }catch(_){} try{ if(prev && prev.getVideoTracks) prev.getVideoTracks().forEach(t => t.stop()); }catch(_){} } videoFacingMode = next; }catch(e){} }
 
 backBtn.onclick = () => history.back();
 
@@ -1089,7 +1094,7 @@ backBtn.onclick = () => history.back();
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
                     audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-                    video: isVideo ? { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 24, max: 30 }, facingMode: 'user' } : false
+                    video: isVideo ? { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 24, max: 30 }, facingMode: videoFacingMode } : false
                 });
                 startCallerRingtone();
                 try{ clearTimeout(ringTimeoutId); }catch(_){ }
@@ -1275,7 +1280,7 @@ backBtn.onclick = () => history.back();
 
                 const stream = await navigator.mediaDevices.getUserMedia({
                 audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-                video: desiredVideo ? { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 24, max: 30 }, facingMode: 'user' } : false
+                video: desiredVideo ? { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 24, max: 30 }, facingMode: videoFacingMode } : false
             });
                 if (desiredVideo) {
                     localVideo.srcObject = stream;
@@ -1366,6 +1371,7 @@ backBtn.onclick = () => history.back();
             if (remoteVideo) remoteVideo.style.display = isVideo ? 'block' : 'none';
             if (localVideo) localVideo.style.display = isVideo ? 'block' : 'none';
             if (cameraBtn) cameraBtn.style.display = isVideo ? 'inline-block' : 'none';
+            if (switchCamBtn) switchCamBtn.style.display = isVideo ? 'inline-block' : 'none';
             if (remoteAvatarPlaceholder) {
                 try{
                     let url = '';
@@ -1430,6 +1436,7 @@ backBtn.onclick = () => history.back();
             if (incomingActions) incomingActions.style.display = 'none';
             if (remoteAvatarPlaceholder) { remoteAvatarPlaceholder.style.display = 'none'; remoteAvatarPlaceholder.src=''; }
             callModal.style.display = 'none';
+            videoFacingMode = 'user';
         }
 
         inputEl.addEventListener('input', () => {
