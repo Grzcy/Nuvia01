@@ -5175,7 +5175,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             <div class="smart-success-message" id="smartSuccessMessage">Operation completed successfully.</div>
             <div class="smart-success-footer">
                 <div class="smart-success-timestamp" id="smartSuccessTimestamp"></div>
-                <div class="smart-success-sound-indicator">🔊</div>
+                <div class="smart-success-sound-indicator">���</div>
             </div>
         </div>
     </div>
@@ -14024,34 +14024,51 @@ async function fetchAndDisplayPosts() {
         async function checkPremiumStatus() {
             if (!currentUser) return;
 
+            // If offline or Firestore unavailable, use cache and avoid network errors
+            if (!navigator.onLine) {
+                try {
+                    const cache = localStorage.getItem(`premium_cache_${currentUser.uid}`);
+                    if (cache) {
+                        const { status, expiryMs } = JSON.parse(cache);
+                        const isExpired = typeof expiryMs === 'number' && Date.now() > expiryMs;
+                        if (!isExpired && status) { if (premiumRequestBtn) premiumRequestBtn.style.display = 'none'; return; }
+                    }
+                } catch(_) {}
+                if (premiumRequestBtn) premiumRequestBtn.style.display = 'flex';
+                return;
+            }
+
             try {
                 const userRef = doc(db, 'artifacts', appId, 'users', currentUser.uid);
                 const userSnap = await getDoc(userRef);
-                
+
                 if (userSnap.exists()) {
                     const userData = userSnap.data();
                     const hasPremium = userData.premiumStatus && userData.premiumExpiry;
-                    
+
                     if (hasPremium) {
                         const expiryDate = userData.premiumExpiry.toDate();
                         const isExpired = expiryDate < new Date();
-                        
+
                         if (!isExpired) {
-                            // User has active premium - hide request button
-                            if (premiumRequestBtn) {
-                                premiumRequestBtn.style.display = 'none';
-                            }
+                            if (premiumRequestBtn) premiumRequestBtn.style.display = 'none';
+                            try { localStorage.setItem(`premium_cache_${currentUser.uid}` , JSON.stringify({ status: userData.premiumStatus, expiryMs: expiryDate.getTime() })); } catch(_) {}
                             return;
                         }
                     }
                 }
-                
-                // Show premium request button if user doesn't have active premium
-                if (premiumRequestBtn) {
-                    premiumRequestBtn.style.display = 'flex';
-                }
-            } catch (error) {
-                console.error("Nuvia_ERROR: Failed to check premium status:", error);
+                if (premiumRequestBtn) premiumRequestBtn.style.display = 'flex';
+            } catch (_) {
+                // Fall back to cache silently
+                try {
+                    const cache = localStorage.getItem(`premium_cache_${currentUser.uid}`);
+                    if (cache) {
+                        const { status, expiryMs } = JSON.parse(cache);
+                        const isExpired = typeof expiryMs === 'number' && Date.now() > expiryMs;
+                        if (!isExpired && status) { if (premiumRequestBtn) premiumRequestBtn.style.display = 'none'; return; }
+                    }
+                } catch(_) {}
+                if (premiumRequestBtn) premiumRequestBtn.style.display = 'flex';
             }
         }
 
@@ -14179,22 +14196,39 @@ async function fetchAndDisplayPosts() {
         // Load Premium Status
         async function loadPremiumStatus() {
             if (!currentUser) return;
-            if (!navigator.onLine) { deactivatePremiumFeatures(); return; }
+
+            // Try cache first for instant UX
+            try {
+                const cache = localStorage.getItem(`premium_cache_${currentUser.uid}`);
+                if (cache) {
+                    const { status, expiryMs } = JSON.parse(cache);
+                    const isExpired = typeof expiryMs === 'number' && Date.now() > expiryMs;
+                    if (!isExpired && status) {
+                        userPremiumStatus = status;
+                        userPremiumExpiry = new Date(expiryMs);
+                        activatePremiumFeatures();
+                    }
+                }
+            } catch(_) {}
+
+            if (!navigator.onLine) { if (!userPremiumStatus) deactivatePremiumFeatures(); return; }
 
             try {
                 const userRef = doc(db, 'artifacts', appId, 'users', currentUser.uid);
                 const userSnap = await getDoc(userRef);
-                
+
                 if (userSnap.exists()) {
                     const userData = userSnap.data();
                     userPremiumStatus = userData.premiumStatus;
                     userPremiumExpiry = userData.premiumExpiry;
-                    
+
                     if (userPremiumStatus && userPremiumExpiry) {
                         const expiryDate = userPremiumExpiry.toDate();
                         const isExpired = expiryDate < new Date();
-                        
+
                         if (!isExpired) {
+                            // Update cache
+                            try { localStorage.setItem(`premium_cache_${currentUser.uid}` , JSON.stringify({ status: userPremiumStatus, expiryMs: expiryDate.getTime() })); } catch(_) {}
                             activatePremiumFeatures();
                         } else {
                             deactivatePremiumFeatures();
@@ -14203,8 +14237,9 @@ async function fetchAndDisplayPosts() {
                         deactivatePremiumFeatures();
                     }
                 }
-            } catch (error) {
-                console.error("Nuvia_ERROR: Failed to load premium status:", error);
+            } catch (_) {
+                // Silent fallback to cache without noisy errors
+                if (!userPremiumStatus) deactivatePremiumFeatures();
             }
         }
 
