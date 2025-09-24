@@ -200,6 +200,7 @@
       } else if(s.frame==='vignette'){
         const rg = ctx.createRadialGradient(w/2,h/2, Math.min(w,h)*0.4, w/2,h/2, Math.max(w,h)*0.7); rg.addColorStop(0,'rgba(0,0,0,0)'); rg.addColorStop(1,'rgba(0,0,0,0.35)'); ctx.fillStyle = rg; ctx.fillRect(0,0,w,h);
       }
+      renderMini();
     }
 
     function openDataUrl(dataUrl, name){ const i = new Image(); i.onload = ()=>{ img = i; originalDataUrl = dataUrl; $('downloadBtn').disabled = false; const pb=$('postBtn'); if(pb) pb.disabled=false; render(); }; i.src = dataUrl; if(name && /\.png$/i.test(name)) s.mime='image/png'; else s.mime='image/jpeg'; }
