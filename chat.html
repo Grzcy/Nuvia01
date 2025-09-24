@@ -1170,7 +1170,7 @@
             }
             targetEl.innerHTML = data.map(f => {
                 const initial = (f.displayName||'U').charAt(0).toUpperCase();
-                const avatar = f.profilePicId ? getCloudinaryImageUrl(f.profilePicId, 'w_36,h_36,c_fill,g_face,r_max') : `https://placehold.co/36x36/00d5ff/ffffff?text=${initial}`;
+                const avatar = f.profilePicId ? getCloudinaryImageUrl(f.profilePicId, 'w_56,h_56,c_fill,g_face,r_max') : `https://placehold.co/56x56/00d5ff/ffffff?text=${initial}`;
                 return `<div class="friend-item" data-id="${f.id}">
                     <img src="${avatar}" onerror="this.src='https://placehold.co/36x36/00d5ff/ffffff?text=${initial}'" alt="${initial}">
                     <div class="friend-meta">
