@@ -324,6 +324,7 @@
                 </div>
                 <button class="icon-btn" id="infoBtn" title="Chat Info"><i class="fas fa-info-circle"></i></button>
                 <button class="icon-btn" id="clearChatBtn" title="Clear chat"><i class="fas fa-trash"></i></button>
+                <button class="icon-btn" id="videoCallBtn" title="Video Call"><i class="fas fa-video"></i></button>
                 <div id="headerProfile" title="My Profile" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
                     <img id="headerProfilePic" src="https://placehold.co/36x36/ff2e92/ffffff?text=U" style="width:36px;height:36px;border-radius:50%;border:2px solid var(--border-light);object-fit:cover;" alt="Me">
                     <i id="headerProfileIcon" class="fas fa-user" style="display:none;"></i>
@@ -361,6 +362,44 @@
                     <button id="confirmCancel" class="icon-btn" style="border:1px solid var(--border-light); border-radius:8px; padding:6px 10px;">Cancel</button>
                     <button id="confirmOk" class="icon-btn" style="background: var(--button-background); color:#fff; border-radius:8px; padding:6px 10px;">Delete</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .call-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:1500}
+        .call-window{width:min(96vw,880px);max-width:96vw;background:var(--card-background);border:1px solid var(--border-light);border-radius:16px;box-shadow:0 18px 48px rgba(0,0,0,.45);display:flex;flex-direction:column;overflow:hidden}
+        .call-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border-light)}
+        .call-title{font-weight:700}
+        .call-status{color:var(--text-light);font-size:12px}
+        .video-wrap{position:relative;display:block;background:rgba(0,0,0,.2)}
+        .remote-video{width:100%;height:56vh;object-fit:cover;background:#000}
+        .remote-avatar{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:160px;height:160px;border-radius:50%;border:2px solid var(--border-light);display:none;object-fit:cover}
+        .local-video{position:absolute;right:12px;bottom:12px;width:140px;height:96px;border-radius:12px;border:1px solid var(--border-light);object-fit:cover;background:#000}
+        .incoming-actions{display:none;gap:12px;justify-content:center;padding:12px;border-top:1px solid var(--border-light)}
+        .call-controls{display:flex;align-items:center;justify-content:center;gap:12px;padding:12px;border-top:1px solid var(--border-light)}
+        .call-btn{min-width:44px;min-height:44px;border-radius:999px;border:1px solid var(--border-light);background:var(--input-background);color:var(--white);cursor:pointer;padding:8px 14px}
+        .call-btn.accept{background:linear-gradient(90deg,#28a745,#34d399);color:#fff}
+        .call-btn.decline{background:linear-gradient(90deg,#e11d48,#ef4444);color:#fff}
+        .end-btn{min-width:52px;min-height:52px;border-radius:999px;border:none;background:var(--button-background);color:#fff;box-shadow:var(--button-shadow);cursor:pointer}
+        @media (max-width:640px){ .remote-video{height:48vh} .local-video{width:110px;height:78px} }
+    </style>
+    <div id="callModal" class="call-modal">
+        <div class="call-window">
+            <div class="call-header"><div class="call-title" id="callTitle">Video Call</div><div class="call-status" id="callStatus">Connecting…</div></div>
+            <div class="video-wrap" id="videoWrap">
+                <img id="remoteAvatarPlaceholder" class="remote-avatar" alt="">
+                <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
+                <video id="localVideo" class="local-video" muted autoplay playsinline></video>
+            </div>
+            <div class="incoming-actions" id="incomingActions">
+                <button class="call-btn accept" id="acceptCallBtn"><i class="fas fa-phone"></i> Accept</button>
+                <button class="call-btn decline" id="declineCallBtn"><i class="fas fa-phone-slash"></i> Decline</button>
+            </div>
+            <div class="call-controls">
+                <button class="call-btn" id="muteBtn" title="Toggle microphone"><i class="fas fa-microphone"></i></button>
+                <button class="call-btn" id="cameraBtn" title="Toggle camera"><i class="fas fa-video"></i></button>
+                <button class="end-btn" id="endCallBtn" title="End call"><i class="fas fa-phone-slash"></i></button>
             </div>
         </div>
     </div>
@@ -504,6 +543,7 @@
             startPresenceHeartbeat();
             await setupHeader(user);
             await loadFriends();
+            startIncomingListener();
             if (!partnerId) return;
             currentPartner = await loadFriendProfile(partnerId);
             if (currentPartner) updatePartnerHeader(currentPartner);
@@ -618,6 +658,47 @@
         const emojiGrid = document.getElementById('emojiGrid');
         const emojiTabs = document.getElementById('emojiTabs');
         const voiceMsgBtn = document.getElementById('voiceMsgBtn');
+
+// Call UI elements
+const callModal = document.getElementById('callModal');
+const remoteVideo = document.getElementById('remoteVideo');
+const localVideo = document.getElementById('localVideo');
+const remoteAvatarPlaceholder = document.getElementById('remoteAvatarPlaceholder');
+const callTitle = document.getElementById('callTitle');
+const videoWrap = document.getElementById('videoWrap');
+const incomingActions = document.getElementById('incomingActions');
+const acceptCallBtn = document.getElementById('acceptCallBtn');
+const declineCallBtn = document.getElementById('declineCallBtn');
+const endCallBtn = document.getElementById('endCallBtn');
+const muteBtn = document.getElementById('muteBtn');
+const cameraBtn = document.getElementById('cameraBtn');
+const videoCallBtn = document.getElementById('videoCallBtn');
+
+// Call state
+let isCaller = false;
+let isIncoming = false;
+let callKind = 'video';
+let ringTimeoutId = null;
+let incomingRingTimeoutId = null;
+let callTimerInterval = null;
+let callStartMs = null;
+let remoteMediaStream = null;
+let acceptInProgressDocId = null;
+let currentIncomingDoc = null;
+
+// Controls wiring
+videoCallBtn?.addEventListener('click', () => {
+    if (!currentPartner) { alert('Select a friend to call.'); return; }
+    try{ ensureMediaUnlocked(); }catch(_){ }
+    startCall(true);
+});
+endCallBtn?.addEventListener('click', () => endCall());
+muteBtn?.addEventListener('click', () => {
+    try{ const stream = localVideo?.srcObject; if (stream) stream.getAudioTracks().forEach(t => t.enabled = !t.enabled); }catch(_){}
+});
+cameraBtn?.addEventListener('click', () => {
+    try{ const stream = localVideo?.srcObject; if (stream) stream.getVideoTracks().forEach(t => t.enabled = !t.enabled); }catch(_){}
+});
 
         async function showIncomingPrompt(docSnap){
             // Attach a per-call snapshot listener for ringing state to detect remote hangup even before acceptance
@@ -744,12 +825,18 @@
         const rtcConfig = (window.__ice_servers && Array.isArray(window.__ice_servers) && window.__ice_servers.length)
             ? { iceServers: window.__ice_servers }
             : { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
-        function ensureMediaUnlocked(){ return;
+        function ensureMediaUnlocked(){
             try{ if (typeof AudioContext !== 'undefined') { const ac = new AudioContext(); if (ac.state === 'suspended') ac.resume().catch(()=>{}); } }catch(_){ }
             try{ if (remoteVideo) { remoteVideo.play().catch(()=>{}); } }catch(_){ }
             try{ if (localVideo) { localVideo.muted = true; localVideo.play().catch(()=>{}); } }catch(_){ }
         }
-        backBtn.onclick = () => history.back();
+        let ringAudio = null; let callerRingAudio = null;
+function startRingtone(){ try{ stopRingtone(); ringAudio = new Audio('/ne.mp3'); ringAudio.loop = true; ringAudio.volume = 0.5; ringAudio.play().catch(()=>{}); }catch(_){}}
+function stopRingtone(){ try{ if (ringAudio){ ringAudio.pause(); ringAudio.currentTime = 0; ringAudio = null; } }catch(_){}}
+function startCallerRingtone(){ try{ stopCallerRingtone(); callerRingAudio = new Audio('/ne.mp3'); callerRingAudio.loop = true; callerRingAudio.volume = 0.5; callerRingAudio.play().catch(()=>{}); }catch(_){}}
+function stopCallerRingtone(){ try{ if (callerRingAudio){ callerRingAudio.pause(); callerRingAudio.currentTime = 0; callerRingAudio = null; } }catch(_){}}
+
+backBtn.onclick = () => history.back();
 
         // Emoji setup with categories and ~500 emojis
         const emojiCategories = [
@@ -977,7 +1064,7 @@
         }
 
 
-        async function startCall(isVideo) { return;
+        async function startCall(isVideo) {
             if (!currentPartner) return;
             isIncoming = false;
             isCaller = true;
@@ -1098,7 +1185,7 @@
 
         // Incoming call listener (basic)
         let unsubIncoming = null;
-        function startIncomingListener() { return;
+        function startIncomingListener() {
             try {
                 const callsCol = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
                 const q = query(callsCol, where('calleeId', '==', currentUser.uid), where('status', '==', 'ringing'), where('video', '==', true));
@@ -1150,7 +1237,7 @@
         // Start incoming listener on auth
         // (after currentUser is set)
         
-        async function acceptIncomingCall(docSnap) { return;
+        async function acceptIncomingCall(docSnap) {
             try {
                 isCaller = false;
                 callKind = 'video';
@@ -1263,7 +1350,7 @@
             }
         }
 
-        function openCallUI(isVideo) { return;
+        function openCallUI(isVideo) {
             callModal.style.display = 'flex';
             callTitle.textContent = 'Video Call';
             videoWrap.style.display = 'block';
@@ -1284,7 +1371,7 @@
             }
         }
 
-        async function endCall() { return;
+        async function endCall() {
             try{ clearTimeout(ringTimeoutId); }catch(_){ }
             try{ clearTimeout(incomingRingTimeoutId); }catch(_){ }
             stopRingtone();
@@ -1599,7 +1686,7 @@
             return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
         }
 
-        function startCallTimer() { return;
+        function startCallTimer() {
             try {
                 const cs = document.getElementById('callStatus');
                 if (!cs) return;
@@ -1614,7 +1701,7 @@
             } catch {}
         }
 
-        function stopCallTimer() { return;
+        function stopCallTimer() {
             try { if (callTimerInterval) clearInterval(callTimerInterval); } catch {}
             callTimerInterval = null;
         }
@@ -1635,7 +1722,7 @@
             if (isTyping) typingTimer = setTimeout(() => handleTyping(false), 1200);
         }
 
-        async function logCallSummary(kind, startedAtMs, endedAtMs){ return;
+        async function logCallSummary(kind, startedAtMs, endedAtMs){
             try{
                 if (!currentUser || !currentPartner) return;
                 const chatId = chatIdFor(currentUser.uid, currentPartner.id);
@@ -1659,7 +1746,7 @@
             }catch(e){ /* ignore */ }
         }
 
-        async function handleMissedByCaller(){ return;
+        async function handleMissedByCaller(){
             try{
                 if (!callDocRef || callStartMs) return;
                 const snap = await getDoc(callDocRef);
