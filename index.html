@@ -9352,15 +9352,15 @@ const lex = inspirationLexicon[type];
 
                 if (file) {
                     const objectUrl = URL.createObjectURL(file);
-                    resetSelectedThumbnail(); if (videoThumbnailControls) videoThumbnailControls.classList.add('hidden');
+                    resetSelectedThumbnail(); if (videoThumbnailControls) videoThumbnailControls.classList.add('hidden'); if (imageEditorControls) imageEditorControls.classList.add('hidden');
                     if (file.type.startsWith('image/')) {
                         if (mediaImagePreview) {
                             mediaImagePreview.onload = () => URL.revokeObjectURL(objectUrl);
                             mediaImagePreview.src = objectUrl;
-                            mediaImagePreview.style.display = 'block';
+                            mediaImagePreview.style.display = 'block'; if (imageEditorControls) imageEditorControls.classList.remove('hidden');
                         }
                     } else if (file.type.startsWith('video/')) {
-                        if (videoThumbnailControls) videoThumbnailControls.classList.remove('hidden');
+                        if (videoThumbnailControls) videoThumbnailControls.classList.remove('hidden'); if (imageEditorControls) imageEditorControls.classList.add('hidden');
                         if (mediaVideoPreview) {
                             const revoke = () => { URL.revokeObjectURL(objectUrl); mediaVideoPreview.removeEventListener('loadeddata', revoke); mediaVideoPreview.removeEventListener('loadedmetadata', revoke); };
                             mediaVideoPreview.addEventListener('loadeddata', revoke);
@@ -9962,7 +9962,7 @@ const lex = inspirationLexicon[type];
 
                 if (file) {
                     const objectUrl = URL.createObjectURL(file);
-                    resetSelectedThumbnail(); if (videoThumbnailControls) videoThumbnailControls.classList.add('hidden');
+                    resetSelectedThumbnail(); if (videoThumbnailControls) videoThumbnailControls.classList.add('hidden'); if (imageEditorControls) imageEditorControls.classList.add('hidden');
                     if (file.type.startsWith('image/')) {
                         if (editMediaImagePreview) {
                             editMediaImagePreview.onload = () => URL.revokeObjectURL(objectUrl);
@@ -13734,15 +13734,15 @@ async function fetchAndDisplayPosts() {
 
                     if (file) {
                     const objectUrl = URL.createObjectURL(file);
-                    resetSelectedThumbnail(); if (videoThumbnailControls) videoThumbnailControls.classList.add('hidden');
+                    resetSelectedThumbnail(); if (videoThumbnailControls) videoThumbnailControls.classList.add('hidden'); if (imageEditorControls) imageEditorControls.classList.add('hidden');
                     if (file.type.startsWith('image/')) {
                         if (mediaImagePreview) {
                             mediaImagePreview.onload = () => URL.revokeObjectURL(objectUrl);
                             mediaImagePreview.src = objectUrl;
-                            mediaImagePreview.style.display = 'block';
+                            mediaImagePreview.style.display = 'block'; if (imageEditorControls) imageEditorControls.classList.remove('hidden');
                         }
                     } else if (file.type.startsWith('video/')) {
-                        if (videoThumbnailControls) videoThumbnailControls.classList.remove('hidden');
+                        if (videoThumbnailControls) videoThumbnailControls.classList.remove('hidden'); if (imageEditorControls) imageEditorControls.classList.add('hidden');
                         if (mediaVideoPreview) {
                             const revoke = () => { URL.revokeObjectURL(objectUrl); mediaVideoPreview.removeEventListener('loadeddata', revoke); mediaVideoPreview.removeEventListener('loadedmetadata', revoke); };
                             mediaVideoPreview.addEventListener('loadeddata', revoke);
@@ -13771,7 +13771,7 @@ async function fetchAndDisplayPosts() {
 
                     if (file) {
                     const objectUrl = URL.createObjectURL(file);
-                    resetSelectedThumbnail(); if (videoThumbnailControls) videoThumbnailControls.classList.add('hidden');
+                    resetSelectedThumbnail(); if (videoThumbnailControls) videoThumbnailControls.classList.add('hidden'); if (imageEditorControls) imageEditorControls.classList.add('hidden');
                         if (file.type.startsWith('image/')) {
                             if (editMediaImagePreview) {
                                 editMediaImagePreview.onload = () => URL.revokeObjectURL(objectUrl);
