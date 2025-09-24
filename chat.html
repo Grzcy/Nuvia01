@@ -1123,7 +1123,7 @@
             if (messages && !friendsMenu.classList.contains('show')) messages.classList.remove('hidden-while-friends');
         });
         
-        friendsSearchEl.addEventListener('input', () => {
+        friendsSearchEl?.addEventListener('input', () => {
             const term = friendsSearchEl.value.trim().toLowerCase();
             if (!term) {
                 filteredFriends = [];
