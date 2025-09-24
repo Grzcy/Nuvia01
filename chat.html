@@ -1124,21 +1124,24 @@
                 stream.getTracks().forEach(t => pc.addTrack(t, stream));
                 
                 pc.ontrack = (e) => {
-                    const rstream = e.streams[0];
-                    if (!callStartMs) {
-                        callStartMs = Date.now();
-                        startCallTimer();
-                    }
-                    if (isVideo) {
-                        remoteVideo.srcObject = rstream;
-                        try { remoteVideo.play().catch(()=>{}); } catch(_){}
-                        if (remoteAvatarPlaceholder) remoteAvatarPlaceholder.style.display = 'none';
-                    } else if (remoteAudio) {
-                        remoteAudio.srcObject = rstream;
-                        remoteAudio.style.display = 'block';
-                        try { remoteAudio.play().catch(() => {}); } catch {}
-                        if (voiceAvatarPlaceholder) voiceAvatarPlaceholder.style.display = 'none';
-                    }
+                    try {
+                        if (!remoteMediaStream) remoteMediaStream = new MediaStream();
+                        remoteMediaStream.addTrack(e.track);
+                        if (!callStartMs) {
+                            callStartMs = Date.now();
+                            startCallTimer();
+                        }
+                        if (isVideo) {
+                            remoteVideo.srcObject = remoteMediaStream;
+                            try { remoteVideo.play().catch(()=>{}); } catch(_){ }
+                            if (remoteAvatarPlaceholder) remoteAvatarPlaceholder.style.display = 'none';
+                        } else if (remoteAudio) {
+                            remoteAudio.srcObject = remoteMediaStream;
+                            remoteAudio.style.display = 'block';
+                            try { remoteAudio.play().catch(()=>{}); } catch(_){ }
+                            if (voiceAvatarPlaceholder) voiceAvatarPlaceholder.style.display = 'none';
+                        }
+                    } catch (_) { }
                 };
 
                 // Create call doc
@@ -1285,21 +1288,24 @@
                 stream.getTracks().forEach(t => pc.addTrack(t, stream));
                 
                 pc.ontrack = (e) => {
-                    const rstream = e.streams[0];
-                    if (!callStartMs) {
-                        callStartMs = Date.now();
-                        startCallTimer();
-                    }
-                    if (desiredVideo) {
-                        remoteVideo.srcObject = rstream;
-                        try { remoteVideo.play().catch(()=>{}); } catch(_){}
-                        if (remoteAvatarPlaceholder) remoteAvatarPlaceholder.style.display = 'none';
-                    } else if (remoteAudio) {
-                        remoteAudio.srcObject = rstream;
-                        remoteAudio.style.display = 'block';
-                        try { remoteAudio.play().catch(() => {}); } catch {}
-                        if (voiceAvatarPlaceholder) voiceAvatarPlaceholder.style.display = 'none';
-                    }
+                    try {
+                        if (!remoteMediaStream) remoteMediaStream = new MediaStream();
+                        remoteMediaStream.addTrack(e.track);
+                        if (!callStartMs) {
+                            callStartMs = Date.now();
+                            startCallTimer();
+                        }
+                        if (desiredVideo) {
+                            remoteVideo.srcObject = remoteMediaStream;
+                            try { remoteVideo.play().catch(()=>{}); } catch(_){ }
+                            if (remoteAvatarPlaceholder) remoteAvatarPlaceholder.style.display = 'none';
+                        } else if (remoteAudio) {
+                            remoteAudio.srcObject = remoteMediaStream;
+                            remoteAudio.style.display = 'block';
+                            try { remoteAudio.play().catch(()=>{}); } catch(_){ }
+                            if (voiceAvatarPlaceholder) voiceAvatarPlaceholder.style.display = 'none';
+                        }
+                    } catch (_) { }
                 };
                 const calleeCandCol = collection(callDocRef, 'calleeCandidates');
                 pc.onicecandidate = (e) => { if (e.candidate) addDoc(calleeCandCol, e.candidate.toJSON()); };
