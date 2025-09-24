@@ -8798,7 +8798,7 @@ async function checkAndStartDailyBonusTimer() {
                     displayProfilePicture(headerProfilePic, headerAvatarIcon, user.photoURL, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
                     headerDisplayName.textContent = user.displayName || "Nuvia User";
                 }
-                showMessageBox(`Error loading header profile: ${error.message}`, 'error');
+                if (navigator.onLine) showMessageBox(`Error loading header profile: ${error.message}`, 'error');
 
                 console.log("Nuvia_DEBUG: fetchAndDisplayHeaderProfile failed. Interactive elements might still be enabled if auth succeeded.");
                 
