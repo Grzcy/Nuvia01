@@ -264,9 +264,15 @@
         ::-webkit-scrollbar-track { background: rgba(255,255,255,0.15); border-radius: 10px; }
         ::-webkit-scrollbar-thumb { background: linear-gradient(to bottom, var(--blue), var(--pink)); border-radius: 10px; border: 2px solid rgba(255,255,255,0.2); }
         ::-webkit-scrollbar-thumb:hover { background: linear-gradient(to bottom, var(--pink), var(--blue)); }
+            /* Pink + Yellow background (match profile.html) */
+        body.profile-pinkyellow-bg {
+            background: linear-gradient(135deg, #ff2e92, #ffd700) fixed !important;
+            background-size: cover;
+            background-attachment: fixed;
+        }
     </style>
 </head>
-<body>
+<body class="profile-pinkyellow-bg">
     <div class="container">
         <div class="header">
             <div class="header-left"><button class="back-btn" id="backBtn" title="Back"><i class="fas fa-arrow-left"></i></button>
