@@ -1202,8 +1202,14 @@
                 unsubCalleeCand = onSnapshot(calleeCandCol, (snap) => {
                     snap.docChanges().forEach(change => {
                         if (change.type === 'added') {
-                            const cand = new RTCIceCandidate(change.doc.data());
-                            try { pc.addIceCandidate(cand); } catch {}
+                            const dataCand = change.doc.data();
+                            console.log('CALLER: received callee ICE candidate', dataCand);
+                            const cand = new RTCIceCandidate(dataCand);
+                            pc.addIceCandidate(cand).then(()=>{
+                                console.log('CALLER: addIceCandidate success');
+                            }).catch(err=>{
+                                console.warn('CALLER: addIceCandidate failed', err);
+                            });
                         }
                     });
                 });
