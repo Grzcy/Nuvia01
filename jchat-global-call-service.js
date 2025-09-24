@@ -46,7 +46,7 @@ function createNotificationOverlay(callId, callData){
 function removeOverlay(){ try{ const el=document.getElementById('globalCallNotification'); if(el) el.remove(); const s=document.getElementById('globalCallNotificationStyles'); if(s) s.remove(); }catch(e){}
 }
 
-function playRingtone(){ try{ const audio = new Audio(); audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqF'; audio.loop = true; audio.volume = 0.35; audio.play().catch(()=>{}); setTimeout(()=>{ try{ audio.pause(); }catch(e){} }, 20000);}catch(e){}}
+function playRingtone(){ try{ const audio = new Audio('https://cdn.builder.io/o/assets%2Fc5542eb63b564e86810556e73a332186%2Ffa802bcb41594c9fb0a35733e90d7cee?alt=media&token=adb505bd-f77f-4840-a50b-b13c040e0dca&apiKey=c5542eb63b564e86810556e73a332186'); audio.loop = true; audio.volume = 0.35; audio.play().catch(()=>{}); setTimeout(()=>{ try{ audio.pause(); }catch(e){} }, 20000);}catch(e){}}
 
 async function answerGlobalCall(callerId){ try{ window.location.href = `/chat.html?partnerId=${encodeURIComponent(callerId)}`; }catch(e){ console.error('JCHAT_ERROR answerGlobalCall', e); } }
 
