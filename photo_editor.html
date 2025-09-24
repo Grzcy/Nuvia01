@@ -203,6 +203,25 @@
       renderMini();
     }
 
+    function renderMini(){ if(!img){ miniCtx.clearRect(0,0,mini.width,mini.height); return; }
+      const mw = mini.width, mh = mini.height; miniCtx.clearRect(0,0,mw,mh);
+      const iw=img.naturalWidth, ih=img.naturalHeight; const scaleBase = Math.max(mw/iw, mh/ih); const scale = scaleBase * s.zoom; const drawW = iw*scale, drawH=ih*scale;
+      const cx = mw/2 + s.offX*(drawW-mw)/2; const cy = mh/2 + s.offY*(drawH-mh)/2;
+      miniCtx.save(); miniCtx.translate(mw/2,mh/2); miniCtx.scale(s.flipX?-1:1, s.flipY?-1:1); miniCtx.rotate(s.rot*Math.PI/180); miniCtx.translate(-mw/2,-mh/2);
+      miniCtx.filter = `brightness(${s.bright}%) contrast(${s.contrast}%) saturate(${s.sat}%) hue-rotate(${s.hue}deg) sepia(${s.sepia}%) grayscale(${s.gray}%) blur(${Math.min(s.blur,2)}px)`;
+      const dx = cx - drawW/2, dy = cy - drawH/2; miniCtx.drawImage(img, dx, dy, drawW, drawH);
+      miniCtx.filter = 'none';
+      miniCtx.restore();
+      if(s.frame==='soft'){
+        miniCtx.strokeStyle = 'rgba(255,255,255,0.5)'; miniCtx.lineWidth = 4; miniCtx.strokeRect(2,2,mw-4,mh-4);
+      } else if(s.frame==='neon'){
+        const g = miniCtx.createLinearGradient(0,0,mw,0); g.addColorStop(0, cssVar('--blue')||'#00d5ff'); g.addColorStop(1, cssVar('--pink')||'#ff2e92');
+        miniCtx.strokeStyle = g; miniCtx.shadowColor = 'rgba(255,255,255,0.25)'; miniCtx.shadowBlur = 8; miniCtx.lineWidth = 5; miniCtx.strokeRect(3,3,mw-6,mh-6); miniCtx.shadowBlur = 0;
+      } else if(s.frame==='vignette'){
+        const rg = miniCtx.createRadialGradient(mw/2,mh/2, mw*0.35, mw/2,mh/2, mw*0.7); rg.addColorStop(0,'rgba(0,0,0,0)'); rg.addColorStop(1,'rgba(0,0,0,0.25)'); miniCtx.fillStyle = rg; miniCtx.fillRect(0,0,mw,mh);
+      }
+    }
+
     function openDataUrl(dataUrl, name){ const i = new Image(); i.onload = ()=>{ img = i; originalDataUrl = dataUrl; $('downloadBtn').disabled = false; const pb=$('postBtn'); if(pb) pb.disabled=false; render(); }; i.src = dataUrl; if(name && /\.png$/i.test(name)) s.mime='image/png'; else s.mime='image/jpeg'; }
 
     function openFile(file){ if(!file) return; const reader = new FileReader(); reader.onload = ()=> openDataUrl(reader.result, file.name); reader.readAsDataURL(file); }
