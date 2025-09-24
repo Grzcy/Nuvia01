@@ -841,7 +841,7 @@ cameraBtn?.addEventListener('click', () => {
             try{ if (localVideo) { localVideo.muted = true; localVideo.play().catch(()=>{}); } }catch(_){ }
         }
         let ringAudio = null; let callerRingAudio = null;
-function startRingtone(){ try{ stopRingtone(); ringAudio = new Audio('https://cdn.builder.io/o/assets%2Fc5542eb63b564e86810556e73a332186%2F4cbef326171f4fa79b77b66a9b292c50?alt=media&token=1db90849-5140-4702-9888-f35fd41c9d51&apiKey=c5542eb63b564e86810556e73a332186'); ringAudio.loop = true; ringAudio.volume = 0.5; ringAudio.play().catch(()=>{}); }catch(_){}}
+function startRingtone(){ try{ stopRingtone(); ringAudio = new Audio('https://cdn.builder.io/o/assets%2Fc5542eb63b564e86810556e73a332186%2Ffa802bcb41594c9fb0a35733e90d7cee?alt=media&token=adb505bd-f77f-4840-a50b-b13c040e0dca&apiKey=c5542eb63b564e86810556e73a332186'); ringAudio.loop = true; ringAudio.volume = 0.5; ringAudio.play().catch(()=>{}); }catch(_){}}
 function stopRingtone(){ try{ if (ringAudio){ ringAudio.pause(); ringAudio.currentTime = 0; ringAudio = null; } }catch(_){}}
 function startCallerRingtone(){ try{ stopCallerRingtone(); callerRingAudio = new Audio('https://cdn.builder.io/o/assets%2Fc5542eb63b564e86810556e73a332186%2F4cbef326171f4fa79b77b66a9b292c50?alt=media&token=1db90849-5140-4702-9888-f35fd41c9d51&apiKey=c5542eb63b564e86810556e73a332186'); callerRingAudio.loop = true; callerRingAudio.volume = 0.5; callerRingAudio.play().catch(()=>{}); }catch(_){}}
 function stopCallerRingtone(){ try{ if (callerRingAudio){ callerRingAudio.pause(); callerRingAudio.currentTime = 0; callerRingAudio = null; } }catch(_){}}
