@@ -1552,7 +1552,11 @@ backBtn.onclick = () => history.back();
                             durationMs: typeof m.durationMs === 'number' ? m.durationMs : null,
                             sender: m.senderId === currentUser.uid ? 'current' : 'partner',
                             timestamp: m.timestamp?.toMillis?.() || Date.now(),
-                            status: m.status || 'delivered'
+                            status: m.status || 'delivered',
+                            reactions: m.reactions || null,
+                            enc: !!m.enc,
+                            cipher: m.cipher || null,
+                            iv: m.iv || null
                         });
                     });
                     // If we received any real messages, remove optimistic placeholders
