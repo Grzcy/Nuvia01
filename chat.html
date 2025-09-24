@@ -322,7 +322,6 @@
                         <div class="friends-list" id="friendsList"><div style="padding:12px;color:var(--text-light);font-size:12px;">Loading friends...</div></div>
                     </div>
                 </div>
-                <button class="icon-btn" id="voiceCallBtn" title="Voice Call"><i class="fas fa-phone"></i></button>
                 <button class="icon-btn" id="videoCallBtn" title="Video Call"><i class="fas fa-video"></i></button>
                 <button class="icon-btn" id="infoBtn" title="Chat Info"><i class="fas fa-info-circle"></i></button>
                 <button class="icon-btn" id="clearChatBtn" title="Clear chat"><i class="fas fa-trash"></i></button>
@@ -380,12 +379,6 @@
                     <video id="remoteVideo" autoplay playsinline style="width:100%; height:auto;"></video>
                     <img id="remoteAvatarPlaceholder" alt="Contact" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:120px; height:120px; border-radius:50%; border:2px solid var(--border-light); box-shadow:0 6px 16px rgba(0,0,0,.5); object-fit:cover; display:none;" />
                     <video id="localVideo" autoplay muted playsinline style="position:absolute; right:8px; bottom:8px; width:120px; border-radius:6px; box-shadow:0 6px 16px rgba(0,0,0,.5);"></video>
-                </div>
-                <div id="voiceWrap" style="display:none; text-align:center; padding:24px;">
-                    <img id="voiceAvatarPlaceholder" alt="Contact" style="width:120px; height:120px; border-radius:50%; border:2px solid var(--border-light); box-shadow:0 6px 16px rgba(0,0,0,.5); object-fit:cover; display:none;" />
-                    <i class="fas fa-phone" style="font-size:36px; color:var(--accent-color); margin-top:8px;"></i>
-                    <div id="callStatus" style="margin-top:8px; color:var(--text-light);">Connecting…</div>
-                    <audio id="remoteAudio" autoplay playsinline style="display:none"></audio>
                 </div>
             </div>
         </div>
@@ -668,18 +661,14 @@
         const emojiGrid = document.getElementById('emojiGrid');
         const emojiTabs = document.getElementById('emojiTabs');
         const voiceMsgBtn = document.getElementById('voiceMsgBtn');
-        const voiceCallBtn = document.getElementById('voiceCallBtn');
         const videoCallBtn = document.getElementById('videoCallBtn');
         const callModal = document.getElementById('callModal');
         const callTitle = document.getElementById('callTitle');
         const endCallBtn = document.getElementById('endCallBtn');
-        const voiceWrap = document.getElementById('voiceWrap');
         const videoWrap = document.getElementById('videoWrap');
         const localVideo = document.getElementById('localVideo');
         const remoteVideo = document.getElementById('remoteVideo');
         const remoteAvatarPlaceholder = document.getElementById('remoteAvatarPlaceholder');
-        const voiceAvatarPlaceholder = document.getElementById('voiceAvatarPlaceholder');
-        const remoteAudio = document.getElementById('remoteAudio');
         const incomingActions = document.getElementById('incomingActions');
         const acceptCallBtn = document.getElementById('acceptCallBtn');
         const declineCallBtn = document.getElementById('declineCallBtn');
@@ -690,7 +679,7 @@
         let ringtoneOsc = null;
         let ringtoneCtx = null;
         let isCaller = false;
-        let callKind = 'voice';
+        let callKind = 'video';
         let callStartMs = null;
         let ringTimeoutId = null;
         let incomingRingTimeoutId = null;
@@ -767,12 +756,11 @@
                         }
                         if (!avatarUrl) avatarUrl = `https://placehold.co/240x240/00d5ff/ffffff?text=${initial}`;
                         try{ if (remoteAvatarPlaceholder) { remoteAvatarPlaceholder.src = avatarUrl; remoteAvatarPlaceholder.style.display = 'block'; } }catch(_){ }
-                        try{ if (voiceAvatarPlaceholder) { voiceAvatarPlaceholder.src = avatarUrl; voiceAvatarPlaceholder.style.display = 'block'; } }catch(_){ }
-                    }
+                            }
                 }catch(e){ console.warn('JCHAT_WARN: failed to load caller avatar', e); }
 
-                openCallUI(isVideo);
-                callTitle.textContent = isVideo ? 'Incoming Video Call' : 'Incoming Voice Call';
+                openCallUI(true);
+                callTitle.textContent = 'Incoming Video Call';
                 try{ ensureMediaUnlocked(); }catch(_){ }
                 const cs = document.getElementById('callStatus');
                 if (cs) cs.textContent = 'Ringing���';
@@ -860,7 +848,6 @@
             : { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
         function ensureMediaUnlocked(){
             try{ if (typeof AudioContext !== 'undefined') { const ac = new AudioContext(); if (ac.state === 'suspended') ac.resume().catch(()=>{}); } }catch(_){ }
-            try{ if (remoteAudio) { remoteAudio.muted = false; remoteAudio.play().catch(()=>{}); } }catch(_){ }
             try{ if (remoteVideo) { remoteVideo.play().catch(()=>{}); } }catch(_){ }
             try{ if (localVideo) { localVideo.muted = true; localVideo.play().catch(()=>{}); } }catch(_){ }
         }
@@ -1092,14 +1079,13 @@
         }
 
         endCallBtn?.addEventListener('click', endCall);
-        voiceCallBtn?.addEventListener('click', () => startCall(false));
         videoCallBtn?.addEventListener('click', () => startCall(true));
 
         async function startCall(isVideo) {
             if (!currentPartner) return;
             isIncoming = false;
             isCaller = true;
-            callKind = isVideo ? 'video' : 'voice';
+            callKind = 'video';
             callStartMs = null;
             if (incomingActions) incomingActions.style.display = 'none';
             openCallUI(isVideo);
@@ -1140,11 +1126,6 @@
                             remoteVideo.srcObject = remoteMediaStream;
                             try { remoteVideo.play().catch(()=>{}); } catch(_){ }
                             if (remoteAvatarPlaceholder) remoteAvatarPlaceholder.style.display = 'none';
-                        } else if (remoteAudio) {
-                            remoteAudio.srcObject = remoteMediaStream;
-                            remoteAudio.style.display = 'block';
-                            try { remoteAudio.play().catch(()=>{}); } catch(_){ }
-                            if (voiceAvatarPlaceholder) voiceAvatarPlaceholder.style.display = 'none';
                         }
                     } catch (err) { console.warn('CALLER: ontrack handler error', err); }
                 };
@@ -1224,7 +1205,7 @@
         function startIncomingListener() {
             try {
                 const callsCol = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
-                const q = query(callsCol, where('calleeId', '==', currentUser.uid), where('status', '==', 'ringing'));
+                const q = query(callsCol, where('calleeId', '==', currentUser.uid), where('status', '==', 'ringing'), where('video', '==', true));
                 unsubIncoming = onSnapshot(q, async (snap) => {
                     for (const change of snap.docChanges()) {
                         try{
@@ -1276,10 +1257,10 @@
         async function acceptIncomingCall(docSnap) {
             try {
                 isCaller = false;
-                callKind = (docSnap.data()?.video ? 'video' : 'voice');
+                callKind = 'video';
                 callStartMs = null;
                 callDocRef = docSnap.ref;
-                const desiredVideo = !!(docSnap.data()?.video);
+                const desiredVideo = true;
                 openCallUI(desiredVideo);
                 if (incomingActions) incomingActions.style.display = 'none';
                 if (endCallBtn) endCallBtn.style.display = 'inline-flex';
@@ -1327,11 +1308,6 @@
                             remoteVideo.srcObject = remoteMediaStream;
                             try { remoteVideo.play().catch(()=>{}); } catch(_){ }
                             if (remoteAvatarPlaceholder) remoteAvatarPlaceholder.style.display = 'none';
-                        } else if (remoteAudio) {
-                            remoteAudio.srcObject = remoteMediaStream;
-                            remoteAudio.style.display = 'block';
-                            try { remoteAudio.play().catch(()=>{}); } catch(_){ }
-                            if (voiceAvatarPlaceholder) voiceAvatarPlaceholder.style.display = 'none';
                         }
                     } catch (err) { console.warn('CALLEE: ontrack handler error', err); }
                 };
@@ -1393,10 +1369,9 @@
 
         function openCallUI(isVideo) {
             callModal.style.display = 'flex';
-            callTitle.textContent = isVideo ? 'Video Call' : 'Voice Call';
-            voiceWrap.style.display = isVideo ? 'none' : 'block';
-            videoWrap.style.display = isVideo ? 'block' : 'none';
-            if (isVideo && remoteAvatarPlaceholder) {
+            callTitle.textContent = 'Video Call';
+            videoWrap.style.display = 'block';
+            if (remoteAvatarPlaceholder) {
                 try{
                     let url = '';
                     if (currentPartner) {
@@ -1410,25 +1385,6 @@
                     }
                     remoteAvatarPlaceholder.style.display = 'block';
                 }catch(_){ }
-            } else if (remoteAvatarPlaceholder) {
-                remoteAvatarPlaceholder.style.display = 'none';
-            }
-            if (!isVideo && voiceAvatarPlaceholder) {
-                try{
-                    let url = '';
-                    if (currentPartner) {
-                        const initial = (currentPartner.displayName || 'U').charAt(0).toUpperCase();
-                        if (currentPartner.profilePicId) {
-                            url = getCloudinaryImageUrl(currentPartner.profilePicId, 'w_240,h_240,c_fill,g_face,r_max');
-                        } else {
-                            url = `https://placehold.co/240x240/00d5ff/ffffff?text=${initial}`;
-                        }
-                        voiceAvatarPlaceholder.src = url;
-                    }
-                    voiceAvatarPlaceholder.style.display = 'block';
-                }catch(_){ }
-            } else if (voiceAvatarPlaceholder) {
-                voiceAvatarPlaceholder.style.display = 'none';
             }
         }
 
@@ -1448,7 +1404,6 @@
             try { unsubCallerCand && unsubCallerCand(); } catch {}
             try { unsubCalleeCand && unsubCalleeCand(); } catch {}
             try { if (remoteVideo) remoteVideo.srcObject = null; } catch {}
-            try { if (remoteAudio) { remoteAudio.pause(); remoteAudio.srcObject = null; remoteAudio.style.display = 'none'; } } catch {}
             try { if (localVideo && localVideo.srcObject) { localVideo.srcObject.getTracks().forEach(t => t.stop()); localVideo.srcObject = null; } } catch {}
 
             if (callDocRef) {
@@ -1479,7 +1434,6 @@
             if (endCallBtn) endCallBtn.style.display = 'inline-flex';
             if (incomingActions) incomingActions.style.display = 'none';
             if (remoteAvatarPlaceholder) { remoteAvatarPlaceholder.style.display = 'none'; remoteAvatarPlaceholder.src=''; }
-            if (voiceAvatarPlaceholder) { voiceAvatarPlaceholder.style.display = 'none'; voiceAvatarPlaceholder.src=''; }
             callModal.style.display = 'none';
         }
 
