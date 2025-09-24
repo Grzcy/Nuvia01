@@ -9510,6 +9510,7 @@ const lex = inspirationLexicon[type];
                         if (postMediaUpload) postMediaUpload.value = '';
                         if (mediaImagePreview) { mediaImagePreview.style.display = 'none'; mediaImagePreview.src = ''; }
                         if (mediaVideoPreview) { mediaVideoPreview.style.display = 'none'; mediaVideoPreview.src = ''; }
+                        const imgCtr = document.getElementById('imageEditorControls'); if (imgCtr) imgCtr.classList.add('hidden');
                         currentMediaFile = null;
                     } catch (_) {
                         showMessageBox('You are offline. Post could not be queued.', 'error');
@@ -10223,7 +10224,7 @@ const lex = inspirationLexicon[type];
                 </div>
                 ${post.poll && post.poll.options ? `
                 <div class="post-poll" data-post-id="${postId}">
-                    ${post.poll.options.map((opt, i)=>`<button class=\"poll-vote-button\" data-post-id=\"${postId}\" data-index=\"${i}\">${opt.text} ��� <span class=\"poll-votes\">${opt.votes||0}</span></button>`).join('')}
+                    ${post.poll.options.map((opt, i)=>`<button class=\"poll-vote-button\" data-post-id=\"${postId}\" data-index=\"${i}\">${opt.text} — <span class=\"poll-votes\">${opt.votes||0}</span></button>`).join('')}
                 </div>` : ''}
                 ${post.mediaUrl ? `
                 <div class="post-media">
@@ -14253,7 +14254,7 @@ async function fetchAndDisplayPosts() {
                 case 'premium': return '🌟';
                 case 'vip': return '���';
                 case 'elite': return '👑';
-                default: return '🌟';
+                default: return '��';
             }
         }
 
