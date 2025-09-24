@@ -10223,7 +10223,7 @@ const lex = inspirationLexicon[type];
                 </div>
                 ${post.poll && post.poll.options ? `
                 <div class="post-poll" data-post-id="${postId}">
-                    ${post.poll.options.map((opt, i)=>`<button class=\"poll-vote-button\" data-post-id=\"${postId}\" data-index=\"${i}\">${opt.text} — <span class=\"poll-votes\">${opt.votes||0}</span></button>`).join('')}
+                    ${post.poll.options.map((opt, i)=>`<button class=\"poll-vote-button\" data-post-id=\"${postId}\" data-index=\"${i}\">${opt.text} ��� <span class=\"poll-votes\">${opt.votes||0}</span></button>`).join('')}
                 </div>` : ''}
                 ${post.mediaUrl ? `
                 <div class="post-media">
@@ -14822,13 +14822,13 @@ startPagePresence();
     if(up){ const area = up.closest('.media-upload-area') || up.parentElement; if(area && !document.getElementById(composerBtnId)){
       const b = document.createElement('button'); b.id = composerBtnId; b.type='button'; b.className='photo-editor-launch-btn'; b.textContent='Edit Photo'; b.style.display='none'; b.addEventListener('click', ()=>{
         if(window.currentMediaFile && window.currentMediaFile.type && window.currentMediaFile.type.startsWith('image/')) window.nuviaGoToPhotoEditor(window.currentMediaFile, 'composer');
-      }); area.appendChild(b);
+      }); const lbl = area.querySelector('.file-input-label'); if(lbl && lbl.parentNode){ lbl.parentNode.insertBefore(b, lbl.nextSibling); } else { area.appendChild(b); }
     }}
     const editUp = document.getElementById('editPostMediaUpload');
     if(editUp){ const area2 = editUp.closest('.media-upload-area') || editUp.parentElement; if(area2 && !document.getElementById('openPhotoEditorBtnEdit')){
       const b2 = document.createElement('button'); b2.id='openPhotoEditorBtnEdit'; b2.type='button'; b2.className='photo-editor-launch-btn'; b2.textContent='Edit Photo'; b2.style.display='none'; b2.addEventListener('click', ()=>{
         if(window.currentEditMediaFile && window.currentEditMediaFile.type && window.currentEditMediaFile.type.startsWith('image/')) window.nuviaGoToPhotoEditor(window.currentEditMediaFile, 'edit');
-      }); area2.appendChild(b2);
+      }); const lbl2 = area2.querySelector('.file-input-label'); if(lbl2 && lbl2.parentNode){ lbl2.parentNode.insertBefore(b2, lbl2.nextSibling); } else { area2.appendChild(b2); }
     }}
   }catch(_){}}
   function showLaunchBtn(which){ try{ if(which==='composer'){ const b=document.getElementById('openPhotoEditorBtn'); if(b) b.style.display='inline-flex'; } else { const b=document.getElementById('openPhotoEditorBtnEdit'); if(b) b.style.display='inline-flex'; } }catch(_){}}
@@ -14860,7 +14860,7 @@ startPagePresence();
   modal.addEventListener('click', (e)=>{ if(e.target===modal) closeEditor(); });
 
   // Hook into file inputs (non-destructive: keep original listeners; we just add editing capability)
-  function attachHooks(){ ensureLaunchButtons(); applyResultFromPhotoEditor();
+  function attachHooks(){ ensureLaunchButtons(); applyResultFromPhotoEditor(); try{ const p=document.getElementById('mediaImagePreview'); if(p && !p.__peHooked){ p.__peHooked=true; p.addEventListener('load', ()=>{ const b=document.getElementById('openPhotoEditorBtn'); if(b) b.style.display='inline-flex'; }); } const p2=document.getElementById('editMediaImagePreview'); if(p2 && !p2.__peHooked){ p2.__peHooked=true; p2.addEventListener('load', ()=>{ const b=document.getElementById('openPhotoEditorBtnEdit'); if(b) b.style.display='inline-flex'; }); } }catch(_){}
     const up = document.getElementById('postMediaUpload');
     if(up && !up.__peHooked){ up.__peHooked = true; up.addEventListener('change', (e)=>{ const f = e.target.files && e.target.files[0]; if(!f) return; if(f.type && f.type.startsWith('image/')){ try{ window.currentMediaFile = f; const imgPrev = document.getElementById('mediaImagePreview'); if(imgPrev){ const url = URL.createObjectURL(f); imgPrev.onload = ()=> URL.revokeObjectURL(url); imgPrev.src = url; imgPrev.style.display='block'; } const b=document.getElementById('openPhotoEditorBtn'); if(b) b.style.display='inline-flex'; }catch(_){ } } else { const b=document.getElementById('openPhotoEditorBtn'); if(b) b.style.display='none'; }
     }); }
