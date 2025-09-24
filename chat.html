@@ -738,8 +738,8 @@ cameraBtn?.addEventListener('click', () => {
                             }
                 }catch(e){ console.warn('JCHAT_WARN: failed to load caller avatar', e); }
 
-                openCallUI(true);
-                callTitle.textContent = 'Incoming Video Call';
+                openCallUI(isVideo);
+                callTitle.textContent = isVideo ? 'Incoming Video Call' : 'Incoming Voice Call';
                 try{ ensureMediaUnlocked(); }catch(_){ }
                 const cs = document.getElementById('callStatus');
                 if (cs) cs.textContent = 'Ringing���';
