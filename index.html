@@ -13760,6 +13760,27 @@ async function fetchAndDisplayPosts() {
             if (openThumbnailModalButton && !openThumbnailModalButton.dataset.bound){ openThumbnailModalButton.addEventListener('click', openThumbnailModal); openThumbnailModalButton.dataset.bound='1'; bindThumbnailModal(); }
             if (openImageEditorButton && !openImageEditorButton.dataset.bound){ openImageEditorButton.addEventListener('click', async ()=>{ try{ if(window.currentMediaFile && window.currentMediaFile.type && window.currentMediaFile.type.startsWith('image/')){ window.nuviaGoToPhotoEditor(window.currentMediaFile, 'composer'); return; } const imgPrev = document.getElementById('mediaImagePreview'); if(imgPrev && imgPrev.src){ if(!imgPrev.complete || !imgPrev.naturalWidth){ await new Promise(res=>{ const onl=()=>{ imgPrev.removeEventListener('load', onl); res(); }; imgPrev.addEventListener('load', onl, { once:true }); }); } const c = document.createElement('canvas'); c.width = imgPrev.naturalWidth||800; c.height = imgPrev.naturalHeight||800; const cx = c.getContext('2d'); cx.drawImage(imgPrev, 0, 0, c.width, c.height); const blob = await new Promise(res=> c.toBlob(res, 'image/jpeg', 0.92)); if(blob){ const f = new File([blob], 'picked.jpg', { type: blob.type||'image/jpeg' }); window.currentMediaFile = f; window.nuviaGoToPhotoEditor(f, 'composer'); return; } } }catch(_){} }); openImageEditorButton.dataset.bound='1'; }
             if (openImageEditorFromPoll && !openImageEditorFromPoll.dataset.bound){ openImageEditorFromPoll.addEventListener('click', ()=>{ try{ if(window.currentMediaFile && window.currentMediaFile.type && window.currentMediaFile.type.startsWith('image/')){ window.nuviaGoToPhotoEditor(window.currentMediaFile, 'composer'); } else { location.assign('/photo_editor.html'); } }catch(_){} }); openImageEditorFromPoll.dataset.bound='1'; }
+            // Ensure Add Media opens file picker, respecting admin/feature toggles
+            const addMediaLabel = document.querySelector('label[for="postMediaUpload"]');
+            if (addMediaLabel && postMediaUpload && !addMediaLabel.dataset.bound){
+                addMediaLabel.addEventListener('click', (e)=>{
+                    if (postMediaUpload.disabled) {
+                        const isAdmin = currentUser && currentUser.uid === ADMIN_UID;
+                        const allowed = isAdmin || (currentSystemSettings && currentSystemSettings.enablePostCreation);
+                        if (!allowed) return; // respect ACL
+                        e.preventDefault();
+                        const wasDisabled = true;
+                        postMediaUpload.disabled = false;
+                        postMediaUpload.click();
+                        setTimeout(()=>{
+                            if (wasDisabled && !isAdmin && !(currentSystemSettings && currentSystemSettings.enablePostCreation)) {
+                                postMediaUpload.disabled = true;
+                            }
+                        }, 0);
+                    }
+                });
+                addMediaLabel.dataset.bound = '1';
+            }
             if (createPostButton) createPostButton.addEventListener('click', createNewPost);
 
             // Edit post modal listeners
