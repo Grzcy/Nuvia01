@@ -10839,7 +10839,12 @@ async function fetchAndDisplayPosts() {
                 if (typeof setLoaderStage === 'function') setLoaderStage('settings');
             } catch (error) {
                 console.error("Nuvia_ERROR: Error fetching system settings:", error);
-                showMessageBox(`Failed to load system settings: ${error.message}`, 'error', true);
+                if (!navigator.onLine || String(error && error.message||'').toLowerCase().includes('offline')) {
+                    currentSystemSettings = currentSystemSettings && Object.keys(currentSystemSettings).length ? currentSystemSettings : { enablePostCreation:true, enablePublicChat:true, enableCalls:false, maintenanceMode:false };
+                    try { applySystemSettings(currentSystemSettings); } catch(_){ }
+                } else {
+                    showMessageBox(`Failed to load system settings: ${error.message}`, 'error', true);
+                }
             }
         }
         /**
