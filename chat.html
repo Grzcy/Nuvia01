@@ -322,7 +322,6 @@
                         <div class="friends-list" id="friendsList"><div style="padding:12px;color:var(--text-light);font-size:12px;">Loading friends...</div></div>
                     </div>
                 </div>
-                <button class="icon-btn" id="videoCallBtn" title="Video Call"><i class="fas fa-video"></i></button>
                 <button class="icon-btn" id="infoBtn" title="Chat Info"><i class="fas fa-info-circle"></i></button>
                 <button class="icon-btn" id="clearChatBtn" title="Clear chat"><i class="fas fa-trash"></i></button>
                 <div id="headerProfile" title="My Profile" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
@@ -364,32 +363,10 @@
                 </div>
             </div>
         </div>
-        <!-- Call Modal -->
-        <div id="callModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter: blur(4px); z-index:300; align-items:center; justify-content:center;">
-            <div style="background:var(--card-background); border:1px solid var(--border-light); border-radius:12px; padding:12px; width:90%; max-width:520px;">
-                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-                    <div id="callTitle" style="font-weight:600;">Call</div>
-                    <button id="endCallBtn" class="icon-btn" title="End Call" style="color:#ff4d4f"><i class="fas fa-phone-slash"></i></button>
-                </div>
-                <div id="incomingActions" style="display:none; gap:12px; justify-content:center; margin:10px 0;">
-                    <button id="acceptCallBtn" class="icon-btn" title="Accept Call" style="background: var(--input-background); border:1px solid var(--border-light); color:#2ed573"><i class="fas fa-phone"></i></button>
-                    <button id="declineCallBtn" class="icon-btn" title="Decline Call" style="background: var(--input-background); border:1px solid var(--border-light); color:#ff4d4f"><i class="fas fa-phone-slash"></i></button>
-                </div>
-                <div id="videoWrap" style="display:none; position:relative; background:#000; border-radius:8px; overflow:hidden;">
-                    <video id="remoteVideo" autoplay playsinline style="width:100%; height:auto;"></video>
-                    <img id="remoteAvatarPlaceholder" alt="Contact" style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:120px; height:120px; border-radius:50%; border:2px solid var(--border-light); box-shadow:0 6px 16px rgba(0,0,0,.5); object-fit:cover; display:none;" />
-                    <video id="localVideo" autoplay muted playsinline style="position:absolute; right:8px; bottom:8px; width:120px; border-radius:6px; box-shadow:0 6px 16px rgba(0,0,0,.5);"></video>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Notification sound -->
     <audio id="newMessageSound" src="/ne.mp3" preload="auto"></audio>
-    <!-- Call ringtone (receiver, incoming) -->
-    <audio id="callRingtone" src="https://cdn.builder.io/o/assets%2F3f14f04ff8a54369ac87bbf78bc0bfa8%2F8fea597eec7d4ecbb3ac55e4af28cd5a?alt=media&token=83131226-e1cb-4f00-9695-bef7d195d72b&apiKey=3f14f04ff8a54369ac87bbf78bc0bfa8" preload="auto" loop style="display:none"></audio>
-    <!-- Outgoing ringback tone (caller) -->
-    <audio id="callerRingtone" src="https://cdn.builder.io/o/assets%2F3f14f04ff8a54369ac87bbf78bc0bfa8%2Fe112f6355fab4b3db3335bb1e557b08a?alt=media&token=bd369f6a-4112-4620-a5a5-492eead04095&apiKey=3f14f04ff8a54369ac87bbf78bc0bfa8" preload="auto" loop style="display:none"></audio>
 
     <script type="module">
         // Fetch retry wrapper to reduce transient "Failed to fetch" errors (used by Firestore and other libs)
@@ -524,8 +501,6 @@
             if (!user) { window.location.href = '/Login.html'; return; }
             currentUser = user;
             startPresenceHeartbeat();
-            startIncomingListener();
-            startCallSignalsListener();
             await setupHeader(user);
             await loadFriends();
             if (!partnerId) return;
@@ -1078,8 +1053,6 @@
             });
         }
 
-        endCallBtn?.addEventListener('click', endCall);
-        videoCallBtn?.addEventListener('click', () => startCall(true));
 
         async function startCall(isVideo) {
             if (!currentPartner) return;
