@@ -611,8 +611,8 @@ function showMessageBox(message, type = 'info') {
                 }catch(err){ console.error('Auth callback error', err); showMessageBox('Auth initialization error','error'); }
             });
         } else {
-            console.warn('Firebase auth not available — initializing UI without auth');
-            setupUIWithoutAuth();
+            console.warn('Firebase auth not available — deferring UI fallback until DOM elements are bound');
+            window.__chat_ui_fallback_needed = true;
         }
 
         // Presence heartbeat for current user
@@ -1739,7 +1739,7 @@ backBtn.onclick = () => history.back();
             }
             content = replyQuote + content;
             const rx = m.reactions || {};
-            const emojis = ['👍','❤️','😂','😮','���'];
+            const emojis = ['👍','❤️','😂','😮','🙏'];
             const summary = Object.keys(rx).map(k=>({ e:k, c: (Array.isArray(rx[k])?rx[k].length:0), mine: (Array.isArray(rx[k]) && rx[k].includes(currentUser?.uid)) }))
                 .filter(x=>x.c>0)
                 .map(x=>`<button class=\"emoji-btn\" data-react-id=\"${m.id}\" data-react-emoji=\"${x.e}\" title=\"${x.e}\" style=\"padding:2px 6px;border-radius:8px;border:1px solid var(--border-light);background:transparent;color:inherit;${x.mine?'outline:2px solid var(--accent-color);outline-offset:1px;':''}\">${x.e} ${x.c}</button>`).join(' ');
