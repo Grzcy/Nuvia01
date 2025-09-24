@@ -1173,8 +1173,11 @@
 
                 // Offer
                 const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: isVideo });
+                console.log('CALLER: created offer', { type: offer.type });
                 await pc.setLocalDescription(offer);
+                console.log('CALLER: setLocalDescription called');
                 await updateDoc(callDocRef, { offer: { sdp: offer.sdp, type: offer.type } });
+                console.log('CALLER: offer saved to call doc', callDocRef.id);
 
                 // Listen for answer
                 unsubCallDoc = onSnapshot(callDocRef, async (docSnap) => {
