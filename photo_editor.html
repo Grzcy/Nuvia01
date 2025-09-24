@@ -142,6 +142,8 @@
   (function(){
     let cvs = document.getElementById('cvs');
     let ctx = cvs.getContext('2d');
+    const mini = document.getElementById('miniCvs');
+    const miniCtx = mini.getContext('2d');
     let img = null; let originalDataUrl = null; let contextName = 'standalone';
     const s = { aspect:'original', zoom:1, offX:0, offY:0, rot:0, bright:100, contrast:100, sat:100, hue:0, sepia:0, gray:0, blur:0, frame:'none', mime:'image/jpeg', flipX:false, flipY:false, sharp:0, bg:{enabled:false, tol:20, key:null, picking:false} };
 
