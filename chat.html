@@ -1165,7 +1165,7 @@
                 pc.onicecandidate = (e) => { if (e.candidate) addDoc(callerCandCol, e.candidate.toJSON()); };
 
                 // Offer
-                const offer = await pc.createOffer();
+                const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: isVideo });
                 await pc.setLocalDescription(offer);
                 await updateDoc(callDocRef, { offer: { sdp: offer.sdp, type: offer.type } });
 
