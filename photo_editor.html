@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Photo Editor · Nuvia</title>
+  <style>
+    :root{
+      /* Fallbacks keep look consistent when theme variables are absent */
+      --background-main: #0b0d17;
+      --card-background: #121321;
+      --header-background: #0f111a;
+      --white: #ffffff;
+      --text-light: rgba(255,255,255,0.8);
+      --border-light: rgba(255,255,255,0.12);
+      --blue: #00d5ff;
+      --pink: #ff2e92;
+      --theme-gold: #ffd700;
+      --button-background: linear-gradient(90deg, var(--blue), var(--pink));
+      --radius: 12px;
+    }
+    html, body { height: 100%; }
+    body{ margin:0; background: var(--background-main, #0b0d17); color: var(--white, #fff); font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+    .app-header{ position: sticky; top:0; z-index: 3; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 16px; background: var(--header-background, #0f111a); border-bottom: 1px solid var(--border-light, rgba(255,255,255,0.12)); }
+    .title{ font-family:'Poppins',sans-serif; font-weight:800; letter-spacing:-.02em; background-image: linear-gradient(90deg, var(--pink), var(--blue)); background-clip:text; -webkit-background-clip:text; color: transparent; }
+    .toolbar{ display:flex; align-items:center; gap:10px; }
+    .btn{ background: var(--button-background, linear-gradient(90deg, #00d5ff, #ff2e92)); color: var(--white, #fff); border:none; border-radius:10px; padding:8px 12px; font-weight:700; cursor:pointer; box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
+    .btn.secondary{ background: rgba(255,255,255,0.08); border: 1px solid var(--border-light, rgba(255,255,255,0.12)); }
+    .btn:disabled{ opacity:.6; cursor:not-allowed; }
+    .file-input{ position: relative; overflow:hidden; display:inline-block; }
+    .file-input input{ position:absolute; inset:0; opacity:0; cursor:pointer; }
+
+    .editor-wrap{ display:grid; grid-template-columns: 1fr 320px; align-items:stretch; gap:0; height: calc(100% - 58px); }
+    .canvas-pane{ display:flex; align-items:center; justify-content:center; background: rgba(255,255,255,0.03); border-right: 1px solid var(--border-light, rgba(255,255,255,0.12)); }
+    .controls-pane{ padding:14px; overflow:auto; }
+    .canvas-box{ padding:16px; }
+    canvas{ max-width: calc(92vw - 340px); max-height: 80vh; background: rgba(0,0,0,0.2); border: 1px solid var(--border-light, rgba(255,255,255,0.12)); border-radius: 10px; display:block; }
+
+    .group{ margin:10px 0; }
+    .group label{ display:flex; justify-content:space-between; align-items:center; gap:10px; color: var(--white, #fff); font-size:.9rem; margin-bottom:6px; }
+    .group input[type=range], .group select{ width:100%; }
+    .divider{ height:1px; background: var(--border-light, rgba(255,255,255,0.12)); margin:12px 0; }
+
+    .actions{ display:flex; justify-content:space-between; gap:10px; padding-top:6px; }
+
+    .drop-hint{ text-align:center; color: var(--text-light, rgba(255,255,255,0.8)); font-size:.9rem; margin-top:8px; }
+
+    @media (max-width: 920px){
+      .editor-wrap{ grid-template-columns: 1fr; }
+      .canvas-pane{ border-right:none; border-bottom: 1px solid var(--border-light, rgba(255,255,255,0.12)); }
+      canvas{ max-width: 94vw; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header" role="banner">
+    <div class="title">Photo Editor</div>
+    <div class="toolbar">
+      <label class="btn file-input" aria-label="Open Image">
+        <input id="openFile" type="file" accept="image/*" />
+        Open Image
+      </label>
+      <button id="downloadBtn" class="btn secondary" disabled aria-label="Download Edited Image">Download</button>
+      <button id="closeBtn" class="btn secondary" aria-label="Close">Close</button>
+    </div>
+  </header>
+
+  <main class="editor-wrap" role="main">
+    <section class="canvas-pane">
+      <div class="canvas-box">
+        <canvas id="cvs" width="800" height="800" aria-label="Photo preview"></canvas>
+        <div class="drop-hint" id="dropHint">Drag & drop an image, paste from clipboard, or use Open Image.</div>
+      </div>
+    </section>
+    <aside class="controls-pane" aria-label="Editor Controls">
+      <div class="group"><label>Aspect Ratio
+        <select id="ctlAspect">
+          <option value="original">Original</option>
+          <option value="1:1">1:1 Square</option>
+          <option value="4:5">4:5 Portrait</option>
+          <option value="16:9">16:9 Landscape</option>
+          <option value="9:16">9:16 Story</option>
+        </select></label>
+      </div>
+      <div class="group"><label><span>Zoom</span><span id="valZoom">1.00x</span></label><input id="ctlZoom" type="range" min="1" max="3" step="0.01" value="1"></div>
+      <div class="group"><label><span>Offset X</span><span id="valOffX">0</span></label><input id="ctlOffX" type="range" min="-1" max="1" step="0.01" value="0"></div>
+      <div class="group"><label><span>Offset Y</span><span id="valOffY">0</span></label><input id="ctlOffY" type="range" min="-1" max="1" step="0.01" value="0"></div>
+      <div class="group"><label><span>Rotate</span><span id="valRot">0°</span></label><input id="ctlRot" type="range" min="-45" max="45" step="1" value="0"></div>
+      <div class="divider"></div>
+      <div class="group"><label><span>Brightness</span><span id="valBright">100%</span></label><input id="ctlBright" type="range" min="50" max="200" step="1" value="100"></div>
+      <div class="group"><label><span>Contrast</span><span id="valContrast">100%</span></label><input id="ctlContrast" type="range" min="50" max="200" step="1" value="100"></div>
+      <div class="group"><label><span>Saturation</span><span id="valSat">100%</span></label><input id="ctlSat" type="range" min="0" max="200" step="1" value="100"></div>
+      <div class="group"><label><span>Hue</span><span id="valHue">0°</span></label><input id="ctlHue" type="range" min="-180" max="180" step="1" value="0"></div>
+      <div class="group"><label><span>Sepia</span><span id="valSepia">0%</span></label><input id="ctlSepia" type="range" min="0" max="100" step="1" value="0"></div>
+      <div class="group"><label><span>Grayscale</span><span id="valGray">0%</span></label><input id="ctlGray" type="range" min="0" max="100" step="1" value="0"></div>
+      <div class="group"><label><span>Blur</span><span id="valBlur">0px</span></label><input id="ctlBlur" type="range" min="0" max="8" step="0.25" value="0"></div>
+      <div class="group"><label>Frame
+        <select id="ctlFrame">
+          <option value="none">None</option>
+          <option value="soft">Soft Border</option>
+          <option value="neon">Neon Glow</option>
+          <option value="vignette">Vignette</option>
+        </select></label>
+      </div>
+      <div class="actions">
+        <button id="resetBtn" class="btn secondary" aria-label="Reset">Reset</button>
+        <div style="display:flex;gap:8px">
+          <button id="useOriginalBtn" class="btn secondary" aria-label="Use Original">Use Original</button>
+          <button id="applyBtn" class="btn" aria-label="Apply">Apply</button>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+  (function(){
+    let cvs = document.getElementById('cvs');
+    let ctx = cvs.getContext('2d');
+    let img = null; let originalDataUrl = null; let contextName = 'standalone';
+    const s = { aspect:'original', zoom:1, offX:0, offY:0, rot:0, bright:100, contrast:100, sat:100, hue:0, sepia:0, gray:0, blur:0, frame:'none', mime:'image/jpeg' };
+
+    function $(id){ return document.getElementById(id); }
+    function cssVar(name){ try{ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }catch(_){ return ''; } }
+
+    function setDefaults(){ s.aspect='original'; s.zoom=1; s.offX=0; s.offY=0; s.rot=0; s.bright=100; s.contrast=100; s.sat=100; s.hue=0; s.sepia=0; s.gray=0; s.blur=0; s.frame='none';
+      $('ctlAspect').value='original'; $('ctlZoom').value=1; $('ctlOffX').value=0; $('ctlOffY').value=0; $('ctlRot').value=0; $('ctlBright').value=100; $('ctlContrast').value=100; $('ctlSat').value=100; $('ctlHue').value=0; $('ctlSepia').value=0; $('ctlGray').value=0; $('ctlBlur').value=0;
+      $('valZoom').textContent='1.00x'; $('valOffX').textContent='0'; $('valOffY').textContent='0'; $('valRot').textContent='0°'; $('valBright').textContent='100%'; $('valContrast').textContent='100%'; $('valSat').textContent='100%'; $('valHue').textContent='0°'; $('valSepia').textContent='0%'; $('valGray').textContent='0%'; $('valBlur').textContent='0px'; $('ctlFrame').value='none';
+    }
+
+    function getAspect(aspect, iw, ih){ if(aspect==='1:1') return [1,1]; if(aspect==='4:5') return [4,5]; if(aspect==='16:9') return [16,9]; if(aspect==='9:16') return [9,16]; return [iw,ih]; }
+
+    function setCanvasSize(){ const wrap = cvs.parentElement; const maxW = Math.min(1000, wrap.clientWidth-4); const maxH = Math.min(800, window.innerHeight*0.8);
+      const [aw,ah] = getAspect(s.aspect, img?img.naturalWidth:1, img?img.naturalHeight:1);
+      let w = maxW, h = w*ah/aw; if(h>maxH){ h = maxH; w = h*aw/ah; }
+      cvs.width = Math.max(200, Math.floor(w)); cvs.height = Math.max(200, Math.floor(h));
+    }
+
+    function render(){ if(!img) return; setCanvasSize(); const w=cvs.width, h=cvs.height; ctx.clearRect(0,0,w,h);
+      const iw=img.naturalWidth, ih=img.naturalHeight; const [aw,ah] = getAspect(s.aspect, iw, ih); const targetRatio = aw/ah;
+      const scaleBase = Math.max(w/iw, h/ih); const scale = scaleBase * s.zoom; const drawW = iw*scale, drawH=ih*scale;
+      const cx = w/2 + s.offX*(drawW-w)/2; const cy = h/2 + s.offY*(drawH-h)/2;
+      ctx.save(); ctx.translate(w/2,h/2); ctx.rotate(s.rot*Math.PI/180); ctx.translate(-w/2,-h/2);
+      ctx.filter = `brightness(${s.bright}%) contrast(${s.contrast}%) saturate(${s.sat}%) hue-rotate(${s.hue}deg) sepia(${s.sepia}%) grayscale(${s.gray}%) blur(${s.blur}px)`;
+      const dx = cx - drawW/2, dy = cy - drawH/2; ctx.drawImage(img, dx, dy, drawW, drawH);
+      ctx.filter = 'none';
+      if(s.frame==='soft'){
+        ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = Math.max(6, Math.floor(Math.min(w,h)*0.02)); ctx.strokeRect(ctx.lineWidth/2, ctx.lineWidth/2, w-ctx.lineWidth, h-ctx.lineWidth);
+      } else if(s.frame==='neon'){
+        const g = ctx.createLinearGradient(0,0,w,0); g.addColorStop(0, cssVar('--blue')||'#00d5ff'); g.addColorStop(1, cssVar('--pink')||'#ff2e92');
+        ctx.strokeStyle = g; ctx.shadowColor = 'rgba(255,255,255,0.35)'; ctx.shadowBlur = 16; ctx.lineWidth = Math.max(8, Math.floor(Math.min(w,h)*0.025)); ctx.strokeRect(ctx.lineWidth/2, ctx.lineWidth/2, w-ctx.lineWidth, h-ctx.lineWidth); ctx.shadowBlur = 0;
+      } else if(s.frame==='vignette'){
+        const rg = ctx.createRadialGradient(w/2,h/2, Math.min(w,h)*0.4, w/2,h/2, Math.max(w,h)*0.7); rg.addColorStop(0,'rgba(0,0,0,0)'); rg.addColorStop(1,'rgba(0,0,0,0.35)'); ctx.fillStyle = rg; ctx.fillRect(0,0,w,h);
+      }
+      ctx.restore();
+    }
+
+    function openDataUrl(dataUrl, name){ const i = new Image(); i.onload = ()=>{ img = i; originalDataUrl = dataUrl; $('downloadBtn').disabled = false; render(); }; i.src = dataUrl; if(name && /\.png$/i.test(name)) s.mime='image/png'; else s.mime='image/jpeg'; }
+
+    function openFile(file){ if(!file) return; const reader = new FileReader(); reader.onload = ()=> openDataUrl(reader.result, file.name); reader.readAsDataURL(file); }
+
+    function exportBlob(){ return new Promise((resolve,reject)=>{ try{ cvs.toBlob((blob)=>{ if(!blob){ reject(new Error('Export failed')); return; } const f = new File([blob], 'edited.' + (s.mime==='image/png'?'png':'jpg'), { type: s.mime }); resolve(f); }, s.mime==='image/png'?'image/png':'image/jpeg', s.mime==='image/png'?1:0.92); }catch(e){ reject(e); } }); }
+
+    function sendToOpener(dataUrl, file){ try{ const msg = { type:'nuvia-photo-done', mime: file.type, name: file.name, dataUrl }; if(window.opener){ window.opener.postMessage(msg, '*'); } if(window.parent && window.parent!==window){ window.parent.postMessage(msg, '*'); } if(window.opener && typeof window.opener.nuviaPhotoEditorCallback==='function'){ window.opener.nuviaPhotoEditorCallback(file, dataUrl); } }catch(_){} }
+
+    // Controls
+    $('ctlAspect').addEventListener('change', ()=>{ s.aspect = $('ctlAspect').value; render(); });
+    $('ctlZoom').addEventListener('input', (e)=>{ s.zoom = parseFloat(e.target.value); $('valZoom').textContent = s.zoom.toFixed(2)+'x'; render(); });
+    $('ctlOffX').addEventListener('input', (e)=>{ s.offX = parseFloat(e.target.value); $('valOffX').textContent = e.target.value; render(); });
+    $('ctlOffY').addEventListener('input', (e)=>{ s.offY = parseFloat(e.target.value); $('valOffY').textContent = e.target.value; render(); });
+    $('ctlRot').addEventListener('input', (e)=>{ s.rot = parseFloat(e.target.value); $('valRot').textContent = Math.round(s.rot)+'°'; render(); });
+    $('ctlBright').addEventListener('input', (e)=>{ s.bright = parseInt(e.target.value,10); $('valBright').textContent = s.bright+'%'; render(); });
+    $('ctlContrast').addEventListener('input', (e)=>{ s.contrast = parseInt(e.target.value,10); $('valContrast').textContent = s.contrast+'%'; render(); });
+    $('ctlSat').addEventListener('input', (e)=>{ s.sat = parseInt(e.target.value,10); $('valSat').textContent = s.sat+'%'; render(); });
+    $('ctlHue').addEventListener('input', (e)=>{ s.hue = parseInt(e.target.value,10); $('valHue').textContent = s.hue+'°'; render(); });
+    $('ctlSepia').addEventListener('input', (e)=>{ s.sepia = parseInt(e.target.value,10); $('valSepia').textContent = s.sepia+'%'; render(); });
+    $('ctlGray').addEventListener('input', (e)=>{ s.gray = parseInt(e.target.value,10); $('valGray').textContent = s.gray+'%'; render(); });
+    $('ctlBlur').addEventListener('input', (e)=>{ s.blur = parseFloat(e.target.value); $('valBlur').textContent = s.blur.toFixed(2)+'px'; render(); });
+    $('ctlFrame').addEventListener('change', ()=>{ s.frame = $('ctlFrame').value; render(); });
+
+    $('resetBtn').addEventListener('click', ()=>{ setDefaults(); render(); });
+    $('useOriginalBtn').addEventListener('click', ()=>{ if(originalDataUrl){ openDataUrl(originalDataUrl); } });
+    $('applyBtn').addEventListener('click', async ()=>{ try{ if(!img) return; const file = await exportBlob(); const dataUrl = cvs.toDataURL(s.mime==='image/png'?'image/png':'image/jpeg', s.mime==='image/png'?1:0.92); sendToOpener(dataUrl, file); }catch(e){ console.error('Apply failed', e); } });
+    $('downloadBtn').addEventListener('click', async ()=>{ try{ if(!img) return; const dataUrl = cvs.toDataURL(s.mime==='image/png'?'image/png':'image/jpeg', s.mime==='image/png'?1:0.92); const a = document.createElement('a'); a.href = dataUrl; a.download = 'nuvia-edited.'+(s.mime==='image/png'?'png':'jpg'); document.body.appendChild(a); a.click(); a.remove(); }catch(e){} });
+
+    // Open/Close
+    $('openFile').addEventListener('change', (e)=>{ const f = e.target.files && e.target.files[0]; if(f){ s.mime = (f.type && /png/i.test(f.type)) ? 'image/png' : 'image/jpeg'; openFile(f); } });
+    $('closeBtn').addEventListener('click', ()=>{ try{ if(window.opener){ window.close(); } else { history.back(); } }catch(_){ window.close(); } });
+
+    // DnD + clipboard
+    document.addEventListener('dragover', (e)=>{ e.preventDefault(); });
+    document.addEventListener('drop', (e)=>{ e.preventDefault(); const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if(f && /^image\//i.test(f.type)) openFile(f); });
+    document.addEventListener('paste', (e)=>{ const items = e.clipboardData && e.clipboardData.items; if(!items) return; for(const it of items){ if(it.type && /^image\//i.test(it.type)){ const f = it.getAsFile(); if(f) openFile(f); break; } } });
+
+    // Message API: parent can send dataUrl or Blob via postMessage
+    window.addEventListener('message', (ev)=>{ try{ const d = ev.data || {}; if(d && d.type==='nuvia-photo-open'){
+      if(d.dataUrl){ openDataUrl(d.dataUrl, d.name||'image.jpg'); }
+      else if(d.blob){ const fr = new FileReader(); fr.onload = ()=> openDataUrl(fr.result, d.name||'image.jpg'); fr.readAsDataURL(d.blob); }
+    } }catch(_){ } });
+
+    // If a query param image is provided (?img=dataUrl)
+    try{ const u = new URL(location.href); const q = u.searchParams.get('img'); if(q){ openDataUrl(q, 'image.jpg'); } }catch(_){ }
+
+    // Initialize
+    setDefaults();
+  })();
+  </script>
+</body>
+</html>
