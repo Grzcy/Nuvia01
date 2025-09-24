@@ -4795,9 +4795,6 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                         <button id="openThumbnailModalButton" class="post-control-button" type="button"><i class="fas fa-image"></i> Set Thumbnail</button>
                         <img id="videoThumbnailPreview" class="thumbnail-preview hidden" alt="Thumbnail preview" loading="lazy" decoding="async" />
                     </div>
-                    <div id="imageEditorControls" class="image-editor-controls hidden" aria-live="polite">
-                        <button id="openImageEditorButton" class="post-control-button" type="button"><i class="fas fa-pen"></i> Edit Photo</button>
-                    </div>
                 </div>
                 <div class="post-controls-row">
                     <label class="post-poll-toggle">
@@ -4808,7 +4805,6 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                         <input type="text" class="poll-option-input" placeholder="Option 2" maxlength="100">
                         <button id="addPollOptionBtn" class="post-control-button" type="button">Add Option</button>
                     </div>
-                    <button id="openImageEditorFromPoll" class="post-control-button" type="button"><i class="fas fa-pen"></i> Edit Photo</button>
                     <label for="postVisibilitySelect" class="post-visibility-select">
                         <i class="fas fa-eye"></i>
                         <select id="postVisibilitySelect" aria-label="Post visibility" class="visibility-select">
@@ -14827,21 +14823,7 @@ startPagePresence();
       else { window.currentEditMediaFile = f; const imgPrev = document.getElementById('editMediaImagePreview'); if(imgPrev){ imgPrev.src = dataUrl; imgPrev.style.display='block'; } const b=document.getElementById('openPhotoEditorBtnEdit'); if(b) b.style.display='inline-flex'; }
     }).catch(()=>{});
   }
-  function ensureLaunchButtons(){ try{ if(document.getElementById('imageEditorControls')) return;
-    const composerBtnId = 'openPhotoEditorBtn';
-    const up = document.getElementById('postMediaUpload');
-    if(up){ const area = up.closest('.media-upload-area') || up.parentElement; if(area && !document.getElementById(composerBtnId)){
-      const b = document.createElement('button'); b.id = composerBtnId; b.type='button'; b.className='photo-editor-launch-btn'; b.textContent='Edit Photo'; b.style.display='none'; b.addEventListener('click', ()=>{
-        if(window.currentMediaFile && window.currentMediaFile.type && window.currentMediaFile.type.startsWith('image/')) window.nuviaGoToPhotoEditor(window.currentMediaFile, 'composer');
-      }); const lbl = area.querySelector('.file-input-label'); if(lbl && lbl.parentNode){ lbl.parentNode.insertBefore(b, lbl.nextSibling); } else { area.appendChild(b); }
-    }}
-    const editUp = document.getElementById('editPostMediaUpload');
-    if(editUp){ const area2 = editUp.closest('.media-upload-area') || editUp.parentElement; if(area2 && !document.getElementById('openPhotoEditorBtnEdit')){
-      const b2 = document.createElement('button'); b2.id='openPhotoEditorBtnEdit'; b2.type='button'; b2.className='photo-editor-launch-btn'; b2.textContent='Edit Photo'; b2.style.display='none'; b2.addEventListener('click', ()=>{
-        if(window.currentEditMediaFile && window.currentEditMediaFile.type && window.currentEditMediaFile.type.startsWith('image/')) window.nuviaGoToPhotoEditor(window.currentEditMediaFile, 'edit');
-      }); const lbl2 = area2.querySelector('.file-input-label'); if(lbl2 && lbl2.parentNode){ lbl2.parentNode.insertBefore(b2, lbl2.nextSibling); } else { area2.appendChild(b2); }
-    }}
-  }catch(_){}}
+  function ensureLaunchButtons(){ try{ applyResultFromPhotoEditor(); }catch(_){}}
   function showLaunchBtn(which){ try{ if(which==='composer'){ const b=document.getElementById('openPhotoEditorBtn'); if(b) b.style.display='inline-flex'; } else { const b=document.getElementById('openPhotoEditorBtnEdit'); if(b) b.style.display='inline-flex'; } }catch(_){}}
 
   // Bind controls
