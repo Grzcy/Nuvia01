@@ -5037,7 +5037,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 <!-- Premium Request Modal -->
             <div id="premiumRequestModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="premiumRequestModalTitle" style="display:none;">
                 <div class="modal-content">
-                    <h3 id="premiumRequestModalTitle">🌟 Request Premium Access</h3>
+                    <h3 id="premiumRequestModalTitle">�� Request Premium Access</h3>
                     <p style="color:var(--text-light); margin-bottom: 1rem;">
                         Choose your premium tier and submit your request. You'll be redirected to payment after submission.
                     </p>
@@ -14771,7 +14771,7 @@ startPagePresence();
     const reader = new FileReader(); reader.onload = ()=>{ img = new Image(); img.onload = ()=>{ modal.classList.add('show'); modal.style.display='flex'; render(); }; img.src = reader.result; };
     reader.readAsDataURL(file);
   }
-  function closeEditor(){ modal.classList.remove('show'); modal.style.display='none'; }
+  function closeEditor(){ modal.classList.remove('show'); modal.style.display='none'; try{ if(contextTarget==='composer'){ const imgPrev = document.getElementById('mediaImagePreview'); if(imgPrev && imgPrev.src) imgPrev.style.display='block'; const b=document.getElementById('openPhotoEditorBtn'); if(b && window.currentMediaFile && window.currentMediaFile.type && window.currentMediaFile.type.startsWith('image/')) b.style.display='inline-flex'; } else { const imgPrev = document.getElementById('editMediaImagePreview'); if(imgPrev && imgPrev.src) imgPrev.style.display='block'; const b=document.getElementById('openPhotoEditorBtnEdit'); if(b && window.currentEditMediaFile && window.currentEditMediaFile.type && window.currentEditMediaFile.type.startsWith('image/')) b.style.display='inline-flex'; } }catch(_){} }
   function exportBlob(){ return new Promise((resolve,reject)=>{ try{ cvs.toBlob((blob)=>{ if(!blob){ reject(new Error('Export failed')); return; } resolve(new File([blob], 'edited.'+(st.mime==='image/png'?'png':'jpg'), { type: st.mime })); }, st.mime==='image/png'?'image/png':'image/jpeg', st.mime==='image/png'?1:0.92); }catch(e){ reject(e) } }); }
   function ensureLaunchButtons(){ try{
     const composerBtnId = 'openPhotoEditorBtn';
