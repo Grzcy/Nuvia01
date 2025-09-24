@@ -582,18 +582,38 @@ function showMessageBox(message, type = 'info') {
             if (e.key === 'jchat-theme') applySavedTheme();
         });
 
-        onAuthStateChanged(auth, async (user) => {
-            if (!user) { window.location.href = '/login.html'; return; }
-            currentUser = user;
-            startPresenceHeartbeat();
-            await setupHeader(user);
-            await loadFriends();
-            startIncomingListener();
-            if (!partnerId) return;
-            currentPartner = await loadFriendProfile(partnerId);
-            if (currentPartner) updatePartnerHeader(currentPartner);
-            startMessagesListener();
-        });
+        // Auth listener (guarded for degraded/offline mode)
+        function setupUIWithoutAuth(){
+            try{
+                // Minimal UI wiring so header and basic interactions work even without Firebase
+                backBtn && (backBtn.onclick = () => history.back());
+                emojiBtn && emojiBtn.addEventListener('click', ()=>{ if (emojiPanel.style.display === 'block') emojiPanel.style.display = 'none'; else { renderEmojis(); emojiPanel.style.display = 'block'; } });
+                document.addEventListener('click', (e)=>{ if (!e.target.closest('#emojiPanel') && !e.target.closest('#emojiBtn')) emojiPanel.style.display = 'none'; });
+                // Make send show offline message
+                sendBtn && sendBtn.addEventListener('click', ()=>{ showMessageBox('Cannot send message while offline.', 'warning'); });
+                attachBtn && attachBtn.addEventListener('click', ()=>{ showMessageBox('Attach is unavailable offline.', 'info'); });
+            }catch(e){ console.warn('setupUIWithoutAuth failed', e); }
+        }
+
+        if (typeof onAuthStateChanged === 'function' && firebaseAvailable) {
+            onAuthStateChanged(auth, async (user) => {
+                try{
+                    if (!user) { window.location.href = '/login.html'; return; }
+                    currentUser = user;
+                    startPresenceHeartbeat();
+                    await setupHeader(user);
+                    await loadFriends();
+                    startIncomingListener();
+                    if (!partnerId) return;
+                    currentPartner = await loadFriendProfile(partnerId);
+                    if (currentPartner) updatePartnerHeader(currentPartner);
+                    startMessagesListener();
+                }catch(err){ console.error('Auth callback error', err); showMessageBox('Auth initialization error','error'); }
+            });
+        } else {
+            console.warn('Firebase auth not available — initializing UI without auth');
+            setupUIWithoutAuth();
+        }
 
         // Presence heartbeat for current user
         let heartbeatTimer = null;
