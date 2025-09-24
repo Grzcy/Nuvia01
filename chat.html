@@ -4,19 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>JCHAT - Messages</title>
-    <link rel="canonical" href="https://nuvia.app/chat.html">
-    <meta property="og:title" content="Nuvia - Chat">
-    <meta property="og:description" content="Private and group chats. Share videos, photos, and calls on Nuvia.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://nuvia.app/chat.html">
-    <meta property="og:site_name" content="Nuvia">
-    <meta property="og:image" content="https://cdn.builder.io/api/v1/image/assets%2Faaaa97254b5c4256a69bb9a7bf91885c%2F9ed0b590d93440a085bb243bd84ed163?format=png&width=1200">
-    <meta property="og:image:alt" content="Nuvia logo">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Nuvia - Chat">
-    <meta name="twitter:description" content="Private and group chats. Share videos, photos, and calls on Nuvia.">
-    <meta name="twitter:image" content="https://cdn.builder.io/api/v1/image/assets%2Faaaa97254b5c4256a69bb9a7bf91885c%2F9ed0b590d93440a085bb243bd84ed163?format=png&width=1200">
-    <link rel="image_src" href="https://cdn.builder.io/api/v1/image/assets%2Faaaa97254b5c4256a69bb9a7bf91885c%2F9ed0b590d93440a085bb243bd84ed163?format=png&width=1200">
     <link rel="manifest" href="/manifest.webmanifest">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -27,7 +14,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <script src="/assets/js/share-utils.js" defer></script>
 
     <style>
         :root {
@@ -150,10 +136,7 @@
         .friend-item:hover { background: rgba(255,255,255,.05); }
         .friend-item img { width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--border-light); object-fit: cover; }
         .friend-meta { min-width: 0; }
-        .friend-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-flex; align-items: center; gap: 6px; }
-        .friend-new-label { font-size: 11px; font-weight: 700; color: var(--white); background: var(--blue); padding: 3px 8px; border-radius: 12px; margin-left: 6px; opacity: 0; transition: opacity .2s ease; display: none; align-items: center; line-height: 1; animation: unreadBlink 1.2s ease-in-out infinite; }
-        .friend-new-label.show { display: inline-flex; opacity: 1; }
-        @keyframes unreadBlink { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
+        .friend-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .friend-sub { font-size: 11px; color: var(--text-light); }
         .friend-presence { display: inline-flex; align-items: center; gap: 6px; }
         .friend-dot { width: 8px; height: 8px; border-radius: 50%; background: #6c757d; }
@@ -252,69 +235,6 @@
             -webkit-background-clip: text; background-clip: text; color: transparent; opacity: .75;
         }
     </style>
-    <style>
-        /* Nuvia pink & yellow overrides for Chat page */
-        :root{ --pink:#ff2e63; --orange:#ff874d; --yellow:#ffd400; --cream:#fff9ec; --card-cream-border:#fff1b8; --button-background:linear-gradient(90deg,var(--pink),var(--orange),var(--yellow)); --button-shadow:0 18px 40px rgba(255,46,99,0.18),0 8px 30px rgba(255,212,0,0.12); --warm-text:#3b2a1f; }
-        body{ background: linear-gradient(180deg,var(--pink),var(--yellow)); color:var(--warm-text); }
-        .header .partner .name, .partner .name { background: linear-gradient(90deg,var(--pink),#ff874d,var(--yellow)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-        .friends-search input, .input, .msg-input, textarea, #messageInput, #messageInput.gemini-text { background:#fffaf0; color:var(--warm-text); border:1px solid #fff1b8; caret-color:var(--pink); }
-        #messageInput::placeholder, #friendsSearch::placeholder, .msg-input::placeholder { color: rgba(59,42,34,0.45); }
-        #messageInput::-webkit-input-placeholder, #friendsSearch::-webkit-input-placeholder { color: rgba(59,42,34,0.45); }
-        #messageInput:-ms-input-placeholder { color: rgba(59,42,34,0.45); }
-        ::selection { background: rgba(255,46,99,0.14); color: #fff; }
-        .msg.sent .bubble{ background: linear-gradient(135deg,var(--pink),#ff874d); color: #fff; }
-        .msg.recv .bubble{ background: #fffef6; color: var(--warm-text); border:1px solid #fff1b8; }
-        .typing, .msg-input-wrapper { background: transparent; }
-        .icon-btn, .friend-trigger, .friends-trigger { background: #fffaf0; color:var(--warm-text); border:1px solid #fff1b8; }
-        .send-btn, .btn-primary { background: var(--button-background); color:#fff; border-radius:999px; box-shadow:0 18px 40px rgba(255,46,99,0.18); }
-    </style>
-    <style id="restore-original-chat">
-        :root{ --pink:#ff2e92; --blue:#00d5ff; --white:#fff; --text-light:rgba(255,255,255,.7); --background-color-primary:#1a1a2e; --background-color-secondary:#0f0f1f; --input-background:rgba(255,255,255,0.05); }
-        body { background: linear-gradient(135deg, var(--background-color-primary), var(--background-color-secondary)); color: var(--white) !important; }
-        .messages { background: transparent !important; }
-        .msg.sent .bubble { background: linear-gradient(135deg, var(--blue), var(--pink)) !important; color: #fff !important; }
-        .msg.recv .bubble { background: rgba(255,255,255,.06) !important; border: 1px solid var(--border-light) !important; color: var(--white) !important; }
-        input, textarea, .msg-input, .friends-search input { background: var(--input-background) !important; color: var(--white) !important; border:1px solid var(--border-light) !important; caret-color: var(--pink) !important; }
-        input::placeholder, textarea::placeholder { color: var(--text-light) !important; }
-        /* Keep send/primary buttons colored */
-        .send-btn, .btn-primary { background: linear-gradient(90deg,#ff2e63,#ff874d,#ffd400) !important; color:#fff !important; }
-    </style>
-    <style id="post-contrast-fix-chat">
-        /* For any message list displayed as posts ensure author and content are readable */
-        .post-card, .msg, .messages .post-card { color: #000 !important; }
-        .post-card .author-name, .msg .author-name, .msg .bubble, .messages .post-card .post-content-text { color: #000 !important; }
-        .post-card p, .msg p, .messages p { color: #000 !important; }
-    </style>
-    <style id="posts-white-chat">
-        /* Force message/post author and content to white for visibility in chat */
-        .messages .post-card .author-name,
-        .messages .post-card .post-timestamp,
-        .messages .post-card .post-content-text,
-        .messages .post-card p,
-        .messages .post-card small,
-        .messages .post-card a,
-        .msg .author-name,
-        .msg .bubble,
-        .msg .time { color: #fff !important; }
-    </style>
-    <style>
-        /* Highlight target message when navigated via hash */
-        .hash-highlight { outline: 2px solid var(--accent-color); outline-offset: 2px; }
-    </style>
-<style>
-.reply-quote{border-left:3px solid var(--accent-color); padding:6px 8px; margin-bottom:6px; background: var(--input-background); border-radius:8px;}
-.reply-quote .reply-author{font-weight:600; font-size:12px; color: var(--white);}
-.reply-quote .reply-snippet{font-size:12px; color: var(--text-light); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-.reply-preview{display:none; background: var(--card-background); border:1px solid var(--border-light); border-radius:10px; padding:6px 10px; margin:6px 16px 0; align-items:center; justify-content:space-between; gap:8px;}
-.reply-preview.show{display:flex;}
-.reply-preview .reply-info{min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color: var(--text-light); font-size:12px;}
-.reply-cancel{background:none; border:none; color: var(--text-light); cursor:pointer; border-radius:8px; padding:6px;}
-.input-wrap.drag-over{outline:2px dashed var(--accent-color);}
-.search-overlay{position:fixed; left:50%; top:64px; transform:translateX(-50%); width:min(92vw,480px); background: var(--card-background); border:1px solid var(--border-light); border-radius:12px; box-shadow:0 12px 40px rgba(0,0,0,.3); padding:8px; z-index:1200; display:none;}
-.search-overlay.show{display:block;}
-.search-input{width:100%; background: var(--input-background); border:1px solid var(--border-light); border-radius:8px; padding:8px 10px; color: var(--white); outline:none;}
-.search-hit{outline:2px solid var(--accent-color); outline-offset:2px;}
-</style>
 </head>
 <body>
     <div class="container">
@@ -323,14 +243,12 @@
                 <button class="back-btn" id="backBtn" title="Back"><i class="fas fa-arrow-left"></i></button>
                 <div class="partner">
                     <div>
-                        <div class="name gradient-title" id="partnerName">Nuvia</div>
+                        <div class="name gradient-title" id="partnerName">JCHAT</div>
                         <div class="status status-pill" id="partnerStatus" style="display:none"><span id="statusDot" class="status-dot status-offline"></span><span id="statusText">Offline</span></div>
                     </div>
                 </div>
             </div>
             <div class="header-right">
-                <button class="icon-btn" id="notifyBtn" title="Enable Notifications"><i class="fas fa-bell"></i></button>
-                <button class="icon-btn" id="e2eeBtn" title="Encryption"><i class="fas fa-lock"></i></button>
                 <div class="friends-root" id="friendsRoot">
                     <div class="friends-trigger" id="friendsTrigger" title="Chat with Friends"><i class="fas fa-users"></i></div>
                     <div class="friends-menu" id="friendsMenu">
@@ -338,10 +256,10 @@
                         <div class="friends-list" id="friendsList"><div style="padding:12px;color:var(--text-light);font-size:12px;">Loading friends...</div></div>
                     </div>
                 </div>
-                <button class="icon-btn" id="infoBtn" title="Chat Info"><i class="fas fa-info-circle"></i></button>
-                <button class="icon-btn" id="clearChatBtn" title="Clear chat"><i class="fas fa-trash"></i></button>
                 <button class="icon-btn" id="voiceCallBtn" title="Voice Call"><i class="fas fa-phone"></i></button>
                 <button class="icon-btn" id="videoCallBtn" title="Video Call"><i class="fas fa-video"></i></button>
+                <button class="icon-btn" id="infoBtn" title="Chat Info"><i class="fas fa-info-circle"></i></button>
+                <button class="icon-btn" id="clearChatBtn" title="Clear chat"><i class="fas fa-trash"></i></button>
                 <div id="headerProfile" title="My Profile" style="display:flex;align-items:center;gap:8px;cursor:pointer;">
                     <img id="headerProfilePic" src="https://placehold.co/36x36/ff2e92/ffffff?text=U" style="width:36px;height:36px;border-radius:50%;border:2px solid var(--border-light);object-fit:cover;" alt="Me">
                     <i id="headerProfileIcon" class="fas fa-user" style="display:none;"></i>
@@ -381,44 +299,21 @@
                 </div>
             </div>
         </div>
-    </div>
-
-    <style>
-        .call-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:1500}
-        .call-window{width:min(96vw,880px);max-width:96vw;background:var(--card-background);border:1px solid var(--border-light);border-radius:16px;box-shadow:0 18px 48px rgba(0,0,0,.45);display:flex;flex-direction:column;overflow:hidden}
-        .call-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border-light)}
-        .call-title{font-weight:700}
-        .call-status{color:var(--text-light);font-size:12px}
-        .video-wrap{position:relative;display:block;background:rgba(0,0,0,.2)}
-        .video-wrap.audio-only{min-height:240px;display:flex;align-items:center;justify-content:center}
-        .remote-video{width:100%;height:56vh;object-fit:cover;background:#000}
-        .remote-avatar{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:160px;height:160px;border-radius:50%;border:2px solid var(--border-light);display:none;object-fit:cover}
-        .local-video{position:absolute;right:12px;bottom:12px;width:200px;height:120px;border-radius:12px;border:1px solid var(--border-light);object-fit:cover;background:#000}
-        .incoming-actions{display:none;gap:12px;justify-content:center;padding:12px;border-top:1px solid var(--border-light)}
-        .call-controls{display:flex;align-items:center;justify-content:center;gap:12px;padding:12px;border-top:1px solid var(--border-light)}
-        .call-btn{min-width:44px;min-height:44px;border-radius:999px;border:1px solid var(--border-light);background:var(--input-background);color:var(--white);cursor:pointer;padding:8px 14px}
-        .call-btn.accept{background:linear-gradient(90deg,#28a745,#34d399);color:#fff}
-        .call-btn.decline{background:linear-gradient(90deg,#e11d48,#ef4444);color:#fff}
-        .end-btn{min-width:52px;min-height:52px;border-radius:999px;border:none;background:linear-gradient(90deg,#e11d48,#ef4444);color:#fff;box-shadow:var(--button-shadow);cursor:pointer}
-        @media (max-width:640px){ .remote-video{height:48vh} .local-video{width:160px;height:96px} }
-    </style>
-    <div id="callModal" class="call-modal">
-        <div class="call-window">
-            <div class="call-header"><div class="call-title" id="callTitle">Video Call</div><div class="call-status" id="callStatus">Connecting…</div></div>
-            <div class="video-wrap" id="videoWrap">
-                <img id="remoteAvatarPlaceholder" class="remote-avatar" alt="">
-                <video id="remoteVideo" class="remote-video" autoplay playsinline></video>
-                <video id="localVideo" class="local-video" muted autoplay playsinline></video>
-            </div>
-            <div class="incoming-actions" id="incomingActions">
-                <button class="call-btn accept" id="acceptCallBtn"><i class="fas fa-phone"></i> Accept</button>
-                <button class="call-btn decline" id="declineCallBtn"><i class="fas fa-phone-slash"></i> Decline</button>
-            </div>
-            <div class="call-controls">
-                <button class="call-btn" id="muteBtn" title="Toggle microphone"><i class="fas fa-microphone"></i></button>
-                <button class="call-btn" id="cameraBtn" title="Toggle camera"><i class="fas fa-video"></i></button>
-                <button class="call-btn" id="switchCamBtn" title="Switch camera"><i class="fas fa-sync-alt"></i></button>
-                <button class="end-btn" id="endCallBtn" title="End call"><i class="fas fa-phone-slash"></i></button>
+        <!-- Call Modal -->
+        <div id="callModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); backdrop-filter: blur(4px); z-index:300; align-items:center; justify-content:center;">
+            <div style="background:var(--card-background); border:1px solid var(--border-light); border-radius:12px; padding:12px; width:90%; max-width:520px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                    <div id="callTitle" style="font-weight:600;">Call</div>
+                    <button id="endCallBtn" class="icon-btn" title="End Call" style="color:#ff4d4f"><i class="fas fa-phone-slash"></i></button>
+                </div>
+                <div id="videoWrap" style="display:none; position:relative; background:#000; border-radius:8px; overflow:hidden;">
+                    <video id="remoteVideo" autoplay playsinline style="width:100%; height:auto;"></video>
+                    <video id="localVideo" autoplay muted playsinline style="position:absolute; right:8px; bottom:8px; width:120px; border-radius:6px; box-shadow:0 6px 16px rgba(0,0,0,.5);"></video>
+                </div>
+                <div id="voiceWrap" style="display:none; text-align:center; padding:24px;">
+                    <i class="fas fa-phone" style="font-size:36px; color:var(--accent-color);"></i>
+                    <div id="callStatus" style="margin-top:8px; color:var(--text-light);">Connecting…</div>
+                </div>
             </div>
         </div>
     </div>
@@ -427,30 +322,9 @@
     <audio id="newMessageSound" src="/ne.mp3" preload="auto"></audio>
 
     <script type="module">
-        // Fetch retry wrapper to reduce transient "Failed to fetch" errors (used by Firestore and other libs)
-        (function(){
-            try{
-                const _origFetch = window.fetch.bind(window);
-                window.fetch = async function(input, init){
-                    const maxRetries = 2; let attempt = 0;
-                    while(true){
-                        try{ return await _origFetch(input, init); }
-                        catch(err){
-                            attempt++;
-                            if (attempt > maxRetries) throw err;
-                            await new Promise(r => setTimeout(r, 300 * attempt));
-                        }
-                    }
-                };
-            }catch(e){ console.warn('fetch-retry-wrap failed', e); }
-        })();
-        // Global error & rejection handlers for clearer debugging
-        window.addEventListener('error', (ev)=>{ console.error('Global error caught:', ev.error || ev.message, ev); });
-        window.addEventListener('unhandledrejection', (ev)=>{ console.error('Unhandled rejection:', ev.reason); });
-
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where, getDocs, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
         import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js";
 
         // Firebase config (same pattern as Profile.html)
@@ -528,7 +402,6 @@
 
         let currentUser = null;
         let currentPartner = null;
-        let currentUserProfile = null;
         let friendsData = [];
         let filteredFriends = [];
         let typingTimer = null;
@@ -560,9 +433,9 @@
             if (!user) { window.location.href = '/Login.html'; return; }
             currentUser = user;
             startPresenceHeartbeat();
+            startIncomingListener();
             await setupHeader(user);
             await loadFriends();
-            startIncomingListener();
             if (!partnerId) return;
             currentPartner = await loadFriendProfile(partnerId);
             if (currentPartner) updatePartnerHeader(currentPartner);
@@ -590,17 +463,14 @@
             } catch {}
         }
 
-        function startCallSignalsListener(){}
-
         async function setupHeader(user) {
             const userProfileRef = doc(db, "artifacts", appId, "users", user.uid, "profiles", "user_profile");
             const snap = await getDoc(userProfileRef);
             const displayName = snap.exists() ? (snap.data().displayName || snap.data().username || user.email || 'JCHAT User') : (user.displayName || user.email || 'JCHAT User');
             const profilePicId = snap.exists() ? (snap.data().profilePicId || user.photoURL || null) : (user.photoURL || null);
-            currentUserProfile = { displayName, profilePicId };
             const initial = displayName.charAt(0).toUpperCase();
             displayProfilePicture(document.getElementById('headerProfilePic'), document.getElementById('headerProfileIcon'), profilePicId, initial, "w_36,h_36,c_fill,g_face,r_max");
-            document.getElementById('headerProfile').onclick = () => window.location.href = '/profile.html';
+            document.getElementById('headerProfile').onclick = () => window.location.href = '/Profile.html';
         }
 
         function updatePartnerHeader(partner) {
@@ -635,7 +505,7 @@
                         if (statusText) {
                             if (state === 'online') statusText.textContent = 'Online';
                             else if (state === 'away') statusText.textContent = `Away • ${formatRelativeTime(lastMs)}`;
-                            else statusText.textContent = `Offline �� ${formatRelativeTime(lastMs)}`;
+                            else statusText.textContent = `Offline • ${formatRelativeTime(lastMs)}`;
                         }
                         const pill = document.getElementById('partnerStatus');
                         if (pill) {
@@ -677,201 +547,24 @@
         const emojiGrid = document.getElementById('emojiGrid');
         const emojiTabs = document.getElementById('emojiTabs');
         const voiceMsgBtn = document.getElementById('voiceMsgBtn');
-
-// Call UI elements
-const callModal = document.getElementById('callModal');
-const remoteVideo = document.getElementById('remoteVideo');
-const localVideo = document.getElementById('localVideo');
-const remoteAvatarPlaceholder = document.getElementById('remoteAvatarPlaceholder');
-const callTitle = document.getElementById('callTitle');
-const videoWrap = document.getElementById('videoWrap');
-const incomingActions = document.getElementById('incomingActions');
-const acceptCallBtn = document.getElementById('acceptCallBtn');
-const declineCallBtn = document.getElementById('declineCallBtn');
-const endCallBtn = document.getElementById('endCallBtn');
-const muteBtn = document.getElementById('muteBtn');
-const cameraBtn = document.getElementById('cameraBtn');
-const switchCamBtn = document.getElementById('switchCamBtn');
-const videoCallBtn = document.getElementById('videoCallBtn');
-const voiceCallBtn = document.getElementById('voiceCallBtn');
-
-// Call state
-let isCaller = false;
-let isIncoming = false;
-let callKind = 'video';
-let ringTimeoutId = null;
-let incomingRingTimeoutId = null;
-let callTimerInterval = null;
-let callStartMs = null;
-let remoteMediaStream = null;
-let acceptInProgressDocId = null;
-let currentIncomingDoc = null;
-let videoFacingMode = 'user';
-
-// Controls wiring
-videoCallBtn?.addEventListener('click', () => {
-    if (!currentPartner) { alert('Select a friend to call.'); return; }
-    try{ ensureMediaUnlocked(); }catch(_){ }
-    startCall(true);
-});
-voiceCallBtn?.addEventListener('click', () => {
-    if (!currentPartner) { alert('Select a friend to call.'); return; }
-    try{ ensureMediaUnlocked(); }catch(_){ }
-    startCall(false);
-});
-endCallBtn?.addEventListener('click', () => endCall());
-muteBtn?.addEventListener('click', () => {
-    try{ const stream = localVideo?.srcObject; if (stream) stream.getAudioTracks().forEach(t => t.enabled = !t.enabled); }catch(_){}
-});
-cameraBtn?.addEventListener('click', () => {
-    try{ const stream = localVideo?.srcObject; if (stream) stream.getVideoTracks().forEach(t => t.enabled = !t.enabled); }catch(_){}
-});
-switchCamBtn?.addEventListener('click', async () => { try{ await switchCamera(); }catch(_){ } });
-
-        async function showIncomingPrompt(docSnap){
-            // Attach a per-call snapshot listener for ringing state to detect remote hangup even before acceptance
-            try{ if (unsubRingingCallDoc) { try{ unsubRingingCallDoc(); }catch(_){} } }catch(_){}
-            unsubRingingCallDoc = null;
-            try{
-                currentIncomingDoc = docSnap;
-                const data = docSnap.data();
-                const isVideo = !!data.video;
-                isIncoming = true;
-
-                // Try to show caller avatar while connecting
-                try{
-                    const callerId = data.callerId;
-                    if (callerId) {
-                        let avatarUrl = '';
-                        let initial = ((data.callerName || data.callerId || 'U')).charAt(0).toUpperCase();
-                        // First try public user doc (fast path)
-                        try {
-                            const callerPubRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', callerId);
-                            const callerSnap = await getDoc(callerPubRef);
-                            const callerData = callerSnap.exists() ? callerSnap.data() : null;
-                            initial = (callerData?.username || data.callerName || 'U').charAt(0).toUpperCase();
-                            if (callerData?.profilePicId) avatarUrl = getCloudinaryImageUrl(callerData.profilePicId, 'w_240,h_240,c_fill,g_face,r_max');
-                        } catch(_) { /* ignore */ }
-                        // Fallback to user's profile document if public doc had no avatar
-                        if (!avatarUrl) {
-                            try {
-                                const profRef = doc(db, 'artifacts', appId, 'users', callerId, 'profiles', 'user_profile');
-                                const profSnap = await getDoc(profRef);
-                                const pd = profSnap.exists() ? profSnap.data() : null;
-                                if (pd?.profilePicId) avatarUrl = getCloudinaryImageUrl(pd.profilePicId, 'w_240,h_240,c_fill,g_face,r_max');
-                            } catch(_) { /* ignore */ }
-                        }
-                        if (!avatarUrl) avatarUrl = `https://placehold.co/240x240/00d5ff/ffffff?text=${initial}`;
-                        try{ if (remoteAvatarPlaceholder) { remoteAvatarPlaceholder.src = avatarUrl; remoteAvatarPlaceholder.style.display = 'block'; } }catch(_){ }
-                            }
-                }catch(e){ console.warn('JCHAT_WARN: failed to load caller avatar', e); }
-
-                openCallUI(isVideo);
-                callTitle.textContent = isVideo ? 'Incoming Video Call' : 'Incoming Voice Call';
-                try{ ensureMediaUnlocked(); }catch(_){ }
-                const cs = document.getElementById('callStatus');
-                if (cs) cs.textContent = 'Ringing���';
-                if (incomingActions) incomingActions.style.display = 'flex';
-                if (acceptCallBtn) acceptCallBtn.style.display = 'inline-flex';
-                if (declineCallBtn) declineCallBtn.style.display = 'none';
-                if (endCallBtn) endCallBtn.style.display = 'none';
-                startRingtone();
-                try{ clearTimeout(incomingRingTimeoutId); }catch(_){ }
-                incomingRingTimeoutId = setTimeout(async ()=>{ try{ await declineIncomingCall(); }catch(_){ } }, 60000);
-                if (acceptCallBtn){
-                    acceptCallBtn.onclick = async () => {
-                        try{
-                            stopRingtone();
-                            if (incomingActions) incomingActions.style.display = 'none';
-                            clearTimeout(incomingRingTimeoutId);
-                            // grab the doc and mark accept-in-progress to avoid race with listeners
-                            const docToAccept = currentIncomingDoc;
-                            if (!docToAccept) return;
-                            acceptInProgressDocId = docToAccept.id;
-                            // detach ringing listener immediately
-                            try{ if (unsubRingingCallDoc) { unsubRingingCallDoc(); unsubRingingCallDoc = null; } }catch(_){ }
-                            // clear main currentIncoming so other listeners won't treat this as 'same'
-                            currentIncomingDoc = null;
-                            isIncoming = false;
-                            await acceptIncomingCall(docToAccept);
-                            acceptInProgressDocId = null;
-                        }catch(e){
-                            acceptInProgressDocId = null;
-                            endCall();
-                        }
-                    };
-                }
-                if (declineCallBtn){
-                    declineCallBtn.onclick = async () => { clearTimeout(incomingRingTimeoutId); await declineIncomingCall(); };
-                }
-                // start a direct listener on the call doc so we catch remote hangup while still ringing
-                try{
-                    const docRef = docSnap.ref;
-                    unsubRingingCallDoc = onSnapshot(docRef, (s)=>{
-                        try{
-                            // If we're currently accepting this call, ignore transient modifications to avoid hiding UI
-                            if (acceptInProgressDocId && acceptInProgressDocId === s.id) return;
-                            const d = s.data() || {};
-                            if (d.signaledEnd || (d.status && d.status !== 'ringing')){
-                                // remote ended/cancelled call while we were ringing
-                                try{ if (incomingRingTimeoutId) clearTimeout(incomingRingTimeoutId); }catch(_){ }
-                                stopRingtone();
-                                if (incomingActions) incomingActions.style.display = 'none';
-                                if (endCallBtn) endCallBtn.style.display = 'inline-flex';
-                                callModal.style.display = 'none';
-                                isIncoming = false; currentIncomingDoc = null;
-                                try{ if (unsubRingingCallDoc) { unsubRingingCallDoc(); unsubRingingCallDoc = null; } }catch(_){ }
-                            }
-                        }catch(_){ }
-                    });
-                }catch(_){ }
-            }catch(e){ endCall(); }
-        }
-
-        async function declineIncomingCall(){
-            try{
-                stopRingtone();
-                try{ clearTimeout(incomingRingTimeoutId); }catch(_){ }
-                if (incomingActions) incomingActions.style.display = 'none';
-                if (callDocRef) { try { await updateDoc(callDocRef, { status: 'declined' }); } catch(_){} }
-            } finally {
-                callDocRef = null;
-                // cleanup ringing doc listener
-                try{ if (unsubRingingCallDoc) { unsubRingingCallDoc(); unsubRingingCallDoc = null; } }catch(_){ }
-                if (endCallBtn) endCallBtn.style.display = 'inline-flex';
-                callModal.style.display = 'none';
-                isIncoming = false; currentIncomingDoc = null;
-            }
-        }
+        const voiceCallBtn = document.getElementById('voiceCallBtn');
+        const videoCallBtn = document.getElementById('videoCallBtn');
+        const callModal = document.getElementById('callModal');
+        const callTitle = document.getElementById('callTitle');
+        const endCallBtn = document.getElementById('endCallBtn');
+        const voiceWrap = document.getElementById('voiceWrap');
+        const videoWrap = document.getElementById('videoWrap');
+        const localVideo = document.getElementById('localVideo');
+        const remoteVideo = document.getElementById('remoteVideo');
         
         // --- WebRTC signaling (Firestore) ---
         let pc = null;
-                let callDocRef = null;
+        let callDocRef = null;
         let unsubCallDoc = null;
         let unsubCallerCand = null;
         let unsubCalleeCand = null;
-        let unsubCallSignals = null;
-        let unsubRingingCallDoc = null;
-        const __localIceRaw = (function(){ try { return localStorage.getItem('jchat-ice'); } catch(_) { return null; } })();
-        const __localIce = (function(){ try { const v = JSON.parse(__localIceRaw||'null'); return Array.isArray(v) ? v : null; } catch(_) { return null; } })();
-        const rtcConfig = (__localIce && __localIce.length)
-            ? { iceServers: __localIce }
-            : ((window.__ice_servers && Array.isArray(window.__ice_servers) && window.__ice_servers.length)
-                ? { iceServers: window.__ice_servers }
-                : { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
-        function ensureMediaUnlocked(){
-            try{ if (typeof AudioContext !== 'undefined') { const ac = new AudioContext(); if (ac.state === 'suspended') ac.resume().catch(()=>{}); } }catch(_){ }
-            try{ if (remoteVideo) { remoteVideo.play().catch(()=>{}); } }catch(_){ }
-            try{ if (localVideo) { localVideo.muted = true; localVideo.play().catch(()=>{}); } }catch(_){ }
-        }
-        let ringAudio = null; let callerRingAudio = null;
-function startRingtone(){ try{ stopRingtone(); ringAudio = new Audio('https://cdn.builder.io/o/assets%2Fc5542eb63b564e86810556e73a332186%2Ffa802bcb41594c9fb0a35733e90d7cee?alt=media&token=adb505bd-f77f-4840-a50b-b13c040e0dca&apiKey=c5542eb63b564e86810556e73a332186'); ringAudio.loop = true; ringAudio.volume = 0.5; ringAudio.play().catch(()=>{}); }catch(_){}}
-function stopRingtone(){ try{ if (ringAudio){ ringAudio.pause(); ringAudio.currentTime = 0; ringAudio = null; } }catch(_){}}
-function startCallerRingtone(){ try{ stopCallerRingtone(); callerRingAudio = new Audio('https://cdn.builder.io/o/assets%2Fc5542eb63b564e86810556e73a332186%2F4cbef326171f4fa79b77b66a9b292c50?alt=media&token=1db90849-5140-4702-9888-f35fd41c9d51&apiKey=c5542eb63b564e86810556e73a332186'); callerRingAudio.loop = true; callerRingAudio.volume = 0.5; callerRingAudio.play().catch(()=>{}); }catch(_){}}
-function stopCallerRingtone(){ try{ if (callerRingAudio){ callerRingAudio.pause(); callerRingAudio.currentTime = 0; callerRingAudio = null; } }catch(_){}}
-async function switchCamera(){ try{ if(!pc) return; const oldStream = localVideo && localVideo.srcObject; const audioTracks = oldStream ? oldStream.getAudioTracks() : []; const next = (videoFacingMode === 'user') ? 'environment' : 'user'; let newStream = null; try{ newStream = await navigator.mediaDevices.getUserMedia({ video: { width:{ ideal:640 }, height:{ ideal:480 }, frameRate:{ ideal:24, max:30 }, facingMode: next } }); }catch(e){ try{ newStream = await navigator.mediaDevices.getUserMedia({ video: { width:{ ideal:640 }, height:{ ideal:480 }, frameRate:{ ideal:24, max:30 }, facingMode: { exact: next } } }); }catch(_){ newStream = await navigator.mediaDevices.getUserMedia({ video: true }); } } const newVideoTrack = newStream.getVideoTracks()[0]; const sender = pc.getSenders ? pc.getSenders().find(s => s.track && s.track.kind === 'video') : null; if(sender && newVideoTrack){ await sender.replaceTrack(newVideoTrack); } const combined = new MediaStream([newVideoTrack, ...audioTracks]); if(localVideo){ const prev = localVideo.srcObject; localVideo.srcObject = combined; try{ localVideo.play().catch(()=>{}); }catch(_){} try{ if(prev && prev.getVideoTracks) prev.getVideoTracks().forEach(t => t.stop()); }catch(_){} } videoFacingMode = next; }catch(e){} }
-
-backBtn.onclick = () => history.back();
+        const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+        backBtn.onclick = () => history.back();
 
         // Emoji setup with categories and ~500 emojis
         const emojiCategories = [
@@ -974,10 +667,6 @@ backBtn.onclick = () => history.back();
             if (delItem) { const id = delItem.getAttribute('data-del-id'); showConfirm(`Delete this message?`, 'Delete', async () => { await deleteMessage(id); }); return; }
             const shareItem = e.target.closest('[data-share-id]');
             if (shareItem) { const id = shareItem.getAttribute('data-share-id'); shareMessage(id); return; }
-            const replyItem = e.target.closest('[data-reply-id]');
-            if (replyItem) { const id = replyItem.getAttribute('data-reply-id'); beginReply(id); return; }
-            const reactBtn = e.target.closest('[data-react-emoji]');
-            if (reactBtn) { const id = reactBtn.getAttribute('data-react-id'); const emoji = reactBtn.getAttribute('data-react-emoji'); toggleReaction(id, emoji); return; }
             // click outside closes any menus
             document.querySelectorAll('.msg-menu').forEach(m => m.style.display = 'none');
         });
@@ -1102,55 +791,19 @@ backBtn.onclick = () => history.back();
             });
         }
 
+        endCallBtn?.addEventListener('click', endCall);
+        voiceCallBtn?.addEventListener('click', () => startCall(false));
+        videoCallBtn?.addEventListener('click', () => startCall(true));
 
         async function startCall(isVideo) {
             if (!currentPartner) return;
-            isIncoming = false;
-            isCaller = true;
-            callKind = isVideo ? 'video' : 'voice';
-            callStartMs = null;
-            if (incomingActions) incomingActions.style.display = 'none';
             openCallUI(isVideo);
-            ensureMediaUnlocked();
-            const csEl = document.getElementById('callStatus');
-            if (csEl) csEl.textContent = 'Calling…';
-            if (endCallBtn) endCallBtn.style.display = 'inline-flex';
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-                    video: isVideo ? { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 24, max: 30 }, facingMode: videoFacingMode } : false
-                });
-                startCallerRingtone();
-                try{ clearTimeout(ringTimeoutId); }catch(_){ }
-                ringTimeoutId = setTimeout(async ()=>{ try{ await handleMissedByCaller(); }catch(_){ } }, 60000);
-                if (isVideo) {
-                    localVideo.srcObject = stream;
-                    try { localVideo.play().catch(()=>{}); } catch(_){}
-                }
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
+                if (isVideo) localVideo.srcObject = stream;
                 pc = new RTCPeerConnection(rtcConfig);
-                try{ pc.oniceconnectionstatechange = () => { const st = pc.iceConnectionState; console.log('PC ICE STATE', st); const cs = document.getElementById('callStatus'); if (st === 'checking') { if (cs) cs.textContent = 'Connecting…'; } else if (st === 'connected' || st === 'completed') { if (!callStartMs) { callStartMs = Date.now(); startCallTimer(); } if (cs) cs.textContent = 'Connected'; try { if (pc && pc.getStats) pc.getStats().then(stats => { console.log('PC getStats on connected', stats); }).catch(()=>{}); } catch(e){} } else if (st === 'disconnected') { if (cs) cs.textContent = 'Reconnecting…'; } else if (st === 'failed') { if (cs) cs.textContent = 'Connection failed'; endCall(); } }; }catch(_){ }
-                // Ensure ontrack is set BEFORE adding local tracks so we don't miss early incoming events
-                pc.ontrack = (e) => {
-                    try {
-                        console.log('CALLER: ontrack event', { trackKind: e.track && e.track.kind, streams: (e.streams && e.streams.length) || 0 });
-                        if (!remoteMediaStream) remoteMediaStream = new MediaStream();
-                        // Prefer full streams when provided
-                        if (e.streams && e.streams[0]) {
-                            remoteMediaStream = e.streams[0];
-                        } else if (e.track) {
-                            remoteMediaStream.addTrack(e.track);
-                        }
-                        if (!callStartMs) {
-                            callStartMs = Date.now();
-                            startCallTimer();
-                        }
-                        remoteVideo.srcObject = remoteMediaStream;
-                        try { remoteVideo.play().catch(()=>{}); } catch(_){ }
-                        if (isVideo && remoteAvatarPlaceholder) remoteAvatarPlaceholder.style.display = 'none';
-                    } catch (err) { console.warn('CALLER: ontrack handler error', err); }
-                };
-                // Add local tracks after ontrack handler is attached
                 stream.getTracks().forEach(t => pc.addTrack(t, stream));
+                pc.ontrack = (e) => { if (isVideo) remoteVideo.srcObject = e.streams[0]; };
 
                 // Create call doc
                 const callsCol = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
@@ -1164,39 +817,21 @@ backBtn.onclick = () => history.back();
 
                 // ICE
                 const callerCandCol = collection(callDocRef, 'callerCandidates');
-                pc.onicecandidate = (e) => {
-                    console.log('CALLER: onicecandidate', e && e.candidate);
-                    if (e && e.candidate) {
-                        try {
-                            addDoc(callerCandCol, e.candidate.toJSON()).catch(err => console.warn('CALLER: addDoc callerCandidate failed', err));
-                        } catch (err) { console.warn('CALLER: addDoc error', err); }
-                    }
-                };
+                pc.onicecandidate = (e) => { if (e.candidate) addDoc(callerCandCol, e.candidate.toJSON()); };
 
                 // Offer
-                const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: isVideo });
-                console.log('CALLER: created offer', { type: offer.type });
+                const offer = await pc.createOffer();
                 await pc.setLocalDescription(offer);
-                console.log('CALLER: setLocalDescription called');
                 await updateDoc(callDocRef, { offer: { sdp: offer.sdp, type: offer.type } });
-                console.log('CALLER: offer saved to call doc', callDocRef.id);
 
                 // Listen for answer
                 unsubCallDoc = onSnapshot(callDocRef, async (docSnap) => {
                     const data = docSnap.data();
-                    console.log('CALLER: callDoc update', docSnap.id, data);
                     if (data?.answer && pc && !pc.currentRemoteDescription) {
                         const answerDesc = new RTCSessionDescription(data.answer);
                         await pc.setRemoteDescription(answerDesc);
-                        // try to play video elements after remote description applied
-                        try { remoteVideo.play().catch(()=>{}); } catch(_){}
-                        try { localVideo.play().catch(()=>{}); } catch(_){}
-                        stopRingtone();
-                        stopCallerRingtone();
-                        try{ clearTimeout(ringTimeoutId); }catch(_){ }
                     }
-                    if (data?.status === 'accepted') { stopRingtone(); stopCallerRingtone(); try{ clearTimeout(ringTimeoutId); }catch(_){ } }
-                    if (data?.status === 'ended' || data?.status === 'declined' || data?.status === 'missed') { stopRingtone(); stopCallerRingtone(); try{ clearTimeout(ringTimeoutId); }catch(_){ } endCall(); }
+                    if (data?.status === 'ended') endCall();
                 });
 
                 // Listen for callee ICE
@@ -1204,14 +839,8 @@ backBtn.onclick = () => history.back();
                 unsubCalleeCand = onSnapshot(calleeCandCol, (snap) => {
                     snap.docChanges().forEach(change => {
                         if (change.type === 'added') {
-                            const dataCand = change.doc.data();
-                            console.log('CALLER: received callee ICE candidate', dataCand);
-                            const cand = new RTCIceCandidate(dataCand);
-                            pc.addIceCandidate(cand).then(()=>{
-                                console.log('CALLER: addIceCandidate success');
-                            }).catch(err=>{
-                                console.warn('CALLER: addIceCandidate failed', err);
-                            });
+                            const cand = new RTCIceCandidate(change.doc.data());
+                            try { pc.addIceCandidate(cand); } catch {}
                         }
                     });
                 });
@@ -1227,47 +856,11 @@ backBtn.onclick = () => history.back();
                 const callsCol = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
                 const q = query(callsCol, where('calleeId', '==', currentUser.uid), where('status', '==', 'ringing'));
                 unsubIncoming = onSnapshot(q, async (snap) => {
-                    for (const change of snap.docChanges()) {
-                        try{
-                            const docSnap = change.doc;
-                            const d = docSnap.data() || {};
-                            if (change.type === 'added' && !pc) {
-                                // Show accept/decline UI instead of auto-answer
-                                callDocRef = docSnap.ref;
-                                await showIncomingPrompt(docSnap);
-                            } else if (change.type === 'modified') {
-                                // Only treat as cancellation if status changed away from 'ringing' or signaledEnd flag set
-                                const same = currentIncomingDoc && (docSnap.id === currentIncomingDoc.id);
-                                // If acceptance is in progress for this doc, ignore this modification (race)
-                                const acceptRace = acceptInProgressDocId && (acceptInProgressDocId === docSnap.id);
-                                if (same && !acceptRace) {
-                                    if (d.signaledEnd || (d.status && d.status !== 'ringing')) {
-                                        // Call cancelled/ended by remote while ringing
-                                        stopRingtone();
-                                        try{ clearTimeout(incomingRingTimeoutId); }catch(_){ }
-                                        if (incomingActions) incomingActions.style.display = 'none';
-                                        if (endCallBtn) endCallBtn.style.display = 'inline-flex';
-                                        callModal.style.display = 'none';
-                                        isIncoming = false; currentIncomingDoc = null;
-                                    } else {
-                                        // ignore unrelated modifications (offer/answer/ice updates)
-                                    }
-                                }
-                            } else if (change.type === 'removed') {
-                                const same = currentIncomingDoc && (docSnap.id === currentIncomingDoc.id);
-                                if (same) {
-                                    stopRingtone();
-                                    try{ clearTimeout(incomingRingTimeoutId); }catch(_){ }
-                                    if (incomingActions) incomingActions.style.display = 'none';
-                                    if (endCallBtn) endCallBtn.style.display = 'inline-flex';
-                                    callModal.style.display = 'none';
-                                    // cleanup ringing listener if present
-                                    try{ if (unsubRingingCallDoc) { unsubRingingCallDoc(); unsubRingingCallDoc = null; } }catch(_){ }
-                                    isIncoming = false; currentIncomingDoc = null;
-                                }
-                            }
-                        }catch(_){ }
-                    }
+                    snap.docChanges().forEach(async change => {
+                        if (change.type === 'added' && !pc) {
+                            await acceptIncomingCall(change.doc);
+                        }
+                    });
                 });
             } catch {}
         }
@@ -1276,112 +869,33 @@ backBtn.onclick = () => history.back();
         
         async function acceptIncomingCall(docSnap) {
             try {
-                isCaller = false;
-                callStartMs = null;
                 callDocRef = docSnap.ref;
-                let latest = await getDoc(callDocRef);
-                let data = latest.data() || {};
-                const desiredVideo = !!data.video;
-                callKind = desiredVideo ? 'video' : 'voice';
-                openCallUI(desiredVideo);
-                if (incomingActions) incomingActions.style.display = 'none';
-                if (endCallBtn) endCallBtn.style.display = 'inline-flex';
-                stopRingtone();
-                const csEl = document.getElementById('callStatus');
-                if (csEl) csEl.textContent = 'Connecting…';
-
-                latest = await getDoc(callDocRef);
-                data = latest.data() || {};
-                if (!data.offer) {
-                    await new Promise((resolve, reject) => {
-                        const timeout = setTimeout(()=>{ try{unsub && unsub();}catch(_){} reject(new Error('Offer timeout')); }, 12000);
-                        const unsub = onSnapshot(callDocRef, (snap)=>{
-                            const d = snap.data() || {};
-                            if (d.offer) { clearTimeout(timeout); try{unsub();}catch(_){} data = d; resolve(); }
-                        }, (err)=>{ clearTimeout(timeout); reject(err); });
-                    });
-                }
-
-                const stream = await navigator.mediaDevices.getUserMedia({
-                audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-                video: desiredVideo ? { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 24, max: 30 }, facingMode: videoFacingMode } : false
-            });
-                if (desiredVideo) {
-                    localVideo.srcObject = stream;
-                    try { localVideo.play().catch(()=>{}); } catch(_){}
-                }
+                const data = docSnap.data();
+                const isVideo = !!data.video;
+                openCallUI(isVideo);
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo });
+                if (isVideo) localVideo.srcObject = stream;
                 pc = new RTCPeerConnection(rtcConfig);
-                try{ pc.oniceconnectionstatechange = () => { const st = pc.iceConnectionState; console.log('PC ICE STATE', st); const cs = document.getElementById('callStatus'); if (st === 'checking') { if (cs) cs.textContent = 'Connecting…'; } else if (st === 'connected' || st === 'completed') { if (!callStartMs) { callStartMs = Date.now(); startCallTimer(); } if (cs) cs.textContent = 'Connected'; try { if (pc && pc.getStats) pc.getStats().then(stats => { console.log('PC getStats on connected', stats); }).catch(()=>{}); } catch(e){} } else if (st === 'disconnected') { if (cs) cs.textContent = 'Reconnecting…'; } else if (st === 'failed') { if (cs) cs.textContent = 'Connection failed'; endCall(); } }; }catch(_){ }
-                // Ensure ontrack attached before adding local tracks
-                pc.ontrack = (e) => {
-                    try {
-                        console.log('CALLEE: ontrack event', { trackKind: e.track && e.track.kind, streams: (e.streams && e.streams.length) || 0 });
-                        if (!remoteMediaStream) remoteMediaStream = new MediaStream();
-                        if (e.streams && e.streams[0]) {
-                            remoteMediaStream = e.streams[0];
-                        } else if (e.track) {
-                            remoteMediaStream.addTrack(e.track);
-                        }
-                        if (!callStartMs) {
-                            callStartMs = Date.now();
-                            startCallTimer();
-                        }
-                        remoteVideo.srcObject = remoteMediaStream;
-                        try { remoteVideo.play().catch(()=>{}); } catch(_){ }
-                        if (desiredVideo && remoteAvatarPlaceholder) remoteAvatarPlaceholder.style.display = 'none';
-                    } catch (err) { console.warn('CALLEE: ontrack handler error', err); }
-                };
-                // Add local tracks after ontrack handler
                 stream.getTracks().forEach(t => pc.addTrack(t, stream));
+                pc.ontrack = (e) => { if (isVideo) remoteVideo.srcObject = e.streams[0]; };
                 const calleeCandCol = collection(callDocRef, 'calleeCandidates');
-                pc.onicecandidate = (e) => {
-                    console.log('CALLEE: onicecandidate', e && e.candidate);
-                    if (e && e.candidate) {
-                        try { addDoc(calleeCandCol, e.candidate.toJSON()).catch(err => console.warn('CALLEE: addDoc calleeCandidate failed', err)); } catch (err) { console.warn('CALLEE: addDoc error', err); }
-                    }
-                };
+                pc.onicecandidate = (e) => { if (e.candidate) addDoc(calleeCandCol, e.candidate.toJSON()); };
+                // Set remote offer
                 const offerDesc = new RTCSessionDescription(data.offer);
-                console.log('CALLEE: setting remote description (offer)');
-                try {
-                    await pc.setRemoteDescription(offerDesc);
-                    console.log('CALLEE: setRemoteDescription(offer) success');
-                } catch (err) {
-                    console.error('CALLEE: setRemoteDescription(offer) failed', err);
-                }
+                await pc.setRemoteDescription(offerDesc);
                 const answer = await pc.createAnswer();
                 await pc.setLocalDescription(answer);
-                await updateDoc(callDocRef, { answer: { sdp: answer.sdp, type: answer.type }, status: 'accepted' });
-                stopRingtone();
-                try{ clearTimeout(incomingRingTimeoutId); }catch(_){ }
+                await updateDoc(callDocRef, { answer: { sdp: answer.sdp, type: answer.type } });
+                // Listen caller ICE
                 const callerCandCol = collection(callDocRef, 'callerCandidates');
                 unsubCallerCand = onSnapshot(callerCandCol, (snap) => {
                     snap.docChanges().forEach(change => {
                         if (change.type === 'added') {
-                            const dataCand = change.doc.data();
-                            console.log('CALLEE: received caller ICE candidate', dataCand);
-                            const cand = new RTCIceCandidate(dataCand);
-                            pc.addIceCandidate(cand).then(()=>{
-                                console.log('CALLEE: addIceCandidate success');
-                            }).catch(err=>{
-                                console.warn('CALLEE: addIceCandidate failed', err);
-                            });
+                            const cand = new RTCIceCandidate(change.doc.data());
+                            try { pc.addIceCandidate(cand); } catch {}
                         }
                     });
                 });
-
-                // Listen for call document updates (ended/declined) so receiver can react when caller ends the call
-                try {
-                    unsubCallDoc = onSnapshot(callDocRef, (docSnap) => {
-                        try {
-                            const d = docSnap.data() || {};
-                            if (d.status === 'ended' || d.status === 'declined' || d.status === 'missed') {
-                                // Remote side ended the call — clean up
-                                endCall();
-                            }
-                        } catch (e) { /* ignore */ }
-                    });
-                } catch (_) { }
-
             } catch (e) {
                 endCall();
             }
@@ -1390,77 +904,20 @@ backBtn.onclick = () => history.back();
         function openCallUI(isVideo) {
             callModal.style.display = 'flex';
             callTitle.textContent = isVideo ? 'Video Call' : 'Voice Call';
-            videoWrap.style.display = 'block';
-            if (videoWrap) videoWrap.classList.toggle('audio-only', !isVideo);
-            if (remoteVideo) remoteVideo.style.display = isVideo ? 'block' : 'none';
-            if (localVideo) localVideo.style.display = isVideo ? 'block' : 'none';
-            if (cameraBtn) cameraBtn.style.display = isVideo ? 'inline-block' : 'none';
-            if (switchCamBtn) switchCamBtn.style.display = isVideo ? 'inline-block' : 'none';
-            if (remoteAvatarPlaceholder) {
-                try{
-                    let url = '';
-                    if (currentPartner) {
-                        const initial = (currentPartner.displayName || 'U').charAt(0).toUpperCase();
-                        if (currentPartner.profilePicId) {
-                            url = getCloudinaryImageUrl(currentPartner.profilePicId, 'w_240,h_240,c_fill,g_face,r_max');
-                        } else {
-                            url = `https://placehold.co/240x240/00d5ff/ffffff?text=${initial}`;
-                        }
-                        remoteAvatarPlaceholder.src = url;
-                    }
-                    remoteAvatarPlaceholder.style.display = 'block';
-                }catch(_){ }
-            }
+            voiceWrap.style.display = isVideo ? 'none' : 'block';
+            videoWrap.style.display = isVideo ? 'block' : 'none';
         }
 
         async function endCall() {
-            try{ clearTimeout(ringTimeoutId); }catch(_){ }
-            try{ clearTimeout(incomingRingTimeoutId); }catch(_){ }
-            stopRingtone();
-            stopCallerRingtone();
-            stopCallTimer();
             try { pc && pc.getSenders().forEach(s => s.track && s.track.stop()); } catch {}
             try { pc && pc.close(); } catch {}
-            const endedAtMs = Date.now();
-            const startedAtMs = callStartMs;
-            const shouldLog = isCaller && typeof startedAtMs === 'number' && endedAtMs >= startedAtMs;
             pc = null;
-            try { if (unsubCallDoc) { try{ unsubCallDoc(); }catch(_){} } } catch {}
+            try { unsubCallDoc && unsubCallDoc(); } catch {}
             try { unsubCallerCand && unsubCallerCand(); } catch {}
             try { unsubCalleeCand && unsubCalleeCand(); } catch {}
-            try { if (remoteVideo) remoteVideo.srcObject = null; } catch {}
-            try { if (localVideo && localVideo.srcObject) { localVideo.srcObject.getTracks().forEach(t => t.stop()); localVideo.srcObject = null; } } catch {}
-
-            if (callDocRef) {
-                try {
-                    await updateDoc(callDocRef, { status: 'ended', endedAt: endedAtMs, endedBy: currentUser?.uid || null, signaledEnd: true, durationMs: (startedAtMs ? (endedAtMs - startedAtMs) : null) });
-                } catch (e) { console.error('JCHAT_ERROR updating call doc on endCall', e); }
-                try {
-                    // notify callee directly as backup signal
-                    try{
-                        const latest = await getDoc(callDocRef);
-                        const cd = latest.exists() ? latest.data() : {};
-                        const calleeId = (currentPartner && currentPartner.id) ? currentPartner.id : (cd && cd.calleeId ? cd.calleeId : null);
-                        if (calleeId) {
-                            const calleePubRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', calleeId);
-                            await updateDoc(calleePubRef, { incomingCallClearedId: callDocRef.id, incomingCallClearedAt: serverTimestamp() }).catch(()=>{});
-                        }
-                    }catch(_){ }
-                } catch (e) { console.error('JCHAT_ERROR notifying callee on endCall', e); }
-            }
-            // ensure we also cleanup any ringing-listener on this client
-            try{ if (unsubRingingCallDoc) { unsubRingingCallDoc(); unsubRingingCallDoc = null; } }catch(_){ }
-
-            if (shouldLog) {
-                try { await logCallSummary(callKind, startedAtMs, endedAtMs); } catch {}
-            }
+            if (callDocRef) { try { await updateDoc(callDocRef, { status: 'ended' }); } catch {} }
             callDocRef = null;
-            stopRingtone();
-            if (endCallBtn) endCallBtn.style.display = 'inline-flex';
-            if (incomingActions) incomingActions.style.display = 'none';
-            if (remoteAvatarPlaceholder) { remoteAvatarPlaceholder.style.display = 'none'; remoteAvatarPlaceholder.src=''; }
             callModal.style.display = 'none';
-            videoFacingMode = 'user';
         }
 
         inputEl.addEventListener('input', () => {
@@ -1477,7 +934,7 @@ backBtn.onclick = () => history.back();
             inputEl.value = '';
             inputEl.dispatchEvent(new Event('input'));
             try {
-                await sendMessageWithQueue(text);
+                await sendMessage(text);
             } catch (e) {
                 updateOptimisticStatus(tempId, 'failed');
             }
@@ -1507,48 +964,18 @@ backBtn.onclick = () => history.back();
             }
         }
 
-        async function getChatEncKey(chatId){
-            try{ const b64 = localStorage.getItem(`jchat-e2ee-${chatId}`); if (!b64) return null; const raw = base64ToArrayBuffer(b64); return await crypto.subtle.importKey('raw', raw, { name:'AES-GCM' }, false, ['encrypt','decrypt']); }catch(_){ return null; }
-        }
-        async function setChatEncKey(chatId, key){
-            try{ const raw = await crypto.subtle.exportKey('raw', key); const b64 = arrayBufferToBase64(raw); localStorage.setItem(`jchat-e2ee-${chatId}`, b64); }catch(_){ }
-        }
-        function removeChatEncKey(chatId){ try{ localStorage.removeItem(`jchat-e2ee-${chatId}`); }catch(_){} }
-        function arrayBufferToBase64(buffer){ let binary=''; const bytes=new Uint8Array(buffer); const len=bytes.byteLength; for(let i=0;i<len;i++){ binary+=String.fromCharCode(bytes[i]); } return btoa(binary); }
-        function base64ToArrayBuffer(b64){ const binary=atob(b64); const len=binary.length; const bytes=new Uint8Array(len); for(let i=0;i<len;i++){ bytes[i]=binary.charCodeAt(i); } return bytes.buffer; }
-        async function encryptText(key, text){ const enc=new TextEncoder().encode(text); const iv=crypto.getRandomValues(new Uint8Array(12)); const cipher=await crypto.subtle.encrypt({ name:'AES-GCM', iv }, key, enc); return { cipher: arrayBufferToBase64(cipher), iv: arrayBufferToBase64(iv.buffer) }; }
-        async function decryptText(key, cipherB64, ivB64){ const cipher=base64ToArrayBuffer(cipherB64); const iv=base64ToArrayBuffer(ivB64); const plain=await crypto.subtle.decrypt({ name:'AES-GCM', iv:new Uint8Array(iv) }, key, cipher); return new TextDecoder().decode(plain); }
-
         async function sendMessage(text) {
             const chatId = chatIdFor(currentUser.uid, currentPartner.id);
             const messagesRef = collection(db, "artifacts", appId, "public", "data", "chats", chatId, "messages");
             await ensureChatDoc(chatId);
-            const key = await getChatEncKey(chatId);
-            if (key) {
-                const enc = await encryptText(key, text);
-                await addDoc(messagesRef, {
-                    text: 'Encrypted message',
-                    enc: true,
-                    cipher: enc.cipher,
-                    iv: enc.iv,
-                    senderId: currentUser.uid,
-                    receiverId: currentPartner.id,
-                    timestamp: serverTimestamp(),
-                    status: 'sent',
-                    replyTo: replyingTo || null,
-                    chatId
-                });
-            } else {
-                await addDoc(messagesRef, {
-                    text,
-                    senderId: currentUser.uid,
-                    receiverId: currentPartner.id,
-                    timestamp: serverTimestamp(),
-                    status: 'sent',
-                    replyTo: replyingTo || null,
-                    chatId
-                });
-            }
+            await addDoc(messagesRef, {
+                text,
+                senderId: currentUser.uid,
+                receiverId: currentPartner.id,
+                timestamp: serverTimestamp(),
+                status: 'sent',
+                chatId
+            });
         }
 
         function startMessagesListener() {
@@ -1558,66 +985,44 @@ backBtn.onclick = () => history.back();
             const q = query(messagesRef, orderBy('timestamp', 'asc'));
             if (unsubscribeMessages) { try { unsubscribeMessages(); } catch {} }
             unsubscribeMessages = onSnapshot(q, (snap) => {
-                try{
-                    // Preserve optimistic messages until real data arrives
-                    messagesEl.querySelectorAll('.msg:not([data-optimistic-id])').forEach(node => node.remove());
-                    const emptyLabel = document.getElementById('emptyLabel');
-                    if (emptyLabel) emptyLabel.style.display = snap.empty ? 'block' : 'none';
-                    let newestMsInSnap = latestSeenMessageMs;
-                    const newPartnerMessages = [];
-                    snap.forEach(docSnap => {
-                        const m = docSnap.data();
-                        const tsMs = m.timestamp?.toMillis?.() || Date.now();
-                        if (tsMs > newestMsInSnap) newestMsInSnap = tsMs;
-                        if (!messagesInitialLoad && m.senderId !== currentUser.uid && tsMs > latestSeenMessageMs) {
-                            newPartnerMessages.push(m);
-                        }
-                        renderMessage({
-                            id: docSnap.id,
-                            text: m.text,
-                            type: m.type || 'text',
-                            fileUrl: m.fileUrl || null,
-                            fileName: m.fileName || null,
-                            replyTo: m.replyTo || null,
-                            callKind: m.callKind || null,
-                            durationMs: typeof m.durationMs === 'number' ? m.durationMs : null,
-                            sender: m.senderId === currentUser.uid ? 'current' : 'partner',
-                            timestamp: m.timestamp?.toMillis?.() || Date.now(),
-                            status: m.status || 'delivered',
-                            reactions: m.reactions || null,
-                            enc: !!m.enc,
-                            cipher: m.cipher || null,
-                            iv: m.iv || null
-                        });
+                // Preserve optimistic messages until real data arrives
+                messagesEl.querySelectorAll('.msg:not([data-optimistic-id])').forEach(node => node.remove());
+                const emptyLabel = document.getElementById('emptyLabel');
+                if (emptyLabel) emptyLabel.style.display = snap.empty ? 'block' : 'none';
+                let newestMsInSnap = latestSeenMessageMs;
+                const newPartnerMessages = [];
+                snap.forEach(docSnap => {
+                    const m = docSnap.data();
+                    const tsMs = m.timestamp?.toMillis?.() || Date.now();
+                    if (tsMs > newestMsInSnap) newestMsInSnap = tsMs;
+                    if (!messagesInitialLoad && m.senderId !== currentUser.uid && tsMs > latestSeenMessageMs) {
+                        newPartnerMessages.push(m);
+                    }
+                    renderMessage({
+                        id: docSnap.id,
+                        text: m.text,
+                        type: m.type || 'text',
+                        fileUrl: m.fileUrl || null,
+                        fileName: m.fileName || null,
+                        sender: m.senderId === currentUser.uid ? 'current' : 'partner',
+                        timestamp: m.timestamp?.toMillis?.() || Date.now(),
+                        status: m.status || 'delivered'
                     });
-                    // If we received any real messages, remove optimistic placeholders
-                    if (!snap.empty) {
-                        messagesEl.querySelectorAll('[data-optimistic-id]').forEach(node => node.remove());
-                    }
-                    if ((location.hash || '').startsWith('#msg-')) { scrollToMessageHashOnce(); }
-                    else { messagesEl.scrollTop = messagesEl.scrollHeight; }
-
-                    // Play sound for new partner messages (skip initial load)
-                    if (!messagesInitialLoad && newPartnerMessages.length > 0) {
-                        playNotificationSoundOnce();
-                    }
-
-                    // Update latest seen marker
-                    latestSeenMessageMs = newestMsInSnap;
-                    messagesInitialLoad = false;
-                }catch(err){
-                    console.error('Error processing messages snapshot', err);
+                });
+                // If we received any real messages, remove optimistic placeholders
+                if (!snap.empty) {
+                    messagesEl.querySelectorAll('[data-optimistic-id]').forEach(node => node.remove());
                 }
-            }, (err)=>{
-                console.error('Messages snapshot listener error', err);
-                // Unsubscribe to avoid repeated uncaught errors
-                try{ if (unsubscribeMessages) unsubscribeMessages(); }catch(_){ }
-                // Specific handling for permission errors
-                if (err && err.code === 'permission-denied'){
-                    showMessageBox('You do not have permission to access these messages. Please check your account permissions or contact support.','error');
-                } else {
-                    showMessageBox('Failed to load messages. Please refresh the page.','error');
+                messagesEl.scrollTop = messagesEl.scrollHeight;
+
+                // Play sound for new partner messages (skip initial load)
+                if (!messagesInitialLoad && newPartnerMessages.length > 0) {
+                    playNotificationSoundOnce();
                 }
+
+                // Update latest seen marker
+                latestSeenMessageMs = newestMsInSnap;
+                messagesInitialLoad = false;
             });
             // Typing listener (presence doc under chat)
             const typingDocRef = doc(db, "artifacts", appId, "public", "data", "chats", chatId, "presence", "typing");
@@ -1649,64 +1054,32 @@ backBtn.onclick = () => history.back();
         function renderMessage(m) {
             const wrap = document.createElement('div');
             wrap.className = `msg ${m.sender === 'current' ? 'sent' : 'recv'}`;
-            // Attach stable identifiers to enable deep-linking and sharing lookups
-            if (m.id) {
-                wrap.setAttribute('data-message-id', m.id);
-                wrap.id = `msg-${m.id}`;
-            } else {
-                wrap.setAttribute('data-message-id', '');
-            }
             const bubble = document.createElement('div');
             bubble.className = 'bubble';
             const timeStr = new Date(m.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
             const statusIcon = m.sender === 'current' ? `<span class="msg-status" data-id="${m.id || ''}" style="margin-left:6px;opacity:.85;">${renderStatusIcon(m.status || 'delivered')}</span>` : '';
             let content = '';
-            const replyQuote = (m.replyTo && m.replyTo.text) ? `<div class=\"reply-quote\"><div class=\"reply-author\">${escapeHtml(m.replyTo.senderName || 'Replied')}</div><div class=\"reply-snippet\">${escapeHtml(m.replyTo.text)}</div></div>` : '';
             if (m.type === 'file' && m.fileUrl) {
-                const caption = (m.text || '').trim() ? `<div style="margin-bottom:6px">${escapeHtml(m.text)}</div>` : '';
                 if (m.fileUrl.match(/\.(png|jpe?g|gif|webp)$/i)) {
-                    content = `${caption}<div style="margin-bottom:6px"><img src="${m.fileUrl}" alt="${escapeHtml(m.fileName||'image')}" style="max-width:220px;border-radius:10px;border:1px solid var(--border-light)" onerror="this.style.display='none'"></div>`;
+                    content = `<div style="margin-bottom:6px"><img src="${m.fileUrl}" alt="${escapeHtml(m.fileName||'image')}" style="max-width:220px;border-radius:10px;border:1px solid var(--border-light)" onerror="this.style.display='none'"></div>`;
                 } else if (m.fileUrl.match(/\.(mp4|webm|ogg)$/i)) {
-                    content = `${caption}<div style="margin-bottom:6px"><video src="${m.fileUrl}" controls style="max-width:220px;border-radius:10px;border:1px solid var(--border-light)"></video></div>`;
+                    content = `<div style="margin-bottom:6px"><video src="${m.fileUrl}" controls style="max-width:220px;border-radius:10px;border:1px solid var(--border-light)"></video></div>`;
                 } else {
-                    content = `${caption}<div style="margin-bottom:6px"><a href="${m.fileUrl}" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline">${escapeHtml(m.fileName||'File')}</a></div>`;
+                    content = `<div style="margin-bottom:6px"><a href="${m.fileUrl}" target="_blank" rel="noopener" style="color:#fff;text-decoration:underline">${escapeHtml(m.fileName||'File')}</a></div>`;
                 }
             } else if (m.type === 'audio') {
-                const caption = (m.text || '').trim() ? `<div style="margin-bottom:6px">${escapeHtml(m.text)}</div>` : '';
                 if (m.fileUrl) {
-                    content = `${caption}<div style="margin-bottom:6px"><audio controls src="${m.fileUrl}" style="width:220px"></audio></div>`;
+                    content = `<div style="margin-bottom:6px"><audio controls src="${m.fileUrl}" style="width:220px"></audio></div>`;
                 } else {
                     content = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><i class="fas fa-microphone"></i><span>Voice note</span><i class="fas fa-spinner fa-spin"></i></div>`;
                 }
             } else {
-                if (m.enc && m.cipher && m.iv) {
-                    content = `<span class=\"enc-text\">🔒 Encrypted message</span>`;
-                } else {
-                    content = escapeHtml(m.text || '');
-                }
+                content = escapeHtml(m.text || '');
             }
-            content = replyQuote + content;
-            const rx = m.reactions || {};
-            const emojis = ['👍','❤️','😂','😮','🙏'];
-            const summary = Object.keys(rx).map(k=>({ e:k, c: (Array.isArray(rx[k])?rx[k].length:0), mine: (Array.isArray(rx[k]) && rx[k].includes(currentUser?.uid)) }))
-                .filter(x=>x.c>0)
-                .map(x=>`<button class=\"emoji-btn\" data-react-id=\"${m.id}\" data-react-emoji=\"${x.e}\" title=\"${x.e}\" style=\"padding:2px 6px;border-radius:8px;border:1px solid var(--border-light);background:transparent;color:inherit;${x.mine?'outline:2px solid var(--accent-color);outline-offset:1px;':''}\">${x.e} ${x.c}</button>`).join(' ');
-            const picker = `<div style=\"display:flex;gap:4px;margin-top:6px\">${emojis.map(e=>`<button class=\"emoji-btn\" data-react-id=\"${m.id}\" data-react-emoji=\"${e}\" title=\"${e}\">${e}</button>`).join('')}</div>`;
-            const actions = m.sender === 'current' ? `<span class=\"msg-actions\"><button class=\"menu-btn\" title=\"More\" data-menu-id=\"${m.id}\"><i class=\"fas fa-ellipsis-v\"></i></button></span>` : '';
-            bubble.innerHTML = `${content}${summary?`<div style=\"margin-top:6px\">${summary}</div>`:''}<div class="time" style="position:relative;">${timeStr}${statusIcon}${actions}<div class="msg-menu" id="menu_${m.id}"><ul><li data-reply-id="${m.id}"><i class=\"fas fa-reply\"></i> Reply</li><li data-share-id="${m.id}"><i class=\"fas fa-share\"></i> Share</li><li data-del-id="${m.id}"><i class=\"fas fa-trash\"></i> Delete</li></ul></div></div>${picker}`;
+            const actions = m.sender === 'current' ? `<span class="msg-actions"><button class="menu-btn" title="More" data-menu-id="${m.id}"><i class=\"fas fa-ellipsis-v\"></i></button></span>` : '';
+            bubble.innerHTML = `${content}<div class="time" style="position:relative;">${timeStr}${statusIcon}${actions}<div class="msg-menu" id="menu_${m.id}"><ul><li data-share-id="${m.id}"><i class=\"fas fa-share\"></i> Share</li><li data-del-id="${m.id}"><i class=\"fas fa-trash\"></i> Delete</li></ul></div></div>`;
             wrap.appendChild(bubble);
             messagesEl.appendChild(wrap);
-            try{
-                if (m.enc && m.cipher && m.iv) {
-                    const chatId = chatIdFor(currentUser.uid, currentPartner.id);
-                    const key = await getChatEncKey(chatId);
-                    if (key) {
-                        const txt = await decryptText(key, m.cipher, m.iv);
-                        const target = wrap.querySelector('.enc-text');
-                        if (target) target.textContent = txt;
-                    }
-                }
-            }catch(_){ }
         }
 
         // Optimistic message rendering (cleared on next snapshot)
@@ -1741,24 +1114,6 @@ backBtn.onclick = () => history.back();
             return '';
         }
 
-        // Smooth scroll to hash-targeted message once
-        let __hashScrolled = false;
-        function scrollToMessageHashOnce() {
-            try {
-                const h = (location.hash || '').trim();
-                if (!h || !h.startsWith('#msg-')) return;
-                const id = h.slice(5);
-                const node = document.getElementById(`msg-${id}`) || document.querySelector(`[data-message-id="${id}"]`);
-                if (node && !__hashScrolled) {
-                    node.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    node.classList.add('hash-highlight');
-                    setTimeout(() => { try { node.classList.remove('hash-highlight'); } catch(_){} }, 1600);
-                    __hashScrolled = true;
-                }
-            } catch(_){}
-        }
-        window.addEventListener('hashchange', () => { __hashScrolled = false; scrollToMessageHashOnce(); });
-
         function formatRelativeTime(tsMs) {
             if (!tsMs) return 'unknown';
             const diff = Date.now() - tsMs;
@@ -1766,45 +1121,6 @@ backBtn.onclick = () => history.back();
             if (diff < 3600 * 1000) return `${Math.floor(diff / 60000)}m ago`;
             if (diff < 24 * 3600 * 1000) return `${Math.floor(diff / 3600000)}h ago`;
             return `${Math.floor(diff / 86400000)}d ago`;
-        }
-
-        function formatDuration(ms){
-            const totalSec = Math.max(0, Math.floor(ms / 1000));
-            const h = Math.floor(totalSec / 3600);
-            const m = Math.floor((totalSec % 3600) / 60);
-            const s = totalSec % 60;
-            if (h > 0) return `${h}h ${m}m ${s}s`;
-            return `${m}m ${s}s`;
-        }
-
-        function formatClock(ms) {
-            const totalSec = Math.max(0, Math.floor(ms / 1000));
-            const h = Math.floor(totalSec / 3600);
-            const m = Math.floor((totalSec % 3600) / 60);
-            const s = totalSec % 60;
-            const mm = String(m).padStart(2, '0');
-            const ss = String(s).padStart(2, '0');
-            return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
-        }
-
-        function startCallTimer() {
-            try {
-                const cs = document.getElementById('callStatus');
-                if (!cs) return;
-                stopCallTimer();
-                cs.textContent = '00:00';
-                callTimerInterval = setInterval(() => {
-                    if (typeof callStartMs === 'number') {
-                        const elapsed = Date.now() - callStartMs;
-                        cs.textContent = formatClock(elapsed);
-                    }
-                }, 1000);
-            } catch {}
-        }
-
-        function stopCallTimer() {
-            try { if (callTimerInterval) clearInterval(callTimerInterval); } catch {}
-            callTimerInterval = null;
         }
 
         function escapeHtml(text) {
@@ -1821,89 +1137,6 @@ backBtn.onclick = () => history.back();
             try { await setDoc(typingDocRef, { [currentUser.uid]: isTyping }, { merge: true }); } catch {}
             clearTimeout(typingTimer);
             if (isTyping) typingTimer = setTimeout(() => handleTyping(false), 1200);
-        }
-
-        async function logCallSummary(kind, startedAtMs, endedAtMs){
-            try{
-                if (!currentUser || !currentPartner) return;
-                const chatId = chatIdFor(currentUser.uid, currentPartner.id);
-                const messagesRef = collection(db, "artifacts", appId, "public", "data", "chats", chatId, "messages");
-                await ensureChatDoc(chatId);
-                const durationMs = Math.max(0, (endedAtMs - startedAtMs));
-                const text = `${kind === 'video' ? 'Video' : 'Voice'} call • ${formatDuration(durationMs)}`;
-                await addDoc(messagesRef, {
-                    type: 'call',
-                    callKind: kind,
-                    durationMs,
-                    startedAt: startedAtMs,
-                    endedAt: endedAtMs,
-                    text,
-                    senderId: currentUser.uid,
-                    receiverId: currentPartner.id,
-                    timestamp: serverTimestamp(),
-                    status: 'sent',
-                    chatId
-                });
-            }catch(e){ /* ignore */ }
-        }
-
-        async function handleMissedByCaller(){
-            try{
-                if (!callDocRef || callStartMs) return;
-                const snap = await getDoc(callDocRef);
-                const data = snap.exists() ? snap.data() : null;
-                if (!data || data.status !== 'ringing') return;
-                await updateDoc(callDocRef, { status: 'missed', missedAt: Date.now() });
-                await logMissedCall(callKind);
-                await createMissedNotificationForCallee(callKind);
-            }catch(_){ } finally {
-                endCall();
-            }
-        }
-
-        async function logMissedCall(kind){
-            try{
-                if (!currentUser || !currentPartner) return;
-                const chatId = chatIdFor(currentUser.uid, currentPartner.id);
-                const messagesRef = collection(db, "artifacts", appId, "public", "data", "chats", chatId, "messages");
-                await ensureChatDoc(chatId);
-                const text = `Missed ${kind === 'video' ? 'video' : 'voice'} call`;
-                await addDoc(messagesRef, {
-                    type: 'call',
-                    callKind: kind,
-                    text,
-                    missed: true,
-                    senderId: currentUser.uid,
-                    receiverId: currentPartner.id,
-                    timestamp: serverTimestamp(),
-                    status: 'sent',
-                    chatId
-                });
-            }catch(_){ }
-        }
-
-        async function createMissedNotificationForCallee(kind){
-            try{
-                if (!currentUser || !currentPartner) return;
-                const ncol = collection(db, 'artifacts', appId, 'users', currentPartner.id, 'notifications');
-                const callerName = (currentUserProfile && currentUserProfile.displayName) || currentUser.displayName || currentUser.email || 'JCHAT User';
-                const callerPic = (currentUserProfile && currentUserProfile.profilePicId) || currentUser.photoURL || null;
-                const chatId = chatIdFor(currentUser.uid, currentPartner.id);
-                const msg = `Missed ${kind === 'video' ? 'video' : 'voice'} call from ${callerName}`;
-                await addDoc(ncol, {
-                    type: 'messages',
-                    category: 'messages',
-                    message: msg,
-                    senderUsername: callerName,
-                    senderProfilePicId: callerPic,
-                    partnerId: currentUser.uid,
-                    chatId,
-                    targetUrl: `/chat.html?partnerId=${currentUser.uid}`,
-                    read: false,
-                    timestamp: serverTimestamp(),
-                    meta: { subtype: 'missed_call', callKind: kind }
-                });
-            }catch(_){ }
         }
 
         // Notification sound helper
@@ -1943,87 +1176,33 @@ backBtn.onclick = () => history.back();
             fileInput.value = '';
         });
 
-        // Robust fetch with timeout and retries to avoid uncaught "Failed to fetch" errors
-        async function safeFetch(input, init = {}, opts = {}){
-            const { timeout = 15000, retries = 2, retryDelay = 600 } = opts;
-            let attempt = 0;
-            while(attempt <= retries){
-                attempt++;
-                const controller = new AbortController();
-                const id = setTimeout(()=> controller.abort(), timeout);
-                try{
-                    const res = await fetch(input, { signal: controller.signal, ...init });
-                    clearTimeout(id);
-                    if (!res.ok) {
-                        // for 4xx do not retry
-                        if (res.status >= 400 && res.status < 500) return res;
-                        throw new Error('Network response was not ok: ' + res.status);
-                    }
-                    return res;
-                }catch(err){
-                    clearTimeout(id);
-                    if (attempt > retries) throw err;
-                    // simple exponential backoff
-                    await new Promise(r => setTimeout(r, retryDelay * attempt));
-                }
-            }
-        }
-
         async function uploadToCloudinary(file) {
             try {
                 const fd = new FormData();
                 fd.append('file', file);
                 fd.append('upload_preset', cloudinaryConfig.uploadPreset);
                 const type = file.type.startsWith('image/') ? 'image' : (file.type.startsWith('video/') ? 'video' : 'raw');
-                let res;
-                try {
-                    res = await safeFetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/${type}/upload`, { method: 'POST', body: fd }, { timeout: 20000, retries: 2, retryDelay: 800 });
-                } catch (e) {
-                    console.error('Cloudinary upload failed', e);
-                    showMessageBox('Upload failed. Check your connection and try again.', 'error');
-                    return null;
-                }
-                if (!res || !res.ok) return null;
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/${type}/upload`, { method: 'POST', body: fd });
+                if (!res.ok) return null;
                 const data = await res.json();
                 return data.secure_url || data.url || null;
-            } catch (e) { console.error('uploadToCloudinary unexpected error', e); return null; }
-        }
-
-        async function toggleReaction(messageId, emoji){
-            try{
-                const chatId = chatIdFor(currentUser.uid, currentPartner.id);
-                const msgRef = doc(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'messages', messageId);
-                const path = `reactions.${emoji}`;
-                await updateDoc(msgRef, { [path]: arrayUnion(currentUser.uid) });
-            }catch(_){ try{ const chatId = chatIdFor(currentUser.uid, currentPartner.id); const msgRef = doc(db, 'artifacts', appId, 'public', 'data', 'chats', chatId, 'messages', messageId); const path = `reactions.${emoji}`; await updateDoc(msgRef, { [path]: arrayRemove(currentUser.uid) }); }catch(__){} }
+            } catch (e) { return null; }
         }
 
         async function sendFileMessage(file, url) {
             const chatId = chatIdFor(currentUser.uid, currentPartner.id);
             const messagesRef = collection(db, "artifacts", appId, "public", "data", "chats", chatId, "messages");
-            try{
-                await addDoc(messagesRef, {
-                    text: file.type.startsWith('image/') ? 'Photo' : (file.type.startsWith('video/') ? 'Video' : 'Attachment'),
-                    type: 'file',
-                    fileUrl: url,
-                    fileName: file.name,
-                    senderId: currentUser.uid,
-                    receiverId: currentPartner.id,
-                    timestamp: serverTimestamp(),
-                    status: 'sent',
-                    chatId
-                });
-            }catch(e){
-                console.error('sendFileMessage failed to write message', e);
-                // Fallback: send a text message with link so user still gets something
-                try{
-                    const fallback = `${file.type.startsWith('image/') ? 'Photo' : (file.type.startsWith('video/') ? 'Video' : 'Attachment')}: ${url}`;
-                    await addDoc(messagesRef, { text: fallback, senderId: currentUser.uid, receiverId: currentPartner.id, timestamp: serverTimestamp(), status: 'sent', chatId });
-                }catch(err){
-                    console.error('Fallback message also failed', err);
-                    showMessageBox('Failed to send message. Please try again.', 'error');
-                }
-            }
+            await addDoc(messagesRef, {
+                text: file.type.startsWith('image/') ? 'Photo' : (file.type.startsWith('video/') ? 'Video' : 'Attachment'),
+                type: 'file',
+                fileUrl: url,
+                fileName: file.name,
+                senderId: currentUser.uid,
+                receiverId: currentPartner.id,
+                timestamp: serverTimestamp(),
+                status: 'sent',
+                chatId
+            });
         }
 
         // Friends dropdown logic
@@ -2116,7 +1295,7 @@ backBtn.onclick = () => history.back();
                 return `<div class="friend-item" data-id="${f.id}">
                     <img src="${avatar}" onerror="this.src='https://placehold.co/36x36/00d5ff/ffffff?text=${initial}'" alt="${initial}">
                     <div class="friend-meta">
-                        <div class="friend-name">${escapeHtml(f.displayName)} <span class="friend-new-label" data-unread-id="${f.id}" aria-hidden="true">New message</span></div>
+                        <div class="friend-name">${escapeHtml(f.displayName)}</div>
                         <div class="friend-sub"><span class="friend-presence"><span class="friend-dot" data-presence-id="${f.id}"></span><span data-presence-text-id="${f.id}">Offline</span></span></div>
                     </div>
                 </div>`;
@@ -2131,20 +1310,15 @@ backBtn.onclick = () => history.back();
                     if (currentPartner) {
                         updatePartnerHeader(currentPartner);
                         startMessagesListener();
-                        const chatId = chatIdFor(currentUser.uid, currentPartner.id);
-                        markRead(chatId);
                     }
                 });
             });
             // subscribe to presence for each friend (lightweight)
             data.forEach(f => subscribeFriendPresence(f.id));
-            // subscribe to unread status per friend
-            data.forEach(f => subscribeFriendUnread(f.id));
         }
 
         const friendPresenceUnsubs = new Map();
         const friendPresenceCache = new Map(); // friendId -> { state, lastMs }
-        const friendUnreadUnsubs = new Map(); // friendId -> unsubscribe function
         function subscribeFriendPresence(friendId) {
             try {
                 if (friendPresenceUnsubs.has(friendId)) return;
@@ -2168,58 +1342,6 @@ backBtn.onclick = () => history.back();
             } catch {}
         }
 
-        function subscribeFriendUnread(friendId) {
-            try {
-                if (!currentUser) return;
-                if (friendUnreadUnsubs.has(friendId)) return;
-                const chatId = chatIdFor(currentUser.uid, friendId);
-                let readAtMs = 0;
-                let latestMs = 0;
-                let latestSenderId = null;
-                const indicatorSelector = `[data-unread-id="${friendId}"]`;
-                const safeMs = (t) => {
-                    if (!t) return 0;
-                    if (typeof t === 'number') return t;
-                    if (t.toDate) return t.toDate().getTime();
-                    if (typeof t.seconds === 'number') return t.seconds * 1000;
-                    return 0;
-                };
-                const updateUI = () => {
-                    const el = document.querySelector(indicatorSelector);
-                    if (!el) return;
-                    const hasUnread = (latestSenderId && latestSenderId !== currentUser.uid && latestMs > (readAtMs || 0));
-                    if (hasUnread) { el.classList.add('show'); el.setAttribute('aria-hidden','false'); }
-                    else { el.classList.remove('show'); el.setAttribute('aria-hidden','true'); }
-                };
-                const receiptsRef = doc(db, "artifacts", appId, "public", "data", "chats", chatId, "presence", "receipts");
-                const unsubReceipts = onSnapshot(receiptsRef, (snap) => {
-                    try {
-                        const d = snap.data() || {};
-                        const ra = d.readAt ? d.readAt[currentUser.uid] : null;
-                        readAtMs = safeMs(ra);
-                        updateUI();
-                    } catch(_) {}
-                });
-                const msgsRef = query(collection(db, "artifacts", appId, "public", "data", "chats", chatId, "messages"), orderBy('timestamp','desc'));
-                const unsubMsg = onSnapshot(msgsRef, (qs) => {
-                    try {
-                        if (!qs.empty) {
-                            const m = qs.docs[0].data();
-                            latestMs = safeMs(m.timestamp);
-                            latestSenderId = m.senderId || null;
-                        } else { latestMs = 0; latestSenderId = null; }
-                        updateUI();
-                    } catch(_) {}
-                });
-                const unsub = () => { try{unsubReceipts();}catch{} try{unsubMsg();}catch{} friendUnreadUnsubs.delete(friendId); };
-                friendUnreadUnsubs.set(friendId, unsub);
-            } catch {}
-        }
-
-        window.addEventListener('beforeunload', () => {
-            try { friendUnreadUnsubs.forEach((fn) => { try{fn();}catch{} }); friendUnreadUnsubs.clear(); } catch {}
-        });
-
         // Visibility-based read receipts
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && currentUser && currentPartner) {
@@ -2227,177 +1349,6 @@ backBtn.onclick = () => history.back();
                 markRead(chatId);
             }
         });
-// Accessibility labels
-        (function(){
-          try{
-            const set = (id, label)=>{ const el = document.getElementById(id); if (el) el.setAttribute('aria-label', label); };
-            set('backBtn','Back'); set('infoBtn','Chat info'); set('clearChatBtn','Clear chat'); set('voiceCallBtn','Voice call'); set('videoCallBtn','Video call'); set('emojiBtn','Emoji'); set('attachBtn','Attach'); set('voiceMsgBtn','Voice message'); set('sendBtn','Send'); const ft = document.getElementById('friendsTrigger'); if (ft) ft.setAttribute('aria-label','Open friends');
-          }catch(_){}}
-        )();
-
-        // Enter to send
-        inputEl.addEventListener('keydown', (e)=>{ if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendBtn.click(); } });
-
-        // Drag & drop upload
-        (function(){
-          const dz = document.querySelector('.input-wrap');
-          const on = (ev,fn)=>document.addEventListener(ev,fn);
-          on('dragover', (e)=>{ e.preventDefault(); if (dz) dz.classList.add('drag-over'); });
-          on('dragenter', (e)=>{ e.preventDefault(); if (dz) dz.classList.add('drag-over'); });
-          on('dragleave', (e)=>{ if (!e.relatedTarget || !dz.contains(e.relatedTarget)) { if (dz) dz.classList.remove('drag-over'); } });
-          on('drop', async (e)=>{ e.preventDefault(); if (dz) dz.classList.remove('drag-over'); if (!e.dataTransfer || !e.dataTransfer.files || !currentUser || !currentPartner) return; const files = Array.from(e.dataTransfer.files); for (const f of files) { const url = await uploadToCloudinary(f); if (url) { await sendFileMessage(f, url); } }});
-        })();
-
-        // Reply feature
-        let replyingTo = null;
-        function ensureReplyPreviewUI(){
-          let bar = document.getElementById('replyPreview');
-          if (bar) return bar;
-          bar = document.createElement('div');
-          bar.id = 'replyPreview';
-          bar.className = 'reply-preview';
-          bar.innerHTML = '<div class="reply-info" id="replyInfo"></div><button id="cancelReplyBtn" class="reply-cancel" title="Cancel reply" aria-label="Cancel reply"><i class="fas fa-times"></i></button>';
-          const inputBar = document.querySelector('.input-bar');
-          if (inputBar && inputBar.parentNode) inputBar.parentNode.insertBefore(bar, inputBar);
-          document.getElementById('cancelReplyBtn')?.addEventListener('click', cancelReply);
-          return bar;
-        }
-        function beginReply(messageId){
-          try{
-            const node = document.querySelector(`[data-message-id="${messageId}"]`);
-            if (!node) return;
-            const isMine = node.classList.contains('sent');
-            const textNode = node.querySelector('.bubble');
-            const raw = textNode ? textNode.innerText || '' : '';
-            const snippet = raw.split('\n').join(' ').slice(0, 160);
-            replyingTo = { id: messageId, text: snippet, senderName: isMine ? 'You' : (currentPartner?.displayName || 'User') };
-            const bar = ensureReplyPreviewUI();
-            const info = document.getElementById('replyInfo');
-            if (info) info.textContent = `${replyingTo.senderName}: ${replyingTo.text}`;
-            bar.classList.add('show');
-            inputEl.focus();
-          }catch(_){ }
-        }
-        function cancelReply(){
-          replyingTo = null;
-          const bar = document.getElementById('replyPreview');
-          if (bar) bar.classList.remove('show');
-        }
-        window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') cancelReply(); });
-
-        // Override send to include reply and offline queue
-        async function sendMessageWithQueue(text){
-          try{
-            await sendMessage(text);
-            cancelReply();
-          }catch(e){
-            try{
-              const key = `jchat_offline_queue_${appId}`;
-              const prev = JSON.parse(localStorage.getItem(key) || '[]');
-              prev.push({ text, to: currentPartner?.id || null, at: Date.now(), replyTo: replyingTo || null });
-              localStorage.setItem(key, JSON.stringify(prev));
-              cancelReply();
-            }catch(_){ }
-          }
-        }
-        async function flushOfflineQueue(){
-          try{
-            const key = `jchat_offline_queue_${appId}`;
-            const prev = JSON.parse(localStorage.getItem(key) || '[]');
-            if (!prev.length || !currentUser || !currentPartner) return;
-            const remain = [];
-            for (const item of prev){
-              if (item.to && currentPartner && item.to === currentPartner.id){
-                try{ await sendMessage(item.text); }catch(_){ remain.push(item); }
-              } else { remain.push(item); }
-            }
-            localStorage.setItem(key, JSON.stringify(remain));
-          }catch(_){ }
-        }
-        window.addEventListener('online', flushOfflineQueue);
-
-        (function(){
-          const btn = document.getElementById('notifyBtn');
-          async function ensureSw(){ try{ return await navigator.serviceWorker.register('/sw.js'); }catch(_){ return null; } }
-          function vapidKey(){ try{ return (window.__webpush_public_vapid || '').trim() || null; }catch(_){ return null; } }
-          function urlBase64ToUint8Array(base64String){ const padding='='.repeat((4-base64String.length%4)%4); const b64=(base64String+padding).replace(/-/g,'+').replace(/_/g,'/'); const raw=atob(b64); const output=new Uint8Array(raw.length); for(let i=0;i<raw.length;i++){ output[i]=raw.charCodeAt(i);} return output; }
-          async function subscribe(){
-            try{
-              if (!('serviceWorker' in navigator) || !('PushManager' in window)) { alert('Push not supported'); return; }
-              const perm = await Notification.requestPermission(); if (perm !== 'granted') return;
-              const reg = await ensureSw(); if (!reg) return;
-              const key = vapidKey(); if (!key) { alert('Set window.__webpush_public_vapid to enable push.'); return; }
-              const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(key) });
-              if (currentUser) {
-                try{
-                  const ref = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'push', 'web');
-                  await setDoc(ref, { subscription: JSON.parse(JSON.stringify(sub)), enabled: true, updatedAt: serverTimestamp() }, { merge: true });
-                }catch(_){ }
-              }
-              alert('Notifications enabled');
-            }catch(_){ }
-          }
-          btn?.addEventListener('click', subscribe);
-        })();
-
-        (function(){
-          const btn = document.getElementById('e2eeBtn');
-          btn?.addEventListener('click', async ()=>{
-            try{
-              if (!currentUser || !currentPartner) { alert('Select a chat'); return; }
-              const chatId = chatIdFor(currentUser.uid, currentPartner.id);
-              const existing = await getChatEncKey(chatId);
-              if (existing) {
-                if (confirm('Disable encryption for this chat?')) { removeChatEncKey(chatId); alert('Encryption disabled'); }
-              } else {
-                const key = await crypto.subtle.generateKey({ name:'AES-GCM', length:256 }, true, ['encrypt','decrypt']);
-                await setChatEncKey(chatId, key);
-                const raw = await crypto.subtle.exportKey('raw', key);
-                const b64 = arrayBufferToBase64(raw);
-                alert('Encryption enabled. Share this key securely with your partner to decrypt: '+b64);
-              }
-            }catch(_){ }
-          });
-        })();
-
-        // Search overlay
-        (function(){
-          try{
-            const headerRight = document.querySelector('.header-right');
-            const btn = document.createElement('button');
-            btn.className = 'icon-btn';
-            btn.id = 'searchBtn';
-            btn.title = 'Search';
-            btn.setAttribute('aria-label','Search');
-            btn.innerHTML = '<i class="fas fa-search"></i>';
-            headerRight?.insertBefore(btn, headerRight.firstChild || null);
-
-            const overlay = document.createElement('div');
-            overlay.id = 'searchOverlay';
-            overlay.className = 'search-overlay';
-            overlay.innerHTML = '<input id="searchInput" class="search-input" type="text" placeholder="Search messages...">';
-            document.body.appendChild(overlay);
-
-            const input = document.getElementById('searchInput');
-            let hits = []; let idx = -1;
-            function clearHits(){ document.querySelectorAll('.search-hit').forEach(n=>n.classList.remove('search-hit')); hits = []; idx = -1; }
-            function find(term){
-              clearHits();
-              if (!term) { overlay.classList.remove('show'); return; }
-              const items = Array.from(document.querySelectorAll('.messages .msg .bubble'));
-              items.forEach(n => {
-                const t = (n.innerText || '').toLowerCase();
-                if (t.includes(term.toLowerCase())) { n.classList.add('search-hit'); hits.push(n); }
-              });
-              if (hits.length){ idx = 0; hits[0].scrollIntoView({ behavior:'smooth', block:'center' }); }
-            }
-            btn.addEventListener('click', ()=>{ overlay.classList.toggle('show'); input.focus(); input.select(); });
-            input.addEventListener('keydown', (e)=>{ if (e.key==='Enter'){ if (hits.length){ idx = (idx+1)%hits.length; hits[idx].scrollIntoView({ behavior:'smooth', block:'center' }); } } else if (e.key==='Escape'){ overlay.classList.remove('show'); clearHits(); } });
-            input.addEventListener('input', ()=> find(input.value.trim()));
-            document.addEventListener('click', (e)=>{ if (!e.target.closest('#searchOverlay') && e.target.id !== 'searchBtn'){ overlay.classList.remove('show'); clearHits(); } });
-          }catch(_){ }
-        })();
     </script>
-    <script src="assets/js/lazy-images.js" defer></script>
 </body>
 </html>
