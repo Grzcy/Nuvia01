@@ -1116,12 +1116,6 @@
         const friendsMainListEl = document.getElementById('friendsMainList');
         const friendsMainSearchEl = document.getElementById('friendsMainSearch');
 
-        friendsTrigger.addEventListener('click', () => {
-            const isOpen = friendsMenu.classList.contains('show');
-            if (isOpen) closeFriends(); else openFriends();
-            const messages = document.getElementById('messages');
-            if (messages) messages.classList.toggle('hidden-while-friends', !isOpen);
-        });
 
         document.addEventListener('click', (e) => {
             if (!e.target.closest('#friendsRoot')) closeFriends();
