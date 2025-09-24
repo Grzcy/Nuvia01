@@ -277,6 +277,26 @@
             --background-gradient-2: #b8860b;
         }
     </style>
+    <style>
+        /* Call Overlay Styles */
+        #callOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(6px); }
+        #callOverlay.active { display: flex; }
+        #callOverlay .content { display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center; background: var(--header-background); border:1px solid var(--border-light); border-radius: 16px; padding: 16px; width: min(92vw, 640px); box-shadow: 0 16px 48px rgba(0,0,0,.45); }
+        #callOverlay .call-status-icon { font-size: 4rem; color: var(--white); text-shadow: 0 2px 0 rgba(0,0,0,0.25); }
+        #callOverlay .call-status-text { font-size: 1.25rem; color: var(--white); margin: 0; }
+        #callOverlay .call-timer { font-size: 1rem; color: var(--text-light); margin: 0; }
+        #callOverlay .call-actions { display:flex; gap:12px; }
+        #callOverlay .call-actions button { width: 56px; height: 56px; border-radius: 50%; border: none; color: #fff; cursor: pointer; display:flex; align-items:center; justify-content:center; font-size: 1.1rem; }
+        #callOverlay .accept-call-btn { background: linear-gradient(135deg,#2ed573,#1dd1a1); }
+        #callOverlay .decline-call-btn, #callOverlay .end-call-btn { background: linear-gradient(135deg,#ff4757,#ff3838); }
+        #callOverlay .toggle-mute-btn, #callOverlay .toggle-video-btn { background: rgba(255,255,255,0.2); }
+        #callOverlay .toggle-mute-btn.active, #callOverlay .toggle-video-btn.active { background: rgba(255,255,255,0.35); }
+        #callOverlay .video-streams { position: relative; width: 100%; max-width: 640px; border-radius: 12px; overflow: hidden; background: #000; }
+        #callOverlay .video-streams video { width: 100%; display: none; background: #000; }
+        #callOverlay .video-streams #remoteVideo { display: none; }
+        #callOverlay .video-streams #localVideo { position: absolute; right: 10px; bottom: 10px; width: 120px; height: 80px; border-radius: 8px; border: 2px solid var(--border-light); object-fit: cover; display: none; }
+        #callOverlay.voice-call .video-streams { display: none; }
+    </style>
 </head>
 <body class="profile-blackgold-bg">
     <div class="container">
@@ -289,6 +309,8 @@
                 </div>
             </div>
             <div class="header-right">
+                <button class="icon-btn" id="voiceCallBtn" title="Voice Call" aria-label="Voice Call"><i class="fas fa-phone"></i></button>
+                <button class="icon-btn" id="videoCallBtn" title="Video Call" aria-label="Video Call"><i class="fas fa-video"></i></button>
                 <div id="headerProfile" title="My Profile" class="header-profile">
                     <img id="headerProfilePic" src="https://placehold.co/36x36/ff2e92/ffffff?text=U" class="header-profile-pic" alt="Me">
                     <i id="headerProfileIcon" class="fas fa-user" style="display:none;"></i>
@@ -337,13 +359,33 @@
         </div>
     </div>
 
+    <!-- Call Overlay -->
+    <div id="callOverlay" role="dialog" aria-modal="true" aria-labelledby="callStatusText">
+        <div class="content">
+            <div class="video-streams">
+                <video id="remoteVideo" playsinline autoplay></video>
+                <video id="localVideo" playsinline autoplay muted></video>
+            </div>
+            <i id="callStatusIcon" class="fas fa-phone call-status-icon" role="img" aria-label="Call Status"></i>
+            <p id="callStatusText" class="call-status-text">Calling...</p>
+            <p id="callTimer" class="call-timer" style="display:none">00:00</p>
+            <div class="call-actions" id="callActions">
+                <button id="acceptCallBtn" class="accept-call-btn" style="display:none" aria-label="Accept Call"><i class="fas fa-phone"></i></button>
+                <button id="declineCallBtn" class="decline-call-btn" style="display:none" aria-label="Decline Call"><i class="fas fa-phone-slash"></i></button>
+                <button id="toggleMuteBtn" class="toggle-mute-btn" style="display:none" title="Mute/Unmute" aria-label="Toggle Mute"><i class="fas fa-microphone"></i></button>
+                <button id="toggleVideoBtn" class="toggle-video-btn" style="display:none" title="Video On/Off" aria-label="Toggle Video"><i class="fas fa-video"></i></button>
+                <button id="endCallBtn" class="end-call-btn" style="display:none" aria-label="End Call"><i class="fas fa-phone-slash"></i></button>
+            </div>
+        </div>
+    </div>
+
     <!-- Notification sound -->
     <audio id="newMessageSound" src="/ne.mp3" preload="auto"></audio>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where, arrayUnion, getDocs } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
         import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js";
 
         // Firebase config (same pattern as Profile.html)
@@ -459,6 +501,7 @@
             if (currentPartner) updatePartnerHeader(currentPartner);
             updateLayoutForPartner();
             startMessagesListener();
+            listenForIncomingCallsForCurrentPartner();
         });
 
         // Presence heartbeat for current user
@@ -566,6 +609,247 @@
         const emojiGrid = document.getElementById('emojiGrid');
         const emojiTabs = document.getElementById('emojiTabs');
         const voiceMsgBtn = document.getElementById('voiceMsgBtn');
+        const voiceCallBtn = document.getElementById('voiceCallBtn');
+        const videoCallBtn = document.getElementById('videoCallBtn');
+        const callOverlay = document.getElementById('callOverlay');
+        const callStatusIcon = document.getElementById('callStatusIcon');
+        const callStatusText = document.getElementById('callStatusText');
+        const callTimerDisplay = document.getElementById('callTimer');
+        const acceptCallBtn = document.getElementById('acceptCallBtn');
+        const declineCallBtn = document.getElementById('declineCallBtn');
+        const endCallBtn = document.getElementById('endCallBtn');
+        const toggleMuteBtn = document.getElementById('toggleMuteBtn');
+        const toggleVideoBtn = document.getElementById('toggleVideoBtn');
+        const localVideo = document.getElementById('localVideo');
+        const remoteVideo = document.getElementById('remoteVideo');
+
+        let remoteStream = null;
+        let peerConnection = null;
+        let localStream = null;
+        let currentCallType = null; // 'voice' | 'video'
+        let isMuted = false;
+        let isVideoOff = false;
+        let callState = 'idle';
+        let callDuration = 0;
+        let callDurationInterval = null;
+        let callTimeoutId = null;
+        let callRef = null; // Firestore doc ref for current call
+        let isIncomingCall = false;
+
+        const iceServers = { iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' },
+            { urls: 'stun:stun3.l.google.com:19302' },
+            { urls: 'stun:stun4.l.google.com:19302' },
+        ]};
+
+        function formatTimer(secs){ const m = String(Math.floor(secs/60)).padStart(2,'0'); const s = String(secs%60).padStart(2,'0'); return `${m}:${s}`; }
+
+        function createPeerConnection(){
+            const pc = new RTCPeerConnection(iceServers);
+            pc.onicecandidate = (event) => {
+                if (event.candidate && callRef) {
+                    const data = JSON.parse(JSON.stringify(event.candidate));
+                    if (isIncomingCall) {
+                        updateDoc(callRef, { receiverCandidates: arrayUnion(data) }).catch(()=>{});
+                    } else {
+                        updateDoc(callRef, { callerCandidates: arrayUnion(data) }).catch(()=>{});
+                    }
+                }
+            };
+            pc.ontrack = (event) => {
+                if (event.streams && event.streams[0]) {
+                    remoteVideo.srcObject = event.streams[0];
+                    remoteVideo.style.display = 'block';
+                    remoteStream = event.streams[0];
+                } else {
+                    if (!remoteStream) { remoteStream = new MediaStream(); remoteVideo.srcObject = remoteStream; remoteVideo.style.display='block'; }
+                    remoteStream.addTrack(event.track);
+                }
+            };
+            return pc;
+        }
+
+        function showOverlay(kind){
+            callOverlay.classList.add('active');
+            callOverlay.classList.remove('voice-call','video-call');
+            callOverlay.classList.add(kind === 'voice' ? 'voice-call' : 'video-call');
+        }
+        function hideOverlay(){ callOverlay.classList.remove('active','voice-call','video-call'); }
+
+        function resetCallUi(){
+            callStatusIcon.className = 'fas fa-phone call-status-icon';
+            callStatusText.textContent = 'Calling...';
+            callTimerDisplay.style.display = 'none';
+            acceptCallBtn.style.display = 'none';
+            declineCallBtn.style.display = 'none';
+            endCallBtn.style.display = 'none';
+            toggleMuteBtn.style.display = 'none';
+            toggleVideoBtn.style.display = 'none';
+            toggleMuteBtn.classList.remove('active');
+            toggleVideoBtn.classList.remove('active');
+            localVideo.style.display = 'none';
+            remoteVideo.style.display = 'none';
+        }
+
+        async function startOutgoingCall(type){
+            if (!currentUser || !currentPartner || callState !== 'idle') return;
+            currentCallType = type;
+            isIncomingCall = false;
+            callState = 'calling';
+            resetCallUi();
+            showOverlay(type);
+            callStatusIcon.className = `fas fa-${type === 'voice' ? 'phone' : 'video'} call-status-icon`;
+            callStatusText.textContent = `Calling ${currentPartner.displayName || 'user'}...`;
+            declineCallBtn.style.display = 'none';
+            endCallBtn.style.display = 'block';
+
+            try{
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: type === 'video' });
+                localVideo.srcObject = localStream;
+                if (type === 'video') localVideo.style.display = 'block';
+
+                peerConnection = createPeerConnection();
+                localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
+
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+
+                const callsCol = collection(db, "artifacts", appId, "public", "data", "calls");
+                const docRef = await addDoc(callsCol, {
+                    callerId: currentUser.uid,
+                    receiverId: currentPartner.id,
+                    callType: type,
+                    status: 'ringing',
+                    offer: { type: offer.type, sdp: offer.sdp },
+                    callerCandidates: [],
+                    receiverCandidates: [],
+                    createdAt: serverTimestamp()
+                });
+                callRef = docRef;
+
+                onSnapshot(docRef, async (snap) => {
+                    const data = snap.data(); if (!data) return;
+                    if (data.status === 'accepted' && data.answer && peerConnection && !peerConnection.currentRemoteDescription) {
+                        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer)).catch(()=>{});
+                        callState = 'connected';
+                        callStatusText.textContent = `In call with ${currentPartner.displayName || 'user'}`;
+                        callTimerDisplay.style.display = 'block';
+                        toggleMuteBtn.style.display = 'block';
+                        toggleVideoBtn.style.display = type === 'video' ? 'block' : 'none';
+                        declineCallBtn.style.display = 'none';
+                        endCallBtn.style.display = 'block';
+                        if (callDurationInterval) clearInterval(callDurationInterval); callDuration = 0; callDurationInterval = setInterval(()=>{ callDuration++; callTimerDisplay.textContent = formatTimer(callDuration); }, 1000);
+                    }
+                    if (Array.isArray(data.receiverCandidates) && data.receiverCandidates.length) {
+                        const list = data.receiverCandidates.slice();
+                        for (const c of list) { try { await peerConnection.addIceCandidate(new RTCIceCandidate(c)); } catch(_){} }
+                        updateDoc(docRef, { receiverCandidates: [] }).catch(()=>{});
+                    }
+                    if (['declined','busy','no-answer','ended'].includes(data.status) && callState !== 'idle') {
+                        endCall(false);
+                    }
+                });
+
+                callTimeoutId = setTimeout(async ()=>{
+                    if (callState === 'calling' && callRef) { await updateDoc(callRef, { status: 'no-answer' }).catch(()=>{}); endCall(false); }
+                }, 20000);
+
+            } catch (e) {
+                endCall(false);
+            }
+        }
+
+        async function acceptCall(){
+            if (callState !== 'ringing' || !callRef) return;
+            try{
+                callState = 'connected';
+                callStatusText.textContent = `Call with ${currentPartner?.displayName || 'user'}`;
+                callTimerDisplay.style.display = 'block';
+                acceptCallBtn.style.display = 'none';
+                declineCallBtn.style.display = 'none';
+                endCallBtn.style.display = 'block';
+                toggleMuteBtn.style.display = 'block';
+                toggleVideoBtn.style.display = currentCallType === 'video' ? 'block' : 'none';
+
+                localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: currentCallType === 'video' });
+                localVideo.srcObject = localStream; if (currentCallType === 'video') localVideo.style.display = 'block';
+
+                peerConnection = createPeerConnection();
+                localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
+
+                const callSnap = await getDoc(callRef); const data = callSnap.data();
+                const remoteOffer = new RTCSessionDescription(data.offer);
+                await peerConnection.setRemoteDescription(remoteOffer);
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                await updateDoc(callRef, { status: 'accepted', answer: { type: answer.type, sdp: answer.sdp } });
+
+                if (Array.isArray(data.callerCandidates) && data.callerCandidates.length) {
+                    for (const c of data.callerCandidates) { try { await peerConnection.addIceCandidate(new RTCIceCandidate(c)); } catch(_){} }
+                    await updateDoc(callRef, { callerCandidates: [] });
+                }
+
+                onSnapshot(callRef, async (snap) => {
+                    const d = snap.data() || {};
+                    if (Array.isArray(d.callerCandidates) && d.callerCandidates.length) {
+                        for (const c of d.callerCandidates) { try { await peerConnection.addIceCandidate(new RTCIceCandidate(c)); } catch(_){} }
+                        await updateDoc(callRef, { callerCandidates: [] });
+                    }
+                    if (d.status === 'ended' && callState !== 'idle') { endCall(false); }
+                });
+
+                if (callDurationInterval) clearInterval(callDurationInterval); callDuration = 0; callDurationInterval = setInterval(()=>{ callDuration++; callTimerDisplay.textContent = formatTimer(callDuration); }, 1000);
+            } catch (e) {
+                endCall(true);
+            }
+        }
+
+        async function declineCall(){ if (callRef) { try { await updateDoc(callRef, { status: 'declined' }); } catch(_){} } endCall(false); }
+
+        function toggleMute(){ if (!localStream) return; localStream.getAudioTracks().forEach(t=>{ t.enabled = !t.enabled; isMuted = !t.enabled; }); toggleMuteBtn.classList.toggle('active', isMuted); toggleMuteBtn.querySelector('i').className = isMuted? 'fas fa-microphone-slash':'fas fa-microphone'; }
+        function toggleVideo(){ if (!localStream) return; localStream.getVideoTracks().forEach(t=>{ t.enabled = !t.enabled; isVideoOff = !t.enabled; }); toggleVideoBtn.classList.toggle('active', isVideoOff); toggleVideoBtn.querySelector('i').className = isVideoOff? 'fas fa-video-slash':'fas fa-video'; localVideo.style.display = isVideoOff? 'none':'block'; }
+
+        async function endCall(updateFirestore){
+            try{ if (callTimeoutId) { clearTimeout(callTimeoutId); callTimeoutId = null; } }catch(_){ }
+            try{ if (callDurationInterval) { clearInterval(callDurationInterval); callDurationInterval = null; } }catch(_){ }
+            if (updateFirestore && callRef) { try { await updateDoc(callRef, { status: 'ended' }); } catch(_){} }
+            try{ if (peerConnection) { peerConnection.close(); } }catch(_){ }
+            peerConnection = null;
+            try{ if (localStream) { localStream.getTracks().forEach(t=>t.stop()); } }catch(_){ }
+            try{ if (remoteStream) { remoteStream.getTracks().forEach(t=>t.stop()); } }catch(_){ }
+            localStream = null; remoteStream = null; callRef = null; callState = 'idle'; currentCallType = null; isIncomingCall = false; isMuted = false; isVideoOff = false;
+            resetCallUi();
+            hideOverlay();
+        }
+
+        let unsubscribeCallListener = null;
+        function listenForIncomingCallsForCurrentPartner(){
+            if (unsubscribeCallListener) { try { unsubscribeCallListener(); } catch(_){} unsubscribeCallListener = null; }
+            if (!currentUser || !currentPartner) return;
+            const callsCol = collection(db, "artifacts", appId, "public", "data", "calls");
+            const qCalls = query(callsCol, where('receiverId','==', currentUser.uid), where('status','==','ringing'));
+            unsubscribeCallListener = onSnapshot(qCalls, async (snap)=>{
+                if (snap.empty) return;
+                const incoming = snap.docs.find(d => (d.data().callerId === currentPartner.id));
+                if (!incoming) return;
+                callRef = incoming.ref; isIncomingCall = true; currentCallType = incoming.data().callType; callState = 'ringing';
+                resetCallUi(); showOverlay(currentCallType);
+                callStatusIcon.className = `fas fa-${currentCallType === 'voice' ? 'phone' : 'video'} call-status-icon`;
+                callStatusText.textContent = `Incoming ${currentCallType} call from ${currentPartner.displayName || 'user'}...`;
+                acceptCallBtn.style.display = 'block';
+                declineCallBtn.style.display = 'block';
+            }, (err)=>{});
+        }
+
+        voiceCallBtn?.addEventListener('click', ()=> startOutgoingCall('voice'));
+        videoCallBtn?.addEventListener('click', ()=> startOutgoingCall('video'));
+        acceptCallBtn?.addEventListener('click', acceptCall);
+        declineCallBtn?.addEventListener('click', declineCall);
+        endCallBtn?.addEventListener('click', ()=> endCall(true));
+        toggleMuteBtn?.addEventListener('click', toggleMute);
+        toggleVideoBtn?.addEventListener('click', toggleVideo);
 
         if (backBtn) backBtn.onclick = () => {
             if (currentPartner) {
@@ -1258,6 +1542,7 @@
                         updatePartnerHeader(currentPartner);
                         updateLayoutForPartner();
                         startMessagesListener();
+                        listenForIncomingCallsForCurrentPartner();
                     }
                 });
             });
