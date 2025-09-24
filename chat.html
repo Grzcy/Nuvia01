@@ -1361,8 +1361,11 @@ backBtn.onclick = () => history.back();
 
         function openCallUI(isVideo) {
             callModal.style.display = 'flex';
-            callTitle.textContent = 'Video Call';
+            callTitle.textContent = isVideo ? 'Video Call' : 'Voice Call';
             videoWrap.style.display = 'block';
+            if (remoteVideo) remoteVideo.style.display = isVideo ? 'block' : 'none';
+            if (localVideo) localVideo.style.display = isVideo ? 'block' : 'none';
+            if (cameraBtn) cameraBtn.style.display = isVideo ? 'inline-block' : 'none';
             if (remoteAvatarPlaceholder) {
                 try{
                     let url = '';
