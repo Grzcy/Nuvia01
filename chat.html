@@ -773,6 +773,7 @@
 
                 openCallUI(isVideo);
                 callTitle.textContent = isVideo ? 'Incoming Video Call' : 'Incoming Voice Call';
+                try{ ensureMediaUnlocked(); }catch(_){ }
                 const cs = document.getElementById('callStatus');
                 if (cs) cs.textContent = 'Ringing…';
                 if (incomingActions) incomingActions.style.display = 'flex';
@@ -854,7 +855,15 @@
         let unsubCalleeCand = null;
         let unsubCallSignals = null;
         let unsubRingingCallDoc = null;
-        const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+        const rtcConfig = (window.__ice_servers && Array.isArray(window.__ice_servers) && window.__ice_servers.length)
+            ? { iceServers: window.__ice_servers }
+            : { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+        function ensureMediaUnlocked(){
+            try{ if (typeof AudioContext !== 'undefined') { const ac = new AudioContext(); if (ac.state === 'suspended') ac.resume().catch(()=>{}); } }catch(_){ }
+            try{ if (remoteAudio) { remoteAudio.muted = false; remoteAudio.play().catch(()=>{}); } }catch(_){ }
+            try{ if (remoteVideo) { remoteVideo.play().catch(()=>{}); } }catch(_){ }
+            try{ if (localVideo) { localVideo.muted = true; localVideo.play().catch(()=>{}); } }catch(_){ }
+        }
         backBtn.onclick = () => history.back();
 
         // Emoji setup with categories and ~500 emojis
@@ -1094,6 +1103,7 @@
             callStartMs = null;
             if (incomingActions) incomingActions.style.display = 'none';
             openCallUI(isVideo);
+            ensureMediaUnlocked();
             const csEl = document.getElementById('callStatus');
             if (csEl) csEl.textContent = 'Calling…';
             try {
@@ -1110,6 +1120,7 @@
                     try { localVideo.play().catch(()=>{}); } catch(_){}
                 }
                 pc = new RTCPeerConnection(rtcConfig);
+                try{ pc.oniceconnectionstatechange = () => { const st = pc.iceConnectionState; const cs = document.getElementById('callStatus'); if (st === 'checking') { if (cs) cs.textContent = 'Connecting…'; } else if (st === 'connected' || st === 'completed') { if (!callStartMs) { callStartMs = Date.now(); startCallTimer(); } if (cs) cs.textContent = 'Connected'; } else if (st === 'disconnected') { if (cs) cs.textContent = 'Reconnecting…'; } else if (st === 'failed') { if (cs) cs.textContent = 'Connection failed'; endCall(); } }; }catch(_){ }
                 stream.getTracks().forEach(t => pc.addTrack(t, stream));
                 
                 pc.ontrack = (e) => {
@@ -1270,6 +1281,7 @@
                     try { localVideo.play().catch(()=>{}); } catch(_){}
                 }
                 pc = new RTCPeerConnection(rtcConfig);
+                try{ pc.oniceconnectionstatechange = () => { const st = pc.iceConnectionState; const cs = document.getElementById('callStatus'); if (st === 'checking') { if (cs) cs.textContent = 'Connecting…'; } else if (st === 'connected' || st === 'completed') { if (!callStartMs) { callStartMs = Date.now(); startCallTimer(); } if (cs) cs.textContent = 'Connected'; } else if (st === 'disconnected') { if (cs) cs.textContent = 'Reconnecting…'; } else if (st === 'failed') { if (cs) cs.textContent = 'Connection failed'; endCall(); } }; }catch(_){ }
                 stream.getTracks().forEach(t => pc.addTrack(t, stream));
                 
                 pc.ontrack = (e) => {
