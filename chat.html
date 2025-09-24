@@ -694,6 +694,11 @@ videoCallBtn?.addEventListener('click', () => {
     try{ ensureMediaUnlocked(); }catch(_){ }
     startCall(true);
 });
+voiceCallBtn?.addEventListener('click', () => {
+    if (!currentPartner) { alert('Select a friend to call.'); return; }
+    try{ ensureMediaUnlocked(); }catch(_){ }
+    startCall(false);
+});
 endCallBtn?.addEventListener('click', () => endCall());
 muteBtn?.addEventListener('click', () => {
     try{ const stream = localVideo?.srcObject; if (stream) stream.getAudioTracks().forEach(t => t.enabled = !t.enabled); }catch(_){}
