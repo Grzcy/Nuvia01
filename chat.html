@@ -616,7 +616,7 @@
                         if (statusText) {
                             if (state === 'online') statusText.textContent = 'Online';
                             else if (state === 'away') statusText.textContent = `Away • ${formatRelativeTime(lastMs)}`;
-                            else statusText.textContent = `Offline • ${formatRelativeTime(lastMs)}`;
+                            else statusText.textContent = `Offline �� ${formatRelativeTime(lastMs)}`;
                         }
                         const pill = document.getElementById('partnerStatus');
                         if (pill) {
@@ -1188,7 +1188,7 @@ backBtn.onclick = () => history.back();
         function startIncomingListener() {
             try {
                 const callsCol = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
-                const q = query(callsCol, where('calleeId', '==', currentUser.uid), where('status', '==', 'ringing'), where('video', '==', true));
+                const q = query(callsCol, where('calleeId', '==', currentUser.uid), where('status', '==', 'ringing'));
                 unsubIncoming = onSnapshot(q, async (snap) => {
                     for (const change of snap.docChanges()) {
                         try{
