@@ -1075,7 +1075,7 @@ backBtn.onclick = () => history.back();
             if (!currentPartner) return;
             isIncoming = false;
             isCaller = true;
-            callKind = 'video';
+            callKind = isVideo ? 'video' : 'voice';
             callStartMs = null;
             if (incomingActions) incomingActions.style.display = 'none';
             openCallUI(isVideo);
