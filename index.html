@@ -4808,6 +4808,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                         <input type="text" class="poll-option-input" placeholder="Option 2" maxlength="100">
                         <button id="addPollOptionBtn" class="post-control-button" type="button">Add Option</button>
                     </div>
+                    <button id="openImageEditorFromPoll" class="post-control-button" type="button"><i class="fas fa-pen"></i> Edit Photo</button>
                     <label for="postVisibilitySelect" class="post-visibility-select">
                         <i class="fas fa-eye"></i>
                         <select id="postVisibilitySelect" aria-label="Post visibility" class="visibility-select">
@@ -5686,7 +5687,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         let customizeInspirationButton, claimDailyBonusButton, customizeInspirationModal;
         let inspirationTypeRadios, cancelCustomizeButton, saveCustomizeButton;
         let postCreationSection, postContentInput, postMediaUpload, mediaImagePreview, mediaVideoPreview, imageEditorControls, openImageEditorButton;
-        let createPostButton, postsFeed, loadingPostsMessage, postTypeFilter, postSearchInput;
+        let createPostButton, postsFeed, loadingPostsMessage, postTypeFilter, postSearchInput, openImageEditorFromPoll;
         let postDateFromInput, postDateToInput, exportPostsCsvButton, exportPostsJsonButton;
         let showSavedOnlyCheckbox, showFollowedOnlyCheckbox, trendingHashtagsDiv, editPostModal, editPostContentInput;
         let editPostMediaUpload, editMediaImagePreview, editMediaVideoPreview, removeEditMediaButton;
@@ -6928,6 +6929,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 videoThumbnailControls = document.getElementById('videoThumbnailControls');
                 openThumbnailModalButton = document.getElementById('openThumbnailModalButton');
                 videoThumbnailPreview = document.getElementById('videoThumbnailPreview');
+                openImageEditorFromPoll = document.getElementById('openImageEditorFromPoll');
                 imageEditorControls = document.getElementById('imageEditorControls');
                 openImageEditorButton = document.getElementById('openImageEditorButton');
                 createPostButton = document.getElementById('createPostButton');
@@ -13756,6 +13758,7 @@ async function fetchAndDisplayPosts() {
             }
             if (openThumbnailModalButton && !openThumbnailModalButton.dataset.bound){ openThumbnailModalButton.addEventListener('click', openThumbnailModal); openThumbnailModalButton.dataset.bound='1'; bindThumbnailModal(); }
             if (openImageEditorButton && !openImageEditorButton.dataset.bound){ openImageEditorButton.addEventListener('click', async ()=>{ try{ if(window.currentMediaFile && window.currentMediaFile.type && window.currentMediaFile.type.startsWith('image/')){ window.nuviaGoToPhotoEditor(window.currentMediaFile, 'composer'); return; } const imgPrev = document.getElementById('mediaImagePreview'); if(imgPrev && imgPrev.src){ if(!imgPrev.complete || !imgPrev.naturalWidth){ await new Promise(res=>{ const onl=()=>{ imgPrev.removeEventListener('load', onl); res(); }; imgPrev.addEventListener('load', onl, { once:true }); }); } const c = document.createElement('canvas'); c.width = imgPrev.naturalWidth||800; c.height = imgPrev.naturalHeight||800; const cx = c.getContext('2d'); cx.drawImage(imgPrev, 0, 0, c.width, c.height); const blob = await new Promise(res=> c.toBlob(res, 'image/jpeg', 0.92)); if(blob){ const f = new File([blob], 'picked.jpg', { type: blob.type||'image/jpeg' }); window.currentMediaFile = f; window.nuviaGoToPhotoEditor(f, 'composer'); return; } } }catch(_){} }); openImageEditorButton.dataset.bound='1'; }
+            if (openImageEditorFromPoll && !openImageEditorFromPoll.dataset.bound){ openImageEditorFromPoll.addEventListener('click', ()=>{ try{ if(window.currentMediaFile && window.currentMediaFile.type && window.currentMediaFile.type.startsWith('image/')){ window.nuviaGoToPhotoEditor(window.currentMediaFile, 'composer'); } else { location.assign('/photo_editor.html'); } }catch(_){} }); openImageEditorFromPoll.dataset.bound='1'; }
             if (createPostButton) createPostButton.addEventListener('click', createNewPost);
 
             // Edit post modal listeners
