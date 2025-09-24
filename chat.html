@@ -1511,7 +1511,7 @@
                 } else {
                     content = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><i class="fas fa-microphone"></i><span>Voice note</span><i class="fas fa-spinner fa-spin"></i></div>`;
                 }
-else {
+            } else {
                 content = escapeHtml(m.text || '');
             }
             const actions = m.sender === 'current' ? `<span class="msg-actions"><button class="menu-btn" title="More" data-menu-id="${m.id}"><i class=\"fas fa-ellipsis-v\"></i></button></span>` : '';
