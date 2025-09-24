@@ -1162,7 +1162,14 @@
 
                 // ICE
                 const callerCandCol = collection(callDocRef, 'callerCandidates');
-                pc.onicecandidate = (e) => { if (e.candidate) addDoc(callerCandCol, e.candidate.toJSON()); };
+                pc.onicecandidate = (e) => {
+                    console.log('CALLER: onicecandidate', e && e.candidate);
+                    if (e && e.candidate) {
+                        try {
+                            addDoc(callerCandCol, e.candidate.toJSON()).catch(err => console.warn('CALLER: addDoc callerCandidate failed', err));
+                        } catch (err) { console.warn('CALLER: addDoc error', err); }
+                    }
+                };
 
                 // Offer
                 const offer = await pc.createOffer({ offerToReceiveAudio: true, offerToReceiveVideo: isVideo });
