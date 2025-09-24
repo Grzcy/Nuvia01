@@ -5598,7 +5598,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         function showOfflineBanner() { const el = ensureOfflineBanner(); el.style.display = 'block'; }
         function hideOfflineBanner() { const el = document.getElementById('offlineStatusBanner'); if (el) el.style.display = 'none'; }
         if (!isOnline) { showOfflineBanner(); }
-        window.addEventListener('online', () => { isOnline = true; hideOfflineBanner(); console.log('Nuvia_DEBUG: Back online'); try { enableNetwork(db).catch(()=>{}); } catch(_) {} });
+        window.addEventListener('online', () => { isOnline = true; hideOfflineBanner(); console.log('Nuvia_DEBUG: Back online'); try { enableNetwork(db).catch(()=>{}); } catch(_) {} try{ if(typeof loadPremiumStatus==='function') loadPremiumStatus(); if(typeof checkPremiumStatus==='function') checkPremiumStatus(); }catch(_){} });
         window.addEventListener('offline', () => { isOnline = false; showOfflineBanner(); console.log('Nuvia_DEBUG: Gone offline'); try { disableNetwork(db).catch(()=>{}); } catch(_) {} });
 
         // Global Error Handling - Temporarily disabled for debugging
@@ -6602,7 +6602,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 'maintenance': '🔧 Maintenance',
                 'update': '🆕 Update'
             };
-            return typeLabels[type] || 'ℹ����� Information';
+            return typeLabels[type] || 'ℹ������� Information';
         }
 
         /**
