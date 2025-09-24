@@ -1648,11 +1648,21 @@ backBtn.onclick = () => history.back();
                     content = `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><i class="fas fa-microphone"></i><span>Voice note</span><i class="fas fa-spinner fa-spin"></i></div>`;
                 }
             } else {
-                content = escapeHtml(m.text || '');
+                if (m.enc && m.cipher && m.iv) {
+                    content = `<span class=\"enc-text\">🔒 Encrypted message</span>`;
+                } else {
+                    content = escapeHtml(m.text || '');
+                }
             }
             content = replyQuote + content;
+            const rx = m.reactions || {};
+            const emojis = ['👍','❤️','😂','😮','🙏'];
+            const summary = Object.keys(rx).map(k=>({ e:k, c: (Array.isArray(rx[k])?rx[k].length:0), mine: (Array.isArray(rx[k]) && rx[k].includes(currentUser?.uid)) }))
+                .filter(x=>x.c>0)
+                .map(x=>`<button class=\"emoji-btn\" data-react-id=\"${m.id}\" data-react-emoji=\"${x.e}\" title=\"${x.e}\" style=\"padding:2px 6px;border-radius:8px;border:1px solid var(--border-light);background:transparent;color:inherit;${x.mine?'outline:2px solid var(--accent-color);outline-offset:1px;':''}\">${x.e} ${x.c}</button>`).join(' ');
+            const picker = `<div style=\"display:flex;gap:4px;margin-top:6px\">${emojis.map(e=>`<button class=\"emoji-btn\" data-react-id=\"${m.id}\" data-react-emoji=\"${e}\" title=\"${e}\">${e}</button>`).join('')}</div>`;
             const actions = m.sender === 'current' ? `<span class=\"msg-actions\"><button class=\"menu-btn\" title=\"More\" data-menu-id=\"${m.id}\"><i class=\"fas fa-ellipsis-v\"></i></button></span>` : '';
-            bubble.innerHTML = `${content}<div class="time" style="position:relative;">${timeStr}${statusIcon}${actions}<div class="msg-menu" id="menu_${m.id}"><ul><li data-reply-id="${m.id}"><i class=\"fas fa-reply\"></i> Reply</li><li data-share-id="${m.id}"><i class=\"fas fa-share\"></i> Share</li><li data-del-id="${m.id}"><i class=\"fas fa-trash\"></i> Delete</li></ul></div></div>`;
+            bubble.innerHTML = `${content}${summary?`<div style=\"margin-top:6px\">${summary}</div>`:''}<div class="time" style="position:relative;">${timeStr}${statusIcon}${actions}<div class="msg-menu" id="menu_${m.id}"><ul><li data-reply-id="${m.id}"><i class=\"fas fa-reply\"></i> Reply</li><li data-share-id="${m.id}"><i class=\"fas fa-share\"></i> Share</li><li data-del-id="${m.id}"><i class=\"fas fa-trash\"></i> Delete</li></ul></div></div>${picker}`;
             wrap.appendChild(bubble);
             messagesEl.appendChild(wrap);
         }
