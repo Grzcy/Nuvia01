@@ -15,6 +15,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 
+    <link rel="prefetch" href="index.html">
+    <link rel="prefetch" href="chat.html">
+
     <style>
         :root {
             --pink: #ff2e92;
@@ -538,7 +541,29 @@
         const emojiTabs = document.getElementById('emojiTabs');
         const voiceMsgBtn = document.getElementById('voiceMsgBtn');
 
-        if (backBtn) backBtn.onclick = () => { if (currentPartner) { window.location.href = 'chat.html'; } else { window.location.href = 'index.html'; } };
+        if (backBtn) backBtn.onclick = () => {
+            if (currentPartner) {
+                try { if (unsubscribeMessages) unsubscribeMessages(); } catch {}
+                try { if (unsubscribeTyping) unsubscribeTyping(); } catch {}
+                currentPartner = null;
+                updateLayoutForPartner();
+                try { setupHeader(currentUser); } catch {}
+                try {
+                    const url = new URL(window.location.href);
+                    url.searchParams.delete('partnerId');
+                    url.searchParams.delete('partner');
+                    const qs = url.searchParams.toString();
+                    history.replaceState(null, '', 'chat.html' + (qs ? ('?' + qs) : ''));
+                } catch {
+                    history.replaceState(null, '', 'chat.html');
+                }
+                const nameEl = document.getElementById('partnerName');
+                if (nameEl) nameEl.textContent = 'Messages';
+                return;
+            } else {
+                window.location.replace('index.html');
+            }
+        };
 
         // Emoji setup with categories and ~500 emojis
         const emojiCategories = [
