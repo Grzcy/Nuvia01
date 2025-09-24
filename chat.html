@@ -33,6 +33,10 @@
             --button-background: linear-gradient(90deg, var(--blue), var(--pink));
             --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
             --accent-color: var(--blue);
+            /* Profile.html background variables */
+            --background-main: rgba(10, 10, 10, .75);
+            --background-gradient-1: #00d5ff;
+            --background-gradient-2: #ff2e92;
         }
 
         /* Light Mode overrides (match Home.html intent) */
@@ -68,7 +72,9 @@
             margin: 0;
             padding: 0;
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, var(--background-color-primary) 0%, var(--background-color-secondary) 100%);
+            background-color: var(--background-main);
+            background-image: radial-gradient(circle at top left, var(--background-gradient-1), transparent 100px),
+                              radial-gradient(circle at bottom right, var(--background-gradient-2), transparent 150px);
             color: var(--white);
             height: 100vh;
             overflow: hidden;
@@ -1159,7 +1165,7 @@
                         dot.className = 'friend-dot ' + (cached.state === 'online' ? 'online' : cached.state === 'away' ? 'away' : '');
                     });
                     document.querySelectorAll(`[data-presence-text-id="${f.id}"]`).forEach(text => {
-                        text.textContent = cached.state === 'online' ? 'Online' : (cached.state === 'away' ? `Away • ${formatRelativeTime(cached.lastMs)}` : `Offline • ${formatRelativeTime(cached.lastMs)}`);
+                        text.textContent = cached.state === 'online' ? 'Online' : (cached.state === 'away' ? `Away • ${formatRelativeTime(cached.lastMs)}` : `Offline ��� ${formatRelativeTime(cached.lastMs)}`);
                     });
                 }
             });
