@@ -538,7 +538,7 @@
         const emojiTabs = document.getElementById('emojiTabs');
         const voiceMsgBtn = document.getElementById('voiceMsgBtn');
 
-        if (backBtn) backBtn.onclick = () => { if (currentPartner) { window.location.href = 'friends.html'; } else { window.location.href = 'index.html'; } };
+        if (backBtn) backBtn.onclick = () => { if (currentPartner) { window.location.href = 'chat.html'; } else { window.location.href = 'index.html'; } };
 
         // Emoji setup with categories and ~500 emojis
         const emojiCategories = [
@@ -1085,7 +1085,7 @@
                 if (emojiPanel) emojiPanel.style.display = 'none';
             }
             const b = document.getElementById('backBtn');
-            if (b) b.title = hasPartner ? 'Back to Friends' : 'Back to Home';
+            if (b) b.title = hasPartner ? 'Back to Chat' : 'Back to Home';
         }
         const friendsMainPanel = document.getElementById('friendsMainPanel');
         const friendsMainListEl = document.getElementById('friendsMainList');
