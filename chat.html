@@ -1696,6 +1696,17 @@ backBtn.onclick = () => history.back();
             bubble.innerHTML = `${content}${summary?`<div style=\"margin-top:6px\">${summary}</div>`:''}<div class="time" style="position:relative;">${timeStr}${statusIcon}${actions}<div class="msg-menu" id="menu_${m.id}"><ul><li data-reply-id="${m.id}"><i class=\"fas fa-reply\"></i> Reply</li><li data-share-id="${m.id}"><i class=\"fas fa-share\"></i> Share</li><li data-del-id="${m.id}"><i class=\"fas fa-trash\"></i> Delete</li></ul></div></div>${picker}`;
             wrap.appendChild(bubble);
             messagesEl.appendChild(wrap);
+            try{
+                if (m.enc && m.cipher && m.iv) {
+                    const chatId = chatIdFor(currentUser.uid, currentPartner.id);
+                    const key = await getChatEncKey(chatId);
+                    if (key) {
+                        const txt = await decryptText(key, m.cipher, m.iv);
+                        const target = wrap.querySelector('.enc-text');
+                        if (target) target.textContent = txt;
+                    }
+                }
+            }catch(_){ }
         }
 
         // Optimistic message rendering (cleared on next snapshot)
