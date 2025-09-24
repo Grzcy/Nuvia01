@@ -1182,6 +1182,7 @@
                 // Listen for answer
                 unsubCallDoc = onSnapshot(callDocRef, async (docSnap) => {
                     const data = docSnap.data();
+                    console.log('CALLER: callDoc update', docSnap.id, data);
                     if (data?.answer && pc && !pc.currentRemoteDescription) {
                         const answerDesc = new RTCSessionDescription(data.answer);
                         await pc.setRemoteDescription(answerDesc);
