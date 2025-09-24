@@ -6,7 +6,6 @@
   <title>Photo Editor · Nuvia</title>
   <style>
     :root{
-      /* Fallbacks keep look consistent when theme variables are absent */
       --background-main: #0b0d17;
       --card-background: #121321;
       --header-background: #0f111a;
@@ -21,8 +20,10 @@
     }
     html, body { height: 100%; }
     body{ margin:0; background: var(--background-main, #0b0d17); color: var(--white, #fff); font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; }
+
     .app-header{ position: sticky; top:0; z-index: 3; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 16px; background: var(--header-background, #0f111a); border-bottom: 1px solid var(--border-light, rgba(255,255,255,0.12)); }
     .title{ font-family:'Poppins',sans-serif; font-weight:800; letter-spacing:-.02em; background-image: linear-gradient(90deg, var(--pink), var(--blue)); background-clip:text; -webkit-background-clip:text; color: transparent; }
+
     .toolbar{ display:flex; align-items:center; gap:10px; }
     .btn{ background: var(--button-background, linear-gradient(90deg, #00d5ff, #ff2e92)); color: var(--white, #fff); border:none; border-radius:10px; padding:8px 12px; font-weight:700; cursor:pointer; box-shadow: 0 6px 20px rgba(0,0,0,0.25); }
     .btn.secondary{ background: rgba(255,255,255,0.08); border: 1px solid var(--border-light, rgba(255,255,255,0.12)); }
@@ -30,25 +31,40 @@
     .file-input{ position: relative; overflow:hidden; display:inline-block; }
     .file-input input{ position:absolute; inset:0; opacity:0; cursor:pointer; }
 
-    .editor-wrap{ display:grid; grid-template-columns: 1fr 320px; align-items:stretch; gap:0; height: calc(100% - 58px); }
+    .editor-wrap{ display:grid; grid-template-columns: 1fr 340px; align-items:stretch; gap:0; height: calc(100% - 58px); }
     .canvas-pane{ display:flex; align-items:center; justify-content:center; background: rgba(255,255,255,0.03); border-right: 1px solid var(--border-light, rgba(255,255,255,0.12)); }
+    .canvas-box{ padding:16px; width:100%; display:flex; flex-direction:column; align-items:center; }
+    canvas{ max-width: calc(92vw - 360px); max-height: 80vh; background: rgba(0,0,0,0.2); border: 1px solid var(--border-light, rgba(255,255,255,0.12)); border-radius: 10px; display:block; }
+
     .controls-pane{ padding:14px; overflow:auto; -webkit-overflow-scrolling: touch; }
-    .canvas-box{ padding:16px; }
-    canvas{ max-width: calc(92vw - 340px); max-height: 80vh; background: rgba(0,0,0,0.2); border: 1px solid var(--border-light, rgba(255,255,255,0.12)); border-radius: 10px; display:block; }
-
-/* Prevent unintended horizontal slider drags while scrolling */
-.controls-pane input[type="range"]{ touch-action: pan-y; }
-
-    /* Smart Preview */
-    .mini-preview-group { margin-top: 6px; }
-    #miniCvs { width: 100%; height: auto; display: block; max-width: 100%; aspect-ratio: 1 / 1; background: rgba(0,0,0,0.2); border: 1px solid var(--border-light, rgba(255,255,255,0.12)); border-radius: 10px; }
-
-    .group{ margin:10px 0; }
-    .group label{ display:flex; justify-content:space-between; align-items:center; gap:10px; color: var(--white, #fff); font-size:.9rem; margin-bottom:6px; }
-    .group input[type=range], .group select{ width:100%; }
     .divider{ height:1px; background: var(--border-light, rgba(255,255,255,0.12)); margin:12px 0; }
 
-    .actions{ display:flex; justify-content:space-between; gap:10px; padding-top:6px; }
+    .value-indicator{ color: var(--text-light, rgba(255,255,255,0.8)); font-variant-numeric: tabular-nums; }
+    .range-row{ display:flex; align-items:center; gap:10px; }
+    .range-row .label-text{ flex:1; display:flex; justify-content:space-between; align-items:center; }
+    .range-row input[type="range"]{ width:100%; touch-action: pan-y; }
+
+    .accordion{ display:flex; flex-direction:column; gap:10px; }
+    .accordion-section{ background: rgba(255,255,255,0.04); border:1px solid var(--border-light, rgba(255,255,255,0.12)); border-radius: var(--radius); overflow:hidden; }
+    .accordion-header{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px; cursor:pointer; user-select:none; }
+    .accordion-title{ font-weight:800; letter-spacing:.2px; }
+    .accordion-chev{ transition: transform .2s ease; }
+    .accordion-section[aria-expanded="true"] .accordion-chev{ transform: rotate(180deg); }
+    .accordion-body{ max-height:0; overflow:hidden; transition:max-height .25s ease; border-top:1px solid var(--border-light, rgba(255,255,255,0.12)); }
+    .accordion-inner{ padding:12px; display:flex; flex-direction:column; gap:10px; }
+
+    .chip-grid{ display:grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap:8px; }
+    .chip{ display:flex; align-items:center; justify-content:center; padding:8px; border-radius:10px; background: rgba(255,255,255,0.06); border:1px solid var(--border-light, rgba(255,255,255,0.12)); cursor:pointer; font-weight:700; }
+    .chip.active{ outline:2px solid var(--blue); }
+
+    .swatch-grid{ display:grid; grid-template-columns: repeat(8, 1fr); gap:8px; }
+    .swatch{ width:28px; height:28px; border-radius:50%; border:1px solid var(--border-light, rgba(255,255,255,0.12)); cursor:pointer; box-shadow: inset 0 0 0 2px rgba(255,255,255,0.15); }
+    .swatch.selected{ outline:2px solid var(--blue); }
+
+    .inline-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+
+    .mini-preview-wrap{ margin-top: 6px; }
+    #miniCvs { width: 100%; height: auto; display: block; max-width: 100%; aspect-ratio: 1 / 1; background: rgba(0,0,0,0.2); border: 1px solid var(--border-light, rgba(255,255,255,0.12)); border-radius: 10px; }
 
     .drop-hint{ text-align:center; color: var(--text-light, rgba(255,255,255,0.8)); font-size:.9rem; margin-top:8px; }
 
@@ -81,165 +97,314 @@
       </div>
     </section>
     <aside class="controls-pane" aria-label="Editor Controls">
-      <div class="group mini-preview-group"><label>Smart Preview</label>
+      <div class="mini-preview-wrap"><label>Smart Preview</label>
         <canvas id="miniCvs" width="200" height="200" aria-label="Smart image preview"></canvas>
       </div>
-      <div class="group"><label>Aspect Ratio
-        <select id="ctlAspect">
-          <option value="original">Original</option>
-          <option value="1:1">1:1 Square</option>
-          <option value="4:5">4:5 Portrait</option>
-          <option value="16:9">16:9 Landscape</option>
-          <option value="9:16">9:16 Story</option>
-        </select></label>
-      </div>
-      <div class="group"><label><span>Zoom</span><span id="valZoom">1.00x</span></label><input id="ctlZoom" type="range" min="1" max="3" step="0.01" value="1"></div>
-      <div class="group"><label><span>Offset X</span><span id="valOffX">0</span></label><input id="ctlOffX" type="range" min="-1" max="1" step="0.01" value="0"></div>
-      <div class="group"><label><span>Offset Y</span><span id="valOffY">0</span></label><input id="ctlOffY" type="range" min="-1" max="1" step="0.01" value="0"></div>
-      <div class="group"><label><span>Rotate</span><span id="valRot">0°</span></label><input id="ctlRot" type="range" min="-45" max="45" step="1" value="0"></div>
-      <div class="divider"></div>
-      <div class="group"><label><span>Brightness</span><span id="valBright">100%</span></label><input id="ctlBright" type="range" min="50" max="200" step="1" value="100"></div>
-      <div class="group"><label><span>Contrast</span><span id="valContrast">100%</span></label><input id="ctlContrast" type="range" min="50" max="200" step="1" value="100"></div>
-      <div class="group"><label><span>Saturation</span><span id="valSat">100%</span></label><input id="ctlSat" type="range" min="0" max="200" step="1" value="100"></div>
-      <div class="group"><label><span>Hue</span><span id="valHue">0°</span></label><input id="ctlHue" type="range" min="-180" max="180" step="1" value="0"></div>
-      <div class="group"><label><span>Sepia</span><span id="valSepia">0%</span></label><input id="ctlSepia" type="range" min="0" max="100" step="1" value="0"></div>
-      <div class="group"><label><span>Grayscale</span><span id="valGray">0%</span></label><input id="ctlGray" type="range" min="0" max="100" step="1" value="0"></div>
-      <div class="group"><label><span>Blur</span><span id="valBlur">0px</span></label><input id="ctlBlur" type="range" min="0" max="8" step="0.25" value="0"></div>
-      <div class="group"><label>Frame
-        <select id="ctlFrame">
-          <option value="none">None</option>
-          <option value="soft">Soft Border</option>
-          <option value="neon">Neon Glow</option>
-          <option value="vignette">Vignette</option>
-        </select></label>
-      </div>
-      <div class="divider"></div>
-      <div class="group">
-        <label>Smart Tools</label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button id="autoEnhanceBtn" class="btn secondary" type="button">Auto Enhance</button>
-          <button id="smartCenterBtn" class="btn secondary" type="button">Smart Center</button>
-          <button id="flipHBtn" class="btn secondary" type="button">Flip H</button>
-          <button id="flipVBtn" class="btn secondary" type="button">Flip V</button>
-        </div>
-      </div>
-      <div class="group"><label><span>Sharpen</span><span id="valSharp">0</span></label><input id="ctlSharp" type="range" min="0" max="1" step="0.05" value="0"></div>
-      <div class="group">
-        <label style="display:flex;align-items:center;gap:8px"><input id="ctlBgEnable" type="checkbox"> Remove Background</label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
-          <button id="bgPickBtn" class="btn secondary" type="button">Pick Color</button>
-          <label style="display:flex;align-items:center;gap:8px"><span>Tolerance</span><input id="ctlBgTol" type="range" min="0" max="100" step="1" value="20"><span id="valBgTol">20</span></label>
-        </div>
-      </div>
-      <div class="actions">
-        <button id="resetBtn" class="btn secondary" aria-label="Reset">Reset</button>
-        <div style="display:flex;gap:8px">
-          <button id="useOriginalBtn" class="btn secondary" aria-label="Use Original">Use Original</button>
-          <button id="applyBtn" class="btn" aria-label="Apply">Apply</button>
-        </div>
+
+      <div class="accordion" id="controlsAccordion">
+        <section class="accordion-section" data-section="composition" aria-expanded="true">
+          <div class="accordion-header" role="button" tabindex="0" aria-controls="accBodyComposition" aria-expanded="true">
+            <div class="accordion-title">Composition</div>
+            <div class="accordion-chev">▼</div>
+          </div>
+          <div class="accordion-body" id="accBodyComposition" style="max-height: 800px;">
+            <div class="accordion-inner">
+              <label>Aspect Ratio
+                <select id="ctlAspect">
+                  <option value="original">Original</option>
+                  <option value="1:1">1:1 Square</option>
+                  <option value="4:5">4:5 Portrait</option>
+                  <option value="16:9">16:9 Landscape</option>
+                  <option value="9:16">9:16 Story</option>
+                </select>
+              </label>
+              <div class="range-row"><div class="label-text"><span>Zoom</span><span class="value-indicator" id="valZoom">1.00x</span></div><input id="ctlZoom" type="range" min="1" max="3" step="0.01" value="1"></div>
+              <div class="range-row"><div class="label-text"><span>Offset X</span><span class="value-indicator" id="valOffX">0</span></div><input id="ctlOffX" type="range" min="-1" max="1" step="0.01" value="0"></div>
+              <div class="range-row"><div class="label-text"><span>Offset Y</span><span class="value-indicator" id="valOffY">0</span></div><input id="ctlOffY" type="range" min="-1" max="1" step="0.01" value="0"></div>
+              <div class="range-row"><div class="label-text"><span>Rotate</span><span class="value-indicator" id="valRot">0°</span></div><input id="ctlRot" type="range" min="-45" max="45" step="1" value="0"></div>
+              <div class="inline-actions">
+                <button id="smartCenterBtn" class="btn secondary" type="button">Smart Center</button>
+                <button id="flipHBtn" class="btn secondary" type="button">Flip H</button>
+                <button id="flipVBtn" class="btn secondary" type="button">Flip V</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="accordion-section" data-section="adjustments" aria-expanded="false">
+          <div class="accordion-header" role="button" tabindex="0" aria-controls="accBodyAdjust" aria-expanded="false">
+            <div class="accordion-title">Adjustments</div>
+            <div class="accordion-chev">▼</div>
+          </div>
+          <div class="accordion-body" id="accBodyAdjust">
+            <div class="accordion-inner">
+              <div class="inline-actions"><button id="autoEnhanceBtn" class="btn secondary" type="button">Auto Enhance</button></div>
+              <div class="range-row"><div class="label-text"><span>Brightness</span><span class="value-indicator" id="valBright">100%</span></div><input id="ctlBright" type="range" min="50" max="200" step="1" value="100"></div>
+              <div class="range-row"><div class="label-text"><span>Contrast</span><span class="value-indicator" id="valContrast">100%</span></div><input id="ctlContrast" type="range" min="50" max="200" step="1" value="100"></div>
+              <div class="range-row"><div class="label-text"><span>Saturation</span><span class="value-indicator" id="valSat">100%</span></div><input id="ctlSat" type="range" min="0" max="200" step="1" value="100"></div>
+              <div class="range-row"><div class="label-text"><span>Hue</span><span class="value-indicator" id="valHue">0°</span></div><input id="ctlHue" type="range" min="-180" max="180" step="1" value="0"></div>
+              <div class="range-row"><div class="label-text"><span>Sepia</span><span class="value-indicator" id="valSepia">0%</span></div><input id="ctlSepia" type="range" min="0" max="100" step="1" value="0"></div>
+              <div class="range-row"><div class="label-text"><span>Grayscale</span><span class="value-indicator" id="valGray">0%</span></div><input id="ctlGray" type="range" min="0" max="100" step="1" value="0"></div>
+              <div class="range-row"><div class="label-text"><span>Blur</span><span class="value-indicator" id="valBlur">0px</span></div><input id="ctlBlur" type="range" min="0" max="8" step="0.25" value="0"></div>
+              <div class="range-row"><div class="label-text"><span>Sharpen</span><span class="value-indicator" id="valSharp">0</span></div><input id="ctlSharp" type="range" min="0" max="1" step="0.05" value="0"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="accordion-section" data-section="filters" aria-expanded="false">
+          <div class="accordion-header" role="button" tabindex="0" aria-controls="accBodyFilters" aria-expanded="false">
+            <div class="accordion-title">Filters</div>
+            <div class="accordion-chev">▼</div>
+          </div>
+          <div class="accordion-body" id="accBodyFilters">
+            <div class="accordion-inner">
+              <label>Preset
+                <select id="ctlPreset">
+                  <option value="none">None</option>
+                  <option value="vivid">Vivid</option>
+                  <option value="vividWarm">Vivid Warm</option>
+                  <option value="vividCool">Vivid Cool</option>
+                  <option value="dramatic">Dramatic</option>
+                  <option value="dramaticWarm">Dramatic Warm</option>
+                  <option value="dramaticCool">Dramatic Cool</option>
+                  <option value="mono">Mono</option>
+                  <option value="silvertone">Silvertone</option>
+                  <option value="noir">Noir</option>
+                </select>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section class="accordion-section" data-section="focus" aria-expanded="false">
+          <div class="accordion-header" role="button" tabindex="0" aria-controls="accBodyFocus" aria-expanded="false">
+            <div class="accordion-title">Focus & Depth</div>
+            <div class="accordion-chev">▼</div>
+          </div>
+          <div class="accordion-body" id="accBodyFocus">
+            <div class="accordion-inner">
+              <label class="inline-actions"><input id="ctlFocusEnable" type="checkbox"> Enable Focus Blur</label>
+              <label>Mode
+                <select id="ctlFocusMode">
+                  <option value="radial">Radial</option>
+                  <option value="linear">Linear (Tilt‑Shift)</option>
+                </select>
+              </label>
+              <div class="range-row"><div class="label-text"><span>Strength</span><span class="value-indicator" id="valFocusAmt">6px</span></div><input id="ctlFocusAmt" type="range" min="0" max="16" step="0.5" value="6"></div>
+              <div class="range-row"><div class="label-text"><span>Size</span><span class="value-indicator" id="valFocusSize">0.5</span></div><input id="ctlFocusSize" type="range" min="0.1" max="1" step="0.05" value="0.5"></div>
+              <div class="range-row" id="focusAngleWrap" style="display:none"><div class="label-text"><span>Angle</span><span class="value-indicator" id="valFocusAngle">0°</span></div><input id="ctlFocusAngle" type="range" min="-90" max="90" step="1" value="0"></div>
+              <div class="inline-actions">
+                <button id="placeFocusBtn" class="btn secondary" type="button">Set Focus Center</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="accordion-section" data-section="frames" aria-expanded="false">
+          <div class="accordion-header" role="button" tabindex="0" aria-controls="accBodyFrames" aria-expanded="false">
+            <div class="accordion-title">Frames</div>
+            <div class="accordion-chev">▼</div>
+          </div>
+          <div class="accordion-body" id="accBodyFrames">
+            <div class="accordion-inner">
+              <label>Frame Style
+                <select id="ctlFrame">
+                  <option value="none">None</option>
+                  <option value="soft">Soft Border</option>
+                  <option value="neon">Neon Glow</option>
+                  <option value="vignette">Vignette</option>
+                  <option value="white">Classic White</option>
+                  <option value="black">Bold Black</option>
+                  <option value="rounded">Rounded Corners</option>
+                  <option value="circle">Circle Border</option>
+                  <option value="polaroid">Polaroid</option>
+                  <option value="film">Film Strip</option>
+                  <option value="gold">Gold Luxe</option>
+                  <option value="shadow">Drop Shadow</option>
+                  <option value="gradient">Gradient Edge</option>
+                </select>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section class="accordion-section" data-section="eyes" aria-expanded="false">
+          <div class="accordion-header" role="button" tabindex="0" aria-controls="accBodyEyes" aria-expanded="false">
+            <div class="accordion-title">Eye Color</div>
+            <div class="accordion-chev">▼</div>
+          </div>
+          <div class="accordion-body" id="accBodyEyes">
+            <div class="accordion-inner">
+              <label class="inline-actions"><input id="ctlEyesEnable" type="checkbox"> Enable Eye Color</label>
+              <div class="swatch-grid" id="eyeSwatches" aria-label="Eye colors"></div>
+              <div class="range-row"><div class="label-text"><span>Iris Size</span><span class="value-indicator" id="valEyeSize">40px</span></div><input id="ctlEyeSize" type="range" min="20" max="80" step="1" value="40"></div>
+              <div class="inline-actions">
+                <button id="placeLeftEyeBtn" class="btn secondary" type="button">Place Left Eye</button>
+                <button id="placeRightEyeBtn" class="btn secondary" type="button">Place Right Eye</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="accordion-section" data-section="background" aria-expanded="false">
+          <div class="accordion-header" role="button" tabindex="0" aria-controls="accBodyBg" aria-expanded="false">
+            <div class="accordion-title">Background</div>
+            <div class="accordion-chev">▼</div>
+          </div>
+          <div class="accordion-body" id="accBodyBg">
+            <div class="accordion-inner">
+              <label class="inline-actions"><input id="ctlBgEnable" type="checkbox"> Remove Background</label>
+              <div class="inline-actions">
+                <button id="bgPickBtn" class="btn secondary" type="button">Pick Color</button>
+                <div class="range-row" style="flex:1"><div class="label-text"><span>Tolerance</span><span class="value-indicator" id="valBgTol">20</span></div><input id="ctlBgTol" type="range" min="0" max="100" step="1" value="20"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="accordion-section" data-section="actions" aria-expanded="false">
+          <div class="accordion-header" role="button" tabindex="0" aria-controls="accBodyActions" aria-expanded="false">
+            <div class="accordion-title">Actions</div>
+            <div class="accordion-chev">▼</div>
+          </div>
+          <div class="accordion-body" id="accBodyActions">
+            <div class="accordion-inner">
+              <div class="inline-actions">
+                <button id="resetBtn" class="btn secondary" aria-label="Reset">Reset</button>
+                <button id="useOriginalBtn" class="btn secondary" aria-label="Use Original">Use Original</button>
+                <button id="applyBtn" class="btn" aria-label="Apply">Apply</button>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </aside>
   </main>
 
   <script>
   (function(){
+    function initAccordion(){
+      const sections = document.querySelectorAll('.accordion-section');
+      sections.forEach(sec=>{
+        const header = sec.querySelector('.accordion-header');
+        const body = sec.querySelector('.accordion-body');
+        function setExpanded(exp){ sec.setAttribute('aria-expanded', exp ? 'true' : 'false'); body.style.maxHeight = exp ? body.scrollHeight + 'px' : '0px'; }
+        const expanded = sec.getAttribute('aria-expanded') === 'true'; setExpanded(expanded);
+        header.addEventListener('click', ()=> setExpanded(sec.getAttribute('aria-expanded')!== 'true'));
+        header.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); setExpanded(sec.getAttribute('aria-expanded')!== 'true'); }});
+        window.addEventListener('resize', ()=>{ if(sec.getAttribute('aria-expanded')==='true'){ body.style.maxHeight = body.scrollHeight + 'px'; }});
+      });
+    }
+
     function setupSmartTouchRanges(){ try{ const ranges = document.querySelectorAll('.controls-pane input[type="range"]'); ranges.forEach(el=>{
       el.addEventListener('pointerdown', (e)=>{ el._sx=e.clientX; el._sy=e.clientY; el._ignore=false; try{ el.setPointerCapture && el.setPointerCapture(e.pointerId);}catch(_){} });
       el.addEventListener('pointermove', (e)=>{ if(el._sx==null) return; const dx=Math.abs(e.clientX-el._sx||0), dy=Math.abs(e.clientY-el._sy||0); if(!el._ignore && dy>dx+6){ el._ignore=true; } });
       el.addEventListener('pointerup', ()=>{ el._sx=null; el._sy=null; setTimeout(()=>{ el._ignore=false; },0); });
       el.addEventListener('pointercancel', ()=>{ el._sx=null; el._sy=null; el._ignore=false; });
-    }); }catch(_){}}
+    }); }catch(_){} }
+
     let cvs = document.getElementById('cvs');
     let ctx = cvs.getContext('2d');
     const mini = document.getElementById('miniCvs');
     const miniCtx = mini.getContext('2d');
-    let img = null; let originalDataUrl = null; let contextName = 'standalone';
-    const s = { aspect:'original', zoom:1, offX:0, offY:0, rot:0, bright:100, contrast:100, sat:100, hue:0, sepia:0, gray:0, blur:0, frame:'none', mime:'image/jpeg', flipX:false, flipY:false, sharp:0, bg:{enabled:false, tol:20, key:null, picking:false} };
+    let img = null; let originalDataUrl = null;
+
+    const s = { aspect:'original', zoom:1, offX:0, offY:0, rot:0, bright:100, contrast:100, sat:100, hue:0, sepia:0, gray:0, blur:0, frame:'none', mime:'image/jpeg', flipX:false, flipY:false, sharp:0,
+      bg:{enabled:false, tol:20, key:null, picking:false},
+      preset:'none',
+      focus:{enabled:false, mode:'radial', amt:6, size:0.5, angle:0, placing:false, cx:0.5, cy:0.5},
+      eyes:{enabled:false, color:'#3aa6ff', size:40, placing:null, left:{x:0.35, y:0.45}, right:{x:0.65, y:0.45}}
+    };
 
     function $(id){ return document.getElementById(id); }
     function cssVar(name){ try{ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }catch(_){ return ''; } }
 
-    function setDefaults(){ s.aspect='original'; s.zoom=1; s.offX=0; s.offY=0; s.rot=0; s.bright=100; s.contrast=100; s.sat=100; s.hue=0; s.sepia=0; s.gray=0; s.blur=0; s.frame='none'; s.flipX=false; s.flipY=false; s.sharp=0; s.bg={enabled:false, tol:20, key:null, picking:false};
+    function setDefaults(){ s.aspect='original'; s.zoom=1; s.offX=0; s.offY=0; s.rot=0; s.bright=100; s.contrast=100; s.sat=100; s.hue=0; s.sepia=0; s.gray=0; s.blur=0; s.frame='none'; s.flipX=false; s.flipY=false; s.sharp=0; s.bg={enabled:false, tol:20, key:null, picking:false}; s.preset='none'; s.focus={enabled:false, mode:'radial', amt:6, size:0.5, angle:0, placing:false, cx:0.5, cy:0.5}; s.eyes={enabled:false, color:'#3aa6ff', size:40, placing:null, left:{x:0.35,y:0.45}, right:{x:0.65,y:0.45}};
       $('ctlAspect').value='original'; $('ctlZoom').value=1; $('ctlOffX').value=0; $('ctlOffY').value=0; $('ctlRot').value=0; $('ctlBright').value=100; $('ctlContrast').value=100; $('ctlSat').value=100; $('ctlHue').value=0; $('ctlSepia').value=0; $('ctlGray').value=0; $('ctlBlur').value=0;
       $('valZoom').textContent='1.00x'; $('valOffX').textContent='0'; $('valOffY').textContent='0'; $('valRot').textContent='0°'; $('valBright').textContent='100%'; $('valContrast').textContent='100%'; $('valSat').textContent='100%'; $('valHue').textContent='0°'; $('valSepia').textContent='0%'; $('valGray').textContent='0%'; $('valBlur').textContent='0px'; $('ctlFrame').value='none';
       const sh=$('ctlSharp'), vsh=$('valSharp'); if(sh&&vsh){ sh.value=0; vsh.textContent='0'; }
       const be=$('ctlBgEnable'), bt=$('ctlBgTol'), vbt=$('valBgTol'); if(be&&bt&&vbt){ be.checked=false; bt.value=20; vbt.textContent='20'; }
+      const ce=$('ctlEyesEnable'), es=$('ctlEyeSize'), ves=$('valEyeSize'); if(ce&&es&&ves){ ce.checked=false; es.value=40; ves.textContent='40px'; }
+      const pr=$('ctlPreset'); if(pr) pr.value='none';
+      const fe=$('ctlFocusEnable'), fm=$('ctlFocusMode'), fa=$('ctlFocusAmt'), fs=$('ctlFocusSize'), fang=$('ctlFocusAngle'), vfa=$('valFocusAmt'), vfs=$('valFocusSize'), vfang=$('valFocusAngle');
+      if(fe&&fm&&fa&&fs&&fang&&vfa&&vfs&&vfang){ fe.checked=false; fm.value='radial'; fa.value=6; fs.value=0.5; fang.value=0; vfa.textContent='6px'; vfs.textContent='0.5'; vfang.textContent='0°'; }
+      const aw=$('focusAngleWrap'); if(aw) aw.style.display='none';
     }
 
     function getAspect(aspect, iw, ih){ if(aspect==='1:1') return [1,1]; if(aspect==='4:5') return [4,5]; if(aspect==='16:9') return [16,9]; if(aspect==='9:16') return [9,16]; return [iw,ih]; }
 
-    function setCanvasSize(){ const wrap = cvs.parentElement; const maxW = Math.min(1000, wrap.clientWidth-4); const maxH = Math.min(800, window.innerHeight*0.8);
-      const [aw,ah] = getAspect(s.aspect, img?img.naturalWidth:1, img?img.naturalHeight:1);
-      let w = maxW, h = w*ah/aw; if(h>maxH){ h = maxH; w = h*aw/ah; }
-      cvs.width = Math.max(200, Math.floor(w)); cvs.height = Math.max(200, Math.floor(h));
-    }
+    function setCanvasSize(){ const wrap = cvs.parentElement; const maxW = Math.min(1200, wrap.clientWidth-4); const maxH = Math.min(900, Math.floor(window.innerHeight*0.8)); const [aw,ah] = getAspect(s.aspect, img?img.naturalWidth:1, img?img.naturalHeight:1); let w = maxW, h = w*ah/aw; if(h>maxH){ h = maxH; w = h*aw/ah; } cvs.width = Math.max(200, Math.floor(w)); cvs.height = Math.max(200, Math.floor(h)); }
+
+    function drawEyesOverlay(){ if(!img) return; if(!(s.eyes && s.eyes.enabled)) return; const w=cvs.width, h=cvs.height; const r = s.eyes.size/2; const color = s.eyes.color; function drawIris(norm){ const x=norm.x*w, y=norm.y*h; const g = ctx.createRadialGradient(x, y, r*0.1, x, y, r); g.addColorStop(0, color + ''); g.addColorStop(1, 'rgba(0,0,0,0)'); ctx.save(); ctx.globalCompositeOperation = 'soft-light'; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill(); ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = Math.max(1, r*0.08); ctx.beginPath(); ctx.arc(x, y, r*0.55, 0, Math.PI*2); ctx.stroke(); ctx.restore(); } drawIris(s.eyes.left); drawIris(s.eyes.right); }
+
+    function drawFrame(w,h){ const lineUnit = Math.max(6, Math.floor(Math.min(w,h)*0.02)); if(s.frame==='soft'){ ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = lineUnit; ctx.strokeRect(ctx.lineWidth/2, ctx.lineWidth/2, w-ctx.lineWidth, h-ctx.lineWidth); } else if(s.frame==='neon'){ const g = ctx.createLinearGradient(0,0,w,0); g.addColorStop(0, cssVar('--blue')||'#00d5ff'); g.addColorStop(1, cssVar('--pink')||'#ff2e92'); ctx.strokeStyle = g; ctx.shadowColor = 'rgba(255,255,255,0.35)'; ctx.shadowBlur = 16; ctx.lineWidth = Math.max(8, Math.floor(Math.min(w,h)*0.025)); ctx.strokeRect(ctx.lineWidth/2, ctx.lineWidth/2, w-ctx.lineWidth, h-ctx.lineWidth); ctx.shadowBlur = 0; } else if(s.frame==='vignette'){ const rg = ctx.createRadialGradient(w/2,h/2, Math.min(w,h)*0.4, w/2,h/2, Math.max(w,h)*0.7); rg.addColorStop(0,'rgba(0,0,0,0)'); rg.addColorStop(1,'rgba(0,0,0,0.35)'); ctx.fillStyle = rg; ctx.fillRect(0,0,w,h); } else if(s.frame==='white'){ ctx.strokeStyle = '#fff'; ctx.lineWidth = Math.max(10, Math.floor(Math.min(w,h)*0.03)); ctx.strokeRect(ctx.lineWidth/2, ctx.lineWidth/2, w-ctx.lineWidth, h-ctx.lineWidth); } else if(s.frame==='black'){ ctx.strokeStyle = '#000'; ctx.globalAlpha = 0.75; ctx.lineWidth = Math.max(12, Math.floor(Math.min(w,h)*0.035)); ctx.strokeRect(ctx.lineWidth/2, ctx.lineWidth/2, w-ctx.lineWidth, h-ctx.lineWidth); ctx.globalAlpha = 1; } else if(s.frame==='rounded'){ const r = Math.max(18, Math.floor(Math.min(w,h)*0.06)); ctx.lineWidth = Math.max(8, Math.floor(Math.min(w,h)*0.025)); ctx.strokeStyle = 'rgba(255,255,255,0.8)'; ctx.beginPath(); const lw=ctx.lineWidth/2; roundedRect(ctx, lw, lw, w-ctx.lineWidth, h-ctx.lineWidth, r); ctx.stroke(); } else if(s.frame==='circle'){ const r = Math.min(w,h)/2 - Math.max(8, Math.floor(Math.min(w,h)*0.02)); ctx.save(); ctx.beginPath(); ctx.arc(w/2,h/2,r,0,Math.PI*2); ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = Math.max(10, Math.floor(Math.min(w,h)*0.03)); ctx.stroke(); ctx.restore(); } else if(s.frame==='polaroid'){ const pad = Math.floor(Math.min(w,h)*0.06); const bottom = Math.floor(pad*1.6); ctx.fillStyle = '#fff'; ctx.fillRect(pad, pad, w-pad*2, h-pad*2); ctx.save(); ctx.beginPath(); ctx.rect(pad*1.5, pad*1.5, w-pad*3, h-pad*3-bottom); ctx.clip(); ctx.globalCompositeOperation='destination-over'; ctx.fillStyle='#000'; ctx.fillRect(0,0,w,h); ctx.restore(); } else if(s.frame==='film'){ const edge = Math.max(16, Math.floor(Math.min(w,h)*0.06)); ctx.fillStyle = '#111'; ctx.fillRect(0,0,w,edge); ctx.fillRect(0,h-edge,w,edge); const holes = 10; const gap = (w-40)/holes; ctx.fillStyle = '#eee'; for(let i=0;i<holes;i++){ ctx.fillRect(20+i*gap, 6, gap*0.35, edge-12); ctx.fillRect(20+i*gap, h-edge+6, gap*0.35, edge-12); } } else if(s.frame==='gold'){ const g = ctx.createLinearGradient(0,0,w,h); g.addColorStop(0,'#b8860b'); g.addColorStop(0.5,'#ffd700'); g.addColorStop(1,'#b8860b'); ctx.strokeStyle=g; ctx.lineWidth = Math.max(12, Math.floor(Math.min(w,h)*0.035)); ctx.strokeRect(ctx.lineWidth/2, ctx.lineWidth/2, w-ctx.lineWidth, h-ctx.lineWidth); } else if(s.frame==='shadow'){ ctx.save(); ctx.shadowColor='rgba(0,0,0,0.6)'; ctx.shadowBlur = Math.max(14, Math.floor(Math.min(w,h)*0.05)); ctx.shadowOffsetX=0; ctx.shadowOffsetY=0; ctx.strokeStyle='rgba(255,255,255,0.0)'; ctx.lineWidth=2; ctx.strokeRect(2,2,w-4,h-4); ctx.restore(); } else if(s.frame==='gradient'){ const g = ctx.createLinearGradient(0,0,0,h); g.addColorStop(0, cssVar('--blue')||'#00d5ff'); g.addColorStop(1, cssVar('--pink')||'#ff2e92'); ctx.lineWidth = Math.max(10, Math.floor(Math.min(w,h)*0.03)); ctx.strokeStyle = g; ctx.strokeRect(ctx.lineWidth/2, ctx.lineWidth/2, w-ctx.lineWidth, h-ctx.lineWidth); } }
+
+    function roundedRect(c,x,y,w,h,r){ c.moveTo(x+r, y); c.lineTo(x+w-r, y); c.quadraticCurveTo(x+w, y, x+w, y+r); c.lineTo(x+w, y+h-r); c.quadraticCurveTo(x+w, y+h, x+w-r, y+h); c.lineTo(x+r, y+h); c.quadraticCurveTo(x, y+h, x, y+h-r); c.lineTo(x, y+r); c.quadraticCurveTo(x, y, x+r, y); }
 
     function render(){ if(!img){ miniCtx.clearRect(0,0,mini.width,mini.height); return; } setCanvasSize(); const w=cvs.width, h=cvs.height; ctx.clearRect(0,0,w,h);
-      const iw=img.naturalWidth, ih=img.naturalHeight; const [aw,ah] = getAspect(s.aspect, iw, ih);
-      const scaleBase = Math.max(w/iw, h/ih); const scale = scaleBase * s.zoom; const drawW = iw*scale, drawH=ih*scale;
-      const cx = w/2 + s.offX*(drawW-w)/2; const cy = h/2 + s.offY*(drawH-h)/2;
-      ctx.save(); ctx.translate(w/2,h/2); ctx.scale(s.flipX?-1:1, s.flipY?-1:1); ctx.rotate(s.rot*Math.PI/180); ctx.translate(-w/2,-h/2);
-      ctx.filter = `brightness(${s.bright}%) contrast(${s.contrast}%) saturate(${s.sat}%) hue-rotate(${s.hue}deg) sepia(${s.sepia}%) grayscale(${s.gray}%) blur(${s.blur}px)`;
-      const dx = cx - drawW/2, dy = cy - drawH/2; ctx.drawImage(img, dx, dy, drawW, drawH);
-      ctx.filter = 'none';
-      ctx.restore();
+      const iw=img.naturalWidth, ih=img.naturalHeight; const [aw,ah] = getAspect(s.aspect, iw, ih); const scaleBase = Math.max(w/iw, h/ih); const scale = scaleBase * s.zoom; const drawW = iw*scale, drawH=ih*scale; const cx = w/2 + s.offX*(drawW-w)/2; const cy = h/2 + s.offY*(drawH-h)/2;
+      ctx.save(); ctx.translate(w/2,h/2); ctx.scale(s.flipX?-1:1, s.flipY?-1:1); ctx.rotate(s.rot*Math.PI/180); ctx.translate(-w/2,-h/2); ctx.filter = `brightness(${s.bright}%) contrast(${s.contrast}%) saturate(${s.sat}%) hue-rotate(${s.hue}deg) sepia(${s.sepia}%) grayscale(${s.gray}%) blur(${s.blur}px)`; const dx = cx - drawW/2, dy = cy - drawH/2; ctx.drawImage(img, dx, dy, drawW, drawH); ctx.filter = 'none'; ctx.restore();
+
       if(s.sharp>0 || (s.bg && s.bg.enabled && s.bg.key)){
-        try{
-          const id = ctx.getImageData(0,0,w,h); const d=id.data; const out = new Uint8ClampedArray(d); const a = Math.min(1, Math.max(0, s.sharp||0));
-          const thr = (s.bg && s.bg.enabled && s.bg.tol!=null) ? Math.pow((s.bg.tol/100)*255, 2) : -1;
-          const key = (s.bg && s.bg.key) ? s.bg.key : null;
-          if(a>0){ const w4=w*4; for(let y=1;y<h-1;y++){ for(let x=1;x<w-1;x++){ const i=(y*w+x)*4;
-              let r=0,g=0,b=0; const nn=[-w-1,-w,-w+1,-1,0,1,w-1,w,w+1]; const kc=[-1,-1,-1,-1,1+8,-1,-1,-1,-1];
-              for(let k=0;k<9;k++){ const j=(i + nn[k]*4); r += d[j]*kc[k]; g += d[j+1]*kc[k]; b += d[j+2]*kc[k]; }
-              out[i]   = Math.max(0, Math.min(255, d[i]   + a*(r - d[i])));
-              out[i+1] = Math.max(0, Math.min(255, d[i+1] + a*(g - d[i+1])));
-              out[i+2] = Math.max(0, Math.min(255, d[i+2] + a*(b - d[i+2])));
-          }} }
-          if(key && thr>=0){ for(let i=0;i<d.length;i+=4){ const dr=d[i]-key.r, dg=d[i+1]-key.g, db=d[i+2]-key.b; if((dr*dr+dg*dg+db*db)<=thr){ out[i+3]=0; } }
-            if(s.bg.enabled) s.mime='image/png';
+        try{ const id = ctx.getImageData(0,0,w,h); const d=id.data; const out = new Uint8ClampedArray(d); const a = Math.min(1, Math.max(0, s.sharp||0)); const thr = (s.bg && s.bg.enabled && s.bg.tol!=null) ? Math.pow((s.bg.tol/100)*255, 2) : -1; const key = (s.bg && s.bg.key) ? s.bg.key : null; if(a>0){ for(let y=1;y<h-1;y++){ for(let x=1;x<w-1;x++){ const i=(y*w+x)*4; let r=0,g=0,b=0; const nn=[-w-1,-w,-w+1,-1,0,1,w-1,w,w+1]; const kc=[-1,-1,-1,-1,1+8,-1,-1,-1,-1]; for(let k=0;k<9;k++){ const j=(i + nn[k]*4); r += d[j]*kc[k]; g += d[j+1]*kc[k]; b += d[j+2]*kc[k]; } out[i]   = Math.max(0, Math.min(255, d[i]   + a*(r - d[i]))); out[i+1] = Math.max(0, Math.min(255, d[i+1] + a*(g - d[i+1]))); out[i+2] = Math.max(0, Math.min(255, d[i+2] + a*(b - d[i+2]))); }} } if(key && thr>=0){ for(let i=0;i<d.length;i+=4){ const dr=d[i]-key.r, dg=d[i+1]-key.g, db=d[i+2]-key.b; if((dr*dr+dg*dg+db*db)<=thr){ out[i+3]=0; } } if(s.bg.enabled) s.mime='image/png'; } id.data.set(out); ctx.putImageData(id,0,0); }catch(_){ }
+      }
+
+      if(s.focus && s.focus.enabled && s.focus.amt>0){
+        try{ const off = document.createElement('canvas'); off.width=w; off.height=h; const ox = off.getContext('2d'); ox.filter = `blur(${s.focus.amt}px)`; ox.drawImage(cvs, 0, 0); ox.filter='none';
+          const mask = document.createElement('canvas'); mask.width=w; mask.height=h; const mx = mask.getContext('2d'); mx.clearRect(0,0,w,h); mx.save();
+          if(s.focus.mode==='radial'){
+            const r = Math.max(w,h) * Math.max(0.05, s.focus.size*0.5);
+            const g = mx.createRadialGradient(s.focus.cx*w, s.focus.cy*h, r*0.6, s.focus.cx*w, s.focus.cy*h, r);
+            g.addColorStop(0, 'rgba(255,255,255,0)');
+            g.addColorStop(0.9, 'rgba(255,255,255,0)');
+            g.addColorStop(1, 'rgba(255,255,255,1)');
+            mx.fillStyle = g; mx.fillRect(0,0,w,h);
+          } else { // linear tilt‑shift
+            const band = Math.max(40, Math.min(w,h) * s.focus.size);
+            mx.translate(s.focus.cx*w, s.focus.cy*h); mx.rotate(s.focus.angle * Math.PI/180); mx.translate(-s.focus.cx*w, -s.focus.cy*h);
+            const g = mx.createLinearGradient(0,0,0,h);
+            const y1 = Math.max(0, s.focus.cy*h - band/2) / h;
+            const y0 = Math.max(0, s.focus.cy*h - band) / h;
+            const y2 = Math.min(h, s.focus.cy*h + band/2) / h;
+            const y3 = Math.min(h, s.focus.cy*h + band) / h;
+            g.addColorStop(0, 'rgba(255,255,255,1)');
+            g.addColorStop(y0, 'rgba(255,255,255,1)');
+            g.addColorStop(y1, 'rgba(255,255,255,0)');
+            g.addColorStop(y2, 'rgba(255,255,255,0)');
+            g.addColorStop(y3, 'rgba(255,255,255,1)');
+            g.addColorStop(1, 'rgba(255,255,255,1)');
+            mx.fillStyle = g; mx.fillRect(0,0,w,h);
+            mx.setTransform(1,0,0,1,0,0);
           }
-          id.data.set(out); ctx.putImageData(id,0,0);
+          mx.restore();
+
+          // Apply mask to blurred offscreen
+          ox.globalCompositeOperation = 'destination-in';
+          ox.drawImage(mask, 0, 0);
+          ox.globalCompositeOperation = 'source-over';
+          ctx.drawImage(off, 0, 0);
         }catch(_){ }
       }
-      if(s.frame==='soft'){
-        ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = Math.max(6, Math.floor(Math.min(w,h)*0.02)); ctx.strokeRect(ctx.lineWidth/2, ctx.lineWidth/2, w-ctx.lineWidth, h-ctx.lineWidth);
-      } else if(s.frame==='neon'){
-        const g = ctx.createLinearGradient(0,0,w,0); g.addColorStop(0, cssVar('--blue')||'#00d5ff'); g.addColorStop(1, cssVar('--pink')||'#ff2e92');
-        ctx.strokeStyle = g; ctx.shadowColor = 'rgba(255,255,255,0.35)'; ctx.shadowBlur = 16; ctx.lineWidth = Math.max(8, Math.floor(Math.min(w,h)*0.025)); ctx.strokeRect(ctx.lineWidth/2, ctx.lineWidth/2, w-ctx.lineWidth, h-ctx.lineWidth); ctx.shadowBlur = 0;
-      } else if(s.frame==='vignette'){
-        const rg = ctx.createRadialGradient(w/2,h/2, Math.min(w,h)*0.4, w/2,h/2, Math.max(w,h)*0.7); rg.addColorStop(0,'rgba(0,0,0,0)'); rg.addColorStop(1,'rgba(0,0,0,0.35)'); ctx.fillStyle = rg; ctx.fillRect(0,0,w,h);
-      }
+
+      drawEyesOverlay();
+      drawFrame(w,h);
       renderMini();
     }
 
-    function renderMini(){ if(!img){ miniCtx.clearRect(0,0,mini.width,mini.height); return; }
-      const mw = mini.width, mh = mini.height; miniCtx.clearRect(0,0,mw,mh);
-      const iw=img.naturalWidth, ih=img.naturalHeight; const scaleBase = Math.max(mw/iw, mh/ih); const scale = scaleBase * s.zoom; const drawW = iw*scale, drawH=ih*scale;
-      const cx = mw/2 + s.offX*(drawW-mw)/2; const cy = mh/2 + s.offY*(drawH-mh)/2;
-      miniCtx.save(); miniCtx.translate(mw/2,mh/2); miniCtx.scale(s.flipX?-1:1, s.flipY?-1:1); miniCtx.rotate(s.rot*Math.PI/180); miniCtx.translate(-mw/2,-mh/2);
-      miniCtx.filter = `brightness(${s.bright}%) contrast(${s.contrast}%) saturate(${s.sat}%) hue-rotate(${s.hue}deg) sepia(${s.sepia}%) grayscale(${s.gray}%) blur(${Math.min(s.blur,2)}px)`;
-      const dx = cx - drawW/2, dy = cy - drawH/2; miniCtx.drawImage(img, dx, dy, drawW, drawH);
-      miniCtx.filter = 'none';
-      miniCtx.restore();
-      if(s.frame==='soft'){
-        miniCtx.strokeStyle = 'rgba(255,255,255,0.5)'; miniCtx.lineWidth = 4; miniCtx.strokeRect(2,2,mw-4,mh-4);
-      } else if(s.frame==='neon'){
-        const g = miniCtx.createLinearGradient(0,0,mw,0); g.addColorStop(0, cssVar('--blue')||'#00d5ff'); g.addColorStop(1, cssVar('--pink')||'#ff2e92');
-        miniCtx.strokeStyle = g; miniCtx.shadowColor = 'rgba(255,255,255,0.25)'; miniCtx.shadowBlur = 8; miniCtx.lineWidth = 5; miniCtx.strokeRect(3,3,mw-6,mh-6); miniCtx.shadowBlur = 0;
-      } else if(s.frame==='vignette'){
-        const rg = miniCtx.createRadialGradient(mw/2,mh/2, mw*0.35, mw/2,mh/2, mw*0.7); rg.addColorStop(0,'rgba(0,0,0,0)'); rg.addColorStop(1,'rgba(0,0,0,0.25)'); miniCtx.fillStyle = rg; miniCtx.fillRect(0,0,mw,mh);
-      }
-    }
+    function renderMini(){ if(!img){ miniCtx.clearRect(0,0,mini.width,mini.height); return; } const mw = mini.width, mh = mini.height; miniCtx.clearRect(0,0,mw,mh); const iw=img.naturalWidth, ih=img.naturalHeight; const scaleBase = Math.max(mw/iw, mh/ih); const scale = scaleBase * s.zoom; const drawW = iw*scale, drawH=ih*scale; const cx = mw/2 + s.offX*(drawW-mw)/2; const cy = mh/2 + s.offY*(drawH-mh)/2; miniCtx.save(); miniCtx.translate(mw/2,mh/2); miniCtx.scale(s.flipX?-1:1, s.flipY?-1:1); miniCtx.rotate(s.rot*Math.PI/180); miniCtx.translate(-mw/2,-mh/2); miniCtx.filter = `brightness(${s.bright}%) contrast(${s.contrast}%) saturate(${s.sat}%) hue-rotate(${s.hue}deg) sepia(${s.sepia}%) grayscale(${s.gray}%) blur(${Math.min(s.blur,2)}px)`; const dx = cx - drawW/2, dy = cy - drawH/2; miniCtx.drawImage(img, dx, dy, drawW, drawH); miniCtx.filter = 'none'; miniCtx.restore(); if(s.frame==='soft'){ miniCtx.strokeStyle = 'rgba(255,255,255,0.5)'; miniCtx.lineWidth = 4; miniCtx.strokeRect(2,2,mw-4,mh-4); } else if(s.frame==='neon'){ const g = miniCtx.createLinearGradient(0,0,mw,0); g.addColorStop(0, cssVar('--blue')||'#00d5ff'); g.addColorStop(1, cssVar('--pink')||'#ff2e92'); miniCtx.strokeStyle = g; miniCtx.shadowColor = 'rgba(255,255,255,0.25)'; miniCtx.shadowBlur = 8; miniCtx.lineWidth = 5; miniCtx.strokeRect(3,3,mw-6,mh-6); miniCtx.shadowBlur = 0; } else if(s.frame==='vignette'){ const rg = miniCtx.createRadialGradient(mw/2,mh/2, mw*0.35, mw/2,mh/2, mw*0.7); rg.addColorStop(0,'rgba(0,0,0,0)'); rg.addColorStop(1,'rgba(0,0,0,0.25)'); miniCtx.fillStyle = rg; miniCtx.fillRect(0,0,mw,mh); } }
 
     function openDataUrl(dataUrl, name){ const i = new Image(); i.onload = ()=>{ img = i; originalDataUrl = dataUrl; $('downloadBtn').disabled = false; const pb=$('postBtn'); if(pb) pb.disabled=false; render(); }; i.src = dataUrl; if(name && /\.png$/i.test(name)) s.mime='image/png'; else s.mime='image/jpeg'; }
-
     function openFile(file){ if(!file) return; const reader = new FileReader(); reader.onload = ()=> openDataUrl(reader.result, file.name); reader.readAsDataURL(file); }
 
     function exportBlob(){ return new Promise((resolve,reject)=>{ try{ cvs.toBlob((blob)=>{ if(!blob){ reject(new Error('Export failed')); return; } const f = new File([blob], 'edited.' + (s.mime==='image/png'?'png':'jpg'), { type: s.mime }); resolve(f); }, s.mime==='image/png'?'image/png':'image/jpeg', s.mime==='image/png'?1:0.92); }catch(e){ reject(e); } }); }
 
     function sendToOpener(dataUrl, file){ try{ const msg = { type:'nuvia-photo-done', mime: file.type, name: file.name, dataUrl }; if(window.opener){ window.opener.postMessage(msg, '*'); } if(window.parent && window.parent!==window){ window.parent.postMessage(msg, '*'); } if(window.opener && typeof window.opener.nuviaPhotoEditorCallback==='function'){ window.opener.nuviaPhotoEditorCallback(file, dataUrl); } }catch(_){} }
 
-    // Controls
+    function applyPreset(p){ s.preset = p; if(p==='none'){ return render(); } const maps = { vivid: { bright:110, contrast:115, sat:125, hue:0, sepia:0, gray:0 }, vividWarm: { bright:110, contrast:112, sat:125, hue:10, sepia:8, gray:0 }, vividCool: { bright:108, contrast:112, sat:120, hue:-10, sepia:0, gray:0 }, dramatic: { bright:95, contrast:135, sat:85, hue:0, sepia:0, gray:10 }, dramaticWarm:{ bright:95, contrast:135, sat:90, hue:12, sepia:6, gray:10 }, dramaticCool:{ bright:95, contrast:138, sat:88, hue:-12, sepia:0, gray:10 }, mono:{ bright:102, contrast:110, sat:0, hue:0, sepia:0, gray:100 }, silvertone:{ bright:104, contrast:120, sat:0, hue:0, sepia:25, gray:80 }, noir:{ bright:98, contrast:150, sat:0, hue:0, sepia:0, gray:100 } }; const m = maps[p]; if(!m) return; s.bright=m.bright; s.contrast=m.contrast; s.sat=m.sat; s.hue=m.hue; s.sepia=m.sepia; s.gray=m.gray; $('ctlBright').value=s.bright; $('ctlContrast').value=s.contrast; $('ctlSat').value=s.sat; $('ctlHue').value=s.hue; $('ctlSepia').value=s.sepia; $('ctlGray').value=s.gray; $('valBright').textContent=s.bright+'%'; $('valContrast').textContent=s.contrast+'%'; $('valSat').textContent=s.sat+'%'; $('valHue').textContent=s.hue+'°'; $('valSepia').textContent=s.sepia+'%'; $('valGray').textContent=s.gray+'%'; render(); }
+
+    const EYE_COLORS = ['#3aa6ff','#1e90ff','#2ecc71','#27ae60','#8e44ad','#a040a0','#a0522d','#b5651d'];
+    function buildEyeSwatches(){ const wrap = $('eyeSwatches'); if(!wrap) return; wrap.innerHTML=''; EYE_COLORS.forEach((c,idx)=>{ const d=document.createElement('button'); d.type='button'; d.className='swatch'; d.style.background = c; d.setAttribute('aria-label','Eye color'); d.addEventListener('click', ()=>{ s.eyes.color=c; wrap.querySelectorAll('.swatch').forEach(sq=>sq.classList.remove('selected')); d.classList.add('selected'); s.eyes.enabled = true; $('ctlEyesEnable').checked = true; render(); }); wrap.appendChild(d); if(idx===0) d.classList.add('selected'); }); }
+
     $('ctlAspect').addEventListener('change', ()=>{ s.aspect = $('ctlAspect').value; render(); });
     $('ctlZoom').addEventListener('input', (e)=>{ if(e.target && e.target._ignore) return; s.zoom = parseFloat(e.target.value); $('valZoom').textContent = s.zoom.toFixed(2)+'x'; render(); });
     $('ctlOffX').addEventListener('input', (e)=>{ if(e.target && e.target._ignore) return; s.offX = parseFloat(e.target.value); $('valOffX').textContent = e.target.value; render(); });
@@ -258,13 +423,22 @@
     $('ctlBgTol').addEventListener('input', (e)=>{ if(e.target && e.target._ignore) return; s.bg.tol = parseInt(e.target.value,10); $('valBgTol').textContent = String(s.bg.tol); render(); });
     $('bgPickBtn').addEventListener('click', ()=>{ s.bg.picking = !s.bg.picking; document.body.style.cursor = s.bg.picking ? 'crosshair' : ''; });
 
+    $('ctlPreset').addEventListener('change', ()=> applyPreset($('ctlPreset').value));
+
+    $('ctlFocusEnable').addEventListener('change', (e)=>{ s.focus.enabled = !!e.target.checked; render(); });
+    $('ctlFocusMode').addEventListener('change', ()=>{ s.focus.mode = $('ctlFocusMode').value; const aw=$('focusAngleWrap'); aw.style.display = s.focus.mode==='linear' ? '' : 'none'; render(); });
+    $('ctlFocusAmt').addEventListener('input', (e)=>{ s.focus.amt = parseFloat(e.target.value); $('valFocusAmt').textContent = s.focus.amt+'px'; render(); });
+    $('ctlFocusSize').addEventListener('input', (e)=>{ s.focus.size = parseFloat(e.target.value); $('valFocusSize').textContent = s.focus.size.toFixed(2); render(); });
+    $('ctlFocusAngle').addEventListener('input', (e)=>{ s.focus.angle = parseFloat(e.target.value); $('valFocusAngle').textContent = Math.round(s.focus.angle)+'°'; render(); });
+    $('placeFocusBtn').addEventListener('click', ()=>{ s.focus.placing = true; document.body.style.cursor='crosshair'; });
+
+    $('ctlEyesEnable').addEventListener('change', (e)=>{ s.eyes.enabled = !!e.target.checked; render(); });
+    $('ctlEyeSize').addEventListener('input', (e)=>{ s.eyes.size = parseInt(e.target.value,10); $('valEyeSize').textContent = s.eyes.size+'px'; render(); });
+    $('placeLeftEyeBtn').addEventListener('click', ()=>{ s.eyes.placing = 'left'; document.body.style.cursor='crosshair'; });
+    $('placeRightEyeBtn').addEventListener('click', ()=>{ s.eyes.placing = 'right'; document.body.style.cursor='crosshair'; });
+
     $('resetBtn').addEventListener('click', ()=>{ setDefaults(); render(); });
     $('useOriginalBtn').addEventListener('click', ()=>{ if(originalDataUrl){ openDataUrl(originalDataUrl); } });
-
-    function autoEnhance(){ try{ if(!img) return; const off=document.createElement('canvas'); const ow=256, oh=Math.max(1, Math.round(256*img.naturalHeight/img.naturalWidth)); off.width=ow; off.height=oh; const ox=off.getContext('2d'); ox.drawImage(img,0,0,ow,oh); const id=ox.getImageData(0,0,ow,oh).data; let sum=0, sum2=0; for(let i=0;i<id.length;i+=4){ const y = 0.2126*id[i]+0.7152*id[i+1]+0.0722*id[i+2]; sum+=y; sum2+=y*y; } const n=id.length/4; const mean=sum/n; const variance=Math.max(1, sum2/n - mean*mean); const std=Math.sqrt(variance); const targetMean=128; const gain=Math.min(1.6, Math.max(0.8, 128/(std+64))); const bias=targetMean-mean*gain; s.bright = Math.max(60, Math.min(160, Math.round(100 + (bias/255)*100))); s.contrast = Math.max(80, Math.min(160, Math.round(100*gain))); s.sat = Math.min(150, Math.round(100 + (std/128)*30)); $('ctlBright').value=s.bright; $('ctlContrast').value=s.contrast; $('ctlSat').value=s.sat; $('valBright').textContent=s.bright+'%'; $('valContrast').textContent=s.contrast+'%'; $('valSat').textContent=s.sat+'%'; render(); }catch(_){ }}
-
-    function smartCenter(){ try{ if(!img) return; const off=document.createElement('canvas'); const ow=192, oh=Math.max(1, Math.round(192*img.naturalHeight/img.naturalWidth)); off.width=ow; off.height=oh; const ox=off.getContext('2d'); ox.drawImage(img,0,0,ow,oh); const id=ox.getImageData(0,0,ow,oh); const d=id.data; const sobel=(x,y,c)=>{ const idx=(y*ow+x)*4+c; const gx = -d[idx-4-ow*4]-2*d[idx-ow*4]-d[idx+4-ow*4] + d[idx-4+ow*4]+2*d[idx+ow*4]+d[idx+4+ow*4]; const gy = -d[idx-4-ow*4]-2*d[idx-4]-d[idx-4+ow*4] + d[idx+4-ow*4]+2*d[idx+4]+d[idx+4+ow*4]; return Math.hypot(gx,gy); }; let sum=0,cx=0,cy=0; for(let y=1;y<oh-1;y++){ for(let x=1;x<ow-1;x++){ const e = sobel(x,y,0)+sobel(x,y,1)+sobel(x,y,2); sum+=e; cx+=e*x; cy+=e*y; } } if(sum>0){ cx/=sum; cy/=sum; const nx=cx/ow, ny=cy/oh; s.offX = Math.max(-1, Math.min(1, (nx-0.5)*2 )); s.offY = Math.max(-1, Math.min(1, (ny-0.5)*2 )); $('ctlOffX').value=s.offX; $('ctlOffY').value=s.offY; $('valOffX').textContent=s.offX.toFixed(2); $('valOffY').textContent=s.offY.toFixed(2); render(); } }catch(_){ }}
-
     $('autoEnhanceBtn').addEventListener('click', autoEnhance);
     $('smartCenterBtn').addEventListener('click', smartCenter);
     $('flipHBtn').addEventListener('click', ()=>{ s.flipX = !s.flipX; render(); });
@@ -272,34 +446,36 @@
     $('applyBtn').addEventListener('click', async ()=>{ try{ if(!img) return; const file = await exportBlob(); const dataUrl = cvs.toDataURL(s.mime==='image/png'?'image/png':'image/jpeg', s.mime==='image/png'?1:0.92); sendToOpener(dataUrl, file); }catch(e){ console.error('Apply failed', e); } });
     $('downloadBtn').addEventListener('click', async ()=>{ try{ if(!img) return; const dataUrl = cvs.toDataURL(s.mime==='image/png'?'image/png':'image/jpeg', s.mime==='image/png'?1:0.92); const a = document.createElement('a'); a.href = dataUrl; a.download = 'nuvia-edited.'+(s.mime==='image/png'?'png':'jpg'); document.body.appendChild(a); a.click(); a.remove(); }catch(e){} });
 
-    $('postBtn').addEventListener('click', async ()=>{ try{ if(!img) return; const dataUrl = cvs.toDataURL(s.mime==='image/png'?'image/png':'image/jpeg', s.mime==='image/png'?1:0.92); try{ sessionStorage.setItem('photoEditor:resultDataUrl', dataUrl); const u = new URL(location.href); const ctx = u.searchParams.get('ctx') || sessionStorage.getItem('photoEditor:context') || 'composer'; sessionStorage.setItem('photoEditor:context', ctx); const ret = sessionStorage.getItem('photoEditor:return'); if(ret){ location.assign(ret); } else { history.back(); } }catch(_){}
-    }catch(e){} });
+    $('postBtn').addEventListener('click', async ()=>{ try{ if(!img) return; const dataUrl = cvs.toDataURL(s.mime==='image/png'?'image/png':'image/jpeg', s.mime==='image/png'?1:0.92); try{ sessionStorage.setItem('photoEditor:resultDataUrl', dataUrl); const u = new URL(location.href); const ctxp = u.searchParams.get('ctx') || sessionStorage.getItem('photoEditor:context') || 'composer'; sessionStorage.setItem('photoEditor:context', ctxp); const ret = sessionStorage.getItem('photoEditor:return'); if(ret){ location.assign(ret); } else { history.back(); } }catch(_){}} catch(e){} });
 
-    // Open/Close
-    $('openFile').addEventListener('change', (e)=>{ const f = e.target.files && e.target.files[0]; if(f){ s.mime = (f.type && /png/i.test(f.type)) ? 'image/png' : 'image/jpeg'; openFile(f); } });
-    $('closeBtn').addEventListener('click', ()=>{ try{ if(window.opener){ window.close(); } else { history.back(); } }catch(_){ window.close(); } });
+    function autoEnhance(){ try{ if(!img) return; const off=document.createElement('canvas'); const ow=256, oh=Math.max(1, Math.round(256*img.naturalHeight/img.naturalWidth)); off.width=ow; off.height=oh; const ox=off.getContext('2d'); ox.drawImage(img,0,0,ow,oh); const id=ox.getImageData(0,0,ow,oh).data; let sum=0, sum2=0; for(let i=0;i<id.length;i+=4){ const y = 0.2126*id[i]+0.7152*id[i+1]+0.0722*id[i+2]; sum+=y; sum2+=y*y; } const n=id.length/4; const mean=sum/n; const variance=Math.max(1, sum2/n - mean*mean); const std=Math.sqrt(variance); const targetMean=128; const gain=Math.min(1.6, Math.max(0.8, 128/(std+64))); const bias=targetMean-mean*gain; s.bright = Math.max(60, Math.min(160, Math.round(100 + (bias/255)*100))); s.contrast = Math.max(80, Math.min(160, Math.round(100*gain))); s.sat = Math.min(150, Math.round(100 + (std/128)*30)); $('ctlBright').value=s.bright; $('ctlContrast').value=s.contrast; $('ctlSat').value=s.sat; $('valBright').textContent=s.bright+'%'; $('valContrast').textContent=s.contrast+'%'; $('valSat').textContent=s.sat+'%'; render(); }catch(_){ }}
 
-    // DnD + clipboard
+    function smartCenter(){ try{ if(!img) return; const off=document.createElement('canvas'); const ow=192, oh=Math.max(1, Math.round(192*img.naturalHeight/img.naturalWidth)); off.width=ow; off.height=oh; const ox=off.getContext('2d'); ox.drawImage(img,0,0,ow,oh); const id=ox.getImageData(0,0,ow,oh); const d=id.data; const sobel=(x,y,c)=>{ const idx=(y*ow+x)*4+c; const gx = -d[idx-4-ow*4]-2*d[idx-ow*4]-d[idx+4-ow*4] + d[idx-4+ow*4]+2*d[idx+ow*4]+d[idx+4+ow*4]; const gy = -d[idx-4-ow*4]-2*d[idx-4]-d[idx-4+ow*4] + d[idx+4-ow*4]+2*d[idx+4]+d[idx+4+ow*4]; return Math.hypot(gx,gy); }; let sum=0,cx=0,cy=0; for(let y=1;y<oh-1;y++){ for(let x=1;x<ow-1;x++){ const e = sobel(x,y,0)+sobel(x,y,1)+sobel(x,y,2); sum+=e; cx+=e*x; cy+=e*y; } } if(sum>0){ cx/=sum; cy/=sum; const nx=cx/ow, ny=cy/oh; s.offX = Math.max(-1, Math.min(1, (nx-0.5)*2 )); s.offY = Math.max(-1, Math.min(1, (ny-0.5)*2 )); $('ctlOffX').value=s.offX; $('ctlOffY').value=s.offY; $('valOffX').textContent=s.offX.toFixed(2); $('valOffY').textContent=s.offY.toFixed(2); render(); } }catch(_){ }}
+
     document.addEventListener('dragover', (e)=>{ e.preventDefault(); });
     document.addEventListener('drop', (e)=>{ e.preventDefault(); const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]; if(f && /^image\//i.test(f.type)) openFile(f); });
     document.addEventListener('paste', (e)=>{ const items = e.clipboardData && e.clipboardData.items; if(!items) return; for(const it of items){ if(it.type && /^image\//i.test(it.type)){ const f = it.getAsFile(); if(f) openFile(f); break; } } });
 
-    cvs.addEventListener('click', (ev)=>{ try{ if(!(s.bg && s.bg.picking)) return; const rect=cvs.getBoundingClientRect(); const x=Math.floor((ev.clientX-rect.left)/rect.width * cvs.width); const y=Math.floor((ev.clientY-rect.top)/rect.height * cvs.height); const id = ctx.getImageData(x,y,1,1).data; s.bg.key = { r:id[0], g:id[1], b:id[2] }; s.bg.picking=false; document.body.style.cursor=''; render(); }catch(_){ } });
+    cvs.addEventListener('click', (ev)=>{ try{ const rect=cvs.getBoundingClientRect(); const x=Math.floor((ev.clientX-rect.left)/rect.width * cvs.width); const y=Math.floor((ev.clientY-rect.top)/rect.height * cvs.height);
+      if(s.bg && s.bg.picking){ const id = ctx.getImageData(x,y,1,1).data; s.bg.key = { r:id[0], g:id[1], b:id[2] }; s.bg.picking=false; document.body.style.cursor=''; render(); return; }
+      if(s.eyes && s.eyes.placing){ const nx = x / cvs.width, ny = y / cvs.height; if(s.eyes.placing==='left'){ s.eyes.left = {x:nx,y:ny}; } else if(s.eyes.placing==='right'){ s.eyes.right = {x:nx,y:ny}; } s.eyes.placing=null; document.body.style.cursor=''; s.eyes.enabled = true; $('ctlEyesEnable').checked = true; render(); return; }
+      if(s.focus && s.focus.placing){ s.focus.cx = x / cvs.width; s.focus.cy = y / cvs.height; s.focus.placing=false; document.body.style.cursor=''; s.focus.enabled = true; $('ctlFocusEnable').checked = true; render(); return; }
+    }catch(_){ } });
 
-    // Message API: parent can send dataUrl or Blob via postMessage
-    window.addEventListener('message', (ev)=>{ try{ const d = ev.data || {}; if(d && d.type==='nuvia-photo-open'){
-      if(d.dataUrl){ openDataUrl(d.dataUrl, d.name||'image.jpg'); }
-      else if(d.blob){ const fr = new FileReader(); fr.onload = ()=> openDataUrl(fr.result, d.name||'image.jpg'); fr.readAsDataURL(d.blob); }
-    } }catch(_){ } });
+    window.addEventListener('message', (ev)=>{ try{ const d = ev.data || {}; if(d && d.type==='nuvia-photo-open'){ if(d.dataUrl){ openDataUrl(d.dataUrl, d.name||'image.jpg'); } else if(d.blob){ const fr = new FileReader(); fr.onload = ()=> openDataUrl(fr.result, d.name||'image.jpg'); fr.readAsDataURL(d.blob); } } }catch(_){ } });
 
-    // If a query param image is provided (?img=dataUrl) or via sessionStorage handoff
-    try{ const u = new URL(location.href); const q = u.searchParams.get('img'); if(q){ openDataUrl(q, 'image.jpg'); }
-      else { const d = sessionStorage.getItem('photoEditor:inputDataUrl'); if(d){ openDataUrl(d, 'image.jpg'); sessionStorage.removeItem('photoEditor:inputDataUrl'); } }
-    }catch(_){ }
+    $('openFile').addEventListener('change', (e)=>{ const f = e.target.files && e.target.files[0]; if(f){ s.mime = (f.type && /png/i.test(f.type)) ? 'image/png' : 'image/jpeg'; openFile(f); } });
+    $('closeBtn').addEventListener('click', ()=>{ try{ if(window.opener){ window.close(); } else { history.back(); } }catch(_){ window.close(); } });
 
-    // Initialize
+    try{ const u = new URL(location.href); const q = u.searchParams.get('img'); if(q){ openDataUrl(q, 'image.jpg'); } else { const d = sessionStorage.getItem('photoEditor:inputDataUrl'); if(d){ openDataUrl(d, 'image.jpg'); sessionStorage.removeItem('photoEditor:inputDataUrl'); } } }catch(_){ }
+
+    function onResize(){ render(); const sections = document.querySelectorAll('.accordion-section[aria-expanded="true"] .accordion-body'); sections.forEach(b=> b.style.maxHeight = b.scrollHeight + 'px'); }
+    window.addEventListener('resize', onResize);
+
+    initAccordion();
     setDefaults();
     setupSmartTouchRanges();
+    buildEyeSwatches();
   })();
   </script>
 </body>
