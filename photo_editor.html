@@ -61,6 +61,7 @@
         Open Image
       </label>
       <button id="downloadBtn" class="btn secondary" disabled aria-label="Download Edited Image">Download</button>
+      <button id="postBtn" class="btn" disabled aria-label="Post">Post</button>
       <button id="closeBtn" class="btn secondary" aria-label="Close">Close</button>
     </div>
   </header>
@@ -154,7 +155,7 @@
       ctx.restore();
     }
 
-    function openDataUrl(dataUrl, name){ const i = new Image(); i.onload = ()=>{ img = i; originalDataUrl = dataUrl; $('downloadBtn').disabled = false; render(); }; i.src = dataUrl; if(name && /\.png$/i.test(name)) s.mime='image/png'; else s.mime='image/jpeg'; }
+    function openDataUrl(dataUrl, name){ const i = new Image(); i.onload = ()=>{ img = i; originalDataUrl = dataUrl; $('downloadBtn').disabled = false; const pb=$('postBtn'); if(pb) pb.disabled=false; render(); }; i.src = dataUrl; if(name && /\.png$/i.test(name)) s.mime='image/png'; else s.mime='image/jpeg'; }
 
     function openFile(file){ if(!file) return; const reader = new FileReader(); reader.onload = ()=> openDataUrl(reader.result, file.name); reader.readAsDataURL(file); }
 
@@ -182,6 +183,9 @@
     $('applyBtn').addEventListener('click', async ()=>{ try{ if(!img) return; const file = await exportBlob(); const dataUrl = cvs.toDataURL(s.mime==='image/png'?'image/png':'image/jpeg', s.mime==='image/png'?1:0.92); sendToOpener(dataUrl, file); }catch(e){ console.error('Apply failed', e); } });
     $('downloadBtn').addEventListener('click', async ()=>{ try{ if(!img) return; const dataUrl = cvs.toDataURL(s.mime==='image/png'?'image/png':'image/jpeg', s.mime==='image/png'?1:0.92); const a = document.createElement('a'); a.href = dataUrl; a.download = 'nuvia-edited.'+(s.mime==='image/png'?'png':'jpg'); document.body.appendChild(a); a.click(); a.remove(); }catch(e){} });
 
+    $('postBtn').addEventListener('click', async ()=>{ try{ if(!img) return; const dataUrl = cvs.toDataURL(s.mime==='image/png'?'image/png':'image/jpeg', s.mime==='image/png'?1:0.92); try{ sessionStorage.setItem('photoEditor:resultDataUrl', dataUrl); const u = new URL(location.href); const ctx = u.searchParams.get('ctx') || sessionStorage.getItem('photoEditor:context') || 'composer'; sessionStorage.setItem('photoEditor:context', ctx); const ret = sessionStorage.getItem('photoEditor:return'); if(ret){ location.assign(ret); } else { history.back(); } }catch(_){}
+    }catch(e){} });
+
     // Open/Close
     $('openFile').addEventListener('change', (e)=>{ const f = e.target.files && e.target.files[0]; if(f){ s.mime = (f.type && /png/i.test(f.type)) ? 'image/png' : 'image/jpeg'; openFile(f); } });
     $('closeBtn').addEventListener('click', ()=>{ try{ if(window.opener){ window.close(); } else { history.back(); } }catch(_){ window.close(); } });
@@ -197,8 +201,10 @@
       else if(d.blob){ const fr = new FileReader(); fr.onload = ()=> openDataUrl(fr.result, d.name||'image.jpg'); fr.readAsDataURL(d.blob); }
     } }catch(_){ } });
 
-    // If a query param image is provided (?img=dataUrl)
-    try{ const u = new URL(location.href); const q = u.searchParams.get('img'); if(q){ openDataUrl(q, 'image.jpg'); } }catch(_){ }
+    // If a query param image is provided (?img=dataUrl) or via sessionStorage handoff
+    try{ const u = new URL(location.href); const q = u.searchParams.get('img'); if(q){ openDataUrl(q, 'image.jpg'); }
+      else { const d = sessionStorage.getItem('photoEditor:inputDataUrl'); if(d){ openDataUrl(d, 'image.jpg'); sessionStorage.removeItem('photoEditor:inputDataUrl'); } }
+    }catch(_){ }
 
     // Initialize
     setDefaults();
