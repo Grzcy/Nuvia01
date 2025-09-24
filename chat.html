@@ -1130,6 +1130,7 @@
                     try { localVideo.play().catch(()=>{}); } catch(_){}
                 }
                 pc = new RTCPeerConnection(rtcConfig);
+                try{ pc.oniceconnectionstatechange = () => { const st = pc.iceConnectionState; const cs = document.getElementById('callStatus'); if (st === 'checking') { if (cs) cs.textContent = 'Connecting…'; } else if (st === 'connected' || st === 'completed') { if (!callStartMs) { callStartMs = Date.now(); startCallTimer(); } } else if (st === 'disconnected') { if (cs) cs.textContent = 'Reconnecting…'; } else if (st === 'failed') { if (cs) cs.textContent = 'Connection failed'; endCall(); } }; }catch(_){ }
                 stream.getTracks().forEach(t => pc.addTrack(t, stream));
                 preferCodecs(pc);
                 pc.ontrack = (e) => {
@@ -1290,6 +1291,7 @@
                     try { localVideo.play().catch(()=>{}); } catch(_){}
                 }
                 pc = new RTCPeerConnection(rtcConfig);
+                try{ pc.oniceconnectionstatechange = () => { const st = pc.iceConnectionState; const cs = document.getElementById('callStatus'); if (st === 'checking') { if (cs) cs.textContent = 'Connecting…'; } else if (st === 'connected' || st === 'completed') { if (!callStartMs) { callStartMs = Date.now(); startCallTimer(); } } else if (st === 'disconnected') { if (cs) cs.textContent = 'Reconnecting…'; } else if (st === 'failed') { if (cs) cs.textContent = 'Connection failed'; endCall(); } }; }catch(_){ }
                 stream.getTracks().forEach(t => pc.addTrack(t, stream));
                 preferCodecs(pc);
                 pc.ontrack = (e) => {
