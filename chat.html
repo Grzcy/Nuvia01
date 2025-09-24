@@ -976,6 +976,8 @@ backBtn.onclick = () => history.back();
             if (shareItem) { const id = shareItem.getAttribute('data-share-id'); shareMessage(id); return; }
             const replyItem = e.target.closest('[data-reply-id]');
             if (replyItem) { const id = replyItem.getAttribute('data-reply-id'); beginReply(id); return; }
+            const reactBtn = e.target.closest('[data-react-emoji]');
+            if (reactBtn) { const id = reactBtn.getAttribute('data-react-id'); const emoji = reactBtn.getAttribute('data-react-emoji'); toggleReaction(id, emoji); return; }
             // click outside closes any menus
             document.querySelectorAll('.msg-menu').forEach(m => m.style.display = 'none');
         });
