@@ -1124,6 +1124,7 @@
                 // Ensure ontrack is set BEFORE adding local tracks so we don't miss early incoming events
                 pc.ontrack = (e) => {
                     try {
+                        console.log('CALLER: ontrack event', { trackKind: e.track && e.track.kind, streams: (e.streams && e.streams.length) || 0 });
                         if (!remoteMediaStream) remoteMediaStream = new MediaStream();
                         // Prefer full streams when provided
                         if (e.streams && e.streams[0]) {
@@ -1145,7 +1146,7 @@
                             try { remoteAudio.play().catch(()=>{}); } catch(_){ }
                             if (voiceAvatarPlaceholder) voiceAvatarPlaceholder.style.display = 'none';
                         }
-                    } catch (_) { }
+                    } catch (err) { console.warn('CALLER: ontrack handler error', err); }
                 };
                 // Add local tracks after ontrack handler is attached
                 stream.getTracks().forEach(t => pc.addTrack(t, stream));
