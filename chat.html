@@ -1101,6 +1101,7 @@
             } else {
                 filteredFriends = friendsData.filter(f => (f.displayName||'').toLowerCase().includes(term) || (f.username||'').toLowerCase().includes(term));
             }
+            if (friendsMainSearchEl) friendsMainSearchEl.value = friendsSearchEl.value;
             renderFriends();
         });
 
