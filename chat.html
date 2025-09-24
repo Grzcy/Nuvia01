@@ -537,8 +537,8 @@
         const emojiGrid = document.getElementById('emojiGrid');
         const emojiTabs = document.getElementById('emojiTabs');
         const voiceMsgBtn = document.getElementById('voiceMsgBtn');
-        
-        backBtn.onclick = () => history.back();
+
+        if (backBtn) backBtn.onclick = () => history.back();
 
         // Emoji setup with categories and ~500 emojis
         const emojiCategories = [
