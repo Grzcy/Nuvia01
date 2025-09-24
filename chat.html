@@ -374,6 +374,7 @@
         .call-title{font-weight:700}
         .call-status{color:var(--text-light);font-size:12px}
         .video-wrap{position:relative;display:block;background:rgba(0,0,0,.2)}
+        .video-wrap.audio-only{min-height:240px;display:flex;align-items:center;justify-content:center}
         .remote-video{width:100%;height:56vh;object-fit:cover;background:#000}
         .remote-avatar{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:160px;height:160px;border-radius:50%;border:2px solid var(--border-light);display:none;object-fit:cover}
         .local-video{position:absolute;right:12px;bottom:12px;width:140px;height:96px;border-radius:12px;border:1px solid var(--border-light);object-fit:cover;background:#000}
@@ -1084,12 +1085,12 @@ backBtn.onclick = () => history.back();
             ensureMediaUnlocked();
             const csEl = document.getElementById('callStatus');
             if (csEl) csEl.textContent = 'Calling…';
+            if (endCallBtn) endCallBtn.style.display = 'inline-flex';
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
                     audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
                     video: isVideo ? { width: { ideal: 640 }, height: { ideal: 480 }, frameRate: { ideal: 24, max: 30 }, facingMode: 'user' } : false
                 });
-                if (endCallBtn) endCallBtn.style.display = 'inline-flex';
                 startCallerRingtone();
                 try{ clearTimeout(ringTimeoutId); }catch(_){ }
                 ringTimeoutId = setTimeout(async ()=>{ try{ await handleMissedByCaller(); }catch(_){ } }, 60000);
@@ -1361,6 +1362,7 @@ backBtn.onclick = () => history.back();
             callModal.style.display = 'flex';
             callTitle.textContent = isVideo ? 'Video Call' : 'Voice Call';
             videoWrap.style.display = 'block';
+            if (videoWrap) videoWrap.classList.toggle('audio-only', !isVideo);
             if (remoteVideo) remoteVideo.style.display = isVideo ? 'block' : 'none';
             if (localVideo) localVideo.style.display = isVideo ? 'block' : 'none';
             if (cameraBtn) cameraBtn.style.display = isVideo ? 'inline-block' : 'none';
