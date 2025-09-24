@@ -452,10 +452,10 @@ function showMessageBox(message, type = 'info') {
     try { console.log('[MessageBox]', type, message); } catch(_) {}
 }
 
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where, getDocs, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
-        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js";
+        // Use dynamic imports for Firebase so the page still loads when network or CDN fails.
+        let initializeApp, getAuth, onAuthStateChanged, getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where, getDocs, arrayUnion, arrayRemove, getStorage, storageRef, uploadBytes, getDownloadURL;
+        let app = null, auth = null, db = null, storage = null;
+        let firebaseAvailable = false;
 
         // Firebase config (same pattern as Profile.html)
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
@@ -475,10 +475,32 @@ function showMessageBox(message, type = 'info') {
             uploadPreset: "Storage_preset"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
+        (async function initFirebase(){
+            try {
+                const fbApp = await import('https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js');
+                const fbAuth = await import('https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js');
+                const fbFirestore = await import('https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js');
+                const fbStorage = await import('https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js');
+
+                // Assign commonly used functions
+                initializeApp = fbApp.initializeApp;
+                getAuth = fbAuth.getAuth; onAuthStateChanged = fbAuth.onAuthStateChanged;
+                ({ getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where, getDocs, arrayUnion, arrayRemove } = fbFirestore);
+                ({ getStorage, ref: storageRef, uploadBytes, getDownloadURL } = fbStorage);
+
+                // Initialize services
+                app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+                storage = getStorage(app);
+                firebaseAvailable = true;
+            } catch (err) {
+                console.warn('Firebase dynamic import failed, running in degraded mode:', err);
+                firebaseAvailable = false;
+                try { showMessageBox('Offline/degraded mode: chat backend unavailable. UI remains interactive.', 'warning', 6000); } catch(_){}
+            }
+        })();
+
 
         // Helpers: Cloudinary URL
         function getCloudinaryImageUrl(urlOrPublicId, transformations = "w_auto,f_auto,q_auto") {
