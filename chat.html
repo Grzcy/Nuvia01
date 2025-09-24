@@ -1330,7 +1330,12 @@
                 // Add local tracks after ontrack handler
                 stream.getTracks().forEach(t => pc.addTrack(t, stream));
                 const calleeCandCol = collection(callDocRef, 'calleeCandidates');
-                pc.onicecandidate = (e) => { if (e.candidate) addDoc(calleeCandCol, e.candidate.toJSON()); };
+                pc.onicecandidate = (e) => {
+                    console.log('CALLEE: onicecandidate', e && e.candidate);
+                    if (e && e.candidate) {
+                        try { addDoc(calleeCandCol, e.candidate.toJSON()).catch(err => console.warn('CALLEE: addDoc calleeCandidate failed', err)); } catch (err) { console.warn('CALLEE: addDoc error', err); }
+                    }
+                };
                 const offerDesc = new RTCSessionDescription(data.offer);
                 await pc.setRemoteDescription(offerDesc);
                 const answer = await pc.createAnswer();
