@@ -5671,7 +5671,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 el.innerHTML = `
                     <div class="offline-banner-inner">
                         <span class="offline-icon"><i class="fas fa-wifi"></i></span>
-                        <span class="offline-text">No internet connection. We’ll reconnect when you����re back online.</span>
+                        <span class="offline-text">No internet connection. We’ll reconnect when you���re back online.</span>
                     </div>`;
                 document.body.appendChild(el);
             }
@@ -8526,6 +8526,7 @@ async function checkAndStartDailyBonusTimer() {
             document.body.classList.remove(...themes); // Remove all existing theme classes.
             document.body.classList.add(themeName); // Add the new theme class.
             localStorage.setItem('nuvia-theme', themeName); // Save theme preference to local storage.
+            try { localStorage.setItem('jchat-theme', themeName); } catch(_){ }
         }
 
         /**
