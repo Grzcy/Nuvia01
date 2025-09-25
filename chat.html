@@ -624,6 +624,8 @@
         const remoteVideo = document.getElementById('remoteVideo');
         const ringbackUrl = "https://cdn.builder.io/o/assets%2Ff4f3997cc4554f07ac7fa298873cc5c0%2Fc1196a8dd03b456f8f8bca5897733de6?alt=media&token=2a8e192d-9d93-43a5-aeba-d32c7b7cfc72&apiKey=f4f3997cc4554f07ac7fa298873cc5c0";
         let ringbackAudio = (()=>{ try{ const a=new Audio(ringbackUrl); a.loop=true; a.volume=0.35; return a; }catch(_){ return null; } })();
+        const receiverToneUrl = "https://cdn.builder.io/o/assets%2Ff4f3997cc4554f07ac7fa298873cc5c0%2F24960e4017a64aa09db615c269e434cf?alt=media&token=24fed996-554d-4e2f-b37f-a4ae094ddb41&apiKey=f4f3997cc4554f07ac7fa298873cc5c0";
+        let receiverRingtoneAudio = (()=>{ try{ const a=new Audio(receiverToneUrl); a.loop=true; a.volume=0.35; return a; }catch(_){ return null; } })();
 
         let remoteStream = null;
         let peerConnection = null;
@@ -776,6 +778,7 @@
                 endCallBtn.style.display = 'block';
                 toggleMuteBtn.style.display = 'block';
                 toggleVideoBtn.style.display = currentCallType === 'video' ? 'block' : 'none';
+                try { if (receiverRingtoneAudio) { receiverRingtoneAudio.pause(); receiverRingtoneAudio.currentTime = 0; } } catch(_){ }
 
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: currentCallType === 'video' });
                 localVideo.srcObject = localStream; if (currentCallType === 'video') localVideo.style.display = 'block';
@@ -810,13 +813,14 @@
             }
         }
 
-        async function declineCall(){ if (callRef) { try { await updateDoc(callRef, { status: 'declined' }); } catch(_){} } endCall(false); }
+        async function declineCall(){ try { if (receiverRingtoneAudio) { receiverRingtoneAudio.pause(); receiverRingtoneAudio.currentTime = 0; } } catch(_){ } if (callRef) { try { await updateDoc(callRef, { status: 'declined' }); } catch(_){} } endCall(false); }
 
         function toggleMute(){ if (!localStream) return; localStream.getAudioTracks().forEach(t=>{ t.enabled = !t.enabled; isMuted = !t.enabled; }); toggleMuteBtn.classList.toggle('active', isMuted); toggleMuteBtn.querySelector('i').className = isMuted? 'fas fa-microphone-slash':'fas fa-microphone'; }
         function toggleVideo(){ if (!localStream) return; localStream.getVideoTracks().forEach(t=>{ t.enabled = !t.enabled; isVideoOff = !t.enabled; }); toggleVideoBtn.classList.toggle('active', isVideoOff); toggleVideoBtn.querySelector('i').className = isVideoOff? 'fas fa-video-slash':'fas fa-video'; localVideo.style.display = isVideoOff? 'none':'block'; }
 
         async function endCall(updateFirestore){
             try { if (ringbackAudio) { ringbackAudio.pause(); ringbackAudio.currentTime = 0; } } catch(_){ }
+            try { if (receiverRingtoneAudio) { receiverRingtoneAudio.pause(); receiverRingtoneAudio.currentTime = 0; } } catch(_){ }
             try{ if (callTimeoutId) { clearTimeout(callTimeoutId); callTimeoutId = null; } }catch(_){ }
             try{ if (callDurationInterval) { clearInterval(callDurationInterval); callDurationInterval = null; } }catch(_){ }
             if (updateFirestore && callRef) { try { await updateDoc(callRef, { status: 'ended' }); } catch(_){} }
@@ -845,6 +849,7 @@
                 callStatusText.textContent = `Incoming ${currentCallType} call from ${currentPartner.displayName || 'user'}...`;
                 acceptCallBtn.style.display = 'block';
                 declineCallBtn.style.display = 'block';
+                try { if (receiverRingtoneAudio) { receiverRingtoneAudio.currentTime = 0; receiverRingtoneAudio.play().catch(()=>{}); } } catch(_){ }
             }, (err)=>{});
         }
 
