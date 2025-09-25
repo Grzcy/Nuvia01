@@ -320,6 +320,19 @@
         @keyframes pulseColor { 0%{ text-shadow:0 0 8px rgba(0,213,255,.35)} 50%{ text-shadow:0 0 12px rgba(255,46,146,.35)} 100%{ text-shadow:0 0 8px rgba(0,213,255,.35)} }
         #callOverlay .call-status-icon { animation: pulseColor 2.2s infinite ease-in-out; }
     </style>
+    <style>
+        /* Sparkling header icons and avatar */
+        .header .icon-btn, .header .back-btn { position: relative; overflow: hidden; }
+        .header .back-btn { width: 48px; height: 48px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border-light); color: var(--white); }
+        .header .icon-btn::before, .header .back-btn::before { content: ""; position: absolute; inset: 0; border-radius: 50%; padding: 1px; background: linear-gradient(90deg, var(--blue), var(--pink)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; opacity: .55; transition: opacity .2s ease; pointer-events: none; }
+        .header .icon-btn:hover::before, .header .back-btn:hover::before { opacity: .9; }
+        .header .icon-btn::after, .header .back-btn::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.25), transparent 35%), radial-gradient(circle at 65% 65%, rgba(255,255,255,0.15), transparent 45%); animation: headerSparkle 3.2s linear infinite; pointer-events: none; mix-blend-mode: screen; }
+        @keyframes headerSparkle { 0% { transform: translate3d(-6%, -6%, 0); opacity: .25; } 50% { transform: translate3d(6%, 6%, 0); opacity: .45; } 100% { transform: translate3d(-6%, -6%, 0); opacity: .25; } }
+        .header .icon-btn:hover, .header .back-btn:hover { box-shadow: 0 6px 18px rgba(0,213,255,0.35), 0 6px 18px rgba(255,46,146,0.35); }
+        .header .icon-btn:active, .header .back-btn:active { transform: scale(0.98); }
+        .header .header-profile-pic { box-shadow: 0 0 0 2px var(--border-light), 0 0 18px rgba(0,213,255,0.15), 0 0 18px rgba(255,46,146,0.15); animation: avatarPulse 4s ease-in-out infinite; }
+        @keyframes avatarPulse { 0%, 100% { box-shadow: 0 0 0 2px var(--border-light), 0 0 16px rgba(0,213,255,0.18), 0 0 16px rgba(255,46,146,0.18); } 50% { box-shadow: 0 0 0 2px var(--border-light), 0 0 22px rgba(255,46,146,0.28), 0 0 22px rgba(0,213,255,0.28); } }
+    </style>
 </head>
 <body class="profile-blackgold-bg">
     <div class="container">
