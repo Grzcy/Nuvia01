@@ -534,6 +534,7 @@
 
         // Apply saved theme or default to light if explicitly set elsewhere
         applySavedTheme();
+        try { if (!localStorage.getItem('jchat-theme')) localStorage.setItem('jchat-theme', 'theme-black-yellow'); } catch {}
         // Reactive theme change across tabs
         window.addEventListener('storage', (e) => {
             if (e.key === 'jchat-theme') applySavedTheme();
