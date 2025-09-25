@@ -712,6 +712,30 @@
         }
         function hideOverlay(){ callOverlay.classList.remove('active','voice-call','video-call'); }
 
+        function setCallHeader(){
+            try {
+                const name = (currentPartner && (currentPartner.displayName || currentPartner.username)) || 'Contact';
+                const initial = name.charAt(0).toUpperCase();
+                const avatarEl = document.getElementById('callPartnerAvatar');
+                const nameEl = document.getElementById('callPartnerName');
+                if (nameEl) nameEl.textContent = name;
+                if (avatarEl){
+                    const t = 'w_72,h_72,c_fill,g_face,r_max';
+                    const url = currentPartner && currentPartner.profilePicId ? getCloudinaryImageUrl(currentPartner.profilePicId, t) : `https://placehold.co/72x72/00d5ff/ffffff?text=${initial}`;
+                    avatarEl.src = url;
+                    avatarEl.onerror = () => { avatarEl.src = `https://placehold.co/72x72/00d5ff/ffffff?text=${initial}`; };
+                }
+            } catch(_){ }
+        }
+        function setCallPill(text, state){
+            try{
+                const pill = document.getElementById('callStatusPill');
+                const label = document.getElementById('callStatusPillText');
+                if (label) label.textContent = text;
+                if (pill){ pill.className = 'call-pill' + (state? (' '+state):''); }
+            } catch(_){ }
+        }
+
         function resetCallUi(){
             callStatusIcon.className = 'fas fa-phone call-status-icon';
             callStatusText.textContent = 'Calling...';
