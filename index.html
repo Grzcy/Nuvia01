@@ -6074,6 +6074,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             
             // Save theme to localStorage
             localStorage.setItem('nuvia-theme', theme);
+            try { localStorage.setItem('jchat-theme', theme); } catch (_){ }
             
             // Update theme switcher button icon
             if (themeSwitcherBtn) {
