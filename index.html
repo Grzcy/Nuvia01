@@ -5747,58 +5747,21 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         let selectedThumbnailBlob = null; let selectedThumbnailDataUrl = null;
         // Theme switcher functionality
         let currentTheme = 'theme-dark-mode'; // Default theme
-        const themeSwitcherThemes = [
-          'theme-light-mode', 'theme-dark-mode', 'theme-sunset-mode', 'theme-glass-mode',
-          'theme-ocean-mode', 'theme-forest-mode', 'theme-cosmic-mode', 'theme-neon-mode',
-          'theme-retro-mode', 'theme-elegant-mode', 'theme-aurora-bliss', 'theme-midnight-sky'
-        ];
+        const themeSwitcherThemes = ['theme-dark-mode'];
 
-        // Theme catalog with pricing and product IDs - Premium themes locked (NGN pricing)
+        // Theme catalog (only default retained)
         const themeCatalog = {
-            'theme-light-mode': { name: 'Light Mode', price: 0, currency: 'NGN', isFree: true, productId: null },
-            'theme-dark-mode': { name: 'Dark Mode', price: 0, currency: 'NGN', isFree: true, productId: null },
-            'theme-sunset-mode': { name: 'Sunset Mode', price: 1200, currency: 'NGN', isFree: false, productId: 'theme_sunset_premium' },
-            'theme-glass-mode': { name: 'Glass Mode', price: 1200, currency: 'NGN', isFree: false, productId: 'theme_glass_premium' },
-            'theme-ocean-mode': { name: 'Ocean Mode', price: 1500, currency: 'NGN', isFree: false, productId: 'theme_ocean_premium' },
-            'theme-forest-mode': { name: 'Forest Mode', price: 1500, currency: 'NGN', isFree: false, productId: 'theme_forest_premium' },
-            'theme-cosmic-mode': { name: 'Cosmic Mode', price: 1800, currency: 'NGN', isFree: false, productId: 'theme_cosmic_premium' },
-            'theme-neon-mode': { name: 'Neon Mode', price: 1800, currency: 'NGN', isFree: false, productId: 'theme_neon_premium' },
-            'theme-retro-mode': { name: 'Retro Mode', price: 1800, currency: 'NGN', isFree: false, productId: 'theme_retro_premium' },
-            'theme-elegant-mode': { name: 'Elegant Mode', price: 2000, currency: 'NGN', isFree: false, productId: 'theme_elegant_premium' },
-            'theme-aurora-bliss': { name: 'Aurora Bliss', price: 2200, currency: 'NGN', isFree: false, productId: 'theme_aurora_bliss_premium' },
-            'theme-midnight-sky': { name: 'Midnight Sky', price: 3000, currency: 'NGN', isFree: false, productId: 'theme_midnight_sky_premium', isVip: true }
+            'theme-dark-mode': { name: 'Dark Mode', price: 0, currency: 'NGN', isFree: true, productId: null }
         };
 
         // Theme purchase/lock state
         let purchasedThemeProductIds = new Set();
         let pendingThemeProductIds = new Set();
 
-        // Mapping between shop product IDs and theme classes
-        const productIdToThemeClass = {
-            'theme_sunset_premium': 'theme-sunset-mode',
-            'theme_glass_premium': 'theme-glass-mode',
-            'theme_ocean_premium': 'theme-ocean-mode',
-            'theme_forest_premium': 'theme-forest-mode',
-            'theme_cosmic_premium': 'theme-cosmic-mode',
-            'theme_neon_premium': 'theme-neon-mode',
-            'theme_retro_premium': 'theme-retro-mode',
-            'theme_elegant_premium': 'theme-elegant-mode',
-            'theme_aurora_bliss_premium': 'theme-aurora-bliss',
-            'theme_midnight_sky_premium': 'theme-midnight-sky'
-        };
+        // No premium product mappings (only default theme)
+        const productIdToThemeClass = {};
 
-        const themeClassToProductId = {
-            'theme-sunset-mode': 'theme_sunset_premium',
-            'theme-glass-mode': 'theme_glass_premium',
-            'theme-ocean-mode': 'theme_ocean_premium',
-            'theme-forest-mode': 'theme_forest_premium',
-            'theme-cosmic-mode': 'theme_cosmic_premium',
-            'theme-neon-mode': 'theme_neon_premium',
-            'theme-retro-mode': 'theme_retro_premium',
-            'theme-elegant-mode': 'theme_elegant_premium',
-            'theme-aurora-bliss': 'theme_aurora_bliss_premium',
-            'theme-midnight-sky': 'theme_midnight_sky_premium'
-        };
+        const themeClassToProductId = {};
 
         // Currency configuration
         const CURRENCIES = {
@@ -6099,7 +6062,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             const body = document.body;
             
             // Remove all theme classes
-            body.classList.remove('theme-light-mode', 'theme-dark-mode', 'theme-sunset-mode', 'theme-glass-mode', 'theme-ocean-mode', 'theme-forest-mode', 'theme-cosmic-mode', 'theme-retro-mode', 'theme-neon-mode', 'theme-elegant-mode', 'theme-quantum-nexus', 'theme-holographic-matrix', 'theme-stellar-genesis', 'theme-circus-maximus', 'theme-temporal-paradox');
+            body.classList.remove('theme-dark-mode');
             
             // Add the new theme class
             body.classList.add(theme);
@@ -6694,21 +6657,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         }
         // Theme icons mapping
         const themeIcons = {
-            'theme-light-mode': 'fas fa-sun',
-            'theme-dark-mode': 'fas fa-moon',
-            'theme-glass-mode': 'fas fa-gem',
-            'theme-sunset-mode': 'fas fa-mountain',
-            'theme-ocean-mode': 'fas fa-water',
-            'theme-forest-mode': 'fas fa-tree',
-            'theme-cosmic-mode': 'fas fa-star',
-            'theme-retro-mode': 'fas fa-tv',
-            'theme-neon-mode': 'fas fa-bolt',
-            'theme-elegant-mode': 'fas fa-crown',
-            'theme-quantum-nexus': 'fas fa-atom',
-            'theme-holographic-matrix': 'fas fa-cube',
-            'theme-stellar-genesis': 'fas fa-rocket',
-            'theme-circus-maximus': 'fas fa-theater-masks',
-            'theme-temporal-paradox': 'fas fa-clock'
+            'theme-dark-mode': 'fas fa-moon'
         };
 
         // Build theme picker list
@@ -14435,7 +14384,7 @@ async function fetchAndDisplayPosts() {
             switch (tier) {
                 case 'premium': return '🌟';
                 case 'vip': return '���';
-                case 'elite': return '👑';
+                case 'elite': return '����';
                 default: return '��';
             }
         }
