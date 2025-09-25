@@ -622,6 +622,8 @@
         const toggleVideoBtn = document.getElementById('toggleVideoBtn');
         const localVideo = document.getElementById('localVideo');
         const remoteVideo = document.getElementById('remoteVideo');
+        const ringbackUrl = "https://cdn.builder.io/o/assets%2Ff4f3997cc4554f07ac7fa298873cc5c0%2Fc1196a8dd03b456f8f8bca5897733de6?alt=media&token=2a8e192d-9d93-43a5-aeba-d32c7b7cfc72&apiKey=f4f3997cc4554f07ac7fa298873cc5c0";
+        let ringbackAudio = (()=>{ try{ const a=new Audio(ringbackUrl); a.loop=true; a.volume=0.35; return a; }catch(_){ return null; } })();
 
         let remoteStream = null;
         let peerConnection = null;
@@ -704,6 +706,7 @@
             callStatusText.textContent = `Calling ${currentPartner.displayName || 'user'}...`;
             declineCallBtn.style.display = 'none';
             endCallBtn.style.display = 'block';
+            try { if (ringbackAudio) { ringbackAudio.currentTime = 0; ringbackAudio.play().catch(()=>{}); } } catch(_){ }
 
             try{
                 localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: type === 'video' });
@@ -733,6 +736,7 @@
                     const data = snap.data(); if (!data) return;
                     if (data.status === 'accepted' && data.answer && peerConnection && !peerConnection.currentRemoteDescription) {
                         await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer)).catch(()=>{});
+                        try { if (ringbackAudio) { ringbackAudio.pause(); ringbackAudio.currentTime = 0; } } catch(_){ }
                         callState = 'connected';
                         callStatusText.textContent = `In call with ${currentPartner.displayName || 'user'}`;
                         callTimerDisplay.style.display = 'block';
@@ -812,6 +816,7 @@
         function toggleVideo(){ if (!localStream) return; localStream.getVideoTracks().forEach(t=>{ t.enabled = !t.enabled; isVideoOff = !t.enabled; }); toggleVideoBtn.classList.toggle('active', isVideoOff); toggleVideoBtn.querySelector('i').className = isVideoOff? 'fas fa-video-slash':'fas fa-video'; localVideo.style.display = isVideoOff? 'none':'block'; }
 
         async function endCall(updateFirestore){
+            try { if (ringbackAudio) { ringbackAudio.pause(); ringbackAudio.currentTime = 0; } } catch(_){ }
             try{ if (callTimeoutId) { clearTimeout(callTimeoutId); callTimeoutId = null; } }catch(_){ }
             try{ if (callDurationInterval) { clearInterval(callDurationInterval); callDurationInterval = null; } }catch(_){ }
             if (updateFirestore && callRef) { try { await updateDoc(callRef, { status: 'ended' }); } catch(_){} }
