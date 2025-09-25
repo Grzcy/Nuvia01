@@ -56,7 +56,7 @@
     .friend-item{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid var(--border-light);cursor:pointer}
     .friend-item:hover{background:rgba(255,255,255,0.08)}
     .friend-avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--accent-color)}
-    .friend-name{font-weight:700}
+    .friend-name{font-weight:700;display:flex;align-items:center;gap:6px}
     .friend-sub{font-size:.85rem;color:var(--text-light)}
     .friends-empty{color:var(--text-light);text-align:center;padding:12px}
   #headerDisplayName{background-image:linear-gradient(90deg,var(--pink),var(--yellow));-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -297,6 +297,15 @@ function startUserHeartbeat(user){
     let typingUnsub = null;
     let typingTimer = null;
 
+// Friends presence (green only when truly online)
+const friendPresenceUnsubs = new Map();
+
+function tsToMillis(v){ try{ if(!v) return 0; if(typeof v.toMillis==='function') return v.toMillis(); if(typeof v.toDate==='function') return v.toDate().getTime(); const n=Number(v); return isNaN(n)?0:n; }catch(_){ return 0; } }
+function isUserOnlineNow(data){ try{ const online = !!data?.online; if(!online) return false; const lastMs = tsToMillis(data?.lastActive); if(!lastMs) return false; const fresh = (Date.now() - lastMs) <= 60*1000; return fresh; }catch(_){ return false; } }
+function updateFriendPresenceDot(friendId, data){ try{ const item = document.querySelector(`.friend-item[data-uid="${friendId}"]`); if(!item) return; const dot = item.querySelector('.presence-dot'); if(!dot) return; const online = isUserOnlineNow(data); if(online){ dot.classList.add('online'); dot.title='Online'; } else { dot.classList.remove('online'); dot.title='Offline'; } }catch(_){ } }
+function subscribeFriendPresence(friendId){ try{ if(friendPresenceUnsubs.has(friendId)) return; const ref = doc(db,'artifacts',appId,'public','data','users', friendId); const unsub = onSnapshot(ref, (snap)=>{ updateFriendPresenceDot(friendId, snap.exists()? snap.data(): null); }, ()=>{}); friendPresenceUnsubs.set(friendId, unsub); }catch(_){ } }
+window.addEventListener('beforeunload', ()=>{ try{ friendPresenceUnsubs.forEach(u=>u&&u()); friendPresenceUnsubs.clear(); }catch(_){ } });
+
     function chatIdFor(u1,u2){ return [u1,u2].sort().join('_'); }
 
     function toggleViews(showFriends){
@@ -316,13 +325,16 @@ function startUserHeartbeat(user){
     function renderFriendItem(f){
       const el = document.createElement('div');
       el.className = 'friend-item';
+      el.dataset.uid = f.uid;
       const img = document.createElement('img');
       img.className = 'friend-avatar';
       const name = document.createElement('div');
       const sub = document.createElement('div');
       name.className = 'friend-name';
       sub.className = 'friend-sub';
-      name.textContent = f.username || 'User';
+      const dot = document.createElement('span'); dot.className = 'presence-dot'; dot.title='Offline';
+      const nameText = document.createElement('span'); nameText.textContent = f.username || 'User';
+      name.appendChild(dot); name.appendChild(nameText);
       sub.textContent = f.bio ? String(f.bio).slice(0,60) : '';
       const avatarUrl = f.profilePicId ? getCloudinaryImageUrl(f.profilePicId,'w_120,h_120,c_fill,g_face,r_max') : `https://placehold.co/80x80/CCCCCC/000000?text=${encodeURIComponent((f.username||'U').charAt(0))}`;
       img.src = avatarUrl;
@@ -330,6 +342,8 @@ function startUserHeartbeat(user){
       const tc = document.createElement('div'); tc.style.display='flex'; tc.style.flexDirection='column'; tc.appendChild(name); tc.appendChild(sub);
       el.appendChild(tc);
       el.addEventListener('click', ()=>{ window.location.href = `/chat.html?partnerId=${f.uid}`; });
+      // Subscribe to presence updates (green only when truly online)
+      subscribeFriendPresence(f.uid);
       return el;
     }
 
