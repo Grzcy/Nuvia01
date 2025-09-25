@@ -389,7 +389,13 @@ window.addEventListener('beforeunload', ()=>{ try{ friendPresenceUnsubs.forEach(
       el.appendChild(img);
       const tc = document.createElement('div'); tc.style.display='flex'; tc.style.flexDirection='column'; tc.appendChild(name); tc.appendChild(sub);
       el.appendChild(tc);
-      el.addEventListener('click', ()=>{
+      el.addEventListener('click', (ev)=>{
+        ev.preventDefault();
+        try{
+          const items = Array.from(document.querySelectorAll('.friend-item'));
+          items.forEach(it=>{ if(it!==el) it.style.display='none'; });
+          friendsView?.classList.add('is-hidden');
+        }catch(_){ }
         const hint = { uid: f.uid, username: f.username||'User', profilePicId: f.profilePicId||null, avatarUrl };
         openChatWith(f.uid, hint);
       });
