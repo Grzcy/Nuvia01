@@ -1401,7 +1401,7 @@
         window.addEventListener('storage', (event) => {
             if (event.key === 'jchat-theme') {
                 const newTheme = event.newValue || 'theme-dark-mode';
-                const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+                const themes = ['theme-dark-mode'];
                 if (themes.includes(newTheme)) {
                     document.body.classList.remove(...themes);
                     document.body.classList.add(newTheme);
