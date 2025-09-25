@@ -5566,7 +5566,7 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
                     
                     // VIP: unlock all premium themes
                     if (vipPass) {
-                        const userEntitlementsRef = doc(db, 'artifacts', appId, 'users', userId, 'user_entitlements');
+                        const userEntitlementsRef = doc(db, 'artifacts', appId, 'users', userId, 'profiles', 'user_entitlements');
                         const entitlementsSnap = await tx.get(userEntitlementsRef);
                         const entitlements = entitlementsSnap.exists() ? entitlementsSnap.data() : {};
 
@@ -5593,7 +5593,7 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
 
                     if (!vipPass && themeItems.length > 0) {
                         // Handle theme purchases - unlock themes for user using new system
-                        const userEntitlementsRef = doc(db, 'artifacts', appId, 'users', userId, 'user_entitlements');
+                        const userEntitlementsRef = doc(db, 'artifacts', appId, 'users', userId, 'profiles', 'user_entitlements');
                         const entitlementsSnap = await tx.get(userEntitlementsRef);
                         const entitlements = entitlementsSnap.exists() ? entitlementsSnap.data() : {};
                         
