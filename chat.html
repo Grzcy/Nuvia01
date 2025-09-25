@@ -709,6 +709,7 @@
             callOverlay.classList.add('active');
             callOverlay.classList.remove('voice-call','video-call');
             callOverlay.classList.add(kind === 'voice' ? 'voice-call' : 'video-call');
+            try { setCallHeader(); } catch(_) {}
         }
         function hideOverlay(){ callOverlay.classList.remove('active','voice-call','video-call'); }
 
@@ -760,6 +761,7 @@
             showOverlay(type);
             callStatusIcon.className = `fas fa-${type === 'voice' ? 'phone' : 'video'} call-status-icon`;
             callStatusText.textContent = `Calling ${currentPartner.displayName || 'user'}...`;
+            try { setCallPill('Calling', 'ringing'); } catch(_) {}
             declineCallBtn.style.display = 'none';
             endCallBtn.style.display = 'block';
             try { if (ringbackAudio) { ringbackAudio.currentTime = 0; ringbackAudio.play().catch(()=>{}); } } catch(_){ }
@@ -795,6 +797,7 @@
                         try { if (ringbackAudio) { ringbackAudio.pause(); ringbackAudio.currentTime = 0; } } catch(_){ }
                         callState = 'connected';
                         callStatusText.textContent = `In call with ${currentPartner.displayName || 'user'}`;
+                        try { setCallPill('Connected', 'connected'); } catch(_) {}
                         callTimerDisplay.style.display = 'block';
                         toggleMuteBtn.style.display = 'block';
                         toggleVideoBtn.style.display = type === 'video' ? 'block' : 'none';
@@ -826,6 +829,7 @@
             try{
                 callState = 'connected';
                 callStatusText.textContent = `Call with ${currentPartner?.displayName || 'user'}`;
+                try { setCallPill('Connected', 'connected'); } catch(_) {}
                 callTimerDisplay.style.display = 'block';
                 acceptCallBtn.style.display = 'none';
                 declineCallBtn.style.display = 'none';
@@ -873,6 +877,7 @@
         function toggleVideo(){ if (!localStream) return; localStream.getVideoTracks().forEach(t=>{ t.enabled = !t.enabled; isVideoOff = !t.enabled; }); toggleVideoBtn.classList.toggle('active', isVideoOff); toggleVideoBtn.querySelector('i').className = isVideoOff? 'fas fa-video-slash':'fas fa-video'; localVideo.style.display = isVideoOff? 'none':'block'; }
 
         async function endCall(updateFirestore){
+            try { setCallPill('Ended', 'ended'); } catch(_) {}
             try { if (ringbackAudio) { ringbackAudio.pause(); ringbackAudio.currentTime = 0; } } catch(_){ }
             try { if (receiverRingtoneAudio) { receiverRingtoneAudio.pause(); receiverRingtoneAudio.currentTime = 0; } } catch(_){ }
             try{ if (callTimeoutId) { clearTimeout(callTimeoutId); callTimeoutId = null; } }catch(_){ }
@@ -901,6 +906,7 @@
                 resetCallUi(); showOverlay(currentCallType);
                 callStatusIcon.className = `fas fa-${currentCallType === 'voice' ? 'phone' : 'video'} call-status-icon`;
                 callStatusText.textContent = `Incoming ${currentCallType} call from ${currentPartner.displayName || 'user'}...`;
+                try { setCallPill('Ringing', 'ringing'); } catch(_) {}
                 acceptCallBtn.style.display = 'block';
                 declineCallBtn.style.display = 'block';
                 try { if (receiverRingtoneAudio) { receiverRingtoneAudio.currentTime = 0; receiverRingtoneAudio.play().catch(()=>{}); } } catch(_){ }
