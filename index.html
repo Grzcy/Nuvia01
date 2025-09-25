@@ -6234,9 +6234,12 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
 
             const body = document.body;
             
-            // Remove all theme classes
-            body.classList.remove('theme-dark-mode');
-            
+            // Remove all theme/premium theme classes
+            try {
+                const existing = [...body.classList].filter(c => c.startsWith('theme-') || c.startsWith('premium-theme-'));
+                if (existing.length) body.classList.remove(...existing);
+            } catch(_) {}
+
             // Add the new theme class
             body.classList.add(theme);
             
@@ -14569,7 +14572,7 @@ async function fetchAndDisplayPosts() {
         // Get Premium Badge Icon
         function getPremiumBadgeIcon(tier) {
             switch (tier) {
-                case 'premium': return '🌟';
+                case 'premium': return '����';
                 case 'vip': return '���';
                 case 'elite': return '����';
                 default: return '��';
