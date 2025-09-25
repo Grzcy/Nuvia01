@@ -372,6 +372,13 @@
     <!-- Call Overlay -->
     <div id="callOverlay" role="dialog" aria-modal="true" aria-labelledby="callStatusText">
         <div class="content">
+            <div class="call-header">
+                <div class="call-avatar"><img id="callPartnerAvatar" alt="Contact"></div>
+                <div class="call-partner-meta">
+                    <div id="callPartnerName" class="call-partner-name">Contact</div>
+                    <span id="callStatusPill" class="call-pill"><span id="callStatusPillText">Calling</span></span>
+                </div>
+            </div>
             <div class="video-streams">
                 <video id="remoteVideo" playsinline autoplay></video>
                 <video id="localVideo" playsinline autoplay muted></video>
