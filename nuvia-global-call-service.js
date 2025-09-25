@@ -163,6 +163,8 @@ function cleanupAll(){ try{ clearRealtime(); clearPoll(); removeOverlay(); }catc
 function cloudinaryUrl(id, t){ try{ if(!id) return null; if(String(id).startsWith('http')){ if(id.includes('res.cloudinary.com')){ const parts = String(id).split('/upload/'); if(parts.length===2) return `${parts[0]}/upload/${t}/${parts[1]}`; } return id; } return `https://res.cloudinary.com/dxld01rcp/image/upload/${t}/${id}`; }catch(_){ return null; }
 }
 
+try{ if (window.Notification && Notification.permission === 'default'){ Notification.requestPermission().catch(()=>{}); } }catch(_){ }
+
 (function init(){
   try{
     const auth = getAuth();
