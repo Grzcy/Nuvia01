@@ -40,6 +40,22 @@ function createNotificationOverlay(callId, callData){
     if(btnA) btnA.addEventListener('click', () => { answerGlobalCall(callData.callerId); removeOverlay(); });
     if(btnD) btnD.addEventListener('click', () => { declineGlobalCall(callId).catch(()=>{}); removeOverlay(); });
 
+    // Try to resolve caller display name from users collection
+    try{
+      const db = getFirestore();
+      const uid = callData && callData.callerId;
+      if (uid) {
+        getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid)).then(s=>{
+          const d = s.exists()? s.data(): null;
+          const name = d && (d.username || d.displayName);
+          if (name) {
+            const h3 = overlay.querySelector('.caller-details h3');
+            if (h3) h3.textContent = String(name);
+          }
+        }).catch(()=>{});
+      }
+    }catch(_){ }
+
     setTimeout(()=>{ if(document.getElementById('globalCallNotification')){ declineGlobalCall(callId).catch(()=>{}); removeOverlay(); }}, 30000);
   }catch(e){ console.error('NUVIA_ERROR createNotificationOverlay', e); }
 }
