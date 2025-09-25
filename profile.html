@@ -10160,17 +10160,43 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
         }
 
         // --- Event Listeners (moved to DOMContentLoaded for safety) ---
-        document.addEventListener('DOMContentLoaded', () => {
-            // Apply theme on load
-            const savedTheme = localStorage.getItem('jchat-theme');
-            const themes = ['theme-dark-mode'];
-            if (savedTheme && themes.includes(savedTheme)) {
-                document.body.classList.remove(...themes);
-                document.body.classList.add(savedTheme);
-            } else {
-                document.body.classList.remove(...themes);
-                document.body.classList.add('theme-dark-mode'); // Default
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Inject shared theme CSS from index so premium/base themes are available
+            async function injectSharedThemes(){
+                try{
+                    if (document.getElementById('shared-theme-styles')) return;
+                    let css = null;
+                    try { css = sessionStorage.getItem('shared_theme_css') || null; } catch(_){ css=null; }
+                    if (!css){
+                        const res = await fetch('index.html', { credentials: 'same-origin' });
+                        if (res.ok) {
+                            const html = await res.text();
+                            const matches = html.match(/body\.(?:theme|premium-theme)-[a-z0-9-\s\S]*?\{[\s\S]*?\}/gi) || [];
+                            css = matches.join('\n\n');
+                            try { sessionStorage.setItem('shared_theme_css', css); } catch(_){ }
+                        }
+                    }
+                    if (css){
+                        const style = document.createElement('style');
+                        style.id = 'shared-theme-styles';
+                        style.textContent = css;
+                        document.head.appendChild(style);
+                    }
+                } catch(_){ }
             }
+            // Apply theme saved in localStorage (supports base and premium)
+            function applySavedTheme(){
+                try {
+                    const body = document.body;
+                    const saved = localStorage.getItem('jchat-theme') || localStorage.getItem('nuvia-theme') || 'theme-dark-mode';
+                    [...body.classList].filter(c => c.startsWith('theme-') || c.startsWith('premium-theme-')).forEach(c => body.classList.remove(c));
+                    body.classList.add(saved);
+                } catch(_){ }
+            }
+            try { if (!localStorage.getItem('jchat-theme')) localStorage.setItem('jchat-theme', 'theme-dark-mode'); } catch(_){ }
+            await injectSharedThemes();
+            applySavedTheme();
+            window.addEventListener('storage', (e) => { if (e.key === 'jchat-theme' || e.key === 'nuvia-theme') applySavedTheme(); });
             // Enforce pink-yellow background for Profile page
             document.body.classList.add('profile-pinkyellow-bg');
 
@@ -10447,13 +10473,11 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
         }); // Close DOMContentLoaded event listener
 
         window.addEventListener('storage', (event) => {
-            if (event.key === 'jchat-theme') {
+            if (event.key === 'jchat-theme' || event.key === 'nuvia-theme') {
+                const body = document.body;
                 const newTheme = event.newValue || 'theme-dark-mode';
-                const themes = ['theme-dark-mode'];
-                if (themes.includes(newTheme)) {
-                    document.body.classList.remove(...themes);
-                    document.body.classList.add(newTheme);
-                }
+                [...body.classList].filter(c => c.startsWith('theme-') || c.startsWith('premium-theme-')).forEach(c => body.classList.remove(c));
+                body.classList.add(newTheme);
             }
         });
 
