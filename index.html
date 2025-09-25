@@ -3106,6 +3106,39 @@
             --border-light: rgba(255, 255, 255, 0.2) !important;
         }
 
+        /* Premium Sparkling Gold Theme */
+        @keyframes goldSparkle {
+            0% { opacity: 0.15; transform: translateY(0); }
+            50% { opacity: 0.35; transform: translateY(-3px); }
+            100% { opacity: 0.15; transform: translateY(0); }
+        }
+        body.premium-theme-gold {
+            --background-main: #0b0b0f !important;
+            --card-background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03)) !important;
+            --white: #ffffff !important;
+            --text-light: rgba(255, 255, 255, 0.78) !important;
+            --border-light: rgba(255, 215, 0, 0.18) !important;
+            --accent-color: var(--theme-gold) !important;
+            --button-background: linear-gradient(90deg, var(--theme-gold), #ffa500) !important;
+            --button-shadow: 0 4px 15px rgba(255, 215, 0, .35), 0 4px 15px rgba(255, 165, 0, .25) !important;
+            background-image:
+                radial-gradient(circle at 20% 10%, rgba(255, 215, 0, 0.08), transparent 120px),
+                radial-gradient(circle at 80% 90%, rgba(255, 165, 0, 0.08), transparent 160px);
+        }
+        body.premium-theme-gold::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                radial-gradient(2px 2px at 10% 20%, rgba(255, 215, 0, 0.6), transparent),
+                radial-gradient(2px 2px at 30% 80%, rgba(255, 255, 255, 0.4), transparent),
+                radial-gradient(2px 2px at 70% 30%, rgba(255, 215, 0, 0.5), transparent),
+                radial-gradient(2px 2px at 90% 60%, rgba(255, 255, 255, 0.35), transparent);
+            animation: goldSparkle 4.5s infinite ease-in-out;
+            z-index: 0;
+        }
+
         /* Premium Features Section */
         .premium-features-section {
             background: var(--card-background);
@@ -5638,7 +5671,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 el.innerHTML = `
                     <div class="offline-banner-inner">
                         <span class="offline-icon"><i class="fas fa-wifi"></i></span>
-                        <span class="offline-text">No internet connection. We’ll reconnect when you���re back online.</span>
+                        <span class="offline-text">No internet connection. We’ll reconnect when you����re back online.</span>
                     </div>`;
                 document.body.appendChild(el);
             }
@@ -5747,11 +5780,12 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         let selectedThumbnailBlob = null; let selectedThumbnailDataUrl = null;
         // Theme switcher functionality
         let currentTheme = 'theme-dark-mode'; // Default theme
-        const themeSwitcherThemes = ['theme-dark-mode'];
+        const themeSwitcherThemes = ['theme-dark-mode', 'premium-theme-gold'];
 
         // Theme catalog (only default retained)
         const themeCatalog = {
-            'theme-dark-mode': { name: 'Dark Mode', price: 0, currency: 'NGN', isFree: true, productId: null }
+            'theme-dark-mode': { name: 'Dark Mode', price: 0, currency: 'NGN', isFree: true, productId: null },
+            'premium-theme-gold': { name: 'Sparkling Gold', price: 0, currency: 'NGN', isFree: true, productId: null }
         };
 
         // Theme purchase/lock state
@@ -14404,18 +14438,22 @@ async function fetchAndDisplayPosts() {
 
         // Apply Premium Theme
         function applyPremiumTheme(themeName, silent = false) {
-            if (!currentUser) return;
-
             // Remove existing premium themes
             removePremiumTheme();
 
             // Apply new theme
-            document.body.classList.add(`premium-theme-${themeName}`);
+            const cls = `premium-theme-${themeName}`;
+            document.body.classList.add(cls);
             activePremiumTheme = themeName;
 
             // Save theme preference
-            localStorage.setItem(`premium_theme_${currentUser.uid}`, themeName);
+            try { if (currentUser && currentUser.uid) localStorage.setItem(`premium_theme_${currentUser.uid}`, themeName); } catch(_){ }
+            try { localStorage.setItem('jchat-theme', cls); } catch(_){ }
+            try { localStorage.setItem('nuvia-theme', cls); } catch(_){ }
 
+            if (!silent && typeof showMessageBox === 'function') {
+                showMessageBox('Theme applied.', 'success');
+            }
             console.log(`Nuvia_DEBUG: Applied premium theme: ${themeName}`);
         }
 
