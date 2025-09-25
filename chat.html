@@ -13,7 +13,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" onload="this.rel='stylesheet'" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"></noscript>
 
     <link rel="prefetch" href="index.html">
     <link rel="prefetch" href="chat.html">
@@ -155,6 +156,7 @@
    .friend-meta { min-width: 0; }
    .friend-name { font-size: 15px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .friend-sub { font-size: 11px; color: var(--text-light); }
+        .friend-last-time { margin-left: 8px; opacity: .85; }
         .friend-presence { display: inline-flex; align-items: center; gap: 6px; }
         .friend-dot { width: 8px; height: 8px; border-radius: 50%; background: #6c757d; }
         .friend-dot.online { background: #4CAF50; box-shadow: 0 0 8px rgba(76,175,80,.7); animation: onlinePulse 1.8s ease-in-out infinite; }
@@ -339,6 +341,16 @@
         .header .header-profile-pic { box-shadow: 0 0 0 2px var(--border-light), 0 0 18px rgba(0,213,255,0.15), 0 0 18px rgba(255,46,146,0.15); animation: avatarPulse 4s ease-in-out infinite; }
         @keyframes avatarPulse { 0%, 100% { box-shadow: 0 0 0 2px var(--border-light), 0 0 16px rgba(0,213,255,0.18), 0 0 16px rgba(255,46,146,0.18); } 50% { box-shadow: 0 0 0 2px var(--border-light), 0 0 22px rgba(255,46,146,0.28), 0 0 22px rgba(0,213,255,0.28); } }
     </style>
+<!-- Performance hints -->
+    <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+    <link rel="preconnect" href="https://api.cloudinary.com" crossorigin>
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://firebaseio.com" crossorigin>
+    <link rel="dns-prefetch" href="//res.cloudinary.com">
+    <link rel="dns-prefetch" href="//api.cloudinary.com">
+    <link rel="dns-prefetch" href="//www.gstatic.com">
+    <link rel="dns-prefetch" href="//firebaseio.com">
+    <script src="assets/js/lazy-images.js" defer></script>
 </head>
 <body class="theme-dark-mode">
     <div class="container">
@@ -434,7 +446,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where, arrayUnion, getDocs } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp, where, arrayUnion, getDocs, limit } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
         import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js";
 
         // Firebase config (same pattern as Profile.html)
@@ -1646,7 +1658,7 @@
                     <img src="${avatar}" onerror="this.src='https://placehold.co/56x56/00d5ff/ffffff?text=${initial}'" alt="${initial}">
                     <div class="friend-meta">
                         <div class="friend-name">${escapeHtml(f.displayName)}</div>
-                        <div class="friend-sub"><span class="friend-presence"><span class="friend-dot" data-presence-id="${f.id}"></span><span data-presence-text-id="${f.id}">Offline</span></span></div>
+                        <div class="friend-sub"><span class="friend-presence"><span class="friend-dot" data-presence-id="${f.id}"></span><span data-presence-text-id="${f.id}">Offline</span></span><span class="friend-last-time" data-last-ts-id="${f.id}"></span></div>
                     </div>
                 </div>`;
             }).join('');
@@ -1667,6 +1679,58 @@
             });
             // subscribe to presence for each friend (lightweight)
             data.forEach(f => subscribeFriendPresence(f.id));
+            loadLastTimestampsForFriends(data);
+        }
+
+        const friendLastTsCache = new Map();
+        function formatTimeShort(tsMs){
+            try { const d = new Date(tsMs); return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch { return ''; }
+        }
+        async function fetchFriendLastTimestamp(friendId){
+            if (!currentUser) return null;
+            if (friendLastTsCache.has(friendId)) return friendLastTsCache.get(friendId);
+            const chatId = chatIdFor(currentUser.uid, friendId);
+            let ts = null;
+            try {
+                const metaRef = doc(db, "artifacts", appId, "users", currentUser.uid, "chat_metadata", friendId);
+                const metaSnap = await getDoc(metaRef);
+                if (metaSnap.exists()) {
+                    const md = metaSnap.data() || {};
+                    const lm = md.lastMessageTimestamp || md.lastReadMessageTimestamp || md.updatedAt || null;
+                    ts = lm?.toMillis ? lm.toMillis() : (typeof lm === 'number' ? lm : null);
+                }
+            } catch {}
+            try {
+                if (!ts) {
+                    const msgsRef = collection(db, "artifacts", appId, "public", "data", "chats", chatId, "messages");
+                    const qs = query(msgsRef, orderBy("timestamp", "desc"), limit(1));
+                    const snap = await getDocs(qs);
+                    if (!snap.empty) {
+                        const m = snap.docs[0].data();
+                        ts = m.timestamp?.toMillis ? m.timestamp.toMillis() : (m.timestamp || null);
+                    }
+                }
+            } catch {}
+            if (ts) friendLastTsCache.set(friendId, ts);
+            return ts;
+        }
+        function setFriendLastTsDom(friendId, tsMs){
+            try{
+                const elList = document.querySelectorAll(`[data-last-ts-id="${friendId}"]`);
+                const text = tsMs ? ` • ${formatTimeShort(tsMs)}` : '';
+                elList.forEach(el => el.textContent = text);
+            } catch {}
+        }
+        function loadLastTimestampsForFriends(list){
+            try{
+                const data = Array.isArray(list) ? list : [];
+                data.forEach((f, idx) => {
+                    setTimeout(async () => {
+                        const ts = await fetchFriendLastTimestamp(f.id);
+                        if (ts) setFriendLastTsDom(f.id, ts);
+                    }, idx * 60);
+                });
+            } catch {}
         }
 
         const friendPresenceUnsubs = new Map();
