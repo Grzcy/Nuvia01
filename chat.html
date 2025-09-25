@@ -47,6 +47,12 @@
 
     /* small screens */
     @media (max-width:600px){.chat-header .partner-name{font-size:1rem}.message-item .avatar{width:24px;height:24px}.message-bubble{font-size:0.85rem}}
+    .is-hidden{display:none}
+    .hidden-input{display:none}
+    .emoji-panel{width:100%;background:var(--input-background);border:1px solid var(--border-light);border-radius:8px;padding:6px;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:6px;max-height:160px;overflow:auto}
+    @media (max-width:600px){.emoji-panel{grid-template-columns:repeat(8,minmax(0,1fr))}}
+    .emoji-btn{background:transparent;border:1px solid var(--border-light);border-radius:8px;padding:6px;font-size:18px;cursor:pointer;color:var(--white)}
+    .emoji-btn:hover{background:rgba(255,255,255,0.06)}
   </style>
 </head>
 <body class="theme-dark-mode">
@@ -84,10 +90,25 @@
       </div>
 
       <div class="input-row">
-        <input type="file" id="mediaInput" accept="image/*,video/*" style="display:none">
+        <input type="file" id="mediaInput" accept="image/*,video/*" class="hidden-input">
+        <button id="emojiButton" class="attach-btn" title="Emoji"><i class="fas fa-face-smile"></i></button>
         <button id="attachButton" class="attach-btn" title="Attach media"><i class="fas fa-paperclip"></i></button>
         <textarea id="messageInput" placeholder="Type your message..."></textarea>
         <button id="sendButton" class="send-btn" title="Send"><i class="fas fa-paper-plane"></i></button>
+      </div>
+      <div id="emojiPanel" class="emoji-panel is-hidden">
+        <button class="emoji-btn" data-emoji="😀">😀</button>
+        <button class="emoji-btn" data-emoji="😁">😁</button>
+        <button class="emoji-btn" data-emoji="😂">😂</button>
+        <button class="emoji-btn" data-emoji="😊">😊</button>
+        <button class="emoji-btn" data-emoji="😍">😍</button>
+        <button class="emoji-btn" data-emoji="🥳">🥳</button>
+        <button class="emoji-btn" data-emoji="😎">😎</button>
+        <button class="emoji-btn" data-emoji="👍">👍</button>
+        <button class="emoji-btn" data-emoji="🔥">🔥</button>
+        <button class="emoji-btn" data-emoji="💯">💯</button>
+        <button class="emoji-btn" data-emoji="🙏">🙏</button>
+        <button class="emoji-btn" data-emoji="🎉">🎉</button>
       </div>
     </div>
   </main>
@@ -97,7 +118,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, doc, getDoc, query, orderBy, onSnapshot, addDoc, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, doc, getDoc, query, orderBy, onSnapshot, addDoc, serverTimestamp, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getCloudinaryImageUrl, displayProfilePicture } from './assets/js/avatar-utils.js';
 
     const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
@@ -137,6 +158,8 @@
     const mediaPreview = document.getElementById('mediaPreview');
     const mediaFileName = document.getElementById('mediaFileName');
     const removeMediaButton = document.getElementById('removeMediaButton');
+    const emojiButton = document.getElementById('emojiButton');
+    const emojiPanel = document.getElementById('emojiPanel');
 
     const messageInput = document.getElementById('messageInput');
     const sendButton = document.getElementById('sendButton');
@@ -147,6 +170,8 @@
     let chatId = null;
     let unsubscribeMessages = null;
     let selectedMediaFile = null;
+    let typingUnsub = null;
+    let typingTimer = null;
 
     function chatIdFor(u1,u2){ return [u1,u2].sort().join('_'); }
 
@@ -190,7 +215,7 @@
         const p = document.createElement('div'); p.textContent = m.text || ''; bubble.appendChild(p);
       }
 
-      const meta = document.createElement('div'); meta.className='message-meta'; meta.textContent = formatTime(m.timestamp);
+      const meta = document.createElement('div'); meta.className='message-meta'; meta.textContent = (formatTime(m.timestamp) + (isSent ? (m.seenAt ? ' ✓✓' : ' ✓') : ''));
       contentWrap.appendChild(bubble); contentWrap.appendChild(meta);
 
       item.appendChild(avatarImg);
@@ -201,15 +226,44 @@
 
     async function ensureChatDoc(chatId, partnerId){ try{ const chatDocRef = doc(db,'artifacts',appId,'public','data','chats',chatId); const snap = await getDoc(chatDocRef); if(!snap.exists()){ await setDoc(chatDocRef, { participants:[currentUser.uid, partnerId], createdAt: serverTimestamp(), lastMessageAt: serverTimestamp() }, { merge:true }); } return true; }catch(e){ console.error('ensureChatDoc failed',e); return false; } }
 
-    async function startListening(){ if(!currentUser || !partnerId) return; chatId = chatIdFor(currentUser.uid, partnerId); const messagesRef = collection(db,'artifacts',appId,'public','data','chats',chatId,'messages'); const q = query(messagesRef, orderBy('timestamp','asc'));
+    async function startListening(){
+      if(!currentUser || !partnerId) return;
+      chatId = chatIdFor(currentUser.uid, partnerId);
+      const messagesRef = collection(db,'artifacts',appId,'public','data','chats',chatId,'messages');
+      const q = query(messagesRef, orderBy('timestamp','asc'));
+
+      // Typing listener for partner
+      try{
+        if(typingUnsub) typingUnsub();
+        const partnerTypingRef = doc(db,'artifacts',appId,'public','data','chats',chatId,'typing', partnerId);
+        typingUnsub = onSnapshot(partnerTypingRef, (snap)=>{
+          const d = snap.data();
+          if(d && d.typing && (Date.now() - (d.ts||0) < 5000)){
+            partnerStatusEl.textContent = 'Typing...';
+          }else{
+            const last = partnerProfile && (partnerProfile.lastActive?.toDate ? partnerProfile.lastActive.toDate() : (partnerProfile.lastActive? new Date(partnerProfile.lastActive): null));
+            partnerStatusEl.textContent = (partnerProfile && partnerProfile.online) ? 'Online' : (last ? ('Last seen ' + last.toLocaleString()) : 'Offline');
+          }
+        }, ()=>{});
+      }catch(_){ }
+
       if(unsubscribeMessages) unsubscribeMessages();
-      unsubscribeMessages = onSnapshot(q,(snap)=>{
-        clearMessages(); const docs = [];
-        snap.forEach(s=>{ const data = s.data(); if(!data) return; docs.push(data); });
+      unsubscribeMessages = onSnapshot(q, async (snap)=>{
+        clearMessages();
+        const docs = snap.docs.map(s=>({ id: s.id, ...s.data() }));
         if(docs.length===0){ messagesLoading.textContent='No messages yet. Say hello!'; }
         else { messagesLoading.style.display='none'; }
+
+        for(const d of docs){
+          try{
+            if(d.receiverId === currentUser.uid && !d.seenAt){
+              const mref = doc(db,'artifacts',appId,'public','data','chats',chatId,'messages', d.id);
+              await updateDoc(mref, { seenAt: serverTimestamp() });
+            }
+          }catch(_){ }
+        }
+
         docs.forEach(d=> renderMessage(d));
-        // scroll to bottom
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }, (err)=>{ console.error('messages listener',err); showMessage('Failed to load messages','error',4000); });
     }
@@ -219,6 +273,16 @@
       const f = e.target.files && e.target.files[0]; if(!f) return; selectedMediaFile = f; mediaFileName.textContent = f.name; mediaPreview.src = URL.createObjectURL(f); mediaPreviewContainer.style.display='flex';
     });
     removeMediaButton.addEventListener('click', ()=>{ selectedMediaFile = null; mediaInput.value=''; mediaPreview.src=''; mediaPreviewContainer.style.display='none'; mediaFileName.textContent=''; });
+
+    // Typing state
+    function handleTypingEvent(){ try{ setTyping(true); clearTimeout(typingTimer); typingTimer = setTimeout(()=> setTyping(false), 1500); }catch(_){}}
+    async function setTyping(active){ try{ if(!currentUser || !chatId) return; const myTypingRef = doc(db,'artifacts',appId,'public','data','chats',chatId,'typing', currentUser.uid); await setDoc(myTypingRef, { typing: !!active, ts: Date.now() }, { merge: true }); }catch(_){}}
+    messageInput.addEventListener('input', handleTypingEvent);
+    window.addEventListener('beforeunload', ()=>{ try{ setTyping(false); }catch(_){ } });
+
+    // Emoji picker
+    if(emojiButton){ emojiButton.addEventListener('click', ()=>{ if(emojiPanel) emojiPanel.classList.toggle('is-hidden'); }); }
+    if(emojiPanel){ emojiPanel.addEventListener('click', (e)=>{ const btn = e.target.closest('.emoji-btn'); if(!btn) return; const emoji = btn.getAttribute('data-emoji')||''; const start = messageInput.selectionStart||messageInput.value.length; const end = messageInput.selectionEnd||messageInput.value.length; messageInput.value = messageInput.value.slice(0,start) + emoji + messageInput.value.slice(end); messageInput.focus(); handleTypingEvent(); }); }
 
     backBtn.addEventListener('click', ()=>{ window.history.back(); });
     viewProfileBtn.addEventListener('click', ()=>{ if(partnerId) window.location.href = `/profile.html?userId=${partnerId}`; });
