@@ -1425,6 +1425,11 @@
             if (panel) panel.classList.toggle('is-hidden', hasPartner);
             if (messages) messages.classList.toggle('is-hidden', !hasPartner);
             if (inputBar) inputBar.classList.toggle('is-hidden', !hasPartner);
+            // Toggle call icons visibility based on selection
+            const vc = document.getElementById('voiceCallBtn');
+            const vid = document.getElementById('videoCallBtn');
+            if (vc) vc.style.display = hasPartner ? 'inline-flex' : 'none';
+            if (vid) vid.style.display = hasPartner ? 'inline-flex' : 'none';
             if (!hasPartner) {
                 try { closeFriends(); } catch(_) {}
                 if (emojiPanel) emojiPanel.style.display = 'none';
