@@ -598,8 +598,12 @@ window.addEventListener('beforeunload', ()=>{ try{ friendPresenceUnsubs.forEach(
         knownMessageIds = new Set(); allMessages = []; clearMessages();
         const bar = document.getElementById('pinnedBar'); if(bar){ bar.style.display='none'; const list=document.getElementById('pinnedList'); if(list) list.innerHTML=''; }
         partnerId = null; partnerProfile = null; chatId = null;
+        // Restore friends list instantly
+        try{ Array.from(document.querySelectorAll('.friend-item')).forEach(it=> it.style.display=''); }catch(_){ }
+        try{ if(friendSearchInput) friendSearchInput.value=''; }catch(_){ }
+        if(myFriends && myFriends.length){ try{ renderFriends(); }catch(_){ } }
+        else if(currentUser){ fetchFriendsFor(currentUser.uid).catch(()=>{}); }
         toggleViews(true);
-        if(currentUser && myFriends.length===0){ fetchFriendsFor(currentUser.uid).catch(()=>{}); }
         try{ history.replaceState(null,'','/chat.html'); }catch(_){ }
       }catch(_){ toggleViews(true); }
     }
