@@ -22,8 +22,8 @@ function createNotificationOverlay(callId, callData){
             <div class="caller-details"><h3>${escapeHtml(callerName)}</h3><p>Incoming ${isVideo ? 'video' : 'voice'} call</p></div>
           </div>
           <div class="call-notification-actions">
-            <button class="decline-call-btn" id="globalDeclineBtn"><i class="fas fa-phone-slash"></i></button>
-            <button class="answer-call-btn" id="globalAnswerBtn"><i class="fas fa-phone"></i></button>
+            <button class="decline-call-btn" id="globalDeclineBtn" aria-label="Decline"><i class="fas fa-phone-slash"></i></button>
+            <button class="answer-call-btn" id="globalAnswerBtn" aria-label="Answer"><i class="fas fa-phone"></i></button>
           </div>
         </div>
       </div>
@@ -40,9 +40,8 @@ function createNotificationOverlay(callId, callData){
     if(btnA) btnA.addEventListener('click', () => { answerGlobalCall(callData.callerId); removeOverlay(); });
     if(btnD) btnD.addEventListener('click', () => { declineGlobalCall(callId).catch(()=>{}); removeOverlay(); });
 
-    // Auto-decline after 30s
     setTimeout(()=>{ if(document.getElementById('globalCallNotification')){ declineGlobalCall(callId).catch(()=>{}); removeOverlay(); }}, 30000);
-  }catch(e){ console.error('JCHAT_ERROR createNotificationOverlay', e); }
+  }catch(e){ console.error('NUVIA_ERROR createNotificationOverlay', e); }
 }
 
 function removeOverlay(){ try{ const el=document.getElementById('globalCallNotification'); if(el) el.remove(); const s=document.getElementById('globalCallNotificationStyles'); if(s) s.remove(); }catch(e){}
@@ -50,9 +49,9 @@ function removeOverlay(){ try{ const el=document.getElementById('globalCallNotif
 
 function playRingtone(){ try{ const audio = new Audio('https://cdn.builder.io/o/assets%2Fc5542eb63b564e86810556e73a332186%2Ffa802bcb41594c9fb0a35733e90d7cee?alt=media&token=adb505bd-f77f-4840-a50b-b13c040e0dca&apiKey=c5542eb63b564e86810556e73a332186'); audio.loop = true; audio.volume = 0.35; audio.play().catch(()=>{}); setTimeout(()=>{ try{ audio.pause(); }catch(e){} }, 20000);}catch(e){} }
 
-async function answerGlobalCall(callerId){ try{ if(!callerId) return; window.location.href = `/chat.html?partnerId=${encodeURIComponent(callerId)}`; }catch(e){ console.error('JCHAT_ERROR answerGlobalCall', e); } }
+async function answerGlobalCall(callerId){ try{ if(!callerId) return; window.location.href = `/chat.html?partnerId=${encodeURIComponent(callerId)}`; }catch(e){ console.error('NUVIA_ERROR answerGlobalCall', e); } }
 
-async function declineGlobalCall(callId){ try{ const db = getFirestore(); const callDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'calls', callId); await updateDoc(callDocRef, { status: 'declined', endedAt: serverTimestamp() }); removeOverlay(); }catch(e){ console.error('JCHAT_ERROR declineGlobalCall', e); } }
+async function declineGlobalCall(callId){ try{ const db = getFirestore(); const callDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'calls', callId); await updateDoc(callDocRef, { status: 'declined', endedAt: serverTimestamp() }); removeOverlay(); }catch(e){ console.error('NUVIA_ERROR declineGlobalCall', e); } }
 
 function clearRealtime(){ try{ if(realtimeUnsub){ realtimeUnsub(); realtimeUnsub = null; } }catch(e){} }
 function clearPoll(){ try{ if(pollIntervalId){ clearInterval(pollIntervalId); pollIntervalId = null; } }catch(e){} }
@@ -67,7 +66,7 @@ async function pollForCalls(uid){ try{
     createNotificationOverlay(docSnap.id, data);
     try{ playRingtone(); }catch(_){ }
   });
-} catch(e){ console.error('JCHAT_ERROR pollForCalls', e); } }
+} catch(e){ console.error('NUVIA_ERROR pollForCalls', e); } }
 
 function setupRealtimeThenPollFallback(uid){
   try{
@@ -90,7 +89,7 @@ function setupRealtimeThenPollFallback(uid){
         sawEvent = true;
         if(pollIntervalId){ clearInterval(pollIntervalId); pollIntervalId = null; }
       }, (err) => {
-        console.warn('JCHAT_WARN realtime onSnapshot failed, falling back to polling', err);
+        console.warn('NUVIA_WARN realtime onSnapshot failed, falling back to polling', err);
         clearRealtime();
         if(!pollIntervalId){ pollIntervalId = setInterval(()=>pollForCalls(uid), 2500); }
       });
@@ -99,9 +98,9 @@ function setupRealtimeThenPollFallback(uid){
         if(!sawEvent && !pollIntervalId){ pollIntervalId = setInterval(()=>pollForCalls(uid), 2500); }
       }, 3000);
 
-    }catch(e){ console.warn('JCHAT_WARN realtime setup failed, starting poll', e); if(!pollIntervalId){ pollIntervalId = setInterval(()=>pollForCalls(uid), 2500); } }
+    }catch(e){ console.warn('NUVIA_WARN realtime setup failed, starting poll', e); if(!pollIntervalId){ pollIntervalId = setInterval(()=>pollForCalls(uid), 2500); } }
 
-  }catch(e){ console.error('JCHAT_ERROR setupRealtimeThenPollFallback', e); }
+  }catch(e){ console.error('NUVIA_ERROR setupRealtimeThenPollFallback', e); }
 
   try{
     const dbBackup = getFirestore();
@@ -122,7 +121,7 @@ function setupRealtimeThenPollFallback(uid){
                 try{ playRingtone(); }catch(_){ }
               }
             } catch (e) {
-              console.error('JCHAT_ERROR backup listener', e);
+              console.error('NUVIA_ERROR backup listener', e);
               createNotificationOverlay(change.doc.id, data);
               try{ playRingtone(); }catch(_){ }
             }
@@ -151,7 +150,7 @@ function cleanupAll(){ try{ clearRealtime(); clearPoll(); removeOverlay(); }catc
     });
 
     window.addEventListener('beforeunload', cleanupAll);
-  }catch(e){ console.error('JCHAT_ERROR init global call service', e); }
+  }catch(e){ console.error('NUVIA_ERROR init global call service', e); }
 })();
 
 window.answerGlobalCall = answerGlobalCall;
