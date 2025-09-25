@@ -11442,8 +11442,8 @@ async function fetchAndDisplayPosts() {
                     return;
                 }
 
-                if (callState !== 'idle') {
-                    // Already in a call or busy, decline new incoming call.
+                if (callState === 'connected' || callState === 'calling' || callState === 'ringing') {
+                    // Already in a call or actively ringing, decline new incoming call.
                     await updateDoc(incomingCallDoc.ref, { status: 'busy' });
                     showMessageBox(`Another call from ${callData.callerId === recipientUserProfileData?.userId ? recipientUserProfileData?.username : 'someone'} is incoming, but you are busy.`, "warning");
                     playNotificationSound('info');
