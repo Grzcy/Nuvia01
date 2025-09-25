@@ -341,7 +341,13 @@ window.addEventListener('beforeunload', ()=>{ try{ friendPresenceUnsubs.forEach(
       el.appendChild(img);
       const tc = document.createElement('div'); tc.style.display='flex'; tc.style.flexDirection='column'; tc.appendChild(name); tc.appendChild(sub);
       el.appendChild(tc);
-      el.addEventListener('click', ()=>{ window.location.href = `/chat.html?partnerId=${f.uid}`; });
+      el.addEventListener('click', ()=>{
+        try{
+          const hint = { uid: f.uid, username: f.username||'User', profilePicId: f.profilePicId||null, avatarUrl };
+          sessionStorage.setItem('chat:partnerHint:'+f.uid, JSON.stringify(hint));
+        }catch(_){ }
+        window.location.href = `/chat.html?partnerId=${f.uid}`;
+      });
       // Subscribe to presence updates (green only when truly online)
       subscribeFriendPresence(f.uid);
       return el;
@@ -533,7 +539,20 @@ window.addEventListener('beforeunload', ()=>{ try{ friendPresenceUnsubs.forEach(
     window.addEventListener('beforeunload', ()=>{ try{ setTyping(false); }catch(_){ } });
 
 
-    backBtn.addEventListener('click', ()=>{ window.history.back(); });
+    function goBackToFriends(){
+      try{
+        if(unsubscribeMessages) { unsubscribeMessages(); unsubscribeMessages=null; }
+        if(typingUnsub) { typingUnsub(); typingUnsub=null; }
+        if(window.__partnerUnsub){ try{ window.__partnerUnsub(); }catch(_){ } window.__partnerUnsub=null; }
+        knownMessageIds = new Set(); allMessages = []; clearMessages();
+        const bar = document.getElementById('pinnedBar'); if(bar){ bar.style.display='none'; const list=document.getElementById('pinnedList'); if(list) list.innerHTML=''; }
+        partnerId = null; partnerProfile = null; chatId = null;
+        toggleViews(true);
+        if(currentUser && myFriends.length===0){ fetchFriendsFor(currentUser.uid).catch(()=>{}); }
+        try{ history.replaceState(null,'','/chat.html'); }catch(_){ }
+      }catch(_){ toggleViews(true); }
+    }
+    backBtn.addEventListener('click', (e)=>{ e.preventDefault(); goBackToFriends(); });
     viewProfileBtn.addEventListener('click', ()=>{ if(partnerId) window.location.href = `/profile.html?userId=${partnerId}`; });
 
     // Search, mute, menu
@@ -626,6 +645,23 @@ window.addEventListener('beforeunload', ()=>{ try{ friendPresenceUnsubs.forEach(
 
         if(!partnerId){ await fetchFriendsFor(user.uid); toggleViews(true); return; }
 
+        // fast enter chat view and hydrate from hint
+        try{
+          toggleViews(false);
+          const hintRaw = sessionStorage.getItem('chat:partnerHint:'+partnerId);
+          if(hintRaw){
+            const hint = JSON.parse(hintRaw);
+            partnerNameEl.textContent = hint.username || 'User';
+            if(hint.avatarUrl){ partnerAvatar.src = hint.avatarUrl; }
+            else if(hint.profilePicId){ displayProfilePicture(partnerAvatar, null, hint.profilePicId, (hint.username||'U').charAt(0), 'w_120,h_120,c_fill,g_face,r_max'); }
+            else { partnerAvatar.src = `https://placehold.co/80x80/CCCCCC/000000?text=${encodeURIComponent((hint.username||'U').charAt(0))}`; }
+            renderPartnerPresence();
+            sessionStorage.removeItem('chat:partnerHint:'+partnerId);
+          } else {
+            // minimal placeholder
+            partnerNameEl.textContent = 'Loading...';
+          }
+        }catch(_){ }
         // load partner profile
         try{
           const partnerRef = doc(db,'artifacts',appId,'public','data','users',partnerId);
