@@ -4467,7 +4467,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         try {
           function applySavedTheme(){
             var saved = localStorage.getItem('jchat-theme');
-            if (!saved) { saved = 'theme-black-yellow'; localStorage.setItem('jchat-theme', saved); }
+            if (!saved) { saved = 'theme-dark-mode'; localStorage.setItem('jchat-theme', saved); }
             var b = document.body;
             Array.from(b.classList).filter(function(c){ return c.indexOf('theme-')===0; }).forEach(function(c){ b.classList.remove(c); });
             b.classList.add(saved);
