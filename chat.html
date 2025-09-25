@@ -599,6 +599,7 @@ window.addEventListener('beforeunload', ()=>{ try{ friendPresenceUnsubs.forEach(
         // Restore friends list instantly
         try{ Array.from(document.querySelectorAll('.friend-item')).forEach(it=> it.style.display=''); }catch(_){ }
         try{ if(friendSearchInput) friendSearchInput.value=''; }catch(_){ }
+        if(friendsView){ friendsView.classList.remove('is-hidden'); friendsView.style.display=''; }
         if(myFriends && myFriends.length){ try{ renderFriends(); }catch(_){ } }
         else if(currentUser){ fetchFriendsFor(currentUser.uid).catch(()=>{}); }
         toggleViews(true);
