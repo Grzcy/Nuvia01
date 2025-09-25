@@ -18,8 +18,8 @@ function createNotificationOverlay(callId, callData){
       <div class="global-call-notification">
         <div class="call-notification-content">
           <div class="caller-info">
-            <div class="caller-avatar"><i class="fas fa-user-circle"></i></div>
-            <div class="caller-details"><h3>${escapeHtml(callerName)}</h3><p>Incoming ${isVideo ? 'video' : 'voice'} call</p></div>
+            <div class="caller-avatar"><img id="globalCallerAvatar" alt="Caller"/></div>
+            <div class="caller-details"><h3 id="globalCallerName">${escapeHtml(callerName)}</h3><p>Incoming ${isVideo ? 'video' : 'voice'} call</p></div>
           </div>
           <div class="call-notification-actions">
             <button class="decline-call-btn" id="globalDeclineBtn" aria-label="Decline"><i class="fas fa-phone-slash"></i></button>
@@ -30,7 +30,7 @@ function createNotificationOverlay(callId, callData){
     `;
 
     const styles = `
-      <style id="globalCallNotificationStyles">#globalCallNotification{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:9999;backdrop-filter:blur(5px)}.global-call-notification{background:linear-gradient(135deg,#1a1a2e,#16213e);padding:30px;border-radius:20px;box-shadow:0 20px 40px rgba(0,0,0,0.5);text-align:center;min-width:300px;border:1px solid rgba(255,255,255,0.1)}.caller-avatar{font-size:4rem;color:#00d5ff;margin-bottom:15px}.caller-details h3{color:white;margin:0 0 10px 0;font-size:1.25rem}.caller-details p{color:#b0b0b0;margin:0}.call-notification-actions{display:flex;justify-content:center;gap:30px;margin-top:20px}.call-notification-actions button{width:60px;height:60px;border-radius:50%;border:none;cursor:pointer;font-size:1.2rem;color:white}.decline-call-btn{background:linear-gradient(135deg,#ff4757,#ff3838)}.answer-call-btn{background:linear-gradient(135deg,#2ed573,#1dd1a1);animation:pulse 2s infinite}@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(46,213,115,0.7)}70%{box-shadow:0 0 0 10px rgba(46,213,115,0)}100%{box-shadow:0 0 0 0 rgba(46,213,115,0)}}</style>`;
+      <style id="globalCallNotificationStyles">#globalCallNotification{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:9999;backdrop-filter:blur(5px)}.global-call-notification{background:var(--header-background,linear-gradient(135deg,#1a1a2e,#16213e));padding:24px;border-radius:16px;box-shadow:0 20px 40px rgba(0,0,0,0.5);text-align:center;min-width:300px;border:1px solid var(--border-light,rgba(255,255,255,0.1))}.caller-avatar{width:84px;height:84px;border-radius:50%;overflow:hidden;margin:0 auto 12px auto;border:2px solid var(--border-light,rgba(255,255,255,0.2))}.caller-avatar img{width:100%;height:100%;object-fit:cover;display:block}.caller-details h3{color:var(--white,#fff);margin:0 0 6px 0;font-size:1.2rem}.caller-details p{color:var(--text-light,#b0b0b0);margin:0}.call-notification-actions{display:flex;justify-content:center;gap:24px;margin-top:16px}.call-notification-actions button{width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;font-size:1.1rem;color:#fff}.decline-call-btn{background:linear-gradient(135deg,#ff4757,#ff3838)}.answer-call-btn{background:linear-gradient(135deg,#2ed573,#1dd1a1);animation:pulse 2s infinite}@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(46,213,115,0.7)}70%{box-shadow:0 0 0 10px rgba(46,213,115,0)}100%{box-shadow:0 0 0 0 rgba(46,213,115,0)}}</style>`;
 
     const tmp = document.createElement('div'); tmp.innerHTML = styles; document.head.appendChild(tmp.firstElementChild);
     document.body.appendChild(overlay);
@@ -40,22 +40,31 @@ function createNotificationOverlay(callId, callData){
     if(btnA) btnA.addEventListener('click', () => { answerGlobalCall(callData.callerId); removeOverlay(); });
     if(btnD) btnD.addEventListener('click', () => { declineGlobalCall(callId).catch(()=>{}); removeOverlay(); });
 
-    // Try to resolve caller display name from users collection
+    // Resolve caller display name and avatar
     try{
       const db = getFirestore();
       const uid = callData && callData.callerId;
       if (uid) {
+        const nameEl = overlay.querySelector('#globalCallerName');
+        const avatarImg = overlay.querySelector('#globalCallerAvatar');
         getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', uid)).then(s=>{
           const d = s.exists()? s.data(): null;
           const name = d && (d.username || d.displayName);
-          if (name) {
-            const h3 = overlay.querySelector('.caller-details h3');
-            if (h3) h3.textContent = String(name);
-          }
+          if (name && nameEl) nameEl.textContent = String(name);
+        }).catch(()=>{});
+        getDoc(doc(db, 'artifacts', appId, 'users', uid, 'profiles', 'user_profile')).then(s=>{
+          const d = s.exists()? s.data(): null;
+          const pic = d && (d.profilePicId || d.photoURL || null);
+          const name = (d && (d.displayName || d.username)) || callerName || 'User';
+          const initial = String(name).charAt(0).toUpperCase();
+          const url = pic ? cloudinaryUrl(pic, 'w_84,h_84,c_fill,g_face,r_max') : `https://placehold.co/84x84/00d5ff/ffffff?text=${initial}`;
+          if (avatarImg){ avatarImg.src = url; avatarImg.onerror = ()=>{ avatarImg.src = `https://placehold.co/84x84/00d5ff/ffffff?text=${initial}`; }; }
         }).catch(()=>{});
       }
     }catch(_){ }
 
+    // Browser notification when hidden
+    try{ if (document.hidden && window.Notification && Notification.permission === 'granted'){ const isVid = (callData && (callData.callType === 'video' || callData.video === true)); new Notification(isVid ? 'Incoming video call' : 'Incoming voice call', { body: callerName ? `From ${callerName}` : 'Incoming call' }); } }catch(_){ }
     setTimeout(()=>{ if(document.getElementById('globalCallNotification')){ declineGlobalCall(callId).catch(()=>{}); removeOverlay(); }}, 30000);
   }catch(e){ console.error('NUVIA_ERROR createNotificationOverlay', e); }
 }
@@ -149,6 +158,9 @@ function setupRealtimeThenPollFallback(uid){
 }
 
 function cleanupAll(){ try{ clearRealtime(); clearPoll(); removeOverlay(); }catch(e){}
+}
+
+function cloudinaryUrl(id, t){ try{ if(!id) return null; if(String(id).startsWith('http')){ if(id.includes('res.cloudinary.com')){ const parts = String(id).split('/upload/'); if(parts.length===2) return `${parts[0]}/upload/${t}/${parts[1]}`; } return id; } return `https://res.cloudinary.com/dxld01rcp/image/upload/${t}/${id}`; }catch(_){ return null; }
 }
 
 (function init(){
