@@ -85,6 +85,13 @@
   .drag-over{outline:2px dashed var(--accent-color);outline-offset:-6px}
   .muted-dot{width:8px;height:8px;border-radius:50%;background:var(--text-light);display:inline-block;margin-left:6px;opacity:.7}
   .reply-quote{border-left:3px solid var(--accent-color);padding:4px 8px;margin-bottom:6px;color:var(--text-light);font-size:0.85rem;border-radius:6px;background:rgba(255,255,255,0.03)}
+    /* Presence styles */
+  :root{ --status-online:#4CAF50; --status-away:#FFC107; --status-offline:#6c757d; }
+  .presence-row{display:inline-flex;align-items:center;gap:6px}
+  .presence-dot{width:8px;height:8px;border-radius:50%;background:var(--status-offline);box-shadow:none}
+  .presence-dot.online{background:var(--status-online);box-shadow:0 0 8px rgba(76,175,80,0.7)}
+  .presence-dot.away{background:var(--status-away);box-shadow:0 0 6px rgba(255,193,7,0.8)}
+  .presence-text{color:var(--text-light);font-size:0.85rem}
   </style>
 </head>
 <body class="theme-dark-mode">
@@ -216,6 +223,74 @@
     let replyContext = null;
     let knownMessageIds = new Set();
     let chatMuted = false;
+let __partnerTyping = false;
+let __presenceTimer = null;
+
+function getLastActiveMsFromProfile(p){
+  try{
+    if(!p) return 0;
+    const v = p.lastActive;
+    if(!v) return 0;
+    if(typeof v?.toMillis === 'function') return v.toMillis();
+    if(typeof v?.toDate === 'function') return v.toDate().getTime();
+    const n = Number(v);
+    return isNaN(n)? 0 : n;
+  }catch(_){ return 0; }
+}
+
+function computePresenceState(p){
+  const online = !!(p && p.online);
+  const lastMs = getLastActiveMsFromProfile(p) || 0;
+  const now = Date.now();
+  if(online) return { state:'online', lastMs };
+  if(!lastMs) return { state:'offline', lastMs:0 };
+  const delta = now - lastMs;
+  if(delta <= 5*60*1000) return { state:'away', lastMs };
+  return { state:'offline', lastMs };
+}
+
+function renderPartnerPresence(){
+  try{
+    const wrap = partnerStatusEl;
+    if(!wrap) return;
+    if(__partnerTyping){
+      wrap.innerHTML = '<span class="presence-row"><span class="presence-dot online"></span><span class="presence-text">Typing...</span></span>';
+      return;
+    }
+    const { state, lastMs } = computePresenceState(partnerProfile||{});
+    if(state === 'online'){
+      wrap.innerHTML = '<span class="presence-row"><span class="presence-dot online"></span><span class="presence-text">Online</span></span>';
+    } else if(state === 'away'){
+      wrap.innerHTML = '<span class="presence-row"><span class="presence-dot away"></span><span class="presence-text">Just left</span></span>';
+    } else {
+      const txt = lastMs ? ('Last seen ' + new Date(lastMs).toLocaleString()) : 'Offline';
+      wrap.innerHTML = '<span class="presence-row"><span class="presence-dot"></span><span class="presence-text">'+ txt +'</span></span>';
+    }
+  }catch(_){ }
+}
+
+function startPresenceAutoRefresh(){
+  try{
+    if(__presenceTimer) clearInterval(__presenceTimer);
+    __presenceTimer = setInterval(()=> renderPartnerPresence(), 30000);
+  }catch(_){ }
+}
+
+function startUserHeartbeat(user){
+  try{
+    if(!user) return;
+    const userDocRef = doc(db,'artifacts',appId,'public','data','users', user.uid);
+    const computeOnline = () => navigator.onLine && document.visibilityState === 'visible';
+    const post = async ()=>{ try{ await setDoc(userDocRef, { online: computeOnline(), lastActive: serverTimestamp() }, { merge:true }); }catch(_){ } };
+    post();
+    if(window.__chatHeartbeat) clearInterval(window.__chatHeartbeat);
+    window.__chatHeartbeat = setInterval(post, 15000);
+    const debounced = ()=> post();
+    window.addEventListener('online', debounced);
+    window.addEventListener('offline', debounced);
+    document.addEventListener('visibilitychange', debounced);
+  }catch(_){ }
+}
 
     // Friends cache
     let myFriends = [];
@@ -381,10 +456,11 @@
         typingUnsub = onSnapshot(partnerTypingRef, (snap)=>{
           const d = snap.data();
           if(d && d.typing && (Date.now() - (d.ts||0) < 5000)){
-            partnerStatusEl.textContent = 'Typing...';
+            __partnerTyping = true;
+            renderPartnerPresence();
           }else{
-            const last = partnerProfile && (partnerProfile.lastActive?.toDate ? partnerProfile.lastActive.toDate() : (partnerProfile.lastActive? new Date(partnerProfile.lastActive): null));
-            partnerStatusEl.textContent = (partnerProfile && partnerProfile.online) ? 'Online' : (last ? ('Last seen ' + last.toLocaleString()) : 'Offline');
+            __partnerTyping = false;
+            renderPartnerPresence();
           }
         }, ()=>{});
       }catch(_){ }
@@ -539,16 +615,25 @@
         // load partner profile
         try{
           const partnerRef = doc(db,'artifacts',appId,'public','data','users',partnerId);
-          const psnap = await getDoc(partnerRef);
-          partnerProfile = psnap.exists()? psnap.data() : { username: 'Unknown', profilePicId: null };
-          partnerNameEl.textContent = partnerProfile.username || 'User';
-          displayProfilePicture(partnerAvatar, null, partnerProfile.profilePicId, (partnerProfile.username||'U').charAt(0), 'w_120,h_120,c_fill,g_face,r_max');
-          partnerStatusEl.textContent = partnerProfile.visibility?.lastOnline === false ? 'Offline' : 'Available';
+          const applyPartner = (data)=> {
+            partnerProfile = data || { username: 'Unknown', profilePicId: null };
+            partnerNameEl.textContent = partnerProfile.username || 'User';
+            displayProfilePicture(partnerAvatar, null, partnerProfile.profilePicId, (partnerProfile.username||'U').charAt(0), 'w_120,h_120,c_fill,g_face,r_max');
+            renderPartnerPresence();
+          };
+          try{
+            const psnap = await getDoc(partnerRef);
+            if(psnap.exists()) applyPartner(psnap.data()); else applyPartner(null);
+          }catch(_){ applyPartner(null); }
+          try{
+            if(window.__partnerUnsub) window.__partnerUnsub();
+            window.__partnerUnsub = onSnapshot(partnerRef, (snap)=>{ try{ if(snap.exists()) applyPartner(snap.data()); }catch(_){ } });
+          }catch(_){}
         }catch(e){ console.error('load partner',e); }
 
         toggleViews(false);
         await ensureChatDoc(chatIdFor(currentUser.uid, partnerId), partnerId);
-        startListening();
+        startListening(); startPresenceAutoRefresh(); startUserHeartbeat(currentUser);
         loadMute();
       } else {
         // not signed in - redirect to login
