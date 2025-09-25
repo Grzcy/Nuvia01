@@ -84,6 +84,7 @@
   .upload-progress .bar{height:100%;width:0%;background:linear-gradient(90deg,var(--blue),var(--pink))}
   .drag-over{outline:2px dashed var(--accent-color);outline-offset:-6px}
   .muted-dot{width:8px;height:8px;border-radius:50%;background:var(--text-light);display:inline-block;margin-left:6px;opacity:.7}
+  .reply-quote{border-left:3px solid var(--accent-color);padding:4px 8px;margin-bottom:6px;color:var(--text-light);font-size:0.85rem;border-radius:6px;background:rgba(255,255,255,0.03)}
   </style>
 </head>
 <body class="theme-dark-mode">
@@ -319,6 +320,7 @@
 
       const contentWrap = document.createElement('div'); contentWrap.className='message-content';
       const bubble = document.createElement('div'); bubble.className='message-bubble';
+      if(m.repliedToText){ const q=document.createElement('div'); q.className='reply-quote'; q.textContent = m.repliedToText; bubble.appendChild(q); }
 
       if(m.type === 'file' || m.type === 'audio'){
         // media
@@ -338,7 +340,7 @@
       contentWrap.appendChild(bubble); contentWrap.appendChild(meta);
 
       const reactionBar = document.createElement('div'); reactionBar.className='reaction-bar';
-      ['❤️','😂','👍','😮','😢'].forEach(em=>{ const chip=document.createElement('button'); chip.className='reaction-chip'; chip.textContent=em; chip.addEventListener('click', ()=> toggleReaction(m.id, em)); reactionBar.appendChild(chip); });
+      ['❤️','😂','��','😮','😢'].forEach(em=>{ const chip=document.createElement('button'); chip.className='reaction-chip'; chip.textContent=em; chip.addEventListener('click', ()=> toggleReaction(m.id, em)); reactionBar.appendChild(chip); });
       contentWrap.appendChild(reactionBar);
 
       const tools = document.createElement('div'); tools.className='message-tools';
