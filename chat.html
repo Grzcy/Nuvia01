@@ -61,6 +61,29 @@
     .friends-empty{color:var(--text-light);text-align:center;padding:12px}
   #headerDisplayName{background-image:linear-gradient(90deg,var(--pink),var(--yellow));-webkit-background-clip:text;background-clip:text;color:transparent}
   .user-profile-header a{ text-decoration:none; color:inherit }
+  .header-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+  .message-content{position:relative}
+  .message-tools{display:flex;align-items:center;gap:6px;margin-top:6px}
+  .message-actions-btn{background:transparent;border:none;color:var(--text-light);cursor:pointer}
+  .message-actions-menu{position:absolute;right:0;top:0;background:rgba(15,15,25,0.95);border:1px solid var(--border-light);border-radius:8px;padding:6px;display:none;flex-direction:column;gap:4px;z-index:20}
+  .message-actions-menu.open{display:flex}
+  .message-actions-menu button{background:transparent;border:none;color:var(--white);text-align:left;padding:6px 8px;border-radius:6px;cursor:pointer}
+  .message-actions-menu button:hover{background:rgba(255,255,255,0.06)}
+  .reaction-bar{display:flex;gap:6px;margin-top:4px}
+  .reaction-chip{border:1px solid var(--border-light);border-radius:12px;padding:2px 6px;background:rgba(255,255,255,0.04);cursor:pointer;font-size:0.85rem}
+  .reaction-chip.active{border-color:var(--accent-color)}
+  .pinned-bar{display:none;padding:8px 12px;border-bottom:1px solid var(--border-light);background:linear-gradient(135deg,rgba(255,255,255,0.02),transparent)}
+  .pinned-list{display:flex;gap:6px;flex-wrap:wrap}
+  .pinned-chip{border:1px solid var(--border-light);border-radius:12px;padding:2px 8px;background:rgba(255,255,255,0.04);cursor:pointer;font-size:0.8rem}
+  .chat-search{display:none;margin-left:auto}
+  .chat-search input{background:rgba(0,0,0,0.25);border:1px solid var(--border-light);color:var(--white);border-radius:12px;padding:6px 10px;width:200px}
+  .reply-banner{display:none;align-items:center;gap:8px;border:1px solid var(--border-light);background:rgba(255,255,255,0.02);border-radius:8px;padding:6px 8px}
+  .reply-text{color:var(--text-light);font-size:0.85rem;flex:1}
+  .reply-cancel-btn{background:none;border:none;color:var(--delete-button-color);cursor:pointer}
+  .upload-progress{display:none;height:6px;background:rgba(255,255,255,0.06);border-radius:6px;overflow:hidden}
+  .upload-progress .bar{height:100%;width:0%;background:linear-gradient(90deg,var(--blue),var(--pink))}
+  .drag-over{outline:2px dashed var(--accent-color);outline-offset:-6px}
+  .muted-dot{width:8px;height:8px;border-radius:50%;background:var(--text-light);display:inline-block;margin-left:6px;opacity:.7}
   </style>
 </head>
 <body class="theme-dark-mode">
@@ -89,29 +112,39 @@
         <div class="partner-name" id="partnerName">Loading...</div>
         <div class="partner-status" id="partnerStatus">Loading...</div>
       </div>
-      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+      <div class="header-actions">
+        <div class="chat-search" id="chatSearchWrap"><input id="chatSearchInput" type="search" placeholder="Search messages"></div>
+        <button id="searchToggleBtn" class="attach-btn" title="Search"><i class="fas fa-magnifying-glass"></i></button>
+        <button id="muteToggleBtn" class="attach-btn" title="Mute/unmute"><i class="fas fa-bell-slash"></i></button>
+        <button id="headerMenuBtn" class="attach-btn" title="More"><i class="fas fa-ellipsis-vertical"></i></button>
         <button id="viewProfileBtn" class="attach-btn" title="View profile"><i class="fas fa-user"></i></button>
       </div>
     </div>
+    <div id="pinnedBar" class="pinned-bar"><div class="pinned-list" id="pinnedList"></div></div>
 
     <div class="chat-messages" id="chatMessages">
       <p class="messages-loading-text" id="messagesLoading">Loading messages...</p>
     </div>
 
     <div class="chat-input-area" id="chatInputArea">
+      <div id="replyBanner" class="reply-banner"><span class="reply-text" id="replyText"></span><button id="replyCancelBtn" class="reply-cancel-btn" title="Cancel reply"><i class="fas fa-times"></i></button></div>
       <div id="mediaPreviewContainer">
         <img id="mediaPreview" src="" alt="preview">
         <span id="mediaFileName"></span>
+        <div class="upload-progress" id="uploadProgress"><div class="bar" id="uploadProgressBar"></div></div>
         <button id="removeMediaButton" title="Remove media"><i class="fas fa-times-circle"></i></button>
       </div>
 
       <div class="input-row">
-        <input type="file" id="mediaInput" accept="image/*,video/*" class="hidden-input">
+        <input type="file" id="mediaInput" accept="image/*,video/*,audio/*" class="hidden-input" multiple>
+        <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden-input">
+        <button id="cameraButton" class="attach-btn" title="Camera"><i class="fas fa-camera"></i></button>
         <button id="attachButton" class="attach-btn" title="Attach media"><i class="fas fa-paperclip"></i></button>
         <textarea id="messageInput" placeholder="Type your message..."></textarea>
         <button id="sendButton" class="send-btn" title="Send"><i class="fas fa-paper-plane"></i></button>
       </div>
     </div>
+    <audio id="notifSound" src="ne.mp3" preload="auto"></audio>
   </main>
 
   <div id="messageBox" style="display:none"></div>
@@ -177,7 +210,11 @@
     let partnerProfile = null;
     let chatId = null;
     let unsubscribeMessages = null;
-    let selectedMediaFile = null;
+    let selectedMediaFiles = [];
+    let allMessages = [];
+    let replyContext = null;
+    let knownMessageIds = new Set();
+    let chatMuted = false;
 
     // Friends cache
     let myFriends = [];
@@ -262,7 +299,7 @@
 
     function clearMessages(){ chatMessages.innerHTML=''; }
 
-    function renderMessage(m){
+    async function renderMessage(m){
       if(!m || !m.senderId) return;
       const isSent = currentUser && m.senderId === currentUser.uid;
       const item = document.createElement('div');
@@ -299,6 +336,27 @@
       const meta = document.createElement('div'); meta.className='message-meta'; meta.textContent = (formatTime(m.timestamp) + (isSent ? (m.seenAt ? ' ✓✓' : ' ✓') : ''));
       contentWrap.appendChild(bubble); contentWrap.appendChild(meta);
 
+      const reactionBar = document.createElement('div'); reactionBar.className='reaction-bar';
+      ['❤️','😂','👍','😮','😢'].forEach(em=>{ const chip=document.createElement('button'); chip.className='reaction-chip'; chip.textContent=em; chip.addEventListener('click', ()=> toggleReaction(m.id, em)); reactionBar.appendChild(chip); });
+      contentWrap.appendChild(reactionBar);
+
+      const tools = document.createElement('div'); tools.className='message-tools';
+      const actionsBtn = document.createElement('button'); actionsBtn.className='message-actions-btn'; actionsBtn.innerHTML = '<i class="fas fa-ellipsis-h"></i>';
+      const menu = document.createElement('div'); menu.className='message-actions-menu';
+      function addMenu(label, fn){ const b=document.createElement('button'); b.textContent=label; b.addEventListener('click', ()=>{ fn(); menu.classList.remove('open'); }); menu.appendChild(b); }
+      addMenu('Reply', ()=> startReply(m));
+      addMenu(m.pinned? 'Unpin':'Pin', ()=> togglePin(m));
+      addMenu('Copy', ()=> copyMessage(m));
+      if(isSent && m.type==='text' && !m.deleted){ addMenu('Edit', ()=> editMessage(m)); }
+      if(isSent){ addMenu('Delete', ()=> deleteMessage(m)); }
+      actionsBtn.addEventListener('click', ()=> menu.classList.toggle('open'));
+      tools.appendChild(actionsBtn);
+      contentWrap.appendChild(menu);
+      contentWrap.appendChild(tools);
+
+      // Load reactions count lazily
+      try{ await loadReactions(m.id, reactionBar); }catch(_){ }
+
       item.appendChild(avatarImg);
       item.appendChild(contentWrap);
 
@@ -330,9 +388,9 @@
 
       if(unsubscribeMessages) unsubscribeMessages();
       unsubscribeMessages = onSnapshot(q, async (snap)=>{
-        clearMessages();
         const docs = snap.docs.map(s=>({ id: s.id, ...s.data() }));
-        if(docs.length===0){ messagesLoading.textContent='No messages yet. Say hello!'; }
+        allMessages = docs;
+        if(docs.length===0){ messagesLoading.textContent='No messages yet. Say hello!'; messagesLoading.style.display='block'; }
         else { messagesLoading.style.display='none'; }
 
         for(const d of docs){
@@ -341,19 +399,39 @@
               const mref = doc(db,'artifacts',appId,'public','data','chats',chatId,'messages', d.id);
               await updateDoc(mref, { seenAt: serverTimestamp() });
             }
+            if(!knownMessageIds.has(d.id)){
+              knownMessageIds.add(d.id);
+              if(d.senderId !== (currentUser&&currentUser.uid)) maybeNotify(d);
+            }
           }catch(_){ }
         }
 
-        docs.forEach(d=> renderMessage(d));
+        renderAllMessages((document.getElementById('chatSearchInput')?.value||'').trim());
+        renderPinnedBar();
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }, (err)=>{ console.error('messages listener',err); showMessage('Failed to load messages','error',4000); });
     }
 
     attachButton.addEventListener('click', ()=> mediaInput.click());
+    cameraButton.addEventListener('click', ()=> cameraInput.click());
     mediaInput.addEventListener('change',(e)=>{
-      const f = e.target.files && e.target.files[0]; if(!f) return; selectedMediaFile = f; mediaFileName.textContent = f.name; mediaPreview.src = URL.createObjectURL(f); mediaPreviewContainer.style.display='flex';
+      const files = Array.from(e.target.files||[]); if(!files.length) return; selectedMediaFiles = selectedMediaFiles.concat(files);
+      mediaFileName.textContent = selectedMediaFiles.length === 1 ? selectedMediaFiles[0].name : (selectedMediaFiles.length + ' files selected');
+      mediaPreview.src = URL.createObjectURL(selectedMediaFiles[0]);
+      mediaPreviewContainer.style.display='flex';
     });
-    removeMediaButton.addEventListener('click', ()=>{ selectedMediaFile = null; mediaInput.value=''; mediaPreview.src=''; mediaPreviewContainer.style.display='none'; mediaFileName.textContent=''; });
+    cameraInput.addEventListener('change',(e)=>{
+      const files = Array.from(e.target.files||[]); if(!files.length) return; selectedMediaFiles = selectedMediaFiles.concat(files);
+      mediaFileName.textContent = selectedMediaFiles.length === 1 ? selectedMediaFiles[0].name : (selectedMediaFiles.length + ' files selected');
+      mediaPreview.src = URL.createObjectURL(selectedMediaFiles[0]);
+      mediaPreviewContainer.style.display='flex';
+    });
+    removeMediaButton.addEventListener('click', ()=>{ selectedMediaFiles = []; mediaInput.value=''; cameraInput.value=''; mediaPreview.src=''; mediaPreviewContainer.style.display='none'; mediaFileName.textContent=''; document.getElementById('uploadProgress').style.display='none'; document.getElementById('uploadProgressBar').style.width='0%'; });
+
+    // Drag & drop
+    ['dragenter','dragover'].forEach(evt=> document.addEventListener(evt, e=>{ e.preventDefault(); chatInputAreaEl.classList.add('drag-over'); }));
+    ;['dragleave','drop'].forEach(evt=> document.addEventListener(evt, e=>{ e.preventDefault(); chatInputAreaEl.classList.remove('drag-over'); }));
+    document.addEventListener('drop', (e)=>{ const files = Array.from(e.dataTransfer?.files||[]); if(!files.length) return; selectedMediaFiles = selectedMediaFiles.concat(files); mediaFileName.textContent = selectedMediaFiles.length === 1 ? selectedMediaFiles[0].name : (selectedMediaFiles.length + ' files selected'); mediaPreview.src = URL.createObjectURL(selectedMediaFiles[0]); mediaPreviewContainer.style.display='flex'; });
 
     // Typing state
     function handleTypingEvent(){ try{ setTyping(true); clearTimeout(typingTimer); typingTimer = setTimeout(()=> setTyping(false), 1500); }catch(_){}}
@@ -365,20 +443,80 @@
     backBtn.addEventListener('click', ()=>{ window.history.back(); });
     viewProfileBtn.addEventListener('click', ()=>{ if(partnerId) window.location.href = `/profile.html?userId=${partnerId}`; });
 
+    // Search, mute, menu
+    const chatSearchWrap = document.getElementById('chatSearchWrap');
+    const chatSearchInput = document.getElementById('chatSearchInput');
+    const searchToggleBtn = document.getElementById('searchToggleBtn');
+    const muteToggleBtn = document.getElementById('muteToggleBtn');
+    const headerMenuBtn = document.getElementById('headerMenuBtn');
+    const replyBanner = document.getElementById('replyBanner');
+    const replyText = document.getElementById('replyText');
+    const replyCancelBtn = document.getElementById('replyCancelBtn');
+    const notifSound = document.getElementById('notifSound');
+
+    searchToggleBtn.addEventListener('click', ()=>{ chatSearchWrap.style.display = chatSearchWrap.style.display==='block' ? 'none' : 'block'; if(chatSearchWrap.style.display==='block'){ chatSearchInput.focus(); } });
+    chatSearchInput.addEventListener('input', ()=> renderAllMessages(chatSearchInput.value.trim()));
+
+    function updateMuteUI(){ muteToggleBtn.innerHTML = chatMuted ? '<i class="fas fa-bell"></i>' : '<i class="fas fa-bell-slash"></i>'; }
+    function loadMute(){ try{ chatMuted = !!localStorage.getItem('mute_'+chatId); updateMuteUI(); }catch(_){ chatMuted=false; } }
+    muteToggleBtn.addEventListener('click', ()=>{ chatMuted = !chatMuted; try{ if(chatMuted) localStorage.setItem('mute_'+chatId,'1'); else localStorage.removeItem('mute_'+chatId); }catch(_){ } updateMuteUI(); showMessage(chatMuted? 'Muted':'Unmuted'); });
+
+    headerMenuBtn.addEventListener('click', async ()=>{
+      const choice = prompt('Type: block or report'); if(!choice) return; const v = choice.toLowerCase(); if(v==='block'){ await blockUser(); } else if(v==='report'){ await reportUser(); }
+    });
+
+    replyCancelBtn.addEventListener('click', ()=> clearReply());
+
     async function uploadToCloudinary(file){ try{ const fd = new FormData(); fd.append('file', file); fd.append('upload_preset', cloudinaryConfig.uploadPreset); const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/auto/upload`, { method:'POST', body:fd }); const data = await res.json(); if(data && (data.secure_url || data.url)) return { url: data.secure_url || data.url, raw: data }; return null; }catch(e){ console.error('upload failed',e); return null; } }
+
+    function uploadToCloudinaryXHR(file, onProgress){ return new Promise((resolve)=>{ const url = `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/auto/upload`; const xhr = new XMLHttpRequest(); const fd = new FormData(); fd.append('file', file); fd.append('upload_preset', cloudinaryConfig.uploadPreset); xhr.open('POST', url); xhr.upload.onprogress = (e)=>{ if(e.lengthComputable && onProgress){ onProgress(Math.round((e.loaded/e.total)*100)); } }; xhr.onreadystatechange = ()=>{ if(xhr.readyState===4){ try{ const data = JSON.parse(xhr.responseText||'{}'); resolve(data && (data.secure_url||data.url)? { url: data.secure_url||data.url, raw: data } : null); }catch(_){ resolve(null); } } }; xhr.send(fd); }); }
 
     sendButton.addEventListener('click', async ()=>{
       if(!currentUser) { showMessage('Please sign in to send messages','warning'); return; }
-      const text = (messageInput.value||'').trim(); if(!text && !selectedMediaFile) return; sendButton.disabled = true;
+      if(chatMuted && !confirm('Chat is muted. Send anyway?')) return;
+      const text = (messageInput.value||'').trim(); if(!text && selectedMediaFiles.length===0) return; sendButton.disabled = true;
       try{
         await ensureChatDoc(chatIdFor(currentUser.uid, partnerId), partnerId);
         const messagesRef = collection(db,'artifacts',appId,'public','data','chats',chatIdFor(currentUser.uid, partnerId),'messages');
-        if(selectedMediaFile){ const up = await uploadToCloudinary(selectedMediaFile); if(!up){ showMessage('Failed to upload media','error'); sendButton.disabled=false; return; } const type = selectedMediaFile.type.startsWith('image/')? 'file' : (selectedMediaFile.type.startsWith('video/')? 'file' : 'audio'); await addDoc(messagesRef, { text: text||'', senderId: currentUser.uid, receiverId: partnerId, timestamp: serverTimestamp(), status: 'sent', chatId: chatIdFor(currentUser.uid, partnerId), type, fileUrl: up.url, fileName: selectedMediaFile.name }); selectedMediaFile = null; mediaPreviewContainer.style.display='none'; mediaInput.value=''; }
-        else { await addDoc(messagesRef, { text, senderId: currentUser.uid, receiverId: partnerId, timestamp: serverTimestamp(), status: 'sent', chatId: chatIdFor(currentUser.uid, partnerId), type: 'text' }); }
+        if(selectedMediaFiles.length){
+          document.getElementById('uploadProgress').style.display='block';
+          for(const file of selectedMediaFiles){
+            const up = await uploadToCloudinaryXHR(file, (p)=>{ document.getElementById('uploadProgressBar').style.width = p + '%'; });
+            if(!up){ showMessage('Failed to upload media','error'); continue; }
+            const lower=(file.type||'').toLowerCase();
+            const type = lower.startsWith('image/')? 'file' : (lower.startsWith('video/')? 'file' : 'audio');
+            await addDoc(messagesRef, { text: '', senderId: currentUser.uid, receiverId: partnerId, timestamp: serverTimestamp(), status: 'sent', chatId: chatIdFor(currentUser.uid, partnerId), type, fileUrl: up.url, fileName: file.name, repliedToId: replyContext?.id||null, repliedToText: replyContext?.text||null });
+          }
+          document.getElementById('uploadProgress').style.display='none';
+          document.getElementById('uploadProgressBar').style.width='0%';
+          selectedMediaFiles = []; mediaPreviewContainer.style.display='none'; mediaInput.value=''; cameraInput.value=''; mediaPreview.src=''; mediaFileName.textContent='';
+        }
+        if(text){ await addDoc(messagesRef, { text, senderId: currentUser.uid, receiverId: partnerId, timestamp: serverTimestamp(), status: 'sent', chatId: chatIdFor(currentUser.uid, partnerId), type: 'text', repliedToId: replyContext?.id||null, repliedToText: replyContext?.text||null }); }
+        clearReply();
         messageInput.value='';
       }catch(e){ console.error('send failed',e); showMessage('Failed to send message','error'); }
       sendButton.disabled=false;
     });
+
+    async function loadReactions(messageId, barEl){ try{ const rcol = collection(db,'artifacts',appId,'public','data','chats',chatId,'messages', messageId, 'reactions'); const qs = await getDocs(rcol); const counts = {}; let myEmoji=null; qs.forEach(d=>{ const e=d.data()?.emoji; if(d.id === (currentUser&&currentUser.uid)) myEmoji=e||null; if(e){ counts[e]=(counts[e]||0)+1; } }); Array.from(barEl.children).forEach(ch=>{ const em = ch.textContent.replace(/\s\d+$/,''); const c = counts[em]||0; ch.textContent = c? (em+' '+c) : em; if(myEmoji===em) ch.classList.add('active'); else ch.classList.remove('active'); }); }catch(_){ }}
+    async function toggleReaction(messageId, emoji){ try{ const rdoc = doc(db,'artifacts',appId,'public','data','chats',chatId,'messages', messageId, 'reactions', currentUser.uid); const snap = await getDoc(rdoc); const cur = snap.exists() ? snap.data()?.emoji : null; const val = cur===emoji ? null : emoji; await setDoc(rdoc, { emoji: val, ts: Date.now() }, { merge:true }); }catch(_){ }}
+
+    function renderPinnedBar(){ const pinned = allMessages.filter(m=> m.pinned); const bar = document.getElementById('pinnedBar'); const list = document.getElementById('pinnedList'); if(pinned.length===0){ bar.style.display='none'; list.innerHTML=''; return; } bar.style.display='block'; list.innerHTML=''; pinned.forEach(m=>{ const chip=document.createElement('button'); chip.className='pinned-chip'; chip.textContent = (m.text? m.text.slice(0,24): (m.fileName||'Attachment')); chip.addEventListener('click', ()=>{ const el = Array.from(document.querySelectorAll('.message-item')).find(x=> x.dataset && x.dataset.id===m.id); if(el){ el.scrollIntoView({behavior:'smooth',block:'center'}); } }); list.appendChild(chip); }); }
+
+    function renderAllMessages(filterText=''){ clearMessages(); const ft = (filterText||'').toLowerCase(); const docs = ft? allMessages.filter(m=> ((m.text||'').toLowerCase().includes(ft) || (m.fileName||'').toLowerCase().includes(ft))) : allMessages; docs.forEach(d=> renderMessage(d)); }
+
+    function startReply(m){ replyContext = { id: m.id, text: m.text||m.fileName||'Attachment' }; replyText.textContent = 'Replying to: '+ replyContext.text.slice(0,80); replyBanner.style.display='flex'; }
+    function clearReply(){ replyContext=null; replyText.textContent=''; replyBanner.style.display='none'; }
+
+    function copyMessage(m){ const text = m.text || m.fileUrl || ''; if(!text) return; navigator.clipboard?.writeText(text); showMessage('Copied'); }
+    async function editMessage(m){ const t = prompt('Edit message', m.text||''); if(t===null) return; try{ const mref = doc(db,'artifacts',appId,'public','data','chats',chatId,'messages', m.id); await updateDoc(mref, { text: t, editedAt: serverTimestamp() }); }catch(_){ showMessage('Failed to edit','error'); } }
+    async function deleteMessage(m){ if(!confirm('Delete this message?')) return; try{ const mref = doc(db,'artifacts',appId,'public','data','chats',chatId,'messages', m.id); await updateDoc(mref, { deleted: true, text: 'Message deleted' }); }catch(_){ showMessage('Failed to delete','error'); } }
+    async function togglePin(m){ try{ const mref = doc(db,'artifacts',appId,'public','data','chats',chatId,'messages', m.id); await updateDoc(mref, { pinned: !m.pinned }); }catch(_){ showMessage('Failed to pin','error'); } }
+
+    function maybeNotify(d){ try{ if(chatMuted) return; if(document.visibilityState==='visible') return; if(notifSound) notifSound.play().catch(()=>{}); if('Notification' in window){ if(Notification.permission==='granted'){ new Notification(partnerProfile?.username||'New message', { body: d.text||d.fileName||'Attachment' }); } else if(Notification.permission!=='denied'){ Notification.requestPermission(); } } }catch(_){ }}
+
+    async function blockUser(){ try{ await setDoc(doc(db,'artifacts',appId,'users', currentUser.uid, 'blocks', partnerId), { blockedAt: serverTimestamp() }, { merge:true }); showMessage('User blocked'); }catch(_){ showMessage('Failed to block','error'); } }
+    async function reportUser(){ try{ await addDoc(collection(db,'artifacts',appId,'public','data','reports'), { type:'chatAbuse', reporterId: currentUser.uid, reportedId: partnerId, at: serverTimestamp(), chatId }); showMessage('Reported'); }catch(_){ showMessage('Failed to report','error'); } }
 
     // Init
     function getParam(name){ const sp=new URLSearchParams(window.location.search); return sp.get(name); }
@@ -408,6 +546,7 @@
         toggleViews(false);
         await ensureChatDoc(chatIdFor(currentUser.uid, partnerId), partnerId);
         startListening();
+        loadMute();
       } else {
         // not signed in - redirect to login
         console.log('no user, redirect to login');
