@@ -12,12 +12,14 @@ function createNotificationOverlay(callId, callData){
   try{
     const existing = document.getElementById('globalCallNotification'); if(existing) existing.remove();
     const overlay = document.createElement('div'); overlay.id = 'globalCallNotification';
+    const isVideo = (callData && (callData.callType === 'video' || callData.video === true));
+    const callerName = callData && (callData.callerUsername || callData.callerDisplayName || callData.callerName) || 'Caller';
     overlay.innerHTML = `
       <div class="global-call-notification">
         <div class="call-notification-content">
           <div class="caller-info">
             <div class="caller-avatar"><i class="fas fa-user-circle"></i></div>
-            <div class="caller-details"><h3>${escapeHtml(callData.callerUsername||'Caller')}</h3><p>Incoming ${escapeHtml(callData.video? 'video':'voice')} call</p></div>
+            <div class="caller-details"><h3>${escapeHtml(callerName)}</h3><p>Incoming ${isVideo ? 'video' : 'voice'} call</p></div>
           </div>
           <div class="call-notification-actions">
             <button class="decline-call-btn" id="globalDeclineBtn"><i class="fas fa-phone-slash"></i></button>
@@ -46,9 +48,9 @@ function createNotificationOverlay(callId, callData){
 function removeOverlay(){ try{ const el=document.getElementById('globalCallNotification'); if(el) el.remove(); const s=document.getElementById('globalCallNotificationStyles'); if(s) s.remove(); }catch(e){}
 }
 
-function playRingtone(){ try{ const audio = new Audio('https://cdn.builder.io/o/assets%2Fc5542eb63b564e86810556e73a332186%2Ffa802bcb41594c9fb0a35733e90d7cee?alt=media&token=adb505bd-f77f-4840-a50b-b13c040e0dca&apiKey=c5542eb63b564e86810556e73a332186'); audio.loop = true; audio.volume = 0.35; audio.play().catch(()=>{}); setTimeout(()=>{ try{ audio.pause(); }catch(e){} }, 20000);}catch(e){}}
+function playRingtone(){ try{ const audio = new Audio('https://cdn.builder.io/o/assets%2Fc5542eb63b564e86810556e73a332186%2Ffa802bcb41594c9fb0a35733e90d7cee?alt=media&token=adb505bd-f77f-4840-a50b-b13c040e0dca&apiKey=c5542eb63b564e86810556e73a332186'); audio.loop = true; audio.volume = 0.35; audio.play().catch(()=>{}); setTimeout(()=>{ try{ audio.pause(); }catch(e){} }, 20000);}catch(e){} }
 
-async function answerGlobalCall(callerId){ try{ window.location.href = `/chat.html?partnerId=${encodeURIComponent(callerId)}`; }catch(e){ console.error('JCHAT_ERROR answerGlobalCall', e); } }
+async function answerGlobalCall(callerId){ try{ if(!callerId) return; window.location.href = `/chat.html?partnerId=${encodeURIComponent(callerId)}`; }catch(e){ console.error('JCHAT_ERROR answerGlobalCall', e); } }
 
 async function declineGlobalCall(callId){ try{ const db = getFirestore(); const callDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'calls', callId); await updateDoc(callDocRef, { status: 'declined', endedAt: serverTimestamp() }); removeOverlay(); }catch(e){ console.error('JCHAT_ERROR declineGlobalCall', e); } }
 
@@ -58,12 +60,12 @@ function clearPoll(){ try{ if(pollIntervalId){ clearInterval(pollIntervalId); po
 async function pollForCalls(uid){ try{
   const db = getFirestore();
   const callsCol = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
-  const q = query(callsCol, where('calleeId','==',uid), where('status','==','ringing'));
+  const q = query(callsCol, where('receiverId','==',uid), where('status','==','ringing'));
   const snap = await getDocs(q);
   snap.forEach(docSnap => {
     const data = docSnap.data();
     createNotificationOverlay(docSnap.id, data);
-    try{ playRingtone(); }catch(_){}
+    try{ playRingtone(); }catch(_){ }
   });
 } catch(e){ console.error('JCHAT_ERROR pollForCalls', e); } }
 
@@ -71,7 +73,7 @@ function setupRealtimeThenPollFallback(uid){
   try{
     const db = getFirestore();
     const callsCol = collection(db, 'artifacts', appId, 'public', 'data', 'calls');
-    const q = query(callsCol, where('calleeId','==',uid), where('status','==','ringing'));
+    const q = query(callsCol, where('receiverId','==',uid), where('status','==','ringing'));
 
     let sawEvent = false;
     try{
@@ -81,12 +83,11 @@ function setupRealtimeThenPollFallback(uid){
             if(change.type === 'added'){
               const data = change.doc.data();
               createNotificationOverlay(change.doc.id, data);
-              try{ playRingtone(); }catch(_){}
+              try{ playRingtone(); }catch(_){ }
             }
           });
         }
         sawEvent = true;
-        // clear polling if active
         if(pollIntervalId){ clearInterval(pollIntervalId); pollIntervalId = null; }
       }, (err) => {
         console.warn('JCHAT_WARN realtime onSnapshot failed, falling back to polling', err);
@@ -94,7 +95,6 @@ function setupRealtimeThenPollFallback(uid){
         if(!pollIntervalId){ pollIntervalId = setInterval(()=>pollForCalls(uid), 2500); }
       });
 
-      // After 3s, if no real-time event seen, start polling as fallback
       setTimeout(()=>{
         if(!sawEvent && !pollIntervalId){ pollIntervalId = setInterval(()=>pollForCalls(uid), 2500); }
       }, 3000);
@@ -103,29 +103,28 @@ function setupRealtimeThenPollFallback(uid){
 
   }catch(e){ console.error('JCHAT_ERROR setupRealtimeThenPollFallback', e); }
 
-  // Additional backup listener: separate onSnapshot with explicit presence check
   try{
     const dbBackup = getFirestore();
     const callsColBackup = collection(dbBackup, 'artifacts', appId, 'public', 'data', 'calls');
-    const qBackup = query(callsColBackup, where('calleeId','==',uid), where('status','==','ringing'));
-    const backupUnsub = onSnapshot(qBackup, async (snap) => {
+    const qBackup = query(callsColBackup, where('receiverId','==',uid), where('status','==','ringing'));
+    onSnapshot(qBackup, async (snap) => {
       if (!snap.empty) {
         for (const change of snap.docChanges()) {
           if (change.type === 'added') {
             const data = change.doc.data();
             try {
-              const presRef = doc(dbBackup, 'artifacts', appId, 'public', 'data', 'users', data.calleeId);
+              const presRef = doc(dbBackup, 'artifacts', appId, 'public', 'data', 'users', data.receiverId || uid);
               const presSnap = await getDoc(presRef);
               const pres = presSnap.exists() ? presSnap.data() : null;
-              const isOnline = pres ? Boolean(pres.online) : true;
+              const isOnline = pres ? Boolean(pres.online) : navigator.onLine !== false;
               if (isOnline) {
                 createNotificationOverlay(change.doc.id, data);
-                try{ playRingtone(); }catch(_){}
+                try{ playRingtone(); }catch(_){ }
               }
             } catch (e) {
               console.error('JCHAT_ERROR backup listener', e);
               createNotificationOverlay(change.doc.id, data);
-              try{ playRingtone(); }catch(_){}
+              try{ playRingtone(); }catch(_){ }
             }
           }
         }
@@ -137,7 +136,6 @@ function setupRealtimeThenPollFallback(uid){
 function cleanupAll(){ try{ clearRealtime(); clearPoll(); removeOverlay(); }catch(e){}
 }
 
-// Initialize listener on auth
 (function init(){
   try{
     const auth = getAuth();
@@ -152,11 +150,9 @@ function cleanupAll(){ try{ clearRealtime(); clearPoll(); removeOverlay(); }catc
       }
     });
 
-    // Also stop listeners on page unload
     window.addEventListener('beforeunload', cleanupAll);
   }catch(e){ console.error('JCHAT_ERROR init global call service', e); }
 })();
 
-// Expose for debugging
 window.answerGlobalCall = answerGlobalCall;
 window.declineGlobalCall = declineGlobalCall;
