@@ -187,8 +187,6 @@ function createPeer(){
   return pc;
 }
 
-// arrayUnion helper without importing full FieldValue in v11 modules
-function serverArrayUnion(v){ return (window.firebase && window.firebase.firestore && window.firebase.firestore.FieldValue && window.firebase.firestore.FieldValue.arrayUnion) ? window.firebase.firestore.FieldValue.arrayUnion(v) : (Array.isArray(v) ? v : [v]); }
 
 async function accept(activeDoc){
   if (callState !== 'ringing' || !activeDoc) return;
