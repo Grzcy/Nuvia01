@@ -242,9 +242,9 @@ function computePresenceState(p){
   const online = !!(p && p.online);
   const lastMs = getLastActiveMsFromProfile(p) || 0;
   const now = Date.now();
-  if(online) return { state:'online', lastMs };
-  if(!lastMs) return { state:'offline', lastMs:0 };
   const delta = now - lastMs;
+  if(online && delta <= 15*1000) return { state:'online', lastMs };
+  if(!lastMs) return { state:'offline', lastMs:0 };
   if(delta <= 5*60*1000) return { state:'away', lastMs };
   return { state:'offline', lastMs };
 }
@@ -301,7 +301,7 @@ function startUserHeartbeat(user){
 const friendPresenceUnsubs = new Map();
 
 function tsToMillis(v){ try{ if(!v) return 0; if(typeof v.toMillis==='function') return v.toMillis(); if(typeof v.toDate==='function') return v.toDate().getTime(); const n=Number(v); return isNaN(n)?0:n; }catch(_){ return 0; } }
-function isUserOnlineNow(data){ try{ const online = !!data?.online; if(!online) return false; const lastMs = tsToMillis(data?.lastActive); if(!lastMs) return false; const fresh = (Date.now() - lastMs) <= 60*1000; return fresh; }catch(_){ return false; } }
+function isUserOnlineNow(data){ try{ const online = !!data?.online; if(!online) return false; const lastMs = tsToMillis(data?.lastActive); if(!lastMs) return false; const fresh = (Date.now() - lastMs) <= 15*1000; return fresh; }catch(_){ return false; } }
 function updateFriendPresenceDot(friendId, data){ try{ const item = document.querySelector(`.friend-item[data-uid="${friendId}"]`); if(!item) return; const dot = item.querySelector('.presence-dot'); if(!dot) return; const online = isUserOnlineNow(data); if(online){ dot.classList.add('online'); dot.title='Online'; } else { dot.classList.remove('online'); dot.title='Offline'; } }catch(_){ } }
 function subscribeFriendPresence(friendId){ try{ if(friendPresenceUnsubs.has(friendId)) return; const ref = doc(db,'artifacts',appId,'public','data','users', friendId); const unsub = onSnapshot(ref, (snap)=>{ updateFriendPresenceDot(friendId, snap.exists()? snap.data(): null); }, ()=>{}); friendPresenceUnsubs.set(friendId, unsub); }catch(_){ } }
 window.addEventListener('beforeunload', ()=>{ try{ friendPresenceUnsubs.forEach(u=>u&&u()); friendPresenceUnsubs.clear(); }catch(_){ } });
