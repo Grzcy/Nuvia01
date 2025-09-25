@@ -11469,6 +11469,7 @@ async function fetchAndDisplayPosts() {
 
                 callStatusIcon.className = `fas fa-${currentCallType === 'voice' ? 'phone' : 'video'} call-status-icon`;
                 callStatusText.textContent = `Incoming ${currentCallType} call from ${callerUsername}...`;
+                try{ if (document.hidden && window.Notification && Notification.permission === 'granted'){ new Notification(currentCallType==='video'? 'Incoming video call':'Incoming voice call', { body: `From ${callerUsername}` }); } }catch(_){ }
                 callTimerDisplay.style.display = 'none'; // Hide timer initially.
                 callActions.style.display = 'flex'; // Show call action buttons.
                 acceptCallBtn.style.display = 'block';
