@@ -1,5 +1,4 @@
-
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -133,7 +132,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             const savedTheme = localStorage.getItem('jchat-theme');
-            const themes = ['theme-light-mode','theme-dark-mode','theme-glass-mode','theme-sunset-mode'];
+            const themes = ['theme-dark-mode'];
             if (savedTheme && themes.includes(savedTheme)) { document.body.classList.remove(...themes); document.body.classList.add(savedTheme); }
             else { document.body.classList.add('theme-dark-mode'); }
         });
@@ -141,7 +140,7 @@
         window.addEventListener('storage', (event) => {
             if (event.key === 'jchat-theme') {
                 const newTheme = event.newValue || 'theme-dark-mode';
-                const themes = ['theme-light-mode','theme-dark-mode','theme-glass-mode','theme-sunset-mode'];
+                const themes = ['theme-dark-mode'];
                 if (themes.includes(newTheme)) { document.body.classList.remove(...themes); document.body.classList.add(newTheme); }
             }
         });
@@ -152,4 +151,3 @@
             try { await signOut(auth); showMessageBox("Logged out successfully! 👋", 'success'); setTimeout(()=>{ window.location.href = '/login.html'; }, 1500); }
             catch (_) { showMessageBox("Failed to log out. Please try again.", 'error'); logoutButton.disabled = false; }
         });
-    
