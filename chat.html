@@ -160,7 +160,9 @@
         .friend-presence { display: inline-flex; align-items: center; gap: 6px; }
         .friend-dot { width: 8px; height: 8px; border-radius: 50%; background: #6c757d; }
         .friend-dot.online { background: #4CAF50; box-shadow: 0 0 8px rgba(76,175,80,.7); animation: onlinePulse 1.8s ease-in-out infinite; }
-        .friend-dot.away { background: #FFC107; box-shadow: 0 0 6px rgba(255,193,7,.6); }
+        .friend-dot.away { background: #FFC107; box-shadow: 0 0 6px rgba(255,193,7,.6); animation: blinkYellow 1.2s step-end infinite; }
+        .friend-dot.offline { background: #ff3b30; box-shadow: 0 0 6px rgba(255,59,48,.6); }
+        @keyframes blinkYellow { 0%, 49% { opacity: 1 } 50%, 100% { opacity: .4 } }
 
         /* Full-page friends panel (shown when no chat selected) */
         .friends-main-panel { flex: 1; display: flex; flex-direction: column; padding: 12px 16px; overflow-y: auto; }
@@ -214,8 +216,8 @@
         .status.status-pill-online { box-shadow: 0 0 12px rgba(76,175,80,.25), 0 0 18px rgba(0,213,255,.15); border-color: rgba(0,213,255,.25); }
         .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #6c757d; box-shadow: none; }
         .status-online { background: #4CAF50; box-shadow: 0 0 8px rgba(76,175,80,.7); animation: onlinePulse 1.8s ease-in-out infinite; }
-        .status-away { background: #FFC107; box-shadow: 0 0 6px rgba(255,193,7,.8); animation: onlinePulse 2s ease-in-out infinite; }
-        .status-offline { background: #6c757d; }
+        .status-away { background: #FFC107; box-shadow: 0 0 6px rgba(255,193,7,.8); animation: blinkYellow 1.2s step-end infinite; }
+        .status-offline { background: #ff3b30; box-shadow: 0 0 6px rgba(255,59,48,.6); }
         @keyframes onlinePulse { 0%,100%{ transform: scale(1)} 50%{ transform: scale(1.2)} }
         .gradient-title { 
             font-family: 'Poppins', sans-serif; 
@@ -1597,10 +1599,13 @@
                 const cached = friendPresenceCache.get(f.id);
                 if (cached) {
                     document.querySelectorAll(`[data-presence-id="${f.id}"]`).forEach(dot => {
-                        dot.className = 'friend-dot ' + (cached.state === 'online' ? 'online' : cached.state === 'away' ? 'away' : '');
+                        dot.className = 'friend-dot ' + (cached.state === 'online' ? 'online' : cached.state === 'away' ? 'away' : 'offline');
                     });
                     document.querySelectorAll(`[data-presence-text-id="${f.id}"]`).forEach(text => {
                         text.textContent = cached.state === 'online' ? 'Online' : (cached.state === 'away' ? `Away • ${formatRelativeTime(cached.lastMs)}` : `Offline • ${formatRelativeTime(cached.lastMs)}`);
+                    });
+                    document.querySelectorAll(`[data-last-ts-id="${f.id}"]`).forEach(lastEl => {
+                        lastEl.textContent = cached.state === 'online' ? '' : (' • ' + formatTimeShort(cached.lastMs));
                     });
                 }
             });
@@ -1750,10 +1755,13 @@
                     else if (now - lastMs <= 5*60*1000) state = 'away';
                     friendPresenceCache.set(friendId, { state, lastMs });
                     document.querySelectorAll(`[data-presence-id="${friendId}"]`).forEach(dot => {
-                        dot.className = 'friend-dot ' + (state === 'online' ? 'online' : state === 'away' ? 'away' : '');
+                        dot.className = 'friend-dot ' + (state === 'online' ? 'online' : state === 'away' ? 'away' : 'offline');
                     });
                     document.querySelectorAll(`[data-presence-text-id="${friendId}"]`).forEach(text => {
                         text.textContent = state === 'online' ? 'Online' : (state === 'away' ? `Away • ${formatRelativeTime(lastMs)}` : `Offline • ${formatRelativeTime(lastMs)}`);
+                    });
+                    document.querySelectorAll(`[data-last-ts-id="${friendId}"]`).forEach(lastEl => {
+                        lastEl.textContent = state === 'online' ? '' : (' • ' + formatTimeShort(lastMs));
                     });
                 });
                 friendPresenceUnsubs.set(friendId, unsub);
