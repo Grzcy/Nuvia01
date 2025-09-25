@@ -9155,6 +9155,76 @@ async function checkAndStartDailyBonusTimer() {
                 return `${base} ${pad} ${pad2}`;
             }catch(_){ return base; }
         }
+        // Reading-time and dedup helpers for inspirations
+        function estimateReadSeconds(text){
+            try{
+                const words = String(text||'').trim().split(/\s+/).filter(Boolean).length;
+                const wpm = 200; // average adult reading speed
+                return (words / wpm) * 60;
+            }catch(_){ return 0; }
+        }
+        function getSeenListKey(type, sub){
+            const t = (type && String(type)) || 'motivational';
+            const s = (sub && String(sub)) || '';
+            const uid = (currentUser?.uid || 'guest');
+            return `nuvia_inspiration_seen_${uid}_${t}${s ? '_' + s : ''}`;
+        }
+        function readSeenList(type, sub){
+            try{
+                const raw = localStorage.getItem(getSeenListKey(type, sub));
+                const arr = JSON.parse(raw || '[]');
+                return Array.isArray(arr) ? arr : [];
+            }catch(_){ return []; }
+        }
+        function writeSeenList(list, type, sub){
+            try{
+                const cap = 500; // prevent unbounded growth
+                const trimmed = list.slice(-cap);
+                localStorage.setItem(getSeenListKey(type, sub), JSON.stringify(trimmed));
+            }catch(_){ }
+        }
+        function isSeen(text, type, sub){
+            try{
+                const norm = String(text||'').trim();
+                return readSeenList(type, sub).includes(norm);
+            }catch(_){ return false; }
+        }
+        function markSeen(text, type, sub){
+            try{
+                const norm = String(text||'').trim();
+                const list = readSeenList(type, sub);
+                if (!list.includes(norm)) { list.push(norm); writeSeenList(list, type, sub); }
+            }catch(_){ }
+        }
+        function ensureMinReadLength(text, type, seed, minSeconds = 10){
+            try{
+                let output = String(text||'').trim();
+                let tries = 0;
+                while (estimateReadSeconds(output) < minSeconds && tries < 8){
+                    const extra = expandInspiration('', type || 'motivational', (seed||0) + 200 + tries).trim();
+                    output = `${output} ${extra}`.trim();
+                    tries++;
+                }
+                return output;
+            }catch(_){ return text; }
+        }
+        function renderInspirationText(baseText, author, type, sub, seed){
+            try{
+                let final = ensureMinReadLength(baseText, type, seed);
+                let guard = 0;
+                while (isSeen(final, type, sub) && guard < 8){
+                    const extra = expandInspiration('', type || 'motivational', (seed||0) + 400 + guard).trim();
+                    final = ensureMinReadLength(`${final} ${extra}`.trim(), type, (seed||0) + 800 + guard);
+                    guard++;
+                }
+                markSeen(final, type, sub);
+                if (inspirationQuoteElement) inspirationQuoteElement.textContent = `"${final}"`;
+                if (inspirationAuthorElement) inspirationAuthorElement.textContent = author ? `- ${author}` : '';
+            }catch(_){
+                if (inspirationQuoteElement) inspirationQuoteElement.textContent = `"${String(baseText||'')}"`;
+                if (inspirationAuthorElement) inspirationAuthorElement.textContent = author ? `- ${author}` : '';
+            }
+        }
         function getPartOfDay(h) {
             if (h >= 5 && h < 12) return 'morning';
             if (h >= 12 && h < 17) return 'afternoon';
@@ -9261,8 +9331,7 @@ const lex = inspirationLexicon[type];
                     item = arr[Math.abs(seed) % arr.length];
                 } else {
                     const quoteData = generateTimeBasedQuote(chosen || 'motivational');
-                    if (inspirationQuoteElement) inspirationQuoteElement.textContent = `"${quoteData.quote}"`;
-                    if (inspirationAuthorElement) inspirationAuthorElement.textContent = `- ${quoteData.author}`;
+                    renderInspirationText(quoteData.quote, quoteData.author, chosen || 'motivational', chosenSub, seed);
                     return;
                 }
 
@@ -9271,17 +9340,14 @@ const lex = inspirationLexicon[type];
                     const q = item.text || item.quote || '';
                     const ref = item.ref || item.author || '';
                     const longQ = expandInspiration(q, chosen || 'motivational', seed);
-                    if (inspirationQuoteElement) inspirationQuoteElement.textContent = `"${longQ}"`;
-                    if (inspirationAuthorElement) inspirationAuthorElement.textContent = ref ? `- ${ref}` : `- Nuvia`;
+                    renderInspirationText(longQ, (ref ? ref : 'Nuvia'), chosen || 'motivational', chosenSub, seed);
                 } else {
                     const longItem = expandInspiration(String(item), chosen || 'motivational', seed);
-                    if (inspirationQuoteElement) inspirationQuoteElement.textContent = `"${longItem}"`;
-                    if (inspirationAuthorElement) inspirationAuthorElement.textContent = `- Nuvia`;
+                    renderInspirationText(longItem, 'Nuvia', chosen || 'motivational', chosenSub, seed);
                 }
             } catch(e) {
                 const quoteData = generateTimeBasedQuote(chosen);
-                if (inspirationQuoteElement) inspirationQuoteElement.textContent = `"${quoteData.quote}"`;
-                if (inspirationAuthorElement) inspirationAuthorElement.textContent = `- ${quoteData.author}`;
+                renderInspirationText(quoteData.quote, quoteData.author, chosen || 'motivational', chosenSub, Date.now());
             }
         }
 
