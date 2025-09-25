@@ -222,12 +222,6 @@
             --active-item-background: rgba(255, 215, 0, 0.1);
         }
 
-        /* Pink + Yellow background overlay for Profile page only */
-        body.profile-pinkyellow-bg {
-            background: linear-gradient(135deg, #ff2e92, #ffd700) fixed !important;
-            background-size: cover;
-            background-attachment: fixed;
-        }
 
         /* EMERGENCY FIX: Remove all scroll restrictions */
         * {
@@ -10197,8 +10191,6 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
             await injectSharedThemes();
             applySavedTheme();
             window.addEventListener('storage', (e) => { if (e.key === 'jchat-theme' || e.key === 'nuvia-theme') applySavedTheme(); });
-            // Enforce pink-yellow background for Profile page
-            document.body.classList.add('profile-pinkyellow-bg');
 
 
             // Profile Picture Upload
