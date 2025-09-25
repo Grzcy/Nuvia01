@@ -161,7 +161,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, doc, getDoc, query, orderBy, onSnapshot, addDoc, serverTimestamp, setDoc, updateDoc, getDocs, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, doc, getDoc, query, orderBy, onSnapshot, addDoc, serverTimestamp, setDoc, updateDoc, getDocs, where, limit, limitToLast } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
     import { getCloudinaryImageUrl, displayProfilePicture } from './assets/js/avatar-utils.js';
 
     const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
@@ -220,6 +220,32 @@
     let partnerProfile = null;
     let chatId = null;
     let unsubscribeMessages = null;
+
+// Ultra-fast message helpers
+const MSG_CACHE_KEY = (cid)=> `chat_cache_${appId}_${cid}`;
+function loadMessagesCache(cid){ try{ return JSON.parse(sessionStorage.getItem(MSG_CACHE_KEY(cid))||'[]'); }catch(_){ return []; } }
+function saveMessagesCache(cid, msgs){ try{ const arr = (msgs||[]).slice(-100); sessionStorage.setItem(MSG_CACHE_KEY(cid), JSON.stringify(arr)); }catch(_){ } }
+function isNearBottom(){ try{ const d = chatMessages; return (d.scrollHeight - d.scrollTop - d.clientHeight) < 120; }catch(_){ return true; } }
+function appendOrUpdateMessage(m){
+  const existing = document.querySelector(`.message-item[data-id="${m.id}"]`);
+  if(existing){ updateMessageDom(existing, m); return; }
+  renderMessage(m);
+}
+function updateMessageDom(el, m){
+  try{
+    el.className = 'message-item ' + ((currentUser && m.senderId===currentUser.uid)? 'sent':'received');
+    const contentWrap = el.querySelector('.message-content');
+    if(!contentWrap) return;
+    const bubble = contentWrap.querySelector('.message-bubble');
+    const meta = contentWrap.querySelector('.message-meta');
+    if(bubble){ bubble.innerHTML=''; if(m.repliedToText){ const q=document.createElement('div'); q.className='reply-quote'; q.textContent=m.repliedToText; bubble.appendChild(q); }
+      if(m.deleted){ const p=document.createElement('div'); p.textContent='Message deleted'; bubble.appendChild(p); }
+      else if(m.type==='file' || m.type==='audio'){ const lower=(m.fileUrl||'').toLowerCase(); if(m.fileUrl && /\.(png|jpe?g|gif|webp)$/i.test(lower)){ const img=document.createElement('img'); img.src=m.fileUrl; img.className='message-media image'; img.style.maxWidth='220px'; img.style.borderRadius='8px'; img.alt='image'; bubble.appendChild(img);} else if(m.fileUrl && /\.(mp4|webm|ogg)$/i.test(lower)){ const v=document.createElement('video'); v.src=m.fileUrl; v.controls=true; v.style.maxWidth='260px'; v.style.borderRadius='8px'; v.className='message-media video'; bubble.appendChild(v);} else if(m.fileUrl && (m.type==='audio' || /\.(mp3|wav|m4a|aac)$/i.test(lower))){ const a=document.createElement('audio'); a.src=m.fileUrl; a.controls=true; bubble.appendChild(a);} else if(m.text){ const p=document.createElement('div'); p.textContent=m.text; bubble.appendChild(p);} }
+      else { const p=document.createElement('div'); p.textContent = m.text || ''; bubble.appendChild(p); }
+    }
+    if(meta){ meta.textContent = (formatTime(m.timestamp) + ((currentUser && m.senderId===currentUser.uid) ? (m.seenAt ? ' ✓✓' : ' ✓') : '')); }
+  }catch(_){ }
+}
     let selectedMediaFiles = [];
     let allMessages = [];
     let replyContext = null;
@@ -516,7 +542,7 @@ window.addEventListener('beforeunload', ()=>{ try{ friendPresenceUnsubs.forEach(
       if(!currentUser || !partnerId) return;
       chatId = chatIdFor(currentUser.uid, partnerId);
       const messagesRef = collection(db,'artifacts',appId,'public','data','chats',chatId,'messages');
-      const q = query(messagesRef, orderBy('timestamp','asc'));
+      const q = query(messagesRef, orderBy('timestamp','asc'), limitToLast(100));
 
       // Typing listener for partner
       try{
@@ -525,38 +551,63 @@ window.addEventListener('beforeunload', ()=>{ try{ friendPresenceUnsubs.forEach(
         typingUnsub = onSnapshot(partnerTypingRef, (snap)=>{
           const d = snap.data();
           if(d && d.typing && (Date.now() - (d.ts||0) < 5000)){
-            __partnerTyping = true;
-            renderPartnerPresence();
+            __partnerTyping = true; renderPartnerPresence();
           }else{
-            __partnerTyping = false;
-            renderPartnerPresence();
+            __partnerTyping = false; renderPartnerPresence();
           }
         }, ()=>{});
       }catch(_){ }
 
+      // Instant render from cache
+      try{
+        const cached = loadMessagesCache(chatId);
+        if(Array.isArray(cached) && cached.length){
+          messagesLoading.style.display='none';
+          allMessages = cached;
+          knownMessageIds = new Set(cached.map(m=> m.id));
+          clearMessages();
+          cached.forEach(m=> renderMessage(m));
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+      }catch(_){ }
+
       if(unsubscribeMessages) unsubscribeMessages();
       unsubscribeMessages = onSnapshot(q, async (snap)=>{
-        const docs = snap.docs.map(s=>({ id: s.id, ...s.data() }));
-        allMessages = docs;
-        if(docs.length===0){ messagesLoading.textContent='No messages yet. Say hello!'; messagesLoading.style.display='block'; }
-        else { messagesLoading.style.display='none'; }
-
-        for(const d of docs){
-          try{
-            if(d.receiverId === currentUser.uid && !d.seenAt){
-              const mref = doc(db,'artifacts',appId,'public','data','chats',chatId,'messages', d.id);
-              await updateDoc(mref, { seenAt: serverTimestamp() });
-            }
+        const nearBottom = isNearBottom();
+        const changes = snap.docChanges();
+        let mutated = false;
+        for(const ch of changes){
+          const d = { id: ch.doc.id, ...ch.doc.data() };
+          if(ch.type === 'added'){
             if(!knownMessageIds.has(d.id)){
               knownMessageIds.add(d.id);
-              if(d.senderId !== (currentUser&&currentUser.uid)) maybeNotify(d);
+              allMessages.push(d);
+              appendOrUpdateMessage(d);
+              mutated = true;
+              try{
+                if(d.receiverId === currentUser.uid && !d.seenAt){
+                  const mref = doc(db,'artifacts',appId,'public','data','chats',chatId,'messages', d.id);
+                  await updateDoc(mref, { seenAt: serverTimestamp() });
+                }
+                if(d.senderId !== (currentUser&&currentUser.uid)) maybeNotify(d);
+              }catch(_){ }
             }
-          }catch(_){ }
+          } else if(ch.type === 'modified'){
+            const idx = allMessages.findIndex(x=> x.id===d.id);
+            if(idx>-1){ allMessages[idx] = d; }
+            appendOrUpdateMessage(d);
+            mutated = true;
+          } else if(ch.type === 'removed'){
+            const idx = allMessages.findIndex(x=> x.id===d.id);
+            if(idx>-1){ allMessages.splice(idx,1); }
+            const el = document.querySelector(`.message-item[data-id="${d.id}"]`);
+            if(el && el.parentNode) el.parentNode.removeChild(el);
+            mutated = true;
+          }
         }
-
-        renderAllMessages((document.getElementById('chatSearchInput')?.value||'').trim());
-        renderPinnedBar();
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        if(snap.docs.length===0){ messagesLoading.textContent='No messages yet. Say hello!'; messagesLoading.style.display='block'; }
+        else { messagesLoading.style.display='none'; }
+        if(mutated){ renderPinnedBar(); saveMessagesCache(chatId, allMessages); if(nearBottom) chatMessages.scrollTop = chatMessages.scrollHeight; }
       }, (err)=>{ console.error('messages listener',err); showMessage('Failed to load messages','error',4000); });
     }
 
