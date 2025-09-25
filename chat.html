@@ -304,6 +304,7 @@
       const isSent = currentUser && m.senderId === currentUser.uid;
       const item = document.createElement('div');
       item.className = 'message-item ' + (isSent? 'sent':'received');
+      item.dataset.id = m.id;
 
       const avatarWrap = document.createElement('div');
       avatarWrap.className = 'avatar';
