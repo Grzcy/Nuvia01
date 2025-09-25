@@ -6,6 +6,7 @@
   <title>Nuvia - Chat</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 
@@ -187,6 +188,7 @@
 
     const backBtn = document.getElementById('backBtn');
     const partnerAvatar = document.getElementById('partnerAvatar');
+    try{ partnerAvatar.setAttribute('fetchpriority','high'); partnerAvatar.decoding='async'; partnerAvatar.loading='eager'; }catch(_){}
     const partnerNameEl = document.getElementById('partnerName');
     const partnerStatusEl = document.getElementById('partnerStatus');
     const viewProfileBtn = document.getElementById('viewProfileBtn');
@@ -276,6 +278,52 @@ function startPresenceAutoRefresh(){
   }catch(_){ }
 }
 
+function applyPartnerData(data){
+  try{
+    partnerProfile = data || { username: 'Unknown', profilePicId: null };
+    partnerNameEl.textContent = partnerProfile.username || 'User';
+    displayProfilePicture(partnerAvatar, null, partnerProfile.profilePicId, (partnerProfile.username||'U').charAt(0), 'w_120,h_120,c_fill,g_face,r_max');
+    renderPartnerPresence();
+  }catch(_){ }
+}
+
+async function openChatWith(uid, hint){
+  try{
+    if(!currentUser) return;
+    // Clean previous listeners
+    if(unsubscribeMessages){ try{ unsubscribeMessages(); }catch(_){} unsubscribeMessages=null; }
+    if(typingUnsub){ try{ typingUnsub(); }catch(_){} typingUnsub=null; }
+    if(window.__partnerUnsub){ try{ window.__partnerUnsub(); }catch(_){} window.__partnerUnsub=null; }
+
+    partnerId = uid;
+    chatId = chatIdFor(currentUser.uid, partnerId);
+    toggleViews(false);
+    try{ history.replaceState(null,'', `/chat.html?partnerId=${partnerId}`); }catch(_){ }
+
+    // Instant header from hint
+    if(hint){
+      try{
+        partnerNameEl.textContent = hint.username || 'User';
+        if(hint.avatarUrl){ partnerAvatar.src = hint.avatarUrl; }
+        else if(hint.profilePicId){ displayProfilePicture(partnerAvatar, null, hint.profilePicId, (hint.username||'U').charAt(0), 'w_120,h_120,c_fill,g_face,r_max'); }
+        else { partnerAvatar.src = `https://placehold.co/80x80/CCCCCC/000000?text=${encodeURIComponent((hint.username||'U').charAt(0))}`; }
+        renderPartnerPresence();
+      }catch(_){ }
+    }
+
+    // Live partner profile
+    const partnerRef = doc(db,'artifacts',appId,'public','data','users', partnerId);
+    try{ const ps = await getDoc(partnerRef); if(ps.exists()) applyPartnerData(ps.data()); }catch(_){ }
+    try{ window.__partnerUnsub = onSnapshot(partnerRef, (snap)=>{ try{ if(snap.exists()) applyPartnerData(snap.data()); }catch(_){ } }); }catch(_){ }
+
+    await ensureChatDoc(chatId, partnerId);
+    startListening();
+    loadMute();
+    startPresenceAutoRefresh();
+    startUserHeartbeat(currentUser);
+  }catch(_){ }
+}
+
 function startUserHeartbeat(user){
   try{
     if(!user) return;
@@ -342,11 +390,8 @@ window.addEventListener('beforeunload', ()=>{ try{ friendPresenceUnsubs.forEach(
       const tc = document.createElement('div'); tc.style.display='flex'; tc.style.flexDirection='column'; tc.appendChild(name); tc.appendChild(sub);
       el.appendChild(tc);
       el.addEventListener('click', ()=>{
-        try{
-          const hint = { uid: f.uid, username: f.username||'User', profilePicId: f.profilePicId||null, avatarUrl };
-          sessionStorage.setItem('chat:partnerHint:'+f.uid, JSON.stringify(hint));
-        }catch(_){ }
-        window.location.href = `/chat.html?partnerId=${f.uid}`;
+        const hint = { uid: f.uid, username: f.username||'User', profilePicId: f.profilePicId||null, avatarUrl };
+        openChatWith(f.uid, hint);
       });
       // Subscribe to presence updates (green only when truly online)
       subscribeFriendPresence(f.uid);
@@ -665,19 +710,13 @@ window.addEventListener('beforeunload', ()=>{ try{ friendPresenceUnsubs.forEach(
         // load partner profile
         try{
           const partnerRef = doc(db,'artifacts',appId,'public','data','users',partnerId);
-          const applyPartner = (data)=> {
-            partnerProfile = data || { username: 'Unknown', profilePicId: null };
-            partnerNameEl.textContent = partnerProfile.username || 'User';
-            displayProfilePicture(partnerAvatar, null, partnerProfile.profilePicId, (partnerProfile.username||'U').charAt(0), 'w_120,h_120,c_fill,g_face,r_max');
-            renderPartnerPresence();
-          };
           try{
             const psnap = await getDoc(partnerRef);
-            if(psnap.exists()) applyPartner(psnap.data()); else applyPartner(null);
-          }catch(_){ applyPartner(null); }
+            if(psnap.exists()) applyPartnerData(psnap.data()); else applyPartnerData(null);
+          }catch(_){ applyPartnerData(null); }
           try{
             if(window.__partnerUnsub) window.__partnerUnsub();
-            window.__partnerUnsub = onSnapshot(partnerRef, (snap)=>{ try{ if(snap.exists()) applyPartner(snap.data()); }catch(_){ } });
+            window.__partnerUnsub = onSnapshot(partnerRef, (snap)=>{ try{ if(snap.exists()) applyPartnerData(snap.data()); }catch(_){ } });
           }catch(_){}
         }catch(e){ console.error('load partner',e); }
 
