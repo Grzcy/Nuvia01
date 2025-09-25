@@ -21,7 +21,7 @@
     <script>
       document.addEventListener('DOMContentLoaded', () => {
         const savedTheme = localStorage.getItem('jchat-theme');
-        const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+        const themes = ['theme-dark-mode'];
         if (savedTheme && themes.includes(savedTheme)) {
             document.body.classList.remove(...themes);
             document.body.classList.add(savedTheme);
@@ -774,7 +774,7 @@
     <main>
         <div class="content-wrapper">
             <div class="section-card">
-                <h1>JCHAT Analytics Dashboard 📊</h1>
+                <h1>JCHAT Analytics Dashboard ���</h1>
                 <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 1.5rem;">
                     Gain insights into user activity, content trends, and system performance.
                 </p>
@@ -1603,7 +1603,7 @@
         window.addEventListener('storage', (event) => {
             if (event.key === 'jchat-theme') {
                 const newTheme = event.newValue || 'theme-dark-mode';
-                const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+                const themes = ['theme-dark-mode'];
                 if (themes.includes(newTheme)) {
                     document.body.classList.remove(...themes);
                     document.body.classList.add(newTheme);
