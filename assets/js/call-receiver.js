@@ -3,7 +3,7 @@
 
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
-import { getFirestore, collection, query, where, onSnapshot, doc, getDoc, updateDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+import { getFirestore, collection, query, where, onSnapshot, doc, getDoc, updateDoc, addDoc, serverTimestamp, arrayUnion } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
 
 const firebaseConfig = typeof window.__firebase_config !== 'undefined' ? JSON.parse(window.__firebase_config) : {
   apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
