@@ -1563,7 +1563,7 @@
         document.addEventListener('click', (e) => {
             if (!e.target.closest('#friendsRoot')) closeFriends();
             const messages = document.getElementById('messages');
-            if (messages && !friendsMenu.classList.contains('show')) messages.classList.remove('hidden-while-friends');
+            if (messages && (!friendsMenu || !friendsMenu.classList.contains('show'))) messages.classList.remove('hidden-while-friends');
         });
         
         friendsSearchEl?.addEventListener('input', () => {
