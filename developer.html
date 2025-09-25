@@ -2517,7 +2517,7 @@ const unverifyUserButton = document.getElementById('unverifyUserButton');
         }
 
         function applyTheme(themeName) {
-            const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+            const themes = ['theme-dark-mode'];
             document.body.classList.remove(...themes);
             document.body.classList.add(themeName);
             localStorage.setItem('jchat-theme', themeName);
