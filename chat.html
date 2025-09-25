@@ -94,21 +94,22 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 12px 16px;
+            padding: 16px 20px;
             background: var(--header-background);
             border-bottom: 1px solid var(--border-light); box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            min-height: 64px;
         }
 
-        .header-left { display: flex; align-items: center; gap: 12px; }
-        .back-btn { background: none; border: none; color: var(--white); font-size: 18px; cursor: pointer; }
+        .header-left { display: flex; align-items: center; gap: 16px; }
+        .back-btn { background: none; border: none; color: var(--white); font-size: 22px; cursor: pointer; }
 
         .partner { display: flex; align-items: center; gap: 10px; }
-        .partner img { width: 42px; height: 42px; border-radius: 50%; border: 2px solid var(--border-light); object-fit: cover; }
+        .partner img { width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--border-light); object-fit: cover; }
         .partner .name { font-family: 'Poppins', sans-serif; font-weight: 600; }
         .status { font-size: 12px; color: var(--text-light); }
 
         .header-right { display: flex; align-items: center; gap: 10px; }
-        .icon-btn { background: none; border: none; color: var(--text-light); font-size: 18px; cursor: pointer; padding: 8px; border-radius: 50%; }
+        .icon-btn { background: none; border: none; color: var(--text-light); font-size: 20px; cursor: pointer; padding: 10px; border-radius: 50%; width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; }
         .icon-btn:hover { background: var(--border-light); color: var(--white); }
 
         /* Friends dropdown */
@@ -146,7 +147,7 @@
 
         /* Header profile (kept) */
         .header-profile { display:flex; align-items:center; gap:8px; cursor:pointer; }
-        .header-profile-pic { width:36px; height:36px; border-radius:50%; border:2px solid var(--border-light); object-fit:cover; }
+        .header-profile-pic { width:44px; height:44px; border-radius:50%; border:2px solid var(--border-light); object-fit:cover; }
         .friends-list { max-height: calc(70vh - 52px); overflow-y: auto; -webkit-overflow-scrolling: touch; }
         .friend-item { display: flex; gap: 14px; align-items: center; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,.05); cursor: pointer; }
    .friend-item:hover { background: rgba(255,255,255,.05); }
@@ -222,7 +223,7 @@
             background-clip: text; 
             color: transparent; 
             letter-spacing: -0.02em;
-            font-size: 1.25rem;
+            font-size: 1.4rem;
             text-shadow: 0 2px 0 rgba(0,0,0,0.25), 0 6px 12px rgba(0, 213, 255, 0.25), 0 6px 12px rgba(255, 46, 146, 0.25);
         }
 
