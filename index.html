@@ -515,11 +515,11 @@
         /* --- Theme Definitions (Light and Dark Mode) --- */
         /* Light Mode - Premium Platinum Minimal */
         body.theme-light-mode {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 25%, #cbd5e1 50%, #94a3b8 75%, #64748b 100%) !important;
+            background: #f0f2f5 !important;
             background-size: 400% 400% !important;
             animation: platinumShimmer 20s ease-in-out infinite !important;
             background-attachment: fixed !important;
-            --background-main: linear-gradient(135deg, #f8fafc 0%, #64748b 100%);
+            --background-main: #f0f2f5;
             --background-gradient-1: #e2e8f0;
             --background-gradient-2: #cbd5e1;
             --white: #1e293b;
@@ -609,6 +609,8 @@
             background-color: transparent !important;
             background-image: linear-gradient(to top, #ff7e5f, #feb47b) !important;
             --background-main: linear-gradient(to top, #ff7e5f, #feb47b);
+            --background-gradient-1: #ff7e5f;
+            --background-gradient-2: #feb47b;
             --card-background: rgba(255, 255, 255, 0.15);
             --white: #fff;
             --text-light: rgba(255, 255, 255, 0.8);
@@ -638,6 +640,8 @@
         /* Glass Mode specific variables */
         body.theme-glass-mode {
             --background-main: rgba(10, 10, 10, 0.75);
+            --background-gradient-1: #00d5ff;
+            --background-gradient-2: #ff2e92;
             background-image: url('https://source.unsplash.com/random/1920x1080?abstract,blur') !important; /* Added !important */
             background-size: cover;
             background-attachment: fixed;
@@ -677,6 +681,8 @@
             animation: oceanWaves 15s ease-in-out infinite !important;
             background-attachment: fixed !important;
             --background-main: linear-gradient(135deg, #001f3f 0%, #2ecc40 100%);
+            --background-gradient-1: #7fdbff;
+            --background-gradient-2: #39cccc;
             --card-background: rgba(0, 116, 217, 0.15);
             --white: #ffffff;
             --text-light: rgba(255, 255, 255, 0.9);
@@ -716,6 +722,8 @@
             background-color: transparent !important;
             background-image: linear-gradient(135deg, #064e3b, #065f46, #047857, #059669) !important;
             --background-main: linear-gradient(135deg, #064e3b, #065f46, #047857, #059669);
+            --background-gradient-1: #10b981;
+            --background-gradient-2: #059669;
             --card-background: rgba(255, 255, 255, 0.1);
             --white: #ffffff;
             --text-light: rgba(255, 255, 255, 0.9);
@@ -749,6 +757,8 @@
             background-color: transparent !important;
             background-image: linear-gradient(135deg, #1e1b4b, #312e81, #4338ca, #6366f1) !important;
             --background-main: linear-gradient(135deg, #1e1b4b, #312e81, #4338ca, #6366f1);
+            --background-gradient-1: #6366f1;
+            --background-gradient-2: #8b5cf6;
             --card-background: rgba(255, 255, 255, 0.1);
             --white: #ffffff;
             --text-light: rgba(255, 255, 255, 0.9);
@@ -781,6 +791,8 @@
             background-color: transparent !important;
             background-image: linear-gradient(135deg, #581c87, #7c3aed, #a855f7, #c084fc) !important;
             --background-main: linear-gradient(135deg, #581c87, #7c3aed, #a855f7, #c084fc);
+            --background-gradient-1: #a855f7;
+            --background-gradient-2: #c084fc;
             --card-background: rgba(255, 255, 255, 0.1);
             --white: #ffffff;
             --text-light: rgba(255, 255, 255, 0.9);
@@ -808,12 +820,48 @@
             --warning-color: #f59e0b;
         }
 
+        /* Black + Yellow Theme - Elegant BlackGold */
+        body.theme-black-yellow {
+            background: linear-gradient(135deg, #000000 0%, #ffd700 100%) !important;
+            background-size: 300% 300% !important;
+            background-attachment: fixed !important;
+            --background-main: linear-gradient(135deg, #000000 0%, #ffd700 100%);
+            --background-gradient-1: #ffd700;
+            --background-gradient-2: #b8860b;
+            --white: #ffffff;
+            --text-light: rgba(255, 255, 255, 0.78);
+            --card-background: rgba(30, 30, 30, 0.7);
+            --header-background: linear-gradient(135deg, rgba(0, 0, 0, 0.92), rgba(20, 20, 20, 0.88));
+            --border-light: rgba(255, 215, 0, 0.18);
+            --input-background: rgba(255, 255, 255, 0.06);
+            --button-background: linear-gradient(90deg, #ffd700, #b8860b);
+            --button-shadow: 0 4px 15px rgba(255, 215, 0, 0.35), 0 4px 15px rgba(184, 134, 11, 0.35);
+            --background-color-primary: #000000;
+            --background-color-secondary: #0a0a0a;
+            --header-background-color: #0a0a0a;
+            --footer-background-color: #0a0a0a;
+            --content-background-color: rgba(255, 215, 0, 0.06);
+            --card-background-color: rgba(30, 30, 30, 0.7);
+            --text-color-primary: #ffffff;
+            --text-color-secondary: #ffe680;
+            --accent-color: #ffd700;
+            --accent-color-dark: #b8860b;
+            --border-color: rgba(255, 215, 0, 0.22);
+            --input-background-color: rgba(255, 255, 255, 0.06);
+            --button-hover-background: #ffdf32;
+            --active-item-background: rgba(255, 215, 0, 0.15);
+            --delete-button-color: #ef4444;
+            --warning-color: #ffd700;
+        }
+
         /* Neon Theme - Premium Digital Matrix with Code Rain */
         body.theme-neon-mode {
             background: linear-gradient(135deg, #0f172a, #1e293b, #334155, #475569) !important;
             background-color: transparent !important;
             background-image: linear-gradient(135deg, #0f172a, #1e293b, #334155, #475569) !important;
             --background-main: linear-gradient(135deg, #0f172a, #1e293b, #334155, #475569);
+            --background-gradient-1: #06b6d4;
+            --background-gradient-2: #0ea5e9;
             --card-background: rgba(255, 255, 255, 0.1);
             --white: #ffffff;
             --text-light: rgba(255, 255, 255, 0.9);
@@ -846,6 +894,8 @@
             background-color: transparent !important;
             background-image: linear-gradient(135deg, #92400e, #b45309, #d97706, #f59e0b) !important;
             --background-main: linear-gradient(135deg, #92400e, #b45309, #d97706, #f59e0b);
+            --background-gradient-1: #f59e0b;
+            --background-gradient-2: #fbbf24;
             --card-background: rgba(255, 255, 255, 0.1);
             --white: #ffffff;
             --text-light: rgba(255, 255, 255, 0.9);
@@ -886,6 +936,8 @@
             animation: quantumFlux 20s ease-in-out infinite, particleCollision 15s linear infinite !important;
             background-attachment: fixed !important;
             --background-main: linear-gradient(135deg, #000428 0%, #00d4ff 100%);
+            --background-gradient-1: #00d4ff;
+            --background-gradient-2: #3498db;
             --card-background: rgba(0, 212, 255, 0.15);
             --white: #ffffff;
             --text-light: rgba(255, 255, 255, 0.95);
@@ -936,6 +988,8 @@
             animation: holographicScan 25s linear infinite, matrixGlitch 8s ease-in-out infinite alternate !important;
             background-attachment: fixed !important;
             --background-main: linear-gradient(135deg, #0a0a0a 0%, #533483 100%);
+            --background-gradient-1: #00ffff;
+            --background-gradient-2: #ff00ff;
             --card-background: rgba(0, 255, 255, 0.1);
             --white: #ffffff;
             --text-light: rgba(255, 255, 255, 0.95);
@@ -988,6 +1042,8 @@
             animation: stellarBirth 30s ease-in-out infinite, cosmicEvolution 20s linear infinite !important;
             background-attachment: fixed !important;
             --background-main: linear-gradient(135deg, #000000 0%, #ffd700 100%);
+            --background-gradient-1: #ffd700;
+            --background-gradient-2: #8a2be2;
             --card-background: rgba(255, 215, 0, 0.12);
             --white: #ffffff;
             --text-light: rgba(255, 255, 255, 0.95);
@@ -1039,6 +1095,8 @@
             animation: circusPerformance 18s ease-in-out infinite, tentPhysics 12s linear infinite !important;
             background-attachment: fixed !important;
             --background-main: linear-gradient(135deg, #ff0080 0%, #1e90ff 100%);
+            --background-gradient-1: #ff0080;
+            --background-gradient-2: #1e90ff;
             --card-background: rgba(255, 255, 255, 0.15);
             --white: #ffffff;
             --text-light: rgba(255, 255, 255, 0.95);
@@ -1096,6 +1154,8 @@
             animation: temporalShift 35s ease-in-out infinite, timeDilation 10s ease-in-out infinite alternate !important;
             background-attachment: fixed !important;
             --background-main: linear-gradient(135deg, #000000 0%, #533483 100%);
+            --background-gradient-1: #8a2be2;
+            --background-gradient-2: #ffd700;
             --card-background: rgba(128, 0, 128, 0.15);
             --white: #ffffff;
             --text-light: rgba(255, 255, 255, 0.95);
@@ -3072,6 +3132,198 @@
             --border-light: rgba(255, 255, 255, 0.2) !important;
         }
 
+        /* Clean Theme Collection */
+        body.theme-snow {
+            background: linear-gradient(135deg, #e8f0fe, #f7f9fc) !important;
+            background-attachment: fixed !important;
+            --background-main: #f7f9fc !important;
+            --background-gradient-1: #e8f0fe;
+            --background-gradient-2: #f7f9fc;
+            --card-background: rgba(255,255,255,0.95) !important;
+            --white: #111 !important;
+            --text-light: #444 !important;
+            --border-light: rgba(0,0,0,0.08) !important;
+            --button-background: linear-gradient(90deg, #e3f2fd, #bbdefb) !important;
+            --button-shadow: 0 4px 15px rgba(187,222,251,.35), 0 4px 15px rgba(227,242,253,.25) !important;
+        }
+        body.theme-slate {
+            background: linear-gradient(135deg, #0b0c10, #1b1e27) !important;
+            background-attachment: fixed !important;
+            --background-main: #111319 !important;
+            --background-gradient-1: #0b0c10;
+            --background-gradient-2: #1b1e27;
+            --card-background: linear-gradient(145deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02)) !important;
+            --white: #e6e8ee !important;
+            --text-light: rgba(230,232,238,.7) !important;
+            --border-light: rgba(255,255,255,0.06) !important;
+            --button-background: linear-gradient(90deg, #4b5563, #6b7280) !important;
+            --button-shadow: 0 4px 15px rgba(75,85,99,.35), 0 4px 15px rgba(107,114,128,.25) !important;
+        }
+        body.theme-ocean {
+            background: linear-gradient(135deg, #001f3f, #0074d9, #39cccc) !important;
+            background-size: 300% 300% !important;
+            background-attachment: fixed !important;
+            --background-main: #0b1226 !important;
+            --background-gradient-1: #7fdbff;
+            --background-gradient-2: #39cccc;
+            --card-background: linear-gradient(145deg, rgba(0,213,255,0.06), rgba(0,213,255,0.02)) !important;
+            --white: #e8f6ff !important;
+            --text-light: rgba(232,246,255,0.75) !important;
+            --border-light: rgba(0,213,255,0.16) !important;
+            --button-background: linear-gradient(90deg, #00d5ff, #3ba9ff) !important;
+            --button-shadow: 0 4px 15px rgba(0,213,255,.35), 0 4px 15px rgba(59,169,255,.25) !important;
+        }
+        body.theme-forest {
+            background: linear-gradient(135deg, #064e3b, #047857, #10b981) !important;
+            background-attachment: fixed !important;
+            --background-main: #0f1a14 !important;
+            --background-gradient-1: #10b981;
+            --background-gradient-2: #059669;
+            --card-background: linear-gradient(145deg, rgba(46,125,50,0.12), rgba(46,125,50,0.05)) !important;
+            --white: #eaf7ee !important;
+            --text-light: rgba(234,247,238,.78) !important;
+            --border-light: rgba(46,125,50,0.18) !important;
+            --button-background: linear-gradient(90deg, #2e7d32, #43a047) !important;
+            --button-shadow: 0 4px 15px rgba(46,125,50,.35), 0 4px 15px rgba(67,160,71,.25) !important;
+        }
+        body.theme-sand {
+            background: linear-gradient(135deg, #cbb994, #b08d57) !important;
+            background-attachment: fixed !important;
+            --background-main: #12100d !important;
+            --background-gradient-1: #e8d5b7;
+            --background-gradient-2: #d2b48c;
+            --card-background: linear-gradient(145deg, rgba(244,227,183,0.12), rgba(244,227,183,0.06)) !important;
+            --white: #f2ead8 !important;
+            --text-light: rgba(242,234,216,.78) !important;
+            --border-light: rgba(244,227,183,0.22) !important;
+            --button-background: linear-gradient(90deg, #e8d5b7, #d2b48c) !important;
+            --button-shadow: 0 4px 15px rgba(210,180,140,.35), 0 4px 15px rgba(232,213,183,.25) !important;
+        }
+        body.theme-rose {
+            background: linear-gradient(135deg, #3a0b1a, #ff2e92) !important;
+            background-attachment: fixed !important;
+            --background-main: #1a0f13 !important;
+            --background-gradient-1: #ff2e92;
+            --background-gradient-2: #ff7eb3;
+            --card-background: linear-gradient(145deg, rgba(255,46,146,0.10), rgba(255,46,146,0.04)) !important;
+            --white: #ffe9f2 !important;
+            --text-light: rgba(255,233,242,.78) !important;
+            --border-light: rgba(255,46,146,0.18) !important;
+            --button-background: linear-gradient(90deg, var(--pink), #ff7eb3) !important;
+            --button-shadow: 0 4px 15px rgba(255,46,146,.35), 0 4px 15px rgba(255,126,179,.25) !important;
+        }
+        body.theme-lavender {
+            background: linear-gradient(135deg, #311b92, #9c27b0, #b388ff) !important;
+            background-attachment: fixed !important;
+            --background-main: #131021 !important;
+            --background-gradient-1: #b388ff;
+            --background-gradient-2: #9c27b0;
+            --card-background: linear-gradient(145deg, rgba(186,104,200,0.12), rgba(186,104,200,0.05)) !important;
+            --white: #f4ecfb !important;
+            --text-light: rgba(244,236,251,.78) !important;
+            --border-light: rgba(186,104,200,0.2) !important;
+            --button-background: linear-gradient(90deg, #b388ff, #9c27b0) !important;
+            --button-shadow: 0 4px 15px rgba(179,136,255,.35), 0 4px 15px rgba(156,39,176,.25) !important;
+        }
+        body.theme-sky {
+            background: linear-gradient(135deg, #0e1623, #3ba9ff, #00d5ff) !important;
+            background-attachment: fixed !important;
+            --background-main: #0e1623 !important;
+            --background-gradient-1: #3ba9ff;
+            --background-gradient-2: #00d5ff;
+            --card-background: linear-gradient(145deg, rgba(59,169,255,0.12), rgba(59,169,255,0.05)) !important;
+            --white: #eaf3ff !important;
+            --text-light: rgba(234,243,255,.78) !important;
+            --border-light: rgba(59,169,255,0.18) !important;
+            --button-background: linear-gradient(90deg, #3ba9ff, #00d5ff) !important;
+            --button-shadow: 0 4px 15px rgba(59,169,255,.35), 0 4px 15px rgba(0,213,255,.25) !important;
+        }
+        body.theme-mint {
+            background: linear-gradient(135deg, #064e3b, #00c8a0, #00d5b5) !important;
+            background-attachment: fixed !important;
+            --background-main: #0f1816 !important;
+            --background-gradient-1: #00c8a0;
+            --background-gradient-2: #00d5b5;
+            --card-background: linear-gradient(145deg, rgba(0,200,160,0.12), rgba(0,200,160,0.05)) !important;
+            --white: #eafff9 !important;
+            --text-light: rgba(234,255,249,.78) !important;
+            --border-light: rgba(0,200,160,0.18) !important;
+            --button-background: linear-gradient(90deg, #00c8a0, #00d5b5) !important;
+            --button-shadow: 0 4px 15px rgba(0,200,160,.35), 0 4px 15px rgba(0,213,181,.25) !important;
+        }
+        body.theme-coffee {
+            background: linear-gradient(135deg, #3e2723, #6d4c41, #8d6e63) !important;
+            background-attachment: fixed !important;
+            --background-main: #120e0b !important;
+            --background-gradient-1: #6d4c41;
+            --background-gradient-2: #8d6e63;
+            --card-background: linear-gradient(145deg, rgba(121,85,72,0.14), rgba(121,85,72,0.06)) !important;
+            --white: #efe1d9 !important;
+            --text-light: rgba(239,225,217,.78) !important;
+            --border-light: rgba(121,85,72,0.22) !important;
+            --button-background: linear-gradient(90deg, #6d4c41, #8d6e63) !important;
+            --button-shadow: 0 4px 15px rgba(109,76,65,.35), 0 4px 15px rgba(141,110,99,.25) !important;
+        }
+        body.theme-midnight {
+            background: linear-gradient(135deg, #0a0c12, #0ea5e9, #6366f1) !important;
+            background-attachment: fixed !important;
+            --background-main: #0a0c12 !important;
+            --background-gradient-1: #0ea5e9;
+            --background-gradient-2: #6366f1;
+            --card-background: linear-gradient(145deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)) !important;
+            --white: #e6ebff !important;
+            --text-light: rgba(230,235,255,.75) !important;
+            --border-light: rgba(255,255,255,0.08) !important;
+            --button-background: linear-gradient(90deg, #0ea5e9, #6366f1) !important;
+            --button-shadow: 0 4px 15px rgba(14,165,233,.35), 0 4px 15px rgba(99,102,241,.25) !important;
+        }
+        body.theme-graphite {
+            background: linear-gradient(135deg, #0f0f10, #2b2b30, #3f3f46) !important;
+            background-attachment: fixed !important;
+            --background-main: #151515 !important;
+            --background-gradient-1: #3f3f46;
+            --background-gradient-2: #52525b;
+            --card-background: linear-gradient(145deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015)) !important;
+            --white: #f0f0f0 !important;
+            --text-light: rgba(240,240,240,0.72) !important;
+            --border-light: rgba(255,255,255,0.06) !important;
+            --button-background: linear-gradient(90deg, #3f3f46, #52525b) !important;
+            --button-shadow: 0 4px 15px rgba(63,63,70,.35), 0 4px 15px rgba(82,82,91,.25) !important;
+        }
+
+        /* Premium Sparkling Gold Theme */
+        @keyframes goldSparkle {
+            0% { opacity: 0.15; transform: translateY(0); }
+            50% { opacity: 0.35; transform: translateY(-3px); }
+            100% { opacity: 0.15; transform: translateY(0); }
+        }
+        body.premium-theme-gold {
+            --background-main: #0b0b0f !important;
+            --card-background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03)) !important;
+            --white: #ffffff !important;
+            --text-light: rgba(255, 255, 255, 0.78) !important;
+            --border-light: rgba(255, 215, 0, 0.18) !important;
+            --accent-color: var(--theme-gold) !important;
+            --button-background: linear-gradient(90deg, var(--theme-gold), #ffa500) !important;
+            --button-shadow: 0 4px 15px rgba(255, 215, 0, .35), 0 4px 15px rgba(255, 165, 0, .25) !important;
+            background-image:
+                radial-gradient(circle at 20% 10%, rgba(255, 215, 0, 0.08), transparent 120px),
+                radial-gradient(circle at 80% 90%, rgba(255, 165, 0, 0.08), transparent 160px);
+        }
+        body.premium-theme-gold::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                radial-gradient(2px 2px at 10% 20%, rgba(255, 215, 0, 0.6), transparent),
+                radial-gradient(2px 2px at 30% 80%, rgba(255, 255, 255, 0.4), transparent),
+                radial-gradient(2px 2px at 70% 30%, rgba(255, 215, 0, 0.5), transparent),
+                radial-gradient(2px 2px at 90% 60%, rgba(255, 255, 255, 0.35), transparent);
+            animation: goldSparkle 4.5s infinite ease-in-out;
+            z-index: 0;
+        }
+
         /* Premium Features Section */
         .premium-features-section {
             background: var(--card-background);
@@ -4428,6 +4680,21 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
           .daily-inspiration-section, .global-announcements-section { width: 100% !important; padding: 14px !important; }
         }
     </style>
+    <script>
+      (function(){
+        try {
+          function applySavedTheme(){
+            var saved = localStorage.getItem('jchat-theme');
+            if (!saved) { saved = 'theme-dark-mode'; localStorage.setItem('jchat-theme', saved); }
+            var b = document.body;
+            Array.from(b.classList).filter(function(c){ return c.indexOf('theme-')===0; }).forEach(function(c){ b.classList.remove(c); });
+            b.classList.add(saved);
+          }
+          document.addEventListener('DOMContentLoaded', applySavedTheme);
+          window.addEventListener('storage', function(e){ if (e.key === 'jchat-theme') applySavedTheme(); });
+        } catch(_){}
+      })();
+    </script>
 </head>
 <body class="theme-dark-mode">
     <!-- Nuvia Pink & Blue Glowing Loader -->
@@ -5699,57 +5966,50 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         // Theme switcher functionality
         let currentTheme = 'theme-dark-mode'; // Default theme
         const themeSwitcherThemes = [
-          'theme-light-mode', 'theme-dark-mode', 'theme-sunset-mode', 'theme-glass-mode',
-          'theme-ocean-mode', 'theme-forest-mode', 'theme-cosmic-mode', 'theme-neon-mode',
-          'theme-retro-mode', 'theme-elegant-mode', 'theme-aurora-bliss', 'theme-midnight-sky'
+            'theme-dark-mode',
+            'theme-light-mode',
+            'theme-snow',
+            'theme-slate',
+            'theme-ocean',
+            'theme-forest',
+            'theme-sand',
+            'theme-rose',
+            'theme-lavender',
+            'theme-sky',
+            'theme-mint',
+            'theme-coffee',
+            'theme-midnight',
+            'theme-graphite',
+            'premium-theme-gold'
         ];
 
-        // Theme catalog with pricing and product IDs - Premium themes locked (NGN pricing)
+        // Theme catalog (only default retained)
         const themeCatalog = {
-            'theme-light-mode': { name: 'Light Mode', price: 0, currency: 'NGN', isFree: true, productId: null },
             'theme-dark-mode': { name: 'Dark Mode', price: 0, currency: 'NGN', isFree: true, productId: null },
-            'theme-sunset-mode': { name: 'Sunset Mode', price: 1200, currency: 'NGN', isFree: false, productId: 'theme_sunset_premium' },
-            'theme-glass-mode': { name: 'Glass Mode', price: 1200, currency: 'NGN', isFree: false, productId: 'theme_glass_premium' },
-            'theme-ocean-mode': { name: 'Ocean Mode', price: 1500, currency: 'NGN', isFree: false, productId: 'theme_ocean_premium' },
-            'theme-forest-mode': { name: 'Forest Mode', price: 1500, currency: 'NGN', isFree: false, productId: 'theme_forest_premium' },
-            'theme-cosmic-mode': { name: 'Cosmic Mode', price: 1800, currency: 'NGN', isFree: false, productId: 'theme_cosmic_premium' },
-            'theme-neon-mode': { name: 'Neon Mode', price: 1800, currency: 'NGN', isFree: false, productId: 'theme_neon_premium' },
-            'theme-retro-mode': { name: 'Retro Mode', price: 1800, currency: 'NGN', isFree: false, productId: 'theme_retro_premium' },
-            'theme-elegant-mode': { name: 'Elegant Mode', price: 2000, currency: 'NGN', isFree: false, productId: 'theme_elegant_premium' },
-            'theme-aurora-bliss': { name: 'Aurora Bliss', price: 2200, currency: 'NGN', isFree: false, productId: 'theme_aurora_bliss_premium' },
-            'theme-midnight-sky': { name: 'Midnight Sky', price: 3000, currency: 'NGN', isFree: false, productId: 'theme_midnight_sky_premium', isVip: true }
+            'theme-light-mode': { name: 'Light Mode', price: 0, currency: 'NGN', isFree: true, productId: null },
+            'theme-snow': { name: 'Snow', price: 0, currency: 'NGN', isFree: true, productId: null },
+            'theme-slate': { name: 'Slate', price: 0, currency: 'NGN', isFree: true, productId: null },
+            'theme-ocean': { name: 'Ocean', price: 0, currency: 'NGN', isFree: true, productId: null },
+            'theme-forest': { name: 'Forest', price: 0, currency: 'NGN', isFree: true, productId: null },
+            'theme-sand': { name: 'Sand', price: 0, currency: 'NGN', isFree: true, productId: null },
+            'theme-rose': { name: 'Rose', price: 0, currency: 'NGN', isFree: true, productId: null },
+            'theme-lavender': { name: 'Lavender', price: 0, currency: 'NGN', isFree: true, productId: null },
+            'theme-sky': { name: 'Sky', price: 0, currency: 'NGN', isFree: true, productId: null },
+            'theme-mint': { name: 'Mint', price: 0, currency: 'NGN', isFree: true, productId: null },
+            'theme-coffee': { name: 'Coffee', price: 0, currency: 'NGN', isFree: true, productId: null },
+            'theme-midnight': { name: 'Midnight', price: 0, currency: 'NGN', isFree: true, productId: null },
+            'theme-graphite': { name: 'Graphite', price: 0, currency: 'NGN', isFree: true, productId: null },
+            'premium-theme-gold': { name: 'Sparkling Gold', price: 0, currency: 'NGN', isFree: true, productId: null }
         };
 
         // Theme purchase/lock state
         let purchasedThemeProductIds = new Set();
         let pendingThemeProductIds = new Set();
 
-        // Mapping between shop product IDs and theme classes
-        const productIdToThemeClass = {
-            'theme_sunset_premium': 'theme-sunset-mode',
-            'theme_glass_premium': 'theme-glass-mode',
-            'theme_ocean_premium': 'theme-ocean-mode',
-            'theme_forest_premium': 'theme-forest-mode',
-            'theme_cosmic_premium': 'theme-cosmic-mode',
-            'theme_neon_premium': 'theme-neon-mode',
-            'theme_retro_premium': 'theme-retro-mode',
-            'theme_elegant_premium': 'theme-elegant-mode',
-            'theme_aurora_bliss_premium': 'theme-aurora-bliss',
-            'theme_midnight_sky_premium': 'theme-midnight-sky'
-        };
+        // No premium product mappings (only default theme)
+        const productIdToThemeClass = {};
 
-        const themeClassToProductId = {
-            'theme-sunset-mode': 'theme_sunset_premium',
-            'theme-glass-mode': 'theme_glass_premium',
-            'theme-ocean-mode': 'theme_ocean_premium',
-            'theme-forest-mode': 'theme_forest_premium',
-            'theme-cosmic-mode': 'theme_cosmic_premium',
-            'theme-neon-mode': 'theme_neon_premium',
-            'theme-retro-mode': 'theme_retro_premium',
-            'theme-elegant-mode': 'theme_elegant_premium',
-            'theme-aurora-bliss': 'theme_aurora_bliss_premium',
-            'theme-midnight-sky': 'theme_midnight_sky_premium'
-        };
+        const themeClassToProductId = {};
 
         // Currency configuration
         const CURRENCIES = {
@@ -6049,9 +6309,12 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
 
             const body = document.body;
             
-            // Remove all theme classes
-            body.classList.remove('theme-light-mode', 'theme-dark-mode', 'theme-sunset-mode', 'theme-glass-mode', 'theme-ocean-mode', 'theme-forest-mode', 'theme-cosmic-mode', 'theme-retro-mode', 'theme-neon-mode', 'theme-elegant-mode', 'theme-quantum-nexus', 'theme-holographic-matrix', 'theme-stellar-genesis', 'theme-circus-maximus', 'theme-temporal-paradox');
-            
+            // Remove all theme/premium theme classes
+            try {
+                const existing = [...body.classList].filter(c => c.startsWith('theme-') || c.startsWith('premium-theme-'));
+                if (existing.length) body.classList.remove(...existing);
+            } catch(_) {}
+
             // Add the new theme class
             body.classList.add(theme);
             
@@ -6062,6 +6325,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             
             // Save theme to localStorage
             localStorage.setItem('nuvia-theme', theme);
+            try { localStorage.setItem('jchat-theme', theme); } catch (_){ }
             
             // Update theme switcher button icon
             if (themeSwitcherBtn) {
@@ -6467,7 +6731,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             document.getElementById('annDismissBtn').onclick = () => { dismissAnnouncementById(annId); modal.style.display = 'none'; };
             document.getElementById('annSnooze1h').onclick = () => { snoozeAnnouncementById(annId, 60*60*1000); modal.style.display = 'none'; showMessageBox('Will remind you in 1 hour', 'success'); };
             document.getElementById('annSnooze1d').onclick = () => { snoozeAnnouncementById(annId, 24*60*60*1000); modal.style.display = 'none'; showMessageBox('Will remind you in 24 hours', 'success'); };
-            document.getElementById('annShareBtn').onclick = async () => { try{ await safeCopyText(`${announcementData.message}\n— JCHAT`); showMessageBox('Announcement copied to clipboard', 'success'); }catch(e){ showMessageBox('Copy failed', 'error'); } };
+            document.getElementById('annShareBtn').onclick = async () => { try{ await safeCopyText(`${announcementData.message}\n��� JCHAT`); showMessageBox('Announcement copied to clipboard', 'success'); }catch(e){ showMessageBox('Copy failed', 'error'); } };
 
             // focus
             setTimeout(()=>{ const btn = document.getElementById('closeAnnModal'); if(btn) btn.focus(); }, 80);
@@ -6645,21 +6909,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         }
         // Theme icons mapping
         const themeIcons = {
-            'theme-light-mode': 'fas fa-sun',
-            'theme-dark-mode': 'fas fa-moon',
-            'theme-glass-mode': 'fas fa-gem',
-            'theme-sunset-mode': 'fas fa-mountain',
-            'theme-ocean-mode': 'fas fa-water',
-            'theme-forest-mode': 'fas fa-tree',
-            'theme-cosmic-mode': 'fas fa-star',
-            'theme-retro-mode': 'fas fa-tv',
-            'theme-neon-mode': 'fas fa-bolt',
-            'theme-elegant-mode': 'fas fa-crown',
-            'theme-quantum-nexus': 'fas fa-atom',
-            'theme-holographic-matrix': 'fas fa-cube',
-            'theme-stellar-genesis': 'fas fa-rocket',
-            'theme-circus-maximus': 'fas fa-theater-masks',
-            'theme-temporal-paradox': 'fas fa-clock'
+            'theme-dark-mode': 'fas fa-moon'
         };
 
         // Build theme picker list
@@ -7059,7 +7309,19 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             'theme-light-mode',
             'theme-dark-mode',
             'theme-glass-mode',
-            'theme-sunset-mode'
+            'theme-sunset-mode',
+            'theme-snow',
+            'theme-slate',
+            'theme-ocean',
+            'theme-forest',
+            'theme-sand',
+            'theme-rose',
+            'theme-lavender',
+            'theme-sky',
+            'theme-mint',
+            'theme-coffee',
+            'theme-midnight',
+            'theme-graphite'
         ];
 
         // --- Inspiration Quotes Data (Local Fallback) ---
@@ -7123,7 +7385,7 @@ const simpleCategoryTemplates = {
   ]
 };
         const quoteTemplates = {
-            motivational: { openers:["Keep going","Start small","Believe in yourself","Stay consistent","Trust the process"], bridges:["�����"," because ",": ",", and ","; "], endings:["every step counts.","tomorrow thanks you for today's effort.","progress loves momentum.","you're closer than you think.","discipline builds destiny."] },
+            motivational: { openers:["Keep going","Start small","Believe in yourself","Stay consistent","Trust the process"], bridges:["�������"," because ",": ",", and ","; "], endings:["every step counts.","tomorrow thanks you for today's effort.","progress loves momentum.","you're closer than you think.","discipline builds destiny."] },
             peaceful: { openers:["Breathe","Slow down","Be gentle","Find quiet","Let go"], bridges:["—"," and ",", then "," as ",": "], endings:["clarity will meet you.","peace finds its way in.","the heart softens.","the mind untangles.","you return to yourself."] },
             funny: { openers:["Reminder","Breaking news","Pro tip","True story","PSA"], bridges:[": "," — "," ���� ",": "], endings:["motivation will arrive after snacks.","I'm on a seafood diet����I see food and I code.","sleep is a patch we never apply.","tomorrow is just today with a wig.","coffee is my personality driver."] },
             wisdom: { openers:["Growth","Curiosity","Patience","Listening","Kindness"], bridges:[" reveals that "," teaches that "," reminds us "," shows that ",": "], endings:["there's more to learn than to prove.","small habits shape great outcomes.","the quietest lessons echo the longest.","consistency outlives talent.","clarity follows attention."] },
@@ -8213,7 +8475,7 @@ async function checkAndStartDailyBonusTimer() {
             let title = 'Success!';
             switch (style) {
                 case 'achievement': title = '�� Achievement Unlocked!'; break;
-                case 'update': title = '✅ Update Complete!'; break;
+                case 'update': title = '�� Update Complete!'; break;
                 case 'celebration': title = '🎊 Celebration!'; break;
                 default: title = 'Success!';
             }
@@ -8493,6 +8755,7 @@ async function checkAndStartDailyBonusTimer() {
             document.body.classList.remove(...themes); // Remove all existing theme classes.
             document.body.classList.add(themeName); // Add the new theme class.
             localStorage.setItem('nuvia-theme', themeName); // Save theme preference to local storage.
+            try { localStorage.setItem('jchat-theme', themeName); } catch(_){ }
         }
 
         /**
@@ -9106,6 +9369,76 @@ async function checkAndStartDailyBonusTimer() {
                 return `${base} ${pad} ${pad2}`;
             }catch(_){ return base; }
         }
+        // Reading-time and dedup helpers for inspirations
+        function estimateReadSeconds(text){
+            try{
+                const words = String(text||'').trim().split(/\s+/).filter(Boolean).length;
+                const wpm = 200; // average adult reading speed
+                return (words / wpm) * 60;
+            }catch(_){ return 0; }
+        }
+        function getSeenListKey(type, sub){
+            const t = (type && String(type)) || 'motivational';
+            const s = (sub && String(sub)) || '';
+            const uid = (currentUser?.uid || 'guest');
+            return `nuvia_inspiration_seen_${uid}_${t}${s ? '_' + s : ''}`;
+        }
+        function readSeenList(type, sub){
+            try{
+                const raw = localStorage.getItem(getSeenListKey(type, sub));
+                const arr = JSON.parse(raw || '[]');
+                return Array.isArray(arr) ? arr : [];
+            }catch(_){ return []; }
+        }
+        function writeSeenList(list, type, sub){
+            try{
+                const cap = 500; // prevent unbounded growth
+                const trimmed = list.slice(-cap);
+                localStorage.setItem(getSeenListKey(type, sub), JSON.stringify(trimmed));
+            }catch(_){ }
+        }
+        function isSeen(text, type, sub){
+            try{
+                const norm = String(text||'').trim();
+                return readSeenList(type, sub).includes(norm);
+            }catch(_){ return false; }
+        }
+        function markSeen(text, type, sub){
+            try{
+                const norm = String(text||'').trim();
+                const list = readSeenList(type, sub);
+                if (!list.includes(norm)) { list.push(norm); writeSeenList(list, type, sub); }
+            }catch(_){ }
+        }
+        function ensureMinReadLength(text, type, seed, minSeconds = 10){
+            try{
+                let output = String(text||'').trim();
+                let tries = 0;
+                while (estimateReadSeconds(output) < minSeconds && tries < 8){
+                    const extra = expandInspiration('', type || 'motivational', (seed||0) + 200 + tries).trim();
+                    output = `${output} ${extra}`.trim();
+                    tries++;
+                }
+                return output;
+            }catch(_){ return text; }
+        }
+        function renderInspirationText(baseText, author, type, sub, seed){
+            try{
+                let final = ensureMinReadLength(baseText, type, seed);
+                let guard = 0;
+                while (isSeen(final, type, sub) && guard < 8){
+                    const extra = expandInspiration('', type || 'motivational', (seed||0) + 400 + guard).trim();
+                    final = ensureMinReadLength(`${final} ${extra}`.trim(), type, (seed||0) + 800 + guard);
+                    guard++;
+                }
+                markSeen(final, type, sub);
+                if (inspirationQuoteElement) inspirationQuoteElement.textContent = `"${final}"`;
+                if (inspirationAuthorElement) inspirationAuthorElement.textContent = author ? `- ${author}` : '';
+            }catch(_){
+                if (inspirationQuoteElement) inspirationQuoteElement.textContent = `"${String(baseText||'')}"`;
+                if (inspirationAuthorElement) inspirationAuthorElement.textContent = author ? `- ${author}` : '';
+            }
+        }
         function getPartOfDay(h) {
             if (h >= 5 && h < 12) return 'morning';
             if (h >= 12 && h < 17) return 'afternoon';
@@ -9212,8 +9545,7 @@ const lex = inspirationLexicon[type];
                     item = arr[Math.abs(seed) % arr.length];
                 } else {
                     const quoteData = generateTimeBasedQuote(chosen || 'motivational');
-                    if (inspirationQuoteElement) inspirationQuoteElement.textContent = `"${quoteData.quote}"`;
-                    if (inspirationAuthorElement) inspirationAuthorElement.textContent = `- ${quoteData.author}`;
+                    renderInspirationText(quoteData.quote, quoteData.author, chosen || 'motivational', chosenSub, seed);
                     return;
                 }
 
@@ -9222,17 +9554,14 @@ const lex = inspirationLexicon[type];
                     const q = item.text || item.quote || '';
                     const ref = item.ref || item.author || '';
                     const longQ = expandInspiration(q, chosen || 'motivational', seed);
-                    if (inspirationQuoteElement) inspirationQuoteElement.textContent = `"${longQ}"`;
-                    if (inspirationAuthorElement) inspirationAuthorElement.textContent = ref ? `- ${ref}` : `- Nuvia`;
+                    renderInspirationText(longQ, (ref ? ref : 'Nuvia'), chosen || 'motivational', chosenSub, seed);
                 } else {
                     const longItem = expandInspiration(String(item), chosen || 'motivational', seed);
-                    if (inspirationQuoteElement) inspirationQuoteElement.textContent = `"${longItem}"`;
-                    if (inspirationAuthorElement) inspirationAuthorElement.textContent = `- Nuvia`;
+                    renderInspirationText(longItem, 'Nuvia', chosen || 'motivational', chosenSub, seed);
                 }
             } catch(e) {
                 const quoteData = generateTimeBasedQuote(chosen);
-                if (inspirationQuoteElement) inspirationQuoteElement.textContent = `"${quoteData.quote}"`;
-                if (inspirationAuthorElement) inspirationAuthorElement.textContent = `- ${quoteData.author}`;
+                renderInspirationText(quoteData.quote, quoteData.author, chosen || 'motivational', chosenSub, Date.now());
             }
         }
 
@@ -11113,8 +11442,8 @@ async function fetchAndDisplayPosts() {
                     return;
                 }
 
-                if (callState !== 'idle') {
-                    // Already in a call or busy, decline new incoming call.
+                if (callState === 'connected' || callState === 'calling' || callState === 'ringing') {
+                    // Already in a call or actively ringing, decline new incoming call.
                     await updateDoc(incomingCallDoc.ref, { status: 'busy' });
                     showMessageBox(`Another call from ${callData.callerId === recipientUserProfileData?.userId ? recipientUserProfileData?.username : 'someone'} is incoming, but you are busy.`, "warning");
                     playNotificationSound('info');
@@ -11140,6 +11469,7 @@ async function fetchAndDisplayPosts() {
 
                 callStatusIcon.className = `fas fa-${currentCallType === 'voice' ? 'phone' : 'video'} call-status-icon`;
                 callStatusText.textContent = `Incoming ${currentCallType} call from ${callerUsername}...`;
+                try{ if (document.hidden && window.Notification && Notification.permission === 'granted'){ new Notification(currentCallType==='video'? 'Incoming video call':'Incoming voice call', { body: `From ${callerUsername}` }); } }catch(_){ }
                 callTimerDisplay.style.display = 'none'; // Hide timer initially.
                 callActions.style.display = 'flex'; // Show call action buttons.
                 acceptCallBtn.style.display = 'block';
@@ -14318,9 +14648,9 @@ async function fetchAndDisplayPosts() {
         // Get Premium Badge Icon
         function getPremiumBadgeIcon(tier) {
             switch (tier) {
-                case 'premium': return '🌟';
+                case 'premium': return '����';
                 case 'vip': return '���';
-                case 'elite': return '👑';
+                case 'elite': return '����';
                 default: return '��';
             }
         }
@@ -14339,24 +14669,31 @@ async function fetchAndDisplayPosts() {
 
         // Apply Premium Theme
         function applyPremiumTheme(themeName, silent = false) {
-            if (!currentUser) return;
-
             // Remove existing premium themes
             removePremiumTheme();
 
             // Apply new theme
-            document.body.classList.add(`premium-theme-${themeName}`);
+            const cls = `premium-theme-${themeName}`;
+            document.body.classList.add(cls);
             activePremiumTheme = themeName;
 
             // Save theme preference
-            localStorage.setItem(`premium_theme_${currentUser.uid}`, themeName);
+            try { if (currentUser && currentUser.uid) localStorage.setItem(`premium_theme_${currentUser.uid}`, themeName); } catch(_){ }
+            try { localStorage.setItem('jchat-theme', cls); } catch(_){ }
+            try { localStorage.setItem('nuvia-theme', cls); } catch(_){ }
 
+            if (!silent && typeof showMessageBox === 'function') {
+                showMessageBox('Theme applied.', 'success');
+            }
             console.log(`Nuvia_DEBUG: Applied premium theme: ${themeName}`);
         }
 
         // Remove Premium Theme
         function removePremiumTheme() {
-            document.body.classList.remove('premium-theme-dark', 'premium-theme-neon', 'premium-theme-glass');
+            try {
+                const toRemove = [...document.body.classList].filter(c => c.startsWith('premium-theme-'));
+                if (toRemove.length) document.body.classList.remove(...toRemove);
+            } catch(_) {}
             activePremiumTheme = null;
         }
 
@@ -14748,7 +15085,6 @@ function startPagePresence(){
 }
 startPagePresence();
 </script>
-<script type="module" src="jchat-global-call-service.js" defer></script>
 <!-- Photo Editor Styles and Modal -->
 <style id="photo-editor-styles">
   #photoEditorModal.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:1200}

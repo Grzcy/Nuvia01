@@ -222,12 +222,6 @@
             --active-item-background: rgba(255, 215, 0, 0.1);
         }
 
-        /* Pink + Yellow background overlay for Profile page only */
-        body.profile-pinkyellow-bg {
-            background: linear-gradient(135deg, #ff2e92, #ffd700) fixed !important;
-            background-size: cover;
-            background-attachment: fixed;
-        }
 
         /* EMERGENCY FIX: Remove all scroll restrictions */
         * {
@@ -5119,7 +5113,8 @@
   @keyframes gold-pulse{0%,100%{box-shadow:0 0 10px rgba(255,215,0,.75),0 0 20px rgba(255,165,0,.5),0 0 30px rgba(255,215,0,.35)}50%{box-shadow:0 0 14px rgba(255,215,0,.9),0 0 26px rgba(255,165,0,.65),0 0 40px rgba(255,215,0,.5)}}
   @media (max-width:768px){.profile-avatar-badge{width:22px;height:22px}.profile-avatar-badge i{font-size:12px}}
 </style>
-<style id="nuvia-brand-style">.logo span,.brand-link span{background:linear-gradient(90deg,var(--pink),#ffd400);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}.logo{background-image:linear-gradient(90deg,var(--pink),#ffd400) !important;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}</style></head>
+<style id="nuvia-brand-style">.logo span,.brand-link span{background:linear-gradient(90deg,var(--pink),#ffd400);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}.logo{background-image:linear-gradient(90deg,var(--pink),#ffd400) !important;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}</style><script src="assets/js/lazy-images.js" defer></script>
+</head>
 <body class="theme-dark-mode">
     <!-- Nuvia Pink & Blue Glowing Loader -->
     <div id="nuviaLoader" class="nuvia-loader">
@@ -10160,19 +10155,43 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
         }
 
         // --- Event Listeners (moved to DOMContentLoaded for safety) ---
-        document.addEventListener('DOMContentLoaded', () => {
-            // Apply theme on load
-            const savedTheme = localStorage.getItem('jchat-theme');
-            const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
-            if (savedTheme && themes.includes(savedTheme)) {
-                document.body.classList.remove(...themes);
-                document.body.classList.add(savedTheme);
-            } else {
-                document.body.classList.remove(...themes);
-                document.body.classList.add('theme-dark-mode'); // Default
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Inject shared theme CSS from index so premium/base themes are available
+            async function injectSharedThemes(){
+                try{
+                    if (document.getElementById('shared-theme-styles')) return;
+                    let css = null;
+                    try { css = sessionStorage.getItem('shared_theme_css') || null; } catch(_){ css=null; }
+                    if (!css){
+                        const res = await fetch('index.html', { credentials: 'same-origin' });
+                        if (res.ok) {
+                            const html = await res.text();
+                            const matches = html.match(/body\.(?:theme|premium-theme)-[a-z0-9-\s\S]*?\{[\s\S]*?\}/gi) || [];
+                            css = matches.join('\n\n');
+                            try { sessionStorage.setItem('shared_theme_css', css); } catch(_){ }
+                        }
+                    }
+                    if (css){
+                        const style = document.createElement('style');
+                        style.id = 'shared-theme-styles';
+                        style.textContent = css;
+                        document.head.appendChild(style);
+                    }
+                } catch(_){ }
             }
-            // Enforce pink-yellow background for Profile page
-            document.body.classList.add('profile-pinkyellow-bg');
+            // Apply theme saved in localStorage (supports base and premium)
+            function applySavedTheme(){
+                try {
+                    const body = document.body;
+                    const saved = localStorage.getItem('jchat-theme') || localStorage.getItem('nuvia-theme') || 'theme-dark-mode';
+                    [...body.classList].filter(c => c.startsWith('theme-') || c.startsWith('premium-theme-')).forEach(c => body.classList.remove(c));
+                    body.classList.add(saved);
+                } catch(_){ }
+            }
+            try { if (!localStorage.getItem('jchat-theme')) localStorage.setItem('jchat-theme', 'theme-dark-mode'); } catch(_){ }
+            await injectSharedThemes();
+            applySavedTheme();
+            window.addEventListener('storage', (e) => { if (e.key === 'jchat-theme' || e.key === 'nuvia-theme') applySavedTheme(); });
 
 
             // Profile Picture Upload
@@ -10447,13 +10466,11 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
         }); // Close DOMContentLoaded event listener
 
         window.addEventListener('storage', (event) => {
-            if (event.key === 'jchat-theme') {
+            if (event.key === 'jchat-theme' || event.key === 'nuvia-theme') {
+                const body = document.body;
                 const newTheme = event.newValue || 'theme-dark-mode';
-                const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
-                if (themes.includes(newTheme)) {
-                    document.body.classList.remove(...themes);
-                    document.body.classList.add(newTheme);
-                }
+                [...body.classList].filter(c => c.startsWith('theme-') || c.startsWith('premium-theme-')).forEach(c => body.classList.remove(c));
+                body.classList.add(newTheme);
             }
         });
 
@@ -10521,6 +10538,6 @@ function startPagePresence(){
 }
 startPagePresence();
 </script>
-<script type="module" src="jchat-global-call-service.js" defer></script>
+<script type="module" src="nuvia-global-call-service.js" defer></script>
 </body>
 </html>

@@ -118,6 +118,40 @@
     #sidebarNav::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--blue),var(--pink));border-radius:6px}
     #sidebarNav::-webkit-scrollbar-track{background:transparent}
   </style>
+  <script>
+    // Theme injection and application (match Chat/Profile behavior)
+    (async function(){
+      async function injectSharedThemes(){
+        try{
+          if (document.getElementById('shared-theme-styles')) return;
+          let css = null;
+          try { css = sessionStorage.getItem('shared_theme_css') || null; } catch(_){ css=null; }
+          if (!css){
+            const res = await fetch('index.html', { credentials: 'same-origin' });
+            if (res.ok) {
+              const html = await res.text();
+              const matches = html.match(/body\.(?:theme|premium-theme)-[a-z0-9-\s\S]*?\{[\s\S]*?\}/gi) || [];
+              css = matches.join('\n\n');
+              try { sessionStorage.setItem('shared_theme_css', css); } catch(_){ }
+            }
+          }
+          if (css){ const style = document.createElement('style'); style.id='shared-theme-styles'; style.textContent=css; document.head.appendChild(style); }
+        }catch(_){ }
+      }
+      function applySavedTheme(){
+        try{
+          const body = document.body;
+          const saved = localStorage.getItem('jchat-theme') || localStorage.getItem('nuvia-theme') || 'theme-dark-mode';
+          [...body.classList].filter(c => c.startsWith('theme-') || c.startsWith('premium-theme-')).forEach(c => body.classList.remove(c));
+          body.classList.add(saved);
+        }catch(_){ }
+      }
+      try { if (!localStorage.getItem('jchat-theme')) localStorage.setItem('jchat-theme', 'theme-dark-mode'); } catch(_){ }
+      await injectSharedThemes();
+      applySavedTheme();
+      window.addEventListener('storage', (e)=>{ if (e.key==='jchat-theme' || e.key==='nuvia-theme') applySavedTheme(); });
+    })();
+  </script>
   <style id="discover-compact-cards">
     /* Compact appearance for Discover grid cards (smaller visuals) */
     #discoverGrid.groups-grid{gap:10px;grid-template-columns:repeat(5,1fr)}
@@ -1127,6 +1161,6 @@ function startPagePresence(){
 }
 startPagePresence();
 </script>
-<script type="module" src="jchat-global-call-service.js" defer></script>
+<script type="module" src="nuvia-global-call-service.js" defer></script>
 </body>
 </html>

@@ -1905,7 +1905,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Apply theme on load
             const savedTheme = localStorage.getItem('jchat-theme');
-            const themes = ['theme-light-mode', 'theme-dark-mode', 'theme-glass-mode', 'theme-sunset-mode'];
+            const themes = ['theme-dark-mode'];
             if (savedTheme && themes.includes(savedTheme)) {
                 document.body.classList.remove(...themes);
                 document.body.classList.add(savedTheme);
