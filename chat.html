@@ -532,9 +532,33 @@
             } catch {}
         }
 
+        // Inject theme CSS rules from index.html so chat respects the same themes
+        async function injectSharedThemes(){
+            try{
+                if (document.getElementById('shared-theme-styles')) return;
+                let css = null;
+                try { css = sessionStorage.getItem('shared_theme_css') || null; } catch(_){ css=null; }
+                if (!css){
+                    const res = await fetch('index.html', { credentials: 'same-origin' });
+                    if (!res.ok) return;
+                    const html = await res.text();
+                    const matches = html.match(/body\.(?:theme|premium-theme)-[a-z0-9-\s\S]*?\{[\s\S]*?\}/gi) || [];
+                    css = matches.join('\n\n');
+                    try { sessionStorage.setItem('shared_theme_css', css); } catch(_){ }
+                }
+                if (css){
+                    const style = document.createElement('style');
+                    style.id = 'shared-theme-styles';
+                    style.textContent = css;
+                    document.head.appendChild(style);
+                }
+            } catch(_){ }
+        }
+
         // Apply saved theme or default to light if explicitly set elsewhere
-        applySavedTheme();
         try { if (!localStorage.getItem('jchat-theme')) localStorage.setItem('jchat-theme', 'theme-black-yellow'); } catch {}
+        await injectSharedThemes();
+        applySavedTheme();
         // Reactive theme change across tabs
         window.addEventListener('storage', (e) => {
             if (e.key === 'jchat-theme') applySavedTheme();
