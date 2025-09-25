@@ -178,7 +178,7 @@ function createPeer(){
     { urls:'stun:stun3.l.google.com:19302' },
     { urls:'stun:stun4.l.google.com:19302' },
   ]});
-  pc.onicecandidate = (e)=>{ try{ if (e.candidate && activeCallRef){ updateDoc(activeCallRef, { receiverCandidates: serverArrayUnion(JSON.parse(JSON.stringify(e.candidate))) }); } }catch(_){ } };
+  pc.onicecandidate = (e)=>{ try{ if (e.candidate && activeCallRef){ updateDoc(activeCallRef, { receiverCandidates: arrayUnion(JSON.parse(JSON.stringify(e.candidate))) }); } }catch(_){ } };
   pc.ontrack = (ev)=>{
     const stream = ev.streams && ev.streams[0] ? ev.streams[0] : (remoteStream || new MediaStream());
     if (!ev.streams || !ev.streams[0]){ stream.addTrack(ev.track); }
