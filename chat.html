@@ -65,14 +65,12 @@
 
     main{max-width:1200px;margin:0 auto;padding:18px;padding-top:73px}
 
-    /* Chat layout */
     .chat-layout{display:grid;gap:14px;min-height:calc(100dvh - 110px);grid-template-columns:1fr}
     @media (min-width:860px){.chat-layout{grid-template-columns:340px 1fr}}
     @media (min-width:1080px){.chat-layout{grid-template-columns:380px 1fr}}
 
     .panel{background:var(--card-background);border:1px solid var(--glass-blue);backdrop-filter:blur(10px) saturate(180%);border-radius:16px;box-shadow:0 8px 25px rgba(0,0,0,.3)}
 
-    /* Conversations list */
     .conversations-panel{display:flex;flex-direction:column;height:calc(100dvh - 120px);min-height:60vh}
     .list-toolbar{display:flex;align-items:center;gap:8px;padding:10px;border-bottom:1px solid var(--border-light)}
     .search-input{flex:1 1 auto;padding:10px 12px;border-radius:12px;border:1px solid var(--border-light);background:var(--input-background);color:var(--white);outline:none}
@@ -83,14 +81,12 @@
     .conv-title{margin:0;font-weight:700}
     .conv-sub{margin:0;color:var(--text-light);font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 
-    /* Presence */
     .presence-wrapper{position:relative;display:inline-block}
     .presence-dot{position:absolute;bottom:2px;right:2px;width:10px;height:10px;border-radius:50%;background:var(--status-offline);border:2px solid rgba(10,10,10,.85)}
     .presence-dot.online{background:var(--status-online)}
     .presence-pill{margin-left:8px;padding:2px 8px;border-radius:999px;border:1px solid var(--border-light);font-size:.75rem;color:var(--text-light);background:rgba(255,255,255,.06)}
     .presence-pill.online{color:#fff;background:rgba(76,175,80,.2);border-color:rgba(76,175,80,.35)}
 
-    /* Messages panel */
     .messages-panel{display:none;flex-direction:column;height:calc(100dvh - 120px);min-height:60vh}
     body.show-chat .messages-panel{display:flex}
     body.show-chat .conversations-panel{display:none}
@@ -98,7 +94,7 @@
     .chat-header{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid var(--border-light)}
     .chat-title{font-family:Poppins,sans-serif;font-weight:800;margin:0}
     .chat-scroll{flex:1 1 auto;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
-    .bubble-row{display:flex;gap:8px;align-items:flex-end}
+    .bubble-row{display:flex;gap:8px;align-items:flex-end;position:relative}
     .bubble-row.mine{justify-content:flex-end}
     .bubble{max-width:70%;padding:10px 12px;border-radius:14px;border:1px solid var(--border-light);background:rgba(255,255,255,.06);color:var(--white)}
     .bubble.mine{background:linear-gradient(90deg,var(--blue),var(--pink));color:#fff;border-color:transparent}
@@ -108,6 +104,9 @@
     .icon-button{width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border-light);background:transparent;color:var(--white);cursor:pointer;transition:transform .2s ease,background-color .2s ease}
     .icon-button:hover{transform:scale(1.05);background-color:rgba(255,255,255,.06)}
     .send-btn{background:var(--button-background);box-shadow:var(--button-shadow);border:0;width:auto;padding:10px 14px;border-radius:12px}
+
+    .action-btn{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border-light);background:transparent;color:var(--white);cursor:pointer;margin-left:6px;opacity:.65;transition:opacity .2s ease}
+    .action-btn:hover,.action-btn:focus{opacity:1}
 
     .empty-state{padding:18px;margin:10px;border-radius:12px;border:1px dashed var(--border-light);color:var(--text-light);text-align:center}
 
@@ -230,7 +229,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
-    import { getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, serverTimestamp, onSnapshot, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+    import { getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, serverTimestamp, onSnapshot, query, where, orderBy, limit, deleteDoc } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
     import { registerSession } from './assets/js/session-manager.js';
     import { getCloudinaryImageUrl, displayProfilePicture } from './assets/js/avatar-utils.js';
 
@@ -358,7 +357,24 @@
 
     function scrollToBottom(){ try{ messagesScroll.scrollTop = messagesScroll.scrollHeight + 200; }catch(_){ } }
 
-    function renderMessage(m){ const mine = m.senderId === currentUser.uid; const row = document.createElement('div'); row.className = 'bubble-row' + (mine ? ' mine' : ''); const bubble = document.createElement('div'); bubble.className = 'bubble' + (mine ? ' mine' : ''); bubble.textContent = m.text || ''; row.appendChild(bubble); messagesScroll.appendChild(row); }
+    function renderMessage(m){
+      const mine = m.senderId === currentUser.uid;
+      const row = document.createElement('div');
+      row.className = 'bubble-row' + (mine ? ' mine' : '');
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble' + (mine ? ' mine' : '');
+      bubble.textContent = m.deleted ? 'Message deleted' : (m.text || '');
+      row.appendChild(bubble);
+      if (mine && !m.deleted) {
+        const del = document.createElement('button');
+        del.className = 'action-btn delete-msg';
+        del.setAttribute('data-id', m.id);
+        del.setAttribute('title', 'Delete');
+        del.innerHTML = '<i class="fas fa-trash"></i>';
+        row.appendChild(del);
+      }
+      messagesScroll.appendChild(row);
+    }
 
     function setChatPresence(online){ if(!chatPresence) return; chatPresence.style.display=''; chatPresence.textContent=online? 'Online':'Offline'; chatPresence.classList.toggle('online', !!online); }
 
@@ -402,6 +418,26 @@
       try{ const idx = allThreads.findIndex(t=>t.id===currentThreadId); if(idx>=0){ allThreads[idx].lastMessage = { text: text.trim(), senderId: currentUser.uid }; } const q=(convSearch.value||'').trim(); conversationsList.innerHTML=''; allThreads.forEach(t=> conversationsList.appendChild(renderConversationItem(t, q))); }catch(_){ }
     }
 
+    async function recomputeThreadLastMessage(){
+      try{
+        const col = collection(db,'artifacts',appId,'public','data','dm_threads', currentThreadId, 'messages');
+        const snap = await getDocs(query(col, orderBy('createdAt','desc'), limit(20)));
+        let last = null;
+        for (const d of snap.docs){ const v=d.data(); if(!v.deleted && v.text && v.text.trim()){ last = { text: v.text, senderId: v.senderId||null, ts: v.createdAt||serverTimestamp() }; break; } }
+        const ref = doc(db,'artifacts',appId,'public','data','dm_threads', currentThreadId);
+        await updateDoc(ref, { lastMessage: last || null, updatedAt: serverTimestamp() });
+      }catch(_){ }
+    }
+
+    async function deleteMessageById(messageId){
+      try{
+        const mref = doc(db,'artifacts',appId,'public','data','dm_threads', currentThreadId, 'messages', messageId);
+        try{ await deleteDoc(mref); }
+        catch(e){ try{ await updateDoc(mref, { text:'Message deleted', deleted:true, type:'deleted', updatedAt: serverTimestamp() }); }catch(err){ throw err; } }
+        await recomputeThreadLastMessage();
+      }catch(e){ console.error('delete message failed', e); }
+    }
+
     convSearch.addEventListener('input', ()=>{ const q=(convSearch.value||'').trim(); conversationsList.innerHTML=''; allThreads.forEach(t=> conversationsList.appendChild(renderConversationItem(t, q))); });
 
     newChatBtn.addEventListener('click', ()=>{ window.location.href = '/find_friends.html'; });
@@ -418,6 +454,16 @@
     messageInput?.addEventListener('input', autoResize);
     messageInput?.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); const txt=(messageInput.value||''); sendMessage(txt).then(()=>{ messageInput.value=''; autoResize(); scrollToBottom(); }); } });
     sendBtn?.addEventListener('click', ()=>{ const txt=(messageInput.value||''); sendMessage(txt).then(()=>{ messageInput.value=''; autoResize(); scrollToBottom(); }); });
+
+    messagesScroll.addEventListener('click', (e)=>{
+      const btn = e.target.closest && e.target.closest('.delete-msg');
+      if(!btn) return;
+      const id = btn.getAttribute('data-id');
+      if(!id) return;
+      const ok = window.confirm('Delete this message?');
+      if(!ok) return;
+      deleteMessageById(id).catch(()=>{});
+    });
 
     const sidebarNav = document.getElementById('sidebarNav');
     const sidebarToggleFab = document.getElementById('sidebarToggleFab');
