@@ -80,6 +80,11 @@
     .conv-avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--blue)}
     .conv-title{margin:0;font-weight:700}
     .conv-sub{margin:0;color:var(--text-light);font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+    .conversation-item.unread{border-color:rgba(0,213,255,.6);background:rgba(0,213,255,.12)}
+    .conversation-header-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+    .conversation-header-row .conv-title{flex:1 1 auto}
+    .conversation-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.15);color:var(--white);font-size:.75rem;font-weight:600;animation:heartbeatPulse 1.4s ease-in-out infinite}
+    .conversation-badge i{font-size:.7rem}
 
     .presence-wrapper{position:relative;display:inline-block}
     .presence-dot{position:absolute;bottom:2px;right:2px;width:10px;height:10px;border-radius:50%;background:var(--status-offline);border:2px solid rgba(10,10,10,.85)}
@@ -129,6 +134,7 @@
     .message-box.loading-pulse{animation:pulseNotice 1.4s ease-in-out infinite}
     @keyframes pulse-notification{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
     @keyframes pulseNotice{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+    @keyframes heartbeatPulse{0%,100%{transform:scale(1)}40%{transform:scale(1.12)}60%{transform:scale(1.05)}}
 
     #backToListBtn{display:none}
     body.show-chat #backToListBtn{display:inline-flex}
