@@ -156,6 +156,12 @@
     .chat-scroll::-webkit-scrollbar{width:10px}
     .chat-scroll::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--blue),var(--pink));border-radius:6px}
     .chat-scroll::-webkit-scrollbar-track{background:transparent}
+
+    .image-viewer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:2000;padding:20px}
+    .image-viewer-overlay.show{display:flex}
+    .image-viewer-overlay img{max-width:90vw;max-height:85vh;border-radius:16px;border:1px solid var(--border-light);box-shadow:0 8px 25px rgba(0,0,0,.5);background:var(--card-background)}
+    .image-viewer-close{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border-light);background:rgba(255,255,255,.06);color:var(--white);cursor:pointer}
+    .image-viewer-close:hover{background:rgba(255,255,255,.12)}
   </style>
 
   <script>
@@ -258,6 +264,11 @@
 
   <div id="messageBox" class="message-box" role="status" aria-live="polite"></div>
 
+  <div id="imageViewer" class="image-viewer-overlay" aria-hidden="true" role="dialog" aria-modal="true">
+    <button id="imageViewerClose" class="image-viewer-close" aria-label="Close image"><i class="fas fa-times"></i></button>
+    <img id="imageViewerImg" alt="">
+  </div>
+
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
@@ -295,6 +306,19 @@
     const chatPresence = document.getElementById('chatPresence');
     const messageInput = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
+
+    const imageViewer = document.getElementById('imageViewer');
+    const imageViewerImg = document.getElementById('imageViewerImg');
+    const imageViewerClose = document.getElementById('imageViewerClose');
+
+    function closeImageViewer(){ try{ if(imageViewer){ imageViewer.classList.remove('show'); imageViewer.setAttribute('aria-hidden','true'); } if(imageViewerImg){ imageViewerImg.removeAttribute('src'); } document.body.style.overflow=''; }catch(_){}}
+    function openImageViewer(src, altText){ try{ if(!src || !imageViewer || !imageViewerImg) return; imageViewerImg.src=src; imageViewerImg.alt=altText||'Profile picture'; imageViewer.classList.add('show'); imageViewer.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }catch(_){}}
+
+    imageViewerClose?.addEventListener('click', closeImageViewer);
+    imageViewer?.addEventListener('click', (e)=>{ if(e.target===imageViewer) closeImageViewer(); });
+    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && imageViewer?.classList.contains('show')) closeImageViewer(); });
+
+    chatPartnerAvatar?.addEventListener('click', ()=>{ const src = chatPartnerAvatar.getAttribute('src'); if(src){ openImageViewer(src, chatTitle?.textContent||'Profile picture'); } });
 
     const typingStates = new Map();
     const typingUnsubs = new Map();
@@ -358,7 +382,7 @@
       const presenceId = `presence-dot-${partnerId}`;
       const lastTextRaw = t.lastMessage?.text ? t.lastMessage.text : '';
       const isTyping = Boolean(typingStates.get(t.id));
-      const safeLastText = isTyping ? 'Typing…' : escapeHtml(lastTextRaw);
+      const safeLastText = isTyping ? 'Typing���' : escapeHtml(lastTextRaw);
       const lastMessageTimestamp = tsToMs(t.lastMessage?.ts || t.lastMessage?.createdAt || t.updatedAt);
       const isUnread = Boolean(t.lastMessage && t.lastMessage.senderId && t.lastMessage.senderId !== currentUser?.uid && lastMessageTimestamp > getThreadReadTimestamp(t.id));
       const active = isActiveFromData(t.partner);
@@ -382,6 +406,8 @@
           <p class="conv-sub${isTyping ? ' typing' : ''}">${safeLastText}${isTyping ? ' <span class=\"typing-dots\"><span></span><span></span><span></span></span>' : ''}${lastSeenHtml}</p>
         </div>
       `;
+      const av = el.querySelector('.conv-avatar');
+      if(av){ av.addEventListener('click', (e)=>{ e.stopPropagation(); const src = av.getAttribute('src'); if(src){ openImageViewer(src, safeName); } }); }
       el.addEventListener('click', ()=> { try{ document.body.classList.add('show-chat'); }catch(_){}; openThread(t.id, partnerId); });
       if(filter){ const q=filter.toLowerCase(); const matches=name.toLowerCase().includes(q)||lastTextRaw.toLowerCase().includes(q); el.style.display=matches?'':'none'; }
       return el;
