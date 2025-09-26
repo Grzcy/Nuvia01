@@ -534,6 +534,7 @@
         scrollToBottom();
         if(snap.docs.length === 0){ markThreadAsRead(threadId, Date.now()); }
         else if(latestCreatedAt){ markThreadAsRead(threadId, latestCreatedAt); }
+        else { markThreadAsRead(threadId, Date.now()); }
       });
       try{ messageInput?.focus(); }catch(_){ }
     }
