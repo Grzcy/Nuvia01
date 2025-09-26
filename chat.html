@@ -179,7 +179,7 @@
         .chat-actions { display: flex; align-items: center; gap: 8px; }
         .icon-btn { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border-light); background: transparent; color: var(--white); cursor: pointer; transition: transform .2s ease, background-color .2s ease; }
         .icon-btn:hover { transform: scale(1.05); background-color: rgba(255,255,255,.06); }
-        .chat-messages { display: none; flex-grow: 1; padding: 10px 16px; overflow-y: auto; display: none; flex-direction: column; gap: 6px; }
+        .chat-messages { display: none; flex-grow: 1; padding: 10px 16px; overflow-y: auto; flex-direction: column; gap: 6px; }
         .chat-messages::-webkit-scrollbar { width: 8px; }
         .chat-messages::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
         .chat-messages::-webkit-scrollbar-thumb { background: linear-gradient(to bottom, var(--blue), var(--pink)); border-radius: 10px; }
@@ -228,7 +228,7 @@
         .friend-item:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,213,255,0.3); background-color: rgba(0,213,255,0.22); }
         .friend-avatar { position: relative; width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--pink); box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: none; }
         .friend-avatar-icon { position: relative; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; background: linear-gradient(45deg, var(--blue), var(--pink)); color: var(--white); box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
-        .friend-name { flex: 1; font-weight: 700; font-size: 1rem; color: var(--white); }
+        .friend-name { flex: 1; display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1rem; color: var(--white); }
         .friend-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--status-offline); box-shadow: none; }
         .friend-dot.online { background: var(--status-online); box-shadow: 0 0 8px rgba(76,175,80,0.7); }
 
@@ -305,8 +305,8 @@
                 <h2 id="partnerDisplayName" class="partner-name">Loading...</h2>
             </div>
             <div class="chat-actions">
+                <button id="backToListBtn" class="icon-btn" title="Back"><i class="fas fa-arrow-left"></i></button>
                 <button id="backToUsersBtn" class="icon-btn" title="Users"><i class="fas fa-users"></i></button>
-                <button id="backToFriendsBtn" class="icon-btn" title="Friends"><i class="fas fa-user-friends"></i></button>
             </div>
         </div>
         <div class="chat-messages" id="chatMessages">
@@ -380,8 +380,8 @@
         const messagesLoadingText = document.getElementById('messagesLoadingText');
         const chatInputArea = document.getElementById('chatInputArea');
 
+        const backToListBtn = document.getElementById('backToListBtn');
         const backToUsersBtn = document.getElementById('backToUsersBtn');
-        const backToFriendsBtn = document.getElementById('backToFriendsBtn');
 
         const messageInput = document.getElementById('messageInput');
         const sendMessageButton = document.getElementById('sendMessageButton');
@@ -418,6 +418,7 @@
         }
 
         function getParam(name) { const url = new URL(window.location.href); return url.searchParams.get(name); }
+        function setParam(name, val) { const url = new URL(window.location.href); if (val == null) url.searchParams.delete(name); else url.searchParams.set(name, val); history.replaceState(null, '', url.toString()); }
         function getFriendshipId(uid1, uid2) { return uid1 < uid2 ? `${uid1}_${uid2}` : `${uid2}_${uid1}`; }
 
         async function fetchAndDisplayHeaderProfile(user) {
@@ -441,13 +442,7 @@
         }
 
         async function fetchNotificationCount(userId) {
-            try {
-                const notificationsCollectionRef = collection(db, "artifacts", appId, "users", userId, "notifications");
-                const qy = query(notificationsCollectionRef, where("read", "==", false));
-                const qs = await getDocs(qy);
-                const unreadCount = qs.size;
-                if (notificationCountElement) { if (unreadCount > 0) { notificationCountElement.textContent = unreadCount; notificationCountElement.style.display = 'flex'; } else { notificationCountElement.style.display = 'none'; } }
-            } catch (_) { if (notificationCountElement) notificationCountElement.style.display = 'none'; }
+            try { const notificationsCollectionRef = collection(db, "artifacts", appId, "users", userId, "notifications"); const qy = query(notificationsCollectionRef, where("read", "==", false)); const qs = await getDocs(qy); const unreadCount = qs.size; if (notificationCountElement) { if (unreadCount > 0) { notificationCountElement.textContent = unreadCount; notificationCountElement.style.display = 'flex'; } else { notificationCountElement.style.display = 'none'; } } } catch (_) { if (notificationCountElement) notificationCountElement.style.display = 'none'; }
         }
 
         async function fetchPartnerProfile(uid) {
@@ -459,15 +454,11 @@
                 partnerDisplayName.textContent = name;
                 const initial = (name || 'U').charAt(0).toUpperCase();
                 displayProfilePicture(partnerProfilePic, partnerAvatarIcon, data.profilePicId || null, initial, "w_80,h_80,c_fill,g_face,r_max");
-            } else {
-                partnerDisplayName.textContent = `User`;
-                partnerAvatarIcon.style.display = 'block';
-            }
+            } else { partnerDisplayName.textContent = `User`; partnerAvatarIcon.style.display = 'block'; }
         }
 
         // Friends list logic
         function clearPresenceListeners() { presenceUnsubs.forEach((fn)=>{ try{ fn(); }catch{} }); presenceUnsubs.clear(); }
-
         function subscribePresence(uid, dotEl) {
             try {
                 const sRef = doc(db, 'artifacts', appId, 'sessions', uid);
@@ -476,104 +467,58 @@
                     if (snap.exists()) {
                         const data = snap.data();
                         const lastSeenTs = data.lastSeen?.toDate ? data.lastSeen.toDate() : (data.lastSeen || null);
-                        if (data.sessionId && lastSeenTs) {
-                            const diff = Date.now() - new Date(lastSeenTs).getTime();
-                            online = diff < 120000; // 2 minutes window
-                        }
+                        if (data.sessionId && lastSeenTs) { const diff = Date.now() - new Date(lastSeenTs).getTime(); online = diff < 120000; }
                     }
                     dotEl.classList.toggle('online', online);
-                }, (err)=>{
-                    dotEl.classList.remove('online');
-                });
+                }, ()=>{ dotEl.classList.remove('online'); });
                 presenceUnsubs.set(uid, unsub);
             } catch { dotEl.classList.remove('online'); }
         }
-
         function createFriendRow(uid, profile) {
-            const item = document.createElement('div');
-            item.className = 'friend-item';
-            const avatarImg = document.createElement('img');
-            avatarImg.className = 'friend-avatar';
-            const avatarIcon = document.createElement('div');
-            avatarIcon.className = 'friend-avatar-icon';
-            avatarIcon.innerHTML = '<i class="fas fa-user-circle"></i>';
-            const name = document.createElement('div');
-            name.className = 'friend-name';
-            name.textContent = profile.username || `User_${uid.substring(0,8)}`;
-            const dot = document.createElement('span');
-            dot.className = 'friend-dot';
+            const item = document.createElement('div'); item.className = 'friend-item';
+            const avatarImg = document.createElement('img'); avatarImg.className = 'friend-avatar';
+            const avatarIcon = document.createElement('div'); avatarIcon.className = 'friend-avatar-icon'; avatarIcon.innerHTML = '<i class="fas fa-user-circle"></i>';
+            const nameWrap = document.createElement('div'); nameWrap.className = 'friend-name';
+            const dot = document.createElement('span'); dot.className = 'friend-dot';
+            const nameText = document.createElement('span'); nameText.textContent = profile.username || `User_${uid.substring(0,8)}`;
 
-            const initial = (name.textContent || 'U').charAt(0).toUpperCase();
             const picId = profile.profilePicId || null;
-            if (picId) {
-                const url = getCloudinaryImageUrl(picId, 'w_100,h_100,c_fill,g_face,r_max');
-                avatarImg.src = url; avatarImg.style.display = 'block'; avatarImg.onerror = ()=>{ avatarImg.style.display='none'; avatarIcon.style.display='flex'; };
-                avatarIcon.style.display = 'none';
-            }
+            if (picId) { const url = getCloudinaryImageUrl(picId, 'w_100,h_100,c_fill,g_face,r_max'); avatarImg.src = url; avatarImg.style.display = 'block'; avatarImg.onerror = ()=>{ avatarImg.style.display='none'; avatarIcon.style.display='flex'; }; avatarIcon.style.display = 'none'; }
 
-            item.appendChild(avatarImg);
-            item.appendChild(avatarIcon);
-            item.appendChild(name);
-            item.appendChild(dot);
+            nameWrap.appendChild(dot); nameWrap.appendChild(nameText);
+            item.appendChild(avatarImg); item.appendChild(avatarIcon); item.appendChild(nameWrap);
 
-            item.addEventListener('click', ()=>{ window.location.href = `./chat.html?partnerId=${encodeURIComponent(uid)}`; });
+            item.addEventListener('click', ()=>{ selectFriend(uid); });
             subscribePresence(uid, dot);
             return item;
         }
-
         async function loadFriendsList() {
             if (!currentUser) return;
-            friendsList.innerHTML = '';
-            friendsLoading.style.display = 'block';
-            clearPresenceListeners();
+            friendsList.innerHTML = ''; friendsLoading.style.display = 'block'; clearPresenceListeners();
             try {
                 const friendsCol = collection(db, 'artifacts', appId, 'public', 'data', 'friends');
                 onSnapshot(friendsCol, async (snap)=>{
                     const friendUids = new Set();
-                    snap.forEach(docSnap=>{
-                        const d = docSnap.data();
-                        if (d.user1Id === currentUser.uid) friendUids.add(d.user2Id);
-                        else if (d.user2Id === currentUser.uid) friendUids.add(d.user1Id);
-                    });
+                    snap.forEach(docSnap=>{ const d = docSnap.data(); if (d.user1Id === currentUser.uid) friendUids.add(d.user2Id); else if (d.user2Id === currentUser.uid) friendUids.add(d.user1Id); });
                     friendsList.innerHTML = '';
-                    if (friendUids.size === 0) {
-                        const p = document.createElement('p'); p.style.textAlign='center'; p.style.color='var(--text-light)'; p.textContent = 'No friends yet.'; friendsList.appendChild(p); friendsLoading.style.display='none'; return;
-                    }
-                    const loads = Array.from(friendUids).map(async (uid)=>{
-                        const uref = doc(db, 'artifacts', appId, 'public', 'data', 'users', uid);
-                        const usnap = await getDoc(uref).catch(()=>null);
-                        const pdata = usnap && usnap.exists() ? usnap.data() : { username: `User_${uid.substring(0,8)}` };
-                        friendsList.appendChild(createFriendRow(uid, pdata));
-                    });
-                    await Promise.all(loads);
-                    friendsLoading.style.display = 'none';
-                }, (err)=>{
-                    friendsList.innerHTML = '';
-                    const p = document.createElement('p'); p.style.textAlign='center'; p.style.color='var(--text-light)'; p.textContent = 'Failed to load friends.'; friendsList.appendChild(p);
-                    friendsLoading.style.display = 'none';
-                });
-            } catch (e) {
-                friendsList.innerHTML = '';
-                const p = document.createElement('p'); p.style.textAlign='center'; p.style.color='var(--text-light)'; p.textContent = 'Failed to load friends.'; friendsList.appendChild(p);
-                friendsLoading.style.display = 'none';
-            }
+                    if (friendUids.size === 0) { const p = document.createElement('p'); p.style.textAlign='center'; p.style.color='var(--text-light)'; p.textContent = 'No friends yet.'; friendsList.appendChild(p); friendsLoading.style.display='none'; return; }
+                    const loads = Array.from(friendUids).map(async (uid)=>{ const uref = doc(db, 'artifacts', appId, 'public', 'data', 'users', uid); const usnap = await getDoc(uref).catch(()=>null); const pdata = usnap && usnap.exists() ? usnap.data() : { username: `User_${uid.substring(0,8)}` }; friendsList.appendChild(createFriendRow(uid, pdata)); });
+                    await Promise.all(loads); friendsLoading.style.display = 'none';
+                }, ()=>{ friendsList.innerHTML = ''; const p = document.createElement('p'); p.style.textAlign='center'; p.style.color='var(--text-light)'; p.textContent = 'Failed to load friends.'; friendsList.appendChild(p); friendsLoading.style.display = 'none'; });
+            } catch { friendsList.innerHTML = ''; const p = document.createElement('p'); p.style.textAlign='center'; p.style.color='var(--text-light)'; p.textContent = 'Failed to load friends.'; friendsList.appendChild(p); friendsLoading.style.display = 'none'; }
         }
 
         // Chat logic
         function renderMessage(docId, data) {
             const isSent = data.senderId === currentUser.uid;
-            const wrapper = document.createElement('div');
-            wrapper.className = `message-item ${isSent ? 'sent' : 'received'}`;
+            const wrapper = document.createElement('div'); wrapper.className = `message-item ${isSent ? 'sent' : 'received'}`;
             const avatarEl = document.createElement('div'); avatarEl.className = 'avatar-icon'; avatarEl.innerHTML = '<i class="fas fa-user"></i>';
             const contentWrap = document.createElement('div'); contentWrap.className = 'message-content-wrapper';
             const sender = document.createElement('div'); sender.className = 'message-sender'; sender.textContent = isSent ? (currentUserProfileData?.username || 'You') : (partnerDisplayName.textContent || 'User');
             const bubble = document.createElement('div'); bubble.className = 'message-bubble'; const hasText = typeof data.text === 'string' && data.text.trim() !== ''; if (hasText) bubble.textContent = data.text;
-            if (data.mediaUrl && data.mediaType) {
-                if (data.mediaType.startsWith('image')) { const img = document.createElement('img'); img.src = data.mediaUrl; img.alt = 'Image'; img.className = 'message-media image'; img.addEventListener('click', ()=>openViewer('image', data.mediaUrl)); bubble.appendChild(document.createElement('br')); bubble.appendChild(img); }
-                else if (data.mediaType.startsWith('video')) { const vid = document.createElement('video'); vid.src = data.mediaUrl; vid.controls = true; vid.className = 'message-media video'; vid.addEventListener('click', ()=>openViewer('video', data.mediaUrl)); bubble.appendChild(document.createElement('br')); bubble.appendChild(vid); }
-            }
+            if (data.mediaUrl && data.mediaType) { if (data.mediaType.startsWith('image')) { const img = document.createElement('img'); img.src = data.mediaUrl; img.alt = 'Image'; img.className = 'message-media image'; img.addEventListener('click', ()=>openViewer('image', data.mediaUrl)); bubble.appendChild(document.createElement('br')); bubble.appendChild(img); } else if (data.mediaType.startsWith('video')) { const vid = document.createElement('video'); vid.src = data.mediaUrl; vid.controls = true; vid.className = 'message-media video'; vid.addEventListener('click', ()=>openViewer('video', data.mediaUrl)); bubble.appendChild(document.createElement('br')); bubble.appendChild(vid); } }
             const ts = document.createElement('div'); ts.className = 'message-timestamp'; const date = data.createdAt?.toDate ? data.createdAt.toDate() : (data.createdAt || new Date()); ts.textContent = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' }).format(date);
-            const acts = document.createElement('div'); acts.className = 'message-actions'; if (isSent) { const copyBtn = document.createElement('button'); copyBtn.textContent = 'Copy'; copyBtn.addEventListener('click', async ()=>{ try { await navigator.clipboard.writeText(data.text || ''); showMessage('success','Copied'); } catch(e){ showMessage('error','Copy failed'); } }); acts.appendChild(copyBtn); }
+            const acts = document.createElement('div'); acts.className = 'message-actions'; if (isSent) { const copyBtn = document.createElement('button'); copyBtn.textContent = 'Copy'; copyBtn.addEventListener('click', async ()=>{ try { await navigator.clipboard.writeText(data.text || ''); showMessage('success','Copied'); } catch{ showMessage('error','Copy failed'); } }); acts.appendChild(copyBtn); }
             contentWrap.appendChild(sender); contentWrap.appendChild(bubble); contentWrap.appendChild(ts); contentWrap.appendChild(acts);
             wrapper.appendChild(avatarEl); wrapper.appendChild(contentWrap); return wrapper;
         }
@@ -620,47 +565,44 @@
                 chatMessages.innerHTML = '';
                 snap.forEach(docSnap=>{ const el = renderMessage(docSnap.id, docSnap.data()); chatMessages.appendChild(el); });
                 scrollToBottom();
-            }, (err)=>{ console.error(err); showMessage('error', 'Failed to load messages'); if (messagesLoadingText) messagesLoadingText.textContent = 'Failed to load messages'; });
+            }, ()=>{ showMessage('error', 'Failed to load messages'); if (messagesLoadingText) messagesLoadingText.textContent = 'Failed to load messages'; });
         }
 
-        function showListMode() {
-            friendListView.style.display = 'block';
-            chatHeader.style.display = 'none';
-            chatMessages.style.display = 'none';
-            chatInputArea.style.display = 'none';
+        function showListMode() { friendListView.style.display = 'block'; chatHeader.style.display = 'none'; chatMessages.style.display = 'none'; chatInputArea.style.display = 'none'; }
+        function showChatMode() { friendListView.style.display = 'none'; chatHeader.style.display = 'flex'; chatMessages.style.display = 'flex'; chatInputArea.style.display = 'flex'; }
+
+        async function selectFriend(uid) {
+            if (!currentUser) return;
+            partnerId = uid; setParam('partnerId', uid);
+            showChatMode(); messagesLoadingText.style.display = 'block';
+            await fetchPartnerProfile(uid);
+            conversationId = await ensureConversationMeta(currentUser.uid, uid);
+            subscribeToMessages();
         }
-        function showChatMode() {
-            friendListView.style.display = 'none';
-            chatHeader.style.display = 'flex';
-            chatMessages.style.display = 'flex';
-            chatInputArea.style.display = 'flex';
+        function backToList() {
+            partnerId = null; setParam('partnerId', null);
+            if (unsubscribeChat) { try{unsubscribeChat();}catch{} unsubscribeChat = null; }
+            chatMessages.innerHTML = '<p class="messages-loading-text" id="messagesLoadingText" style="text-align:center;color:var(--text-light)">Loading messages...</p>';
+            partnerDisplayName.textContent = '';
+            partnerProfilePic.src = ''; partnerProfilePic.style.display = 'none'; partnerAvatarIcon.style.display = 'block';
+            showListMode();
         }
 
         function wireEvents() {
             sendMessageButton.addEventListener('click', sendMessage);
             messageInput.addEventListener('keydown', (e)=>{ if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
             backToUsersBtn.addEventListener('click', ()=>{ window.location.href = './find_friends.html'; });
-            backToFriendsBtn.addEventListener('click', ()=>{ window.location.href = './friends.html'; });
+            backToListBtn.addEventListener('click', backToList);
             bindInputAutoResize();
         }
 
         onAuthStateChanged(auth, async (user)=>{
             try {
                 if (!user) { await signInAnonymously(auth); return; }
-                currentUser = user;
-                await fetchAndDisplayHeaderProfile(user);
-                await fetchNotificationCount(user.uid);
-
-                partnerId = getParam('partnerId');
-                if (!partnerId) {
-                    showListMode();
-                    await loadFriendsList();
-                    return;
-                }
-                showChatMode();
-                await fetchPartnerProfile(partnerId);
-                conversationId = await ensureConversationMeta(user.uid, partnerId);
-                subscribeToMessages();
+                currentUser = user; await fetchAndDisplayHeaderProfile(user); await fetchNotificationCount(user.uid);
+                const initialPartner = getParam('partnerId');
+                await loadFriendsList();
+                if (initialPartner) { await selectFriend(initialPartner); } else { showListMode(); }
             } catch (e) { console.error(e); showMessage('error', e.message || 'Auth error'); }
         });
 
