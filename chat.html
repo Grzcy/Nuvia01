@@ -48,7 +48,6 @@
     #sidebarToggleFab{width:32px;height:32px;border-radius:50%;border:0;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(45deg,var(--blue),var(--pink));color:var(--white);cursor:pointer;transition:transform .2s ease;box-shadow:0 4px 15px rgba(0,213,255,.3),0 4px 15px rgba(255,46,146,.3)}
     #sidebarToggleFab:hover{transform:scale(1.1)}
 
-    /* Sidebar (same look/feel as Groups) */
     #sidebarNav{position:fixed;top:0;left:0;height:100%;width:clamp(220px,60vw,340px);background:var(--header-background);border-right:1px solid var(--border-light);box-shadow:6px 0 24px rgba(0,0,0,.35);transform:translateX(-100%);transition:transform .32s cubic-bezier(.22,.61,.36,1);z-index:90;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-gutter:stable both-edges}
     #sidebarNav.sidebar-visible{transform:translateX(0)}
     #sidebarNav .sidebar-header{position:sticky;top:0;background:var(--header-background);display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border-light);z-index:1}
@@ -67,24 +66,32 @@
     main{max-width:1100px;margin:0 auto;padding:18px;padding-top:73px}
 
     /* Chat layout */
-    .chat-layout{display:grid;grid-template-columns:1fr;gap:14px}
-    @media (max-width:900px){.chat-layout{grid-template-columns:1fr}}
+    .chat-layout{display:grid;gap:14px;min-height:calc(100dvh - 110px)}
+    .chat-layout{grid-template-columns:1fr}
+    @media (min-width:1000px){.chat-layout{grid-template-columns:360px 1fr}}
 
     .panel{background:var(--card-background);border:1px solid var(--glass-blue);backdrop-filter:blur(10px) saturate(180%);border-radius:16px;box-shadow:0 8px 25px rgba(0,0,0,.3)}
 
     /* Conversations list */
-    .conversations-panel{display:flex;flex-direction:column;min-height:60vh}
+    .conversations-panel{display:flex;flex-direction:column;height:calc(100dvh - 120px);min-height:60vh}
     .list-toolbar{display:flex;align-items:center;gap:8px;padding:10px;border-bottom:1px solid var(--border-light)}
     .search-input{flex:1 1 auto;padding:10px 12px;border-radius:12px;border:1px solid var(--border-light);background:var(--input-background);color:var(--white);outline:none}
-    .conversation-list{display:flex;flex-direction:column;gap:8px;padding:10px;max-height:calc(100vh - 200px);overflow:auto}
+    .conversation-list{display:flex;flex-direction:column;gap:8px;padding:10px;flex:1 1 auto;max-height:none;overflow:auto}
     .conversation-item{display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;border:1px solid var(--border-light);background:rgba(255,255,255,.03);cursor:pointer}
     .conversation-item:hover{background:rgba(255,255,255,.08)}
     .conv-avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--blue)}
     .conv-title{margin:0;font-weight:700}
     .conv-sub{margin:0;color:var(--text-light);font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 
+    /* Presence */
+    .presence-wrapper{position:relative;display:inline-block}
+    .presence-dot{position:absolute;bottom:2px;right:2px;width:10px;height:10px;border-radius:50%;background:var(--status-offline);border:2px solid rgba(10,10,10,.85)}
+    .presence-dot.online{background:var(--status-online)}
+    .presence-pill{margin-left:8px;padding:2px 8px;border-radius:999px;border:1px solid var(--border-light);font-size:.75rem;color:var(--text-light);background:rgba(255,255,255,.06)}
+    .presence-pill.online{color:#fff;background:rgba(76,175,80,.2);border-color:rgba(76,175,80,.35)}
+
     /* Messages panel */
-    .messages-panel{display:none;flex-direction:column;height:calc(100vh - 130px);min-height:60vh}
+    .messages-panel{display:none;flex-direction:column;height:calc(100dvh - 120px);min-height:60vh}
     body.show-chat .messages-panel{display:flex}
     body.show-chat .conversations-panel{display:none}
     .chat-header{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid var(--border-light)}
@@ -96,26 +103,22 @@
     .bubble.mine{background:linear-gradient(90deg,var(--blue),var(--pink));color:#fff;border-color:transparent}
     .bubble-meta{margin-top:4px;color:var(--text-light);font-size:.75rem}
     .composer{display:flex;align-items:center;gap:8px;padding:10px;border-top:1px solid var(--border-light)}
-    .composer-input{flex:1 1 auto;min-height:44px;padding:10px 12px;border-radius:12px;border:1px solid var(--border-light);background:var(--input-background);color:var(--white);outline:none}
+    .composer-input{flex:1 1 auto;min-height:44px;padding:10px 12px;border-radius:12px;border:1px solid var(--border-light);background:var(--input-background);color:var(--white);outline:none;resize:none;max-height:180px}
     .icon-button{width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border-light);background:transparent;color:var(--white);cursor:pointer;transition:transform .2s ease,background-color .2s ease}
     .icon-button:hover{transform:scale(1.05);background-color:rgba(255,255,255,.06)}
     .send-btn{background:var(--button-background);box-shadow:var(--button-shadow);border:0;width:auto;padding:10px 14px;border-radius:12px}
 
-    /* Small enhancements */
     .empty-state{padding:18px;margin:10px;border-radius:12px;border:1px dashed var(--border-light);color:var(--text-light);text-align:center}
 
-    /* Header compatibility with other pages */
     .notification-icon-wrapper{position:relative;margin-right:15px}
     .notification-icon-wrapper a{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.06));border:2px solid rgba(255,255,255,.25);backdrop-filter:blur(15px);transition:all .3s ease;position:relative;overflow:hidden;color:inherit;text-decoration:none}
     .notification-icon-wrapper i{font-size:1.2rem;color:#ffffff;text-shadow:0 0 10px rgba(255,215,0,.8),0 0 15px rgba(255,142,83,.6)}
     .notification-badge{position:absolute;top:-8px;right:-8px;background:linear-gradient(135deg,#ff4757,#ff3742);color:#ffffff;border-radius:50%;padding:3px 7px;font-size:.75rem;font-weight:900;min-width:20px;height:20px;text-align:center;box-shadow:0 2px 8px rgba(255,71,87,.6),0 0 0 2px #ffffff,0 0 0 3px rgba(255,71,87,.3);display:flex;align-items:center;justify-content:center;animation:pulse-notification 2s infinite;z-index:2;line-height:1}
     @keyframes pulse-notification{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
 
-    /* Back button visibility */
     #backToListBtn{display:none}
     body.show-chat #backToListBtn{display:inline-flex}
 
-    /* Scrollbar */
     #sidebarNav::-webkit-scrollbar{width:8px}
     #sidebarNav::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--blue),var(--pink));border-radius:6px}
     #sidebarNav::-webkit-scrollbar-track{background:transparent}
@@ -125,7 +128,6 @@
   </style>
 
   <script>
-    // Share theme CSS from index.html, keep appearance consistent across pages
     (async function(){
       async function injectSharedThemes(){
         try{
@@ -194,7 +196,6 @@
 
   <main>
     <div class="chat-layout">
-      <!-- Conversations -->
       <section class="panel conversations-panel" aria-label="Conversations">
         <div class="list-toolbar">
           <input id="convSearch" class="search-input" type="search" placeholder="Search chats" aria-label="Search chats" />
@@ -204,7 +205,6 @@
         <div id="convEmpty" class="empty-state" style="display:none">No conversations yet.</div>
       </section>
 
-      <!-- Messages -->
       <section class="panel messages-panel" aria-label="Messages">
         <div class="chat-header">
           <button id="backToListBtn" class="icon-button" type="button" aria-label="Back to friends"><i class="fas fa-arrow-left"></i></button>
@@ -213,8 +213,13 @@
           <div>
             <h3 id="chatTitle" class="chat-title"></h3>
           </div>
+          <span id="chatPresence" class="presence-pill" aria-live="polite" aria-atomic="true" style="display:none"></span>
         </div>
         <div id="messagesScroll" class="chat-scroll"></div>
+        <div class="composer">
+          <textarea id="messageInput" class="composer-input" rows="1" placeholder="Type a message" aria-label="Type a message"></textarea>
+          <button id="sendBtn" class="send-btn" aria-label="Send"><i class="fas fa-paper-plane"></i></button>
+        </div>
       </section>
     </div>
   </main>
@@ -244,49 +249,42 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // UI refs
     const conversationsList = document.getElementById('conversationsList');
     const convEmpty = document.getElementById('convEmpty');
     const convSearch = document.getElementById('convSearch');
     const newChatBtn = document.getElementById('newChatBtn');
 
     const messagesScroll = document.getElementById('messagesScroll');
-
     const chatTitle = document.getElementById('chatTitle');
     const chatPartnerAvatar = document.getElementById('chatPartnerAvatar');
     const chatPartnerIcon = document.getElementById('chatPartnerIcon');
     const backToListBtn = document.getElementById('backToListBtn');
+    const chatPresence = document.getElementById('chatPresence');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
 
-    // State
     let currentUser = null;
     let currentThreadId = null;
     let currentPartnerId = null;
     let messagesUnsub = null;
+    let partnerPresenceUnsub = null;
     let allThreads = [];
+    const presenceUnsubs = new Map();
 
     function getQueryParam(k){ try{ return new URL(window.location.href).searchParams.get(k); }catch(_){ return null; } }
 
-    function makeThreadId(a, b){
-      const x = (a||'').toString();
-      const y = (b||'').toString();
-      return x < y ? `${x}_${y}` : `${y}_${x}`;
-    }
+    function makeThreadId(a, b){ const x=(a||'').toString(); const y=(b||'').toString(); return x<y?`${x}_${y}`:`${y}_${x}`; }
 
     async function fetchUserProfile(uid){
       try{
         const snap = await getDoc(doc(db,'artifacts',appId,'public','data','users',uid));
-        if(!snap.exists()) return { uid, username: uid.slice(0,6), profilePicId: null };
+        if(!snap.exists()) return { uid, username: uid.slice(0,6), profilePicId: null, online:false, lastActive:null };
         const d = snap.data();
-        return { uid, username: d.username || (d.displayName||uid.slice(0,6)), profilePicId: d.profilePicId || d.avatarId || null };
-      }catch(_){ return { uid, username: uid.slice(0,6), profilePicId: null }; }
+        return { uid, username: d.username || (d.displayName||uid.slice(0,6)), profilePicId: d.profilePicId || d.avatarId || null, online:Boolean(d.online), lastActive:d.lastActive||null };
+      }catch(_){ return { uid, username: uid.slice(0,6), profilePicId: null, online:false, lastActive:null }; }
     }
 
-    function showToast(msg, type='info', timeout=2500){
-      const box = document.getElementById('messageBox');
-      if(!box) return; box.textContent = msg; box.style.display='block';
-      box.className = ''; box.classList.add('show');
-      if(timeout) setTimeout(()=>{ box.style.display='none'; }, timeout);
-    }
+    function setConvEmptyVisible(show){ if (convEmpty) convEmpty.style.display = show ? '' : 'none'; }
 
     function renderConversationItem(t, filter=''){
       const partnerId = (t.participants||[]).find(p=>p!==currentUser?.uid) || '';
@@ -296,59 +294,63 @@
       const name = t.partner?.username || partnerId.slice(0,6);
       const initial = (name||'U').charAt(0).toUpperCase();
       const avatar = t.partner?.profilePicId ? getCloudinaryImageUrl(t.partner.profilePicId,'w_90,h_90,c_fill,g_face,r_max') : '';
+      const presenceId = `presence-dot-${partnerId}`;
+      const lastText = t.lastMessage?.text ? t.lastMessage.text : '';
       el.innerHTML = `
-        ${avatar?`<img class="conv-avatar" src="${avatar}" alt="${name}">`:`<img class="conv-avatar" alt="${name}" src="https://placehold.co/44x44/CCCCCC/000000?text=${encodeURIComponent(initial)}">`}
+        <div class="presence-wrapper">
+          ${avatar?`<img class=\"conv-avatar\" src=\"${avatar}\" alt=\"${name}\">`:`<img class=\"conv-avatar\" alt=\"${name}\" src=\"https://placehold.co/44x44/CCCCCC/000000?text=${encodeURIComponent(initial)}\">`}
+          <span class="presence-dot ${t.partner?.online ? 'online' : ''}" id="${presenceId}" aria-hidden="true"></span>
+        </div>
         <div style="flex:1 1 auto;min-width:0">
           <p class="conv-title">${name}</p>
-          <p class="conv-sub">${t.lastMessage?.text ? t.lastMessage.text : 'Say hi 👋'}</p>
+          <p class="conv-sub">${lastText}</p>
         </div>
       `;
       el.addEventListener('click', ()=> { try{ document.body.classList.add('show-chat'); }catch(_){}; openThread(t.id, partnerId); });
-      if(filter){
-        const q = filter.toLowerCase();
-        const matches = name.toLowerCase().includes(q) || (t.lastMessage?.text||'').toLowerCase().includes(q);
-        el.style.display = matches ? '' : 'none';
-      }
+      if(filter){ const q=filter.toLowerCase(); const matches=name.toLowerCase().includes(q)||(t.lastMessage?.text||'').toLowerCase().includes(q); el.style.display=matches?'':'none'; }
       return el;
     }
+
+    function clearPresenceListeners(){ presenceUnsubs.forEach(u=>{ try{ u(); }catch(_){} }); presenceUnsubs.clear(); }
 
     async function loadConversations(){
       if(!currentUser) return;
       conversationsList.innerHTML = '';
+      clearPresenceListeners();
       let f1Snap = null, f2Snap = null;
       try{ f1Snap = await getDocs(query(collection(db,'artifacts',appId,'public','data','friends'), where('user1Id','==', currentUser.uid))); }catch(_){ f1Snap = { docs: [] }; }
       try{ f2Snap = await getDocs(query(collection(db,'artifacts',appId,'public','data','friends'), where('user2Id','==', currentUser.uid))); }catch(_){ f2Snap = { docs: [] }; }
       const friendIds = new Set();
-      (f1Snap.docs||[]).forEach(d=>{ const v = d.data(); if(v && v.user2Id) friendIds.add(v.user2Id); });
-      (f2Snap.docs||[]).forEach(d=>{ const v = d.data(); if(v && v.user1Id) friendIds.add(v.user1Id); });
+      (f1Snap.docs||[]).forEach(d=>{ const v=d.data(); if(v&&v.user2Id) friendIds.add(v.user2Id); });
+      (f2Snap.docs||[]).forEach(d=>{ const v=d.data(); if(v&&v.user1Id) friendIds.add(v.user1Id); });
       const items = await Promise.all(Array.from(friendIds).map(async (uid)=>{
         const partner = await fetchUserProfile(uid);
         const id = makeThreadId(currentUser.uid, uid);
         let last = null, updated = null;
         try{ const td = await getDoc(doc(db,'artifacts',appId,'public','data','dm_threads', id)); if(td.exists()){ const data = td.data(); last = data.lastMessage || null; updated = data.updatedAt || null; } }catch(_){ }
-        return { id, participants: [currentUser.uid, uid], partner, lastMessage: last, updatedAt: updated };
+        return { id, participants:[currentUser.uid, uid], partner, lastMessage:last, updatedAt:updated };
       }));
-      items.sort((a,b)=> ((b.updatedAt?.toMillis?.()||0) - (a.updatedAt?.toMillis?.()||0)) || (a.partner?.username||'').localeCompare(b.partner?.username||''));
+      items.sort((a,b)=> ((b.updatedAt?.toMillis?.()||0)-(a.updatedAt?.toMillis?.()||0)) || (a.partner?.username||'').localeCompare(b.partner?.username||''));
       allThreads = items;
+      if(!items.length){ setConvEmptyVisible(true); } else { setConvEmptyVisible(false); }
       items.forEach(t=> conversationsList.appendChild(renderConversationItem(t)));
+
+      items.forEach(t=>{
+        const partnerId = (t.participants||[]).find(p=>p!==currentUser?.uid) || '';
+        if(!partnerId) return;
+        const ref = doc(db,'artifacts',appId,'public','data','users',partnerId);
+        try{
+          const unsub = onSnapshot(ref, (snap)=>{
+            const data = snap.exists()? snap.data() : null;
+            const dot = document.getElementById(`presence-dot-${partnerId}`);
+            if(dot){ if(data && data.online){ dot.classList.add('online'); } else { dot.classList.remove('online'); } }
+          },()=>{});
+          presenceUnsubs.set(partnerId, unsub);
+        }catch(_){ }
+      });
     }
 
-    async function ensureThreadWith(partnerId){
-      const threadId = makeThreadId(currentUser.uid, partnerId);
-      const ref = doc(db,'artifacts',appId,'public','data','dm_threads', threadId);
-      const snap = await getDoc(ref);
-      if(!snap.exists()){
-        await setDoc(ref, {
-          participants: [currentUser.uid, partnerId],
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-          lastMessage: null
-        });
-      }
-      return threadId;
-    }
-
-    function scrollToBottom(){ try{ messagesScroll.scrollTop = messagesScroll.scrollHeight + 200; }catch(_){}}
+    function scrollToBottom(){ try{ messagesScroll.scrollTop = messagesScroll.scrollHeight + 200; }catch(_){} }
 
     function renderMessage(m){
       const mine = m.senderId === currentUser.uid;
@@ -361,69 +363,65 @@
       messagesScroll.appendChild(row);
     }
 
+    function setChatPresence(online){ if(!chatPresence) return; chatPresence.style.display=''; chatPresence.textContent=online? 'Online':'Offline'; chatPresence.classList.toggle('online', !!online); }
+
     async function openThread(threadId, partnerId){
       if(messagesUnsub){ try{ messagesUnsub(); }catch(_){} messagesUnsub = null; }
+      if(partnerPresenceUnsub){ try{ partnerPresenceUnsub(); }catch(_){} partnerPresenceUnsub = null; }
       currentThreadId = threadId; currentPartnerId = partnerId;
       const partner = partnerId ? await fetchUserProfile(partnerId) : null;
       chatTitle.textContent = partner?.username || 'Chat';
       displayProfilePicture(chatPartnerAvatar, chatPartnerIcon, partner?.profilePicId || null, (partner?.username||'U').charAt(0).toUpperCase(), 'w_90,h_90,c_fill,g_face,r_max');
+      setChatPresence(!!partner?.online);
+      try{
+        const pref = doc(db,'artifacts',appId,'public','data','users', partnerId);
+        partnerPresenceUnsub = onSnapshot(pref, (snap)=>{ const data = snap.exists()? snap.data() : null; setChatPresence(Boolean(data && data.online)); }, ()=>{});
+      }catch(_){ }
+
       messagesScroll.innerHTML = '';
       const col = collection(db,'artifacts',appId,'public','data','dm_threads', threadId, 'messages');
       const qMsgs = query(col, orderBy('createdAt','asc'), limit(200));
-      messagesUnsub = onSnapshot(qMsgs, (snap)=>{
-        messagesScroll.innerHTML = '';
-        snap.docs.forEach(d=> renderMessage({ id:d.id, ...d.data() }));
-        scrollToBottom();
-      });
+      messagesUnsub = onSnapshot(qMsgs, (snap)=>{ messagesScroll.innerHTML = ''; snap.docs.forEach(d=> renderMessage({ id:d.id, ...d.data() })); scrollToBottom(); });
+      try{ messageInput?.focus(); }catch(_){ }
+    }
+
+    async function ensureThreadWith(partnerId){
+      const threadId = makeThreadId(currentUser.uid, partnerId);
+      const ref = doc(db,'artifacts',appId,'public','data','dm_threads', threadId);
+      const snap = await getDoc(ref);
+      if(!snap.exists()){
+        await setDoc(ref, { participants:[currentUser.uid, partnerId], createdAt: serverTimestamp(), updatedAt: serverTimestamp(), lastMessage:null });
+      }
+      return threadId;
     }
 
     async function sendMessage(text){
       if(!currentThreadId || !text.trim()) return;
       const col = collection(db,'artifacts',appId,'public','data','dm_threads', currentThreadId, 'messages');
+      try{ await setDoc(doc(db,'artifacts',appId,'public','data','dm_threads', currentThreadId), { participants:[currentUser.uid, currentPartnerId], createdAt: serverTimestamp() }, { merge: true }); }catch(_){ }
       await addDoc(col, { text: text.trim(), senderId: currentUser.uid, createdAt: serverTimestamp(), type: 'text' });
       const ref = doc(db,'artifacts',appId,'public','data','dm_threads', currentThreadId);
       await updateDoc(ref, { updatedAt: serverTimestamp(), lastMessage: { text: text.trim(), senderId: currentUser.uid, ts: serverTimestamp() } });
+      try{ const idx = allThreads.findIndex(t=>t.id===currentThreadId); if(idx>=0){ allThreads[idx].lastMessage = { text: text.trim(), senderId: currentUser.uid }; } const q=(convSearch.value||'').trim(); conversationsList.innerHTML=''; allThreads.forEach(t=> conversationsList.appendChild(renderConversationItem(t, q))); }catch(_){ }
     }
 
+    convSearch.addEventListener('input', ()=>{ const q=(convSearch.value||'').trim(); conversationsList.innerHTML=''; allThreads.forEach(t=> conversationsList.appendChild(renderConversationItem(t, q))); });
 
-    convSearch.addEventListener('input', ()=>{
-      const q = (convSearch.value||'').trim();
-      conversationsList.childNodes.forEach(node=>{ if(node.classList && node.classList.contains('conversation-item')){ /* will filter when re-rendering */ } });
-      // Simple re-render with filter
-      conversationsList.innerHTML = '';
-      allThreads.forEach(t=> conversationsList.appendChild(renderConversationItem(t, q)));
-    });
+    newChatBtn.addEventListener('click', ()=>{ window.location.href = '/find_friends.html'; });
 
-    newChatBtn.addEventListener('click', ()=>{
-      window.location.href = '/find_friends.html';
-    });
-
-    async function tryOpenFromQuery(){
-      const pid = getQueryParam('partnerId');
-      if(!pid || !currentUser) return;
-      try{
-        const tid = await ensureThreadWith(pid);
-        await loadConversations();
-        await openThread(tid, pid);
-        try{ document.body.classList.add('show-chat'); }catch(_){ }
-      }catch(_){ }
-    }
+    async function tryOpenFromQuery(){ const pid=getQueryParam('partnerId'); if(!pid || !currentUser) return; try{ const tid=await ensureThreadWith(pid); await loadConversations(); await openThread(tid, pid); try{ document.body.classList.add('show-chat'); }catch(_){ } }catch(_){ } }
 
     onAuthStateChanged(auth, async (user) => {
-      try{
-        if(!user){ await signInAnonymously(auth); return; }
-        currentUser = user;
-        try { localStorage.setItem('nuvia_auth_status','authenticated'); } catch(_){ }
-        registerSession(auth, db, appId).catch(()=>{});
-        await loadConversations();
-        await tryOpenFromQuery();
-      }catch(e){ console.error(e); }
+      try{ if(!user){ await signInAnonymously(auth); return; } currentUser = user; try { localStorage.setItem('nuvia_auth_status','authenticated'); } catch(_){ } registerSession(auth, db, appId).catch(()=>{}); await loadConversations(); await tryOpenFromQuery(); }catch(e){ console.error(e); }
     });
 
-    // Back to list
-    backToListBtn?.addEventListener('click', ()=>{ try{ document.body.classList.remove('show-chat'); }catch(_){} });
+    backToListBtn?.addEventListener('click', ()=>{ try{ document.body.classList.remove('show-chat'); }catch(_){ } });
 
-    // Sidebar controls
+    function autoResize(){ try{ messageInput.style.height=''; messageInput.style.height = Math.min(180, Math.max(44, messageInput.scrollHeight)) + 'px'; }catch(_){}}
+    messageInput?.addEventListener('input', autoResize);
+    messageInput?.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); const txt=(messageInput.value||''); sendMessage(txt).then(()=>{ messageInput.value=''; autoResize(); scrollToBottom(); }); } });
+    sendBtn?.addEventListener('click', ()=>{ const txt=(messageInput.value||''); sendMessage(txt).then(()=>{ messageInput.value=''; autoResize(); scrollToBottom(); }); });
+
     const sidebarNav = document.getElementById('sidebarNav');
     const sidebarToggleFab = document.getElementById('sidebarToggleFab');
     const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
@@ -447,7 +445,8 @@
           if (!user || !user.uid) return;
           const db = getFirestore();
           const userDoc = doc(db, 'artifacts', APP_ID, 'public', 'data', 'users', user.uid);
-          const post = () => setDoc(userDoc, { online: navigator.onLine, lastActive: serverTimestamp(), currentPage: window.location.pathname }, { merge: true }).catch(()=>{});
+          const computeOnline = () => navigator.onLine && document.visibilityState === 'visible';
+          const post = () => setDoc(userDoc, { online: computeOnline(), lastActive: serverTimestamp(), currentPage: window.location.pathname }, { merge: true }).catch(()=>{});
           post();
           const tid = setInterval(post, 15000);
           const debounced = () => post();
