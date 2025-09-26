@@ -330,26 +330,35 @@
     function renderConversationItem(t, filter=''){
       const partnerId = (t.participants||[]).find(p=>p!==currentUser?.uid) || '';
       const el = document.createElement('div');
-      el.className = 'conversation-item';
-      el.setAttribute('data-id', t.id);
       const name = t.partner?.username || partnerId.slice(0,6);
+      const safeName = escapeHtml(name);
       const initial = (name||'U').charAt(0).toUpperCase();
       const avatar = t.partner?.profilePicId ? getCloudinaryImageUrl(t.partner.profilePicId,'w_90,h_90,c_fill,g_face,r_max') : '';
       const presenceId = `presence-dot-${partnerId}`;
-      const lastText = t.lastMessage?.text ? t.lastMessage.text : '';
+      const lastTextRaw = t.lastMessage?.text ? t.lastMessage.text : '';
+      const safeLastText = escapeHtml(lastTextRaw);
+      const lastMessageTimestamp = tsToMs(t.lastMessage?.ts || t.lastMessage?.createdAt || t.updatedAt);
+      const isUnread = Boolean(t.lastMessage && t.lastMessage.senderId && t.lastMessage.senderId !== currentUser?.uid && lastMessageTimestamp > getThreadReadTimestamp(t.id));
       const active = isActiveFromData(t.partner);
+      const badgeHtml = isUnread ? `<span class=\"conversation-badge\" role=\"status\" aria-live=\"polite\"><i class=\"fas fa-bolt\"></i>New message</span>` : '';
+      el.className = 'conversation-item' + (isUnread ? ' unread' : '');
+      el.setAttribute('data-id', t.id);
+      el.setAttribute('data-unread', isUnread ? 'true' : 'false');
       el.innerHTML = `
         <div class="presence-wrapper">
-          ${avatar?`<img class=\"conv-avatar\" src=\"${avatar}\" alt=\"${name}\">`:`<img class=\"conv-avatar\" alt=\"${name}\" src=\"https://placehold.co/44x44/CCCCCC/000000?text=${encodeURIComponent(initial)}\">`}
+          ${avatar?`<img class=\"conv-avatar\" src=\"${avatar}\" alt=\"${safeName}\">`:`<img class=\"conv-avatar\" alt=\"${safeName}\" src=\"https://placehold.co/44x44/CCCCCC/000000?text=${encodeURIComponent(initial)}\">`}
           <span class="presence-dot ${active ? 'online' : ''}" id="${presenceId}" aria-hidden="true"></span>
         </div>
         <div class="conversation-details">
-          <p class="conv-title">${name}</p>
-          <p class="conv-sub">${lastText}</p>
+          <div class="conversation-header-row">
+            <p class="conv-title">${safeName}</p>
+            ${badgeHtml}
+          </div>
+          <p class="conv-sub">${safeLastText}</p>
         </div>
       `;
       el.addEventListener('click', ()=> { try{ document.body.classList.add('show-chat'); }catch(_){}; openThread(t.id, partnerId); });
-      if(filter){ const q=filter.toLowerCase(); const matches=name.toLowerCase().includes(q)||(t.lastMessage?.text||'').toLowerCase().includes(q); el.style.display=matches?'':'none'; }
+      if(filter){ const q=filter.toLowerCase(); const matches=name.toLowerCase().includes(q)||lastTextRaw.toLowerCase().includes(q); el.style.display=matches?'':'none'; }
       return el;
     }
 
