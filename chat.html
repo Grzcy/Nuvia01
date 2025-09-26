@@ -39,7 +39,7 @@
       --background-gradient-1:#00d5ff;--background-gradient-2:#ff2e92;--card-background:linear-gradient(145deg,rgba(255,255,255,.03),rgba(255,255,255,.01));
       --header-background:linear-gradient(135deg,rgba(10,10,10,.85),rgba(10,10,10,.75));--border-light:rgba(255,255,255,.05);
       --input-background:rgba(255,255,255,.05);--button-background:linear-gradient(90deg,var(--blue),var(--pink));--button-shadow:0 4px 15px var(--blue),0 4px 15px var(--pink);
-      --background-color-primary:#1a1a2e;--background-color-secondary:#0f0f1f;--header-background-color:#2a2a4a;--footer-background-color:#2a2a4a;--content-background-color:#20203a;--card-background-color:#2a2a4a;--text-color-primary:#e0e0e0;--text-color-secondary:#b0b0d0;--status-online:#556B2F;--status-offline:#6c757d;--status-away:#FFC107;--delete-button-color:#dc3545;--warning-color:#ffc107;--accent-color:#00d5ff;--accent-color-dark:#00aaff;--border-color:#3a3a5a;--theme-gold:#ffd700
+      --background-color-primary:#1a1a2e;--background-color-secondary:#0f0f1f;--header-background-color:#2a2a4a;--footer-background-color:#2a2a4a;--content-background-color:#20203a;--card-background-color:#2a2a4a;--text-color-primary:#e0e0e0;--text-color-secondary:#b0b0d0;--status-online:#2ecc71;--status-offline:#6c757d;--status-away:#FFC107;--delete-button-color:#dc3545;--warning-color:#ffc107;--accent-color:#00d5ff;--accent-color-dark:#00aaff;--border-color:#3a3a5a;--theme-gold:#ffd700
     }
     body{min-height:100vh;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background-color:var(--background-main);background-image:radial-gradient(circle at top left,var(--background-gradient-1),transparent 100px),radial-gradient(circle at bottom right,var(--background-gradient-2),transparent 150px);color:var(--white)}
     header{position:fixed;top:0;left:0;right:0;z-index:20;background:var(--header-background);border-bottom:1px solid var(--border-light);backdrop-filter:saturate(140%) blur(6px);height:55px;display:flex;align-items:center;justify-content:center}
@@ -83,16 +83,16 @@
     .conversation-item.unread{border-color:rgba(0,213,255,.6);background:rgba(0,213,255,.12)}
     .conversation-header-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
     .conversation-header-row .conv-title{flex:1 1 auto}
-    .conversation-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.15);color:var(--white);font-size:.75rem;font-weight:600;animation:heartbeatPulse 1.4s ease-in-out infinite}
+    .conversation-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.15);color:var(--white);font-size:.75rem;font-weight:600;animation:softGlow 1.8s ease-in-out infinite}
     .conversation-badge i{font-size:.7rem}
 
     .presence-wrapper{position:relative;display:inline-block}
     .presence-dot{position:absolute;bottom:2px;right:2px;width:10px;height:10px;border-radius:50%;background:var(--status-offline);border:2px solid rgba(10,10,10,.85)}
-    .presence-dot.online{background:var(--status-online);box-shadow:0 0 0 0 rgba(85,107,47,.6);animation:heartbeatPulse 1.5s ease-in-out infinite}
-    .presence-dot.online::after{content:'';position:absolute;inset:-4px;border-radius:50%;box-shadow:0 0 0 0 rgba(85,107,47,.25);animation:pulseRing 1.5s ease-out infinite}
+    .presence-dot.online{background:var(--status-online);box-shadow:0 0 0 0 rgba(46,204,113,.6);animation:softGlow 1.8s ease-in-out infinite}
+    .presence-dot.online::after{content:'';position:absolute;inset:-4px;border-radius:50%;box-shadow:0 0 0 0 rgba(46,204,113,.25);animation:softRing 1.8s ease-out infinite}
     @keyframes pulseRing{0%{transform:scale(.9);opacity:.8}70%{transform:scale(1.3);opacity:0}100%{opacity:0}}
     .presence-pill{margin-left:8px;padding:2px 8px;border-radius:999px;border:1px solid var(--border-light);font-size:.75rem;color:var(--text-light);background:rgba(255,255,255,.06)}
-    .presence-pill.online{color:#fff;background:rgba(85,107,47,.2);border-color:rgba(85,107,47,.35)}
+    .presence-pill.online{color:#fff;background:rgba(46,204,113,.2);border-color:rgba(46,204,113,.35)}
     .presence-pill.typing{color:#fff;background:rgba(0,213,255,.2);border-color:rgba(0,213,255,.35)}
     .typing-dots{display:inline-flex;align-items:center;gap:2px;margin-left:4px}
     .typing-dots span{width:4px;height:4px;background:currentColor;border-radius:50%;opacity:.6;animation:dotFade 1.2s infinite}
@@ -143,6 +143,8 @@
     @keyframes pulse-notification{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
     @keyframes pulseNotice{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
     @keyframes heartbeatPulse{0%,100%{transform:scale(1)}40%{transform:scale(1.12)}60%{transform:scale(1.05)}}
+    @keyframes softGlow{0%,100%{box-shadow:0 0 0 0 rgba(46,204,113,.45);transform:scale(1)}50%{box-shadow:0 0 8px 4px rgba(46,204,113,.75);transform:scale(1)}}
+    @keyframes softRing{0%{transform:scale(.9);opacity:.35}60%{transform:scale(1.35);opacity:0}100%{opacity:0}}
 
     #backToListBtn{display:none}
     body.show-chat #backToListBtn{display:inline-flex}
@@ -355,7 +357,7 @@
       const lastMessageTimestamp = tsToMs(t.lastMessage?.ts || t.lastMessage?.createdAt || t.updatedAt);
       const isUnread = Boolean(t.lastMessage && t.lastMessage.senderId && t.lastMessage.senderId !== currentUser?.uid && lastMessageTimestamp > getThreadReadTimestamp(t.id));
       const active = isActiveFromData(t.partner);
-      const badgeHtml = isUnread ? `<span class=\"conversation-badge\" role=\"status\" aria-live=\"polite\"><i class=\"fas fa-bolt\"></i>New message</span>` : '';
+      const badgeHtml = isUnread ? `<span class=\"conversation-badge\" role=\"status\" aria-live=\"polite\" aria-label=\"New unread message\"><i class=\"fas fa-envelope\"></i></span>` : '';
       el.className = 'conversation-item' + (isUnread ? ' unread' : '');
       el.setAttribute('data-id', t.id);
       el.setAttribute('data-unread', isUnread ? 'true' : 'false');
