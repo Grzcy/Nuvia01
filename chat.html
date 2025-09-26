@@ -67,7 +67,7 @@
     main{max-width:1100px;margin:0 auto;padding:18px;padding-top:73px}
 
     /* Chat layout */
-    .chat-layout{display:grid;grid-template-columns:320px 1fr;gap:14px}
+    .chat-layout{display:grid;grid-template-columns:1fr;gap:14px}
     @media (max-width:900px){.chat-layout{grid-template-columns:1fr}}
 
     .panel{background:var(--card-background);border:1px solid var(--glass-blue);backdrop-filter:blur(10px) saturate(180%);border-radius:16px;box-shadow:0 8px 25px rgba(0,0,0,.3)}
@@ -110,6 +110,10 @@
     .notification-icon-wrapper i{font-size:1.2rem;color:#ffffff;text-shadow:0 0 10px rgba(255,215,0,.8),0 0 15px rgba(255,142,83,.6)}
     .notification-badge{position:absolute;top:-8px;right:-8px;background:linear-gradient(135deg,#ff4757,#ff3742);color:#ffffff;border-radius:50%;padding:3px 7px;font-size:.75rem;font-weight:900;min-width:20px;height:20px;text-align:center;box-shadow:0 2px 8px rgba(255,71,87,.6),0 0 0 2px #ffffff,0 0 0 3px rgba(255,71,87,.3);display:flex;align-items:center;justify-content:center;animation:pulse-notification 2s infinite;z-index:2;line-height:1}
     @keyframes pulse-notification{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+
+    /* Back button visibility */
+    #backToListBtn{display:none}
+    body.show-chat #backToListBtn{display:inline-flex}
 
     /* Scrollbar */
     #sidebarNav::-webkit-scrollbar{width:8px}
