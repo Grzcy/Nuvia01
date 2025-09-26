@@ -74,6 +74,9 @@
 
     /* Conversations list */
     .conversations-panel{display:flex;flex-direction:column;min-height:60vh}
+    /* Hide conversations panel by default; show it only when selecting */
+    .conversations-panel{display:none}
+    body.show-conversations .conversations-panel{display:flex}
     .list-toolbar{display:flex;align-items:center;gap:8px;padding:10px;border-bottom:1px solid var(--border-light)}
     .search-input{flex:1 1 auto;padding:10px 12px;border-radius:12px;border:1px solid var(--border-light);background:var(--input-background);color:var(--white);outline:none}
     .conversation-list{display:flex;flex-direction:column;gap:8px;padding:10px;max-height:calc(100vh - 200px);overflow:auto}
@@ -311,7 +314,7 @@
           <p class="conv-sub">${t.lastMessage?.text ? t.lastMessage.text : 'Say hi 👋'}</p>
         </div>
       `;
-      el.addEventListener('click', ()=> openThread(t.id, partnerId));
+      el.addEventListener('click', ()=> { openThread(t.id, partnerId); try{ document.body.classList.remove('show-conversations'); }catch(_){} });
       if(filter){
         const q = filter.toLowerCase();
         const matches = name.toLowerCase().includes(q) || (t.lastMessage?.text||'').toLowerCase().includes(q);
@@ -435,6 +438,12 @@
         registerSession(auth, db, appId).catch(()=>{});
         await loadConversations();
         await tryOpenFromQuery();
+        try{
+          const hasThread = !!currentThreadId;
+          const urlHasPartner = !!getQueryParam('partnerId');
+          if(!hasThread && !urlHasPartner){ document.body.classList.add('show-conversations'); }
+          else { document.body.classList.remove('show-conversations'); }
+        }catch(_){}
       }catch(e){ console.error(e); }
     });
 
