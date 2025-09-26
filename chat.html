@@ -85,6 +85,7 @@
     .conversation-header-row .conv-title{flex:1 1 auto}
     .conversation-badge{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.15);color:var(--white);font-size:1.1rem;animation:softGlow 1.8s ease-in-out infinite}
     .conversation-badge i{font-size:1.1rem}
+    .presence-wrapper .conversation-badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:2}
 
     .presence-wrapper{position:relative;display:inline-block}
     .presence-dot{position:absolute;bottom:2px;right:2px;width:10px;height:10px;border-radius:50%;background:var(--status-offline);border:2px solid rgba(10,10,10,.85)}
@@ -365,11 +366,11 @@
         <div class="presence-wrapper">
           ${avatar?`<img class=\"conv-avatar\" src=\"${avatar}\" alt=\"${safeName}\">`:`<img class=\"conv-avatar\" alt=\"${safeName}\" src=\"https://placehold.co/44x44/CCCCCC/000000?text=${encodeURIComponent(initial)}\">`}
           <span class="presence-dot ${active ? 'online' : ''}" id="${presenceId}" aria-hidden="true"></span>
+          ${badgeHtml}
         </div>
         <div class="conversation-details">
           <div class="conversation-header-row">
             <p class="conv-title">${safeName}</p>
-            ${badgeHtml}
           </div>
           <p class="conv-sub${isTyping ? ' typing' : ''}">${safeLastText}${isTyping ? ' <span class=\"typing-dots\"><span></span><span></span><span></span></span>' : ''}</p>
         </div>
@@ -548,7 +549,7 @@
       if(partnerPresenceUnsub){ try{ partnerPresenceUnsub(); }catch(_){} partnerPresenceUnsub = null; }
       if(partnerTypingUnsub){ try{ partnerTypingUnsub(); }catch(_){} partnerTypingUnsub = null; }
       if(chatPresence){ chatPresence.classList.add('is-hidden'); chatPresence.textContent=''; chatPresence.classList.remove('online'); chatPresence.classList.remove('typing'); }
-      currentThreadId = threadId; currentPartnerId = partnerId;
+      currentThreadId = threadId; currentPartnerId = partnerId; markThreadAsRead(threadId, Date.now());
       const partner = partnerId ? await fetchUserProfile(partnerId) : null;
       chatTitle.textContent = partner?.username || 'Chat';
       displayProfilePicture(chatPartnerAvatar, chatPartnerIcon, partner?.profilePicId || null, (partner?.username||'U').charAt(0).toUpperCase(), 'w_90,h_90,c_fill,g_face,r_max');
