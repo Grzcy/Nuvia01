@@ -211,7 +211,7 @@
           <img id="chatPartnerAvatar" alt="Partner avatar" class="conv-avatar" style="display:none">
           <i id="chatPartnerIcon" class="fas fa-user-circle" style="font-size:40px;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent"></i>
           <div>
-            <h3 id="chatTitle" class="chat-title">Select a conversation</h3>
+            <h3 id="chatTitle" class="chat-title"></h3>
             <div id="chatSubtitle" class="conv-sub"></div>
           </div>
         </div>
@@ -323,24 +323,26 @@
     async function loadConversations(){
       if(!currentUser) return;
       conversationsList.innerHTML = '';
-      convEmpty.style.display = 'none';
-      let items = [];
-      try{
-        const col = collection(db,'artifacts',appId,'public','data','dm_threads');
-        const qMine = query(col, where('participants','array-contains', currentUser.uid));
-        const snap = await getDocs(qMine);
-        items = snap.docs.map(d=>({ id:d.id, ...d.data() }));
-      }catch(e){ items = []; }
-      // Enrich with partner profile and sort by updatedAt desc
-      const enriched = await Promise.all(items.map(async t=>{
-        const partnerId = (t.participants||[]).find(p=>p!==currentUser.uid);
-        const partner = partnerId ? await fetchUserProfile(partnerId) : null;
-        return { ...t, partner };
+      let f1Snap = null, f2Snap = null;
+      try{ f1Snap = await getDocs(query(collection(db,'artifacts',appId,'public','data','friends'), where('user1Id','==', currentUser.uid))); }catch(_){ f1Snap = { docs: [] }; }
+      try{ f2Snap = await getDocs(query(collection(db,'artifacts',appId,'public','data','friends'), where('user2Id','==', currentUser.uid))); }catch(_){ f2Snap = { docs: [] }; }
+      const friendIds = new Set();
+      (f1Snap.docs||[]).forEach(d=>{ const v = d.data(); if(v && v.user2Id) friendIds.add(v.user2Id); });
+      (f2Snap.docs||[]).forEach(d=>{ const v = d.data(); if(v && v.user1Id) friendIds.add(v.user1Id); });
+      const items = await Promise.all(Array.from(friendIds).map(async (uid)=>{
+        const partner = await fetchUserProfile(uid);
+        const id = makeThreadId(currentUser.uid, uid);
+        let last = null, updated = null;
+        try{ const td = await getDoc(doc(db,'artifacts',appId,'public','data','dm_threads', id)); if(td.exists()){ const data = td.data(); last = data.lastMessage || null; updated = data.updatedAt || null; } }catch(_){ }
+        return { id, participants: [currentUser.uid, uid], partner, lastMessage: last, updatedAt: updated };
       }));
-      enriched.sort((a,b)=> (b.updatedAt?.toMillis?.()||0) - (a.updatedAt?.toMillis?.()||0));
-      allThreads = enriched;
-      if(enriched.length===0){ convEmpty.style.display = 'block'; return; }
-      enriched.forEach(t=> conversationsList.appendChild(renderConversationItem(t)));
+      items.sort((a,b)=> ((b.updatedAt?.toMillis?.()||0) - (a.updatedAt?.toMillis?.()||0)) || (a.partner?.username||'').localeCompare(b.partner?.username||''));
+      allThreads = items;
+      items.forEach(t=> conversationsList.appendChild(renderConversationItem(t)));
+      if(!currentThreadId && items.length>0){
+        const pid = items[0].partner?.uid || (items[0].participants||[]).find(p=>p!==currentUser.uid);
+        if(pid) openThread(items[0].id, pid);
+      }
     }
 
     async function ensureThreadWith(partnerId){
