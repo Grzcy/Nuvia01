@@ -593,9 +593,12 @@
     backToListBtn?.addEventListener('click', ()=>{ try{ document.body.classList.remove('show-chat'); }catch(_){ } });
 
     function autoResize(){ try{ messageInput.style.height=''; messageInput.style.height = Math.min(180, Math.max(44, messageInput.scrollHeight)) + 'px'; }catch(_){}}
-    messageInput?.addEventListener('input', autoResize);
+    messageInput?.addEventListener('input', ()=>{ autoResize(); notifyTyping(); });
     messageInput?.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); const txt=(messageInput.value||''); sendMessage(txt).then(()=>{ messageInput.value=''; autoResize(); scrollToBottom(); }); } });
     sendBtn?.addEventListener('click', ()=>{ const txt=(messageInput.value||''); sendMessage(txt).then(()=>{ messageInput.value=''; autoResize(); scrollToBottom(); }); });
+
+    function scheduleStopTyping(){ if(typingStopTimer){ clearTimeout(typingStopTimer); } typingStopTimer = setTimeout(()=>{ try{ if(currentThreadId && currentUser){ const ref=doc(db,'artifacts',appId,'public','data','dm_threads', currentThreadId, 'typing', currentUser.uid); setDoc(ref,{ active:false, updatedAt: serverTimestamp() },{ merge:true }).catch(()=>{}); } }catch(_){} }, 4000); }
+    async function notifyTyping(){ try{ if(!currentThreadId || !currentUser) return; const ref = doc(db,'artifacts',appId,'public','data','dm_threads', currentThreadId, 'typing', currentUser.uid); await setDoc(ref, { active:true, updatedAt: serverTimestamp() }, { merge:true }); scheduleStopTyping(); }catch(_){} }
 
     messagesScroll.addEventListener('click', (e)=>{
       const btn = e.target.closest && e.target.closest('.delete-msg');
