@@ -412,6 +412,7 @@
     function renderConversationsList(filterTerm=''){
       const filterValue = (filterTerm || '').trim();
       conversationsList.innerHTML = '';
+      allThreads.sort((a,b)=> (tsToMs(b.updatedAt) - tsToMs(a.updatedAt)) || (a.partner?.username||'').localeCompare(b.partner?.username||''));
       allThreads.forEach(t => conversationsList.appendChild(renderConversationItem(t, filterValue)));
       setConvEmptyVisible(!allThreads.length);
     }
