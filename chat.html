@@ -301,7 +301,7 @@
       }catch(_){ return { uid, username: uid.slice(0,6), profilePicId: null, online:false, lastActive:null }; }
     }
 
-    function setConvEmptyVisible(show){ if (convEmpty) convEmpty.style.display = show ? '' : 'none'; }
+    function setConvEmptyVisible(show){ if (!convEmpty) return; convEmpty.classList.toggle('is-hidden', !show); }
 
     function renderConversationItem(t, filter=''){
       const partnerId = (t.participants||[]).find(p=>p!==currentUser?.uid) || '';
@@ -390,16 +390,28 @@
       messagesScroll.appendChild(row);
     }
 
-    function setChatPresence(online){ if(!chatPresence) return; chatPresence.style.display=''; chatPresence.textContent=online? 'Online':'Offline'; chatPresence.classList.toggle('online', !!online); }
+    function setChatPresence(state){
+      if(!chatPresence) return;
+      if(state === null || typeof state === 'undefined'){
+        chatPresence.classList.add('is-hidden');
+        chatPresence.classList.remove('online');
+        chatPresence.textContent = '';
+        return;
+      }
+      chatPresence.classList.remove('is-hidden');
+      chatPresence.textContent = state ? 'Online' : 'Offline';
+      chatPresence.classList.toggle('online', !!state);
+    }
 
     async function openThread(threadId, partnerId){
       if(messagesUnsub){ try{ messagesUnsub(); }catch(_){} messagesUnsub = null; }
       if(partnerPresenceUnsub){ try{ partnerPresenceUnsub(); }catch(_){} partnerPresenceUnsub = null; }
+      if(chatPresence){ chatPresence.classList.add('is-hidden'); chatPresence.textContent=''; chatPresence.classList.remove('online'); }
       currentThreadId = threadId; currentPartnerId = partnerId;
       const partner = partnerId ? await fetchUserProfile(partnerId) : null;
       chatTitle.textContent = partner?.username || 'Chat';
       displayProfilePicture(chatPartnerAvatar, chatPartnerIcon, partner?.profilePicId || null, (partner?.username||'U').charAt(0).toUpperCase(), 'w_90,h_90,c_fill,g_face,r_max');
-      setChatPresence(isActiveFromData(partner));
+      setChatPresence(partner ? isActiveFromData(partner) : null);
       try{
         const pref = doc(db,'artifacts',appId,'public','data','users', partnerId);
         partnerPresenceUnsub = onSnapshot(pref, (snap)=>{ const data = snap.exists()? snap.data() : null; setChatPresence(isActiveFromData(data)); }, ()=>{});
