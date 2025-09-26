@@ -39,7 +39,7 @@
       --background-gradient-1:#00d5ff;--background-gradient-2:#ff2e92;--card-background:linear-gradient(145deg,rgba(255,255,255,.03),rgba(255,255,255,.01));
       --header-background:linear-gradient(135deg,rgba(10,10,10,.85),rgba(10,10,10,.75));--border-light:rgba(255,255,255,.05);
       --input-background:rgba(255,255,255,.05);--button-background:linear-gradient(90deg,var(--blue),var(--pink));--button-shadow:0 4px 15px var(--blue),0 4px 15px var(--pink);
-      --background-color-primary:#1a1a2e;--background-color-secondary:#0f0f1f;--header-background-color:#2a2a4a;--footer-background-color:#2a2a4a;--content-background-color:#20203a;--card-background-color:#2a2a4a;--text-color-primary:#e0e0e0;--text-color-secondary:#b0b0d0;--status-online:#4CAF50;--status-offline:#6c757d;--status-away:#FFC107;--delete-button-color:#dc3545;--warning-color:#ffc107;--accent-color:#00d5ff;--accent-color-dark:#00aaff;--border-color:#3a3a5a;--theme-gold:#ffd700
+      --background-color-primary:#1a1a2e;--background-color-secondary:#0f0f1f;--header-background-color:#2a2a4a;--footer-background-color:#2a2a4a;--content-background-color:#20203a;--card-background-color:#2a2a4a;--text-color-primary:#e0e0e0;--text-color-secondary:#b0b0d0;--status-online:#556B2F;--status-offline:#6c757d;--status-away:#FFC107;--delete-button-color:#dc3545;--warning-color:#ffc107;--accent-color:#00d5ff;--accent-color-dark:#00aaff;--border-color:#3a3a5a;--theme-gold:#ffd700
     }
     body{min-height:100vh;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background-color:var(--background-main);background-image:radial-gradient(circle at top left,var(--background-gradient-1),transparent 100px),radial-gradient(circle at bottom right,var(--background-gradient-2),transparent 150px);color:var(--white)}
     header{position:fixed;top:0;left:0;right:0;z-index:20;background:var(--header-background);border-bottom:1px solid var(--border-light);backdrop-filter:saturate(140%) blur(6px);height:55px;display:flex;align-items:center;justify-content:center}
@@ -88,9 +88,17 @@
 
     .presence-wrapper{position:relative;display:inline-block}
     .presence-dot{position:absolute;bottom:2px;right:2px;width:10px;height:10px;border-radius:50%;background:var(--status-offline);border:2px solid rgba(10,10,10,.85)}
-    .presence-dot.online{background:var(--status-online)}
+    .presence-dot.online{background:var(--status-online);box-shadow:0 0 0 0 rgba(85,107,47,.6);animation:heartbeatPulse 1.5s ease-in-out infinite}
+    .presence-dot.online::after{content:'';position:absolute;inset:-4px;border-radius:50%;box-shadow:0 0 0 0 rgba(85,107,47,.25);animation:pulseRing 1.5s ease-out infinite}
+    @keyframes pulseRing{0%{transform:scale(.9);opacity:.8}70%{transform:scale(1.3);opacity:0}100%{opacity:0}}
     .presence-pill{margin-left:8px;padding:2px 8px;border-radius:999px;border:1px solid var(--border-light);font-size:.75rem;color:var(--text-light);background:rgba(255,255,255,.06)}
-    .presence-pill.online{color:#fff;background:rgba(76,175,80,.2);border-color:rgba(76,175,80,.35)}
+    .presence-pill.online{color:#fff;background:rgba(85,107,47,.2);border-color:rgba(85,107,47,.35)}
+    .presence-pill.typing{color:#fff;background:rgba(0,213,255,.2);border-color:rgba(0,213,255,.35)}
+    .typing-dots{display:inline-flex;align-items:center;gap:2px;margin-left:4px}
+    .typing-dots span{width:4px;height:4px;background:currentColor;border-radius:50%;opacity:.6;animation:dotFade 1.2s infinite}
+    .typing-dots span:nth-child(2){animation-delay:.2s}
+    .typing-dots span:nth-child(3){animation-delay:.4s}
+    @keyframes dotFade{0%,60%,100%{transform:translateY(0);opacity:.6}30%{transform:translateY(-3px);opacity:1}}
 
     .messages-panel{display:none;flex-direction:column;height:calc(100dvh - 120px);min-height:60vh}
     body.show-chat .messages-panel{display:flex}
@@ -284,6 +292,12 @@
     const messageInput = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
 
+    const typingStates = new Map();
+    const typingUnsubs = new Map();
+    let partnerTypingUnsub = null;
+    let isPartnerTyping = false;
+    let typingStopTimer = null;
+
     let currentUser = null;
     let currentThreadId = null;
     let currentPartnerId = null;
@@ -336,7 +350,8 @@
       const avatar = t.partner?.profilePicId ? getCloudinaryImageUrl(t.partner.profilePicId,'w_90,h_90,c_fill,g_face,r_max') : '';
       const presenceId = `presence-dot-${partnerId}`;
       const lastTextRaw = t.lastMessage?.text ? t.lastMessage.text : '';
-      const safeLastText = escapeHtml(lastTextRaw);
+      const isTyping = Boolean(typingStates.get(t.id));
+      const safeLastText = isTyping ? 'Typing…' : escapeHtml(lastTextRaw);
       const lastMessageTimestamp = tsToMs(t.lastMessage?.ts || t.lastMessage?.createdAt || t.updatedAt);
       const isUnread = Boolean(t.lastMessage && t.lastMessage.senderId && t.lastMessage.senderId !== currentUser?.uid && lastMessageTimestamp > getThreadReadTimestamp(t.id));
       const active = isActiveFromData(t.partner);
@@ -354,7 +369,7 @@
             <p class="conv-title">${safeName}</p>
             ${badgeHtml}
           </div>
-          <p class="conv-sub">${safeLastText}</p>
+          <p class="conv-sub${isTyping ? ' typing' : ''}">${safeLastText}${isTyping ? ' <span class=\"typing-dots\"><span></span><span></span><span></span></span>' : ''}</p>
         </div>
       `;
       el.addEventListener('click', ()=> { try{ document.body.classList.add('show-chat'); }catch(_){}; openThread(t.id, partnerId); });
@@ -364,6 +379,7 @@
 
     function clearPresenceListeners(){ presenceUnsubs.forEach(u=>{ try{ u(); }catch(_){} }); presenceUnsubs.clear(); }
     function clearThreadMetaListeners(){ threadMetaUnsubs.forEach(u=>{ try{ u(); }catch(_){} }); threadMetaUnsubs.clear(); }
+    function clearTypingListeners(){ typingUnsubs.forEach(u=>{ try{ u(); }catch(_){} }); typingUnsubs.clear(); typingStates.clear(); }
 
     function loadReadState(uid){
       if(!uid) return {};
@@ -422,6 +438,7 @@
       conversationsList.innerHTML = '';
       clearPresenceListeners();
       clearThreadMetaListeners();
+      clearTypingListeners();
       let f1Snap = null, f2Snap = null;
       try{ f1Snap = await getDocs(query(collection(db,'artifacts',appId,'public','data','friends'), where('user1Id','==', currentUser.uid))); }catch(_){ f1Snap = { docs: [] }; }
       try{ f2Snap = await getDocs(query(collection(db,'artifacts',appId,'public','data','friends'), where('user2Id','==', currentUser.uid))); }catch(_){ f2Snap = { docs: [] }; }
@@ -455,6 +472,16 @@
         }
         const threadRef = doc(db,'artifacts',appId,'public','data','dm_threads', t.id);
         try{
+          const typingDocRef = doc(db,'artifacts',appId,'public','data','dm_threads', t.id, 'typing', partnerId);
+          try{
+            const unsubTyping = onSnapshot(typingDocRef, (snap)=>{
+              const data = snap.exists()? snap.data() : null;
+              const fresh = data && data.active && (Date.now() - tsToMs(data.updatedAt)) <= 6000;
+              if(fresh){ typingStates.set(t.id, true); } else { typingStates.delete(t.id); }
+              renderConversationsList(convSearch.value || '');
+            }, ()=>{});
+            typingUnsubs.set(t.id, unsubTyping);
+          }catch(_){ }
           const unsubscribeThread = onSnapshot(threadRef, (snap)=>{
             if(!snap.exists()) return;
             const data = snap.data() || {};
@@ -494,23 +521,31 @@
       messagesScroll.appendChild(row);
     }
 
-    function setChatPresence(state){
+    function renderChatHeaderPresence(state){
       if(!chatPresence) return;
-      if(state === null || typeof state === 'undefined'){
+      chatPresence.classList.remove('is-hidden');
+      if(isPartnerTyping){
+        chatPresence.textContent = 'Typing…';
+        chatPresence.classList.add('typing');
+        chatPresence.classList.remove('online');
+      }else if(state === null || typeof state === 'undefined'){
         chatPresence.classList.add('is-hidden');
         chatPresence.classList.remove('online');
+        chatPresence.classList.remove('typing');
         chatPresence.textContent = '';
-        return;
+      }else{
+        chatPresence.textContent = state ? 'Online' : 'Offline';
+        chatPresence.classList.toggle('online', !!state);
+        chatPresence.classList.remove('typing');
       }
-      chatPresence.classList.remove('is-hidden');
-      chatPresence.textContent = state ? 'Online' : 'Offline';
-      chatPresence.classList.toggle('online', !!state);
     }
+    function setChatPresence(state){ renderChatHeaderPresence(state); }
 
     async function openThread(threadId, partnerId){
       if(messagesUnsub){ try{ messagesUnsub(); }catch(_){} messagesUnsub = null; }
       if(partnerPresenceUnsub){ try{ partnerPresenceUnsub(); }catch(_){} partnerPresenceUnsub = null; }
-      if(chatPresence){ chatPresence.classList.add('is-hidden'); chatPresence.textContent=''; chatPresence.classList.remove('online'); }
+      if(partnerTypingUnsub){ try{ partnerTypingUnsub(); }catch(_){} partnerTypingUnsub = null; }
+      if(chatPresence){ chatPresence.classList.add('is-hidden'); chatPresence.textContent=''; chatPresence.classList.remove('online'); chatPresence.classList.remove('typing'); }
       currentThreadId = threadId; currentPartnerId = partnerId;
       const partner = partnerId ? await fetchUserProfile(partnerId) : null;
       chatTitle.textContent = partner?.username || 'Chat';
@@ -518,7 +553,16 @@
       setChatPresence(partner ? isActiveFromData(partner) : null);
       try{
         const pref = doc(db,'artifacts',appId,'public','data','users', partnerId);
-        partnerPresenceUnsub = onSnapshot(pref, (snap)=>{ const data = snap.exists()? snap.data() : null; setChatPresence(isActiveFromData(data)); }, ()=>{});
+        partnerPresenceUnsub = onSnapshot(pref, (snap)=>{ const data = snap.exists()? snap.data() : null; renderChatHeaderPresence(isActiveFromData(data)); }, ()=>{});
+      }catch(_){ }
+      try{
+        const typingDocRef = doc(db,'artifacts',appId,'public','data','dm_threads', threadId, 'typing', partnerId);
+        partnerTypingUnsub = onSnapshot(typingDocRef, (snap)=>{
+          const data = snap.exists()? snap.data(): null;
+          const fresh = data && data.active && (Date.now() - tsToMs(data.updatedAt)) <= 6000;
+          isPartnerTyping = !!fresh;
+          renderChatHeaderPresence(partner ? isActiveFromData(partner) : null);
+        }, ()=>{});
       }catch(_){ }
 
       messagesScroll.innerHTML = '';
