@@ -244,6 +244,7 @@
             <h3 id="chatTitle" class="chat-title"></h3>
           </div>
           <span id="chatPresence" class="presence-pill chat-presence is-hidden" aria-live="polite" aria-atomic="true"></span>
+          <span id="chatLastSeen" class="presence-pill is-hidden" aria-live="polite"></span>
         </div>
         <div id="messagesScroll" class="chat-scroll"></div>
         <div class="composer">
@@ -299,6 +300,9 @@
     let partnerTypingUnsub = null;
     let isPartnerTyping = false;
     let typingStopTimer = null;
+
+    let partnerLastActiveMs = 0;
+    let lastSeenTimer = null;
 
     let currentUser = null;
     let currentThreadId = null;
@@ -523,22 +527,55 @@
       messagesScroll.appendChild(row);
     }
 
+    function formatTimeAgo(ms){
+      const t = Number(ms)||0; if(!t) return 'just now';
+      const diff = Date.now() - t; if(diff < 0) return 'just now';
+      const s = Math.floor(diff/1000);
+      if(s < 60) return 'just now';
+      const m = Math.floor(s/60);
+      if(m < 60) return m + ' minute' + (m===1?'':'s') + ' ago';
+      const h = Math.floor(m/60);
+      if(h < 24) return h + ' hour' + (h===1?'':'s') + ' ago';
+      const d = Math.floor(h/24);
+      if(d < 7) return d + ' day' + (d===1?'':'s') + ' ago';
+      const dt = new Date(t);
+      return dt.toLocaleString();
+    }
+
     function renderChatHeaderPresence(state){
       if(!chatPresence) return;
+      const lastSeenEl = document.getElementById('chatLastSeen');
+      const hideLastSeen = ()=>{ try{ if(lastSeenEl){ lastSeenEl.classList.add('is-hidden'); lastSeenEl.textContent=''; } if(lastSeenTimer){ clearInterval(lastSeenTimer); lastSeenTimer=null; } }catch(_){} };
       chatPresence.classList.remove('is-hidden');
       if(isPartnerTyping){
         chatPresence.textContent = 'Typing…';
         chatPresence.classList.add('typing');
         chatPresence.classList.remove('online');
+        hideLastSeen();
       }else if(state === null || typeof state === 'undefined'){
         chatPresence.classList.add('is-hidden');
         chatPresence.classList.remove('online');
         chatPresence.classList.remove('typing');
         chatPresence.textContent = '';
-      }else{
-        chatPresence.textContent = state ? 'Online' : 'Offline';
-        chatPresence.classList.toggle('online', !!state);
+        hideLastSeen();
+      }else if(state){
+        chatPresence.textContent = 'Online';
+        chatPresence.classList.add('online');
         chatPresence.classList.remove('typing');
+        hideLastSeen();
+      }else{
+        chatPresence.textContent = 'Offline';
+        chatPresence.classList.remove('online');
+        chatPresence.classList.remove('typing');
+        if(lastSeenEl){
+          lastSeenEl.classList.remove('is-hidden');
+          lastSeenEl.textContent = 'Last seen ' + formatTimeAgo(partnerLastActiveMs);
+        }
+        try{ if(lastSeenTimer) clearInterval(lastSeenTimer); }catch(_){}
+        lastSeenTimer = setInterval(()=>{
+          const el = document.getElementById('chatLastSeen');
+          if(el && !el.classList.contains('is-hidden') && partnerLastActiveMs){ el.textContent = 'Last seen ' + formatTimeAgo(partnerLastActiveMs); }
+        }, 60000);
       }
     }
     function setChatPresence(state){ renderChatHeaderPresence(state); }
@@ -548,14 +585,17 @@
       if(partnerPresenceUnsub){ try{ partnerPresenceUnsub(); }catch(_){} partnerPresenceUnsub = null; }
       if(partnerTypingUnsub){ try{ partnerTypingUnsub(); }catch(_){} partnerTypingUnsub = null; }
       if(chatPresence){ chatPresence.classList.add('is-hidden'); chatPresence.textContent=''; chatPresence.classList.remove('online'); chatPresence.classList.remove('typing'); }
-      currentThreadId = threadId; currentPartnerId = partnerId; markThreadAsRead(threadId, Date.now());
+      try{ if(lastSeenTimer){ clearInterval(lastSeenTimer); lastSeenTimer=null; } }catch(_){}
+      partnerLastActiveMs = 0;
+      currentThreadId = threadId; currentPartnerId = partnerId; markThreadAsRead(threadId, Date.now()); partnerLastActiveMs = 0;
       const partner = partnerId ? await fetchUserProfile(partnerId) : null;
       chatTitle.textContent = partner?.username || 'Chat';
+      partnerLastActiveMs = partner && partner.lastActive ? tsToMs(partner.lastActive) : 0;
       displayProfilePicture(chatPartnerAvatar, chatPartnerIcon, partner?.profilePicId || null, (partner?.username||'U').charAt(0).toUpperCase(), 'w_90,h_90,c_fill,g_face,r_max');
       setChatPresence(partner ? isActiveFromData(partner) : null);
       try{
         const pref = doc(db,'artifacts',appId,'public','data','users', partnerId);
-        partnerPresenceUnsub = onSnapshot(pref, (snap)=>{ const data = snap.exists()? snap.data() : null; renderChatHeaderPresence(isActiveFromData(data)); }, ()=>{});
+        partnerPresenceUnsub = onSnapshot(pref, (snap)=>{ const data = snap.exists()? snap.data() : null; partnerLastActiveMs = data && data.lastActive ? tsToMs(data.lastActive) : partnerLastActiveMs; renderChatHeaderPresence(isActiveFromData(data)); }, ()=>{});
       }catch(_){ }
       try{
         const typingDocRef = doc(db,'artifacts',appId,'public','data','dm_threads', threadId, 'typing', partnerId);
