@@ -523,7 +523,18 @@
       messagesScroll.innerHTML = '';
       const col = collection(db,'artifacts',appId,'public','data','dm_threads', threadId, 'messages');
       const qMsgs = query(col, orderBy('createdAt','asc'), limit(200));
-      messagesUnsub = onSnapshot(qMsgs, (snap)=>{ messagesScroll.innerHTML = ''; snap.docs.forEach(d=> renderMessage({ id:d.id, ...d.data() })); scrollToBottom(); });
+      messagesUnsub = onSnapshot(qMsgs, (snap)=>{
+        messagesScroll.innerHTML = '';
+        let latestCreatedAt = null;
+        snap.docs.forEach(d=>{
+          const data = d.data();
+          renderMessage({ id:d.id, ...data });
+          if(data && data.createdAt){ latestCreatedAt = data.createdAt; }
+        });
+        scrollToBottom();
+        if(snap.docs.length === 0){ markThreadAsRead(threadId, Date.now()); }
+        else if(latestCreatedAt){ markThreadAsRead(threadId, latestCreatedAt); }
+      });
       try{ messageInput?.focus(); }catch(_){ }
     }
 
