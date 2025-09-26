@@ -420,6 +420,7 @@
       if(!currentUser) return;
       conversationsList.innerHTML = '';
       clearPresenceListeners();
+      clearThreadMetaListeners();
       let f1Snap = null, f2Snap = null;
       try{ f1Snap = await getDocs(query(collection(db,'artifacts',appId,'public','data','friends'), where('user1Id','==', currentUser.uid))); }catch(_){ f1Snap = { docs: [] }; }
       try{ f2Snap = await getDocs(query(collection(db,'artifacts',appId,'public','data','friends'), where('user2Id','==', currentUser.uid))); }catch(_){ f2Snap = { docs: [] }; }
@@ -435,21 +436,38 @@
       }));
       items.sort((a,b)=> ((b.updatedAt?.toMillis?.()||0)-(a.updatedAt?.toMillis?.()||0)) || (a.partner?.username||'').localeCompare(b.partner?.username||''));
       allThreads = items;
-      if(!items.length){ setConvEmptyVisible(true); } else { setConvEmptyVisible(false); }
-      items.forEach(t=> conversationsList.appendChild(renderConversationItem(t)));
+      renderConversationsList(convSearch.value || '');
 
       items.forEach(t=>{
         const partnerId = (t.participants||[]).find(p=>p!==currentUser?.uid) || '';
-        if(!partnerId) return;
-        const ref = doc(db,'artifacts',appId,'public','data','users',partnerId);
+        if(partnerId){
+          const ref = doc(db,'artifacts',appId,'public','data','users',partnerId);
+          try{
+            const unsub = onSnapshot(ref, (snap)=>{
+              const data = snap.exists()? snap.data() : null;
+              const dot = document.getElementById(`presence-dot-${partnerId}`);
+              const active = isActiveFromData(data);
+              if(dot){ if(active){ dot.classList.add('online'); } else { dot.classList.remove('online'); } }
+            },()=>{});
+            presenceUnsubs.set(partnerId, unsub);
+          }catch(_){ }
+        }
+        const threadRef = doc(db,'artifacts',appId,'public','data','dm_threads', t.id);
         try{
-          const unsub = onSnapshot(ref, (snap)=>{
-            const data = snap.exists()? snap.data() : null;
-            const dot = document.getElementById(`presence-dot-${partnerId}`);
-            const active = isActiveFromData(data);
-            if(dot){ if(active){ dot.classList.add('online'); } else { dot.classList.remove('online'); } }
+          const unsubscribeThread = onSnapshot(threadRef, (snap)=>{
+            if(!snap.exists()) return;
+            const data = snap.data() || {};
+            const idx = allThreads.findIndex(entry=>entry.id===t.id);
+            if(idx>=0){
+              allThreads[idx] = {
+                ...allThreads[idx],
+                lastMessage: data.lastMessage || allThreads[idx].lastMessage,
+                updatedAt: data.updatedAt || allThreads[idx].updatedAt
+              };
+              renderConversationsList(convSearch.value || '');
+            }
           },()=>{});
-          presenceUnsubs.set(partnerId, unsub);
+          threadMetaUnsubs.set(t.id, unsubscribeThread);
         }catch(_){ }
       });
     }
