@@ -998,6 +998,12 @@
     function playCallerTone(){ try{ if(!callerTone){ callerTone = new Audio(callerToneUrl); callerTone.loop = true; callerTone.preload = 'auto'; } callerTone.currentTime = 0; callerTone.play().catch(()=>{}); }catch(_){} }
     function stopCallerTone(){ try{ if(callerTone){ callerTone.pause(); callerTone.currentTime = 0; } }catch(_){} }
 
+    // Incoming ringing tone
+    const ringToneUrl = 'https://cdn.builder.io/o/assets%2Ffc8049673cdb4f1597f82a1bce1a2e4f%2Ffbb458d4209b4838bc22e09868e15ea5?alt=media&token=00dd6cb7-8ba0-4025-a326-01e76a2a5df8&apiKey=fc8049673cdb4f1597f82a1bce1a2e4f';
+    let ringTone = null;
+    function playRingTone(){ try{ if(!ringTone){ ringTone = new Audio(ringToneUrl); ringTone.loop = true; ringTone.preload = 'auto'; } ringTone.currentTime = 0; ringTone.play().catch(()=>{}); }catch(_){} }
+    function stopRingTone(){ try{ if(ringTone){ ringTone.pause(); ringTone.currentTime = 0; } }catch(_){} }
+
     const iceServers = { iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },
       { urls: 'stun:stun1.l.google.com:19302' },
@@ -1054,6 +1060,7 @@
       clearInterval(callDurationInterval);
       clearTimeout(callTimeoutId);
       stopCallerTone();
+      stopRingTone();
       if (peerConnection){ try{ peerConnection.close(); }catch(_){} peerConnection=null; }
       if (localStream){ try{ localStream.getTracks().forEach(t=>t.stop()); }catch(_){} localStream=null; }
       if (remoteStream){ try{ remoteStream.getTracks().forEach(t=>t.stop()); }catch(_){} remoteStream=null; }
@@ -1171,6 +1178,7 @@
       if (!callRef || callState!=='ringing') return;
       try{
         stopCallerTone();
+        stopRingTone();
         callState = 'connected';
         callTimerDisplay.style.display = 'block';
         acceptCallBtn.style.display = 'none';
@@ -1221,6 +1229,7 @@
 
     function declineIncomingCall(){
       if (!callRef) return;
+      stopRingTone();
       updateDoc(callRef, { status:'declined', lastActivity: serverTimestamp() }).catch(()=>{}).finally(()=> endCall(false));
     }
 
@@ -1252,6 +1261,7 @@
         callState = 'ringing';
         currentCallType = (d.data().callType === 'video') ? 'video' : 'voice';
         setOverlayFor(currentCallType, `Incoming ${currentCallType} call…`);
+        playRingTone();
         acceptCallBtn.style.display = 'block';
         declineCallBtn.style.display = 'block';
         if (cancelCallBtn) cancelCallBtn.style.display = 'none';
