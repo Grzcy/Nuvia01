@@ -63,12 +63,12 @@
     .sidebar-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);backdrop-filter:blur(4px);opacity:0;visibility:hidden;transition:opacity .25s ease;z-index:85}
     .sidebar-backdrop.show{opacity:1;visibility:visible}
 
-    main{max-width:1100px;margin:0 auto;padding:18px;padding-top:73px}
+    main{max-width:1200px;margin:0 auto;padding:18px;padding-top:73px}
 
     /* Chat layout */
-    .chat-layout{display:grid;gap:14px;min-height:calc(100dvh - 110px)}
-    .chat-layout{grid-template-columns:1fr}
-    @media (min-width:1000px){.chat-layout{grid-template-columns:360px 1fr}}
+    .chat-layout{display:grid;gap:14px;min-height:calc(100dvh - 110px);grid-template-columns:1fr}
+    @media (min-width:860px){.chat-layout{grid-template-columns:340px 1fr}}
+    @media (min-width:1080px){.chat-layout{grid-template-columns:380px 1fr}}
 
     .panel{background:var(--card-background);border:1px solid var(--glass-blue);backdrop-filter:blur(10px) saturate(180%);border-radius:16px;box-shadow:0 8px 25px rgba(0,0,0,.3)}
 
@@ -76,7 +76,7 @@
     .conversations-panel{display:flex;flex-direction:column;height:calc(100dvh - 120px);min-height:60vh}
     .list-toolbar{display:flex;align-items:center;gap:8px;padding:10px;border-bottom:1px solid var(--border-light)}
     .search-input{flex:1 1 auto;padding:10px 12px;border-radius:12px;border:1px solid var(--border-light);background:var(--input-background);color:var(--white);outline:none}
-    .conversation-list{display:flex;flex-direction:column;gap:8px;padding:10px;flex:1 1 auto;max-height:none;overflow:auto}
+    .conversation-list{display:flex;flex-direction:column;gap:8px;padding:10px;flex:1 1 auto;overflow:auto}
     .conversation-item{display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;border:1px solid var(--border-light);background:rgba(255,255,255,.03);cursor:pointer}
     .conversation-item:hover{background:rgba(255,255,255,.08)}
     .conv-avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--blue)}
@@ -94,6 +94,7 @@
     .messages-panel{display:none;flex-direction:column;height:calc(100dvh - 120px);min-height:60vh}
     body.show-chat .messages-panel{display:flex}
     body.show-chat .conversations-panel{display:none}
+    @media (min-width:860px){body.show-chat .messages-panel{display:flex} body.show-chat .conversations-panel{display:flex}}
     .chat-header{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid var(--border-light)}
     .chat-title{font-family:Poppins,sans-serif;font-weight:800;margin:0}
     .chat-scroll{flex:1 1 auto;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
@@ -271,8 +272,11 @@
     let allThreads = [];
     const presenceUnsubs = new Map();
 
-    function getQueryParam(k){ try{ return new URL(window.location.href).searchParams.get(k); }catch(_){ return null; } }
+    const PRESENCE_STALE_MS = 45000;
+    function tsToMs(ts){ try{ if(!ts) return 0; if(typeof ts.toMillis === 'function') return ts.toMillis(); if(typeof ts === 'number') return ts; if(ts.seconds) return ts.seconds*1000; const d = new Date(ts); const ms = d.getTime(); return isFinite(ms)? ms : 0; }catch(_){ return 0; } }
+    function isActiveFromData(data){ try{ const online = Boolean(data && data.online); const last = tsToMs(data && data.lastActive); if(!online) return false; if(!last) return false; return (Date.now() - last) <= PRESENCE_STALE_MS; }catch(_){ return false; } }
 
+    function getQueryParam(k){ try{ return new URL(window.location.href).searchParams.get(k); }catch(_){ return null; } }
     function makeThreadId(a, b){ const x=(a||'').toString(); const y=(b||'').toString(); return x<y?`${x}_${y}`:`${y}_${x}`; }
 
     async function fetchUserProfile(uid){
@@ -296,10 +300,11 @@
       const avatar = t.partner?.profilePicId ? getCloudinaryImageUrl(t.partner.profilePicId,'w_90,h_90,c_fill,g_face,r_max') : '';
       const presenceId = `presence-dot-${partnerId}`;
       const lastText = t.lastMessage?.text ? t.lastMessage.text : '';
+      const active = isActiveFromData(t.partner);
       el.innerHTML = `
         <div class="presence-wrapper">
           ${avatar?`<img class=\"conv-avatar\" src=\"${avatar}\" alt=\"${name}\">`:`<img class=\"conv-avatar\" alt=\"${name}\" src=\"https://placehold.co/44x44/CCCCCC/000000?text=${encodeURIComponent(initial)}\">`}
-          <span class="presence-dot ${t.partner?.online ? 'online' : ''}" id="${presenceId}" aria-hidden="true"></span>
+          <span class="presence-dot ${active ? 'online' : ''}" id="${presenceId}" aria-hidden="true"></span>
         </div>
         <div style="flex:1 1 auto;min-width:0">
           <p class="conv-title">${name}</p>
@@ -343,25 +348,17 @@
           const unsub = onSnapshot(ref, (snap)=>{
             const data = snap.exists()? snap.data() : null;
             const dot = document.getElementById(`presence-dot-${partnerId}`);
-            if(dot){ if(data && data.online){ dot.classList.add('online'); } else { dot.classList.remove('online'); } }
+            const active = isActiveFromData(data);
+            if(dot){ if(active){ dot.classList.add('online'); } else { dot.classList.remove('online'); } }
           },()=>{});
           presenceUnsubs.set(partnerId, unsub);
         }catch(_){ }
       });
     }
 
-    function scrollToBottom(){ try{ messagesScroll.scrollTop = messagesScroll.scrollHeight + 200; }catch(_){} }
+    function scrollToBottom(){ try{ messagesScroll.scrollTop = messagesScroll.scrollHeight + 200; }catch(_){ } }
 
-    function renderMessage(m){
-      const mine = m.senderId === currentUser.uid;
-      const row = document.createElement('div');
-      row.className = 'bubble-row' + (mine ? ' mine' : '');
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble' + (mine ? ' mine' : '');
-      bubble.textContent = m.text || '';
-      row.appendChild(bubble);
-      messagesScroll.appendChild(row);
-    }
+    function renderMessage(m){ const mine = m.senderId === currentUser.uid; const row = document.createElement('div'); row.className = 'bubble-row' + (mine ? ' mine' : ''); const bubble = document.createElement('div'); bubble.className = 'bubble' + (mine ? ' mine' : ''); bubble.textContent = m.text || ''; row.appendChild(bubble); messagesScroll.appendChild(row); }
 
     function setChatPresence(online){ if(!chatPresence) return; chatPresence.style.display=''; chatPresence.textContent=online? 'Online':'Offline'; chatPresence.classList.toggle('online', !!online); }
 
@@ -372,10 +369,10 @@
       const partner = partnerId ? await fetchUserProfile(partnerId) : null;
       chatTitle.textContent = partner?.username || 'Chat';
       displayProfilePicture(chatPartnerAvatar, chatPartnerIcon, partner?.profilePicId || null, (partner?.username||'U').charAt(0).toUpperCase(), 'w_90,h_90,c_fill,g_face,r_max');
-      setChatPresence(!!partner?.online);
+      setChatPresence(isActiveFromData(partner));
       try{
         const pref = doc(db,'artifacts',appId,'public','data','users', partnerId);
-        partnerPresenceUnsub = onSnapshot(pref, (snap)=>{ const data = snap.exists()? snap.data() : null; setChatPresence(Boolean(data && data.online)); }, ()=>{});
+        partnerPresenceUnsub = onSnapshot(pref, (snap)=>{ const data = snap.exists()? snap.data() : null; setChatPresence(isActiveFromData(data)); }, ()=>{});
       }catch(_){ }
 
       messagesScroll.innerHTML = '';
