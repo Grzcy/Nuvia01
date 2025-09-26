@@ -291,6 +291,9 @@
     let partnerPresenceUnsub = null;
     let allThreads = [];
     const presenceUnsubs = new Map();
+    const threadMetaUnsubs = new Map();
+    const READ_STORAGE_KEY = 'nuvia_chat_reads';
+    let readState = {};
 
     const PRESENCE_STALE_MS = 45000;
     function tsToMs(ts){ try{ if(!ts) return 0; if(typeof ts.toMillis === 'function') return ts.toMillis(); if(typeof ts === 'number') return ts; if(ts.seconds) return ts.seconds*1000; const d = new Date(ts); const ms = d.getTime(); return isFinite(ms)? ms : 0; }catch(_){ return 0; } }
