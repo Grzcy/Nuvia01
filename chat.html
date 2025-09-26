@@ -161,14 +161,7 @@
     <div class="header-content-wrapper">
       <button id="sidebarToggleFab" aria-label="Toggle Navigation"><i class="fas fa-bars"></i></button>
       <a href="/index.html" class="logo"><span>Nuvia</span></a>
-      <div class="user-profile-header" style="display:flex;align-items:center;gap:10px">
-        <div class="notification-icon-wrapper">
-          <a href="/notifications.html" id="notificationToggle" aria-label="Notifications">
-            <i class="fas fa-bell"></i>
-            <span class="notification-badge" id="notificationCount">0</span>
-          </a>
-        </div>
-      </div>
+      <div class="user-profile-header" style="display:flex;align-items:center;gap:10px"></div>
     </div>
   </header>
 
@@ -215,15 +208,9 @@
           <i id="chatPartnerIcon" class="fas fa-user-circle" style="font-size:40px;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent"></i>
           <div>
             <h3 id="chatTitle" class="chat-title"></h3>
-            <div id="chatSubtitle" class="conv-sub"></div>
           </div>
         </div>
         <div id="messagesScroll" class="chat-scroll"></div>
-        <form id="composerForm" class="composer">
-          <button id="emojiBtn" class="icon-button" type="button" aria-label="Emoji"><i class="far fa-face-smile"></i></button>
-          <input id="messageInput" class="composer-input" type="text" placeholder="Type a message" autocomplete="off" aria-label="Type a message" />
-          <button id="sendBtn" class="send-btn" type="submit" aria-label="Send"><i class="fas fa-paper-plane"></i>&nbsp;<span>Send</span></button>
-        </form>
       </section>
     </div>
   </main>
@@ -260,8 +247,6 @@
     const newChatBtn = document.getElementById('newChatBtn');
 
     const messagesScroll = document.getElementById('messagesScroll');
-    const composerForm = document.getElementById('composerForm');
-    const messageInput = document.getElementById('messageInput');
 
     const chatTitle = document.getElementById('chatTitle');
     const chatSubtitle = document.getElementById('chatSubtitle');
@@ -381,7 +366,6 @@
       currentThreadId = threadId; currentPartnerId = partnerId;
       const partner = partnerId ? await fetchUserProfile(partnerId) : null;
       chatTitle.textContent = partner?.username || 'Chat';
-      chatSubtitle.textContent = partnerId;
       displayProfilePicture(chatPartnerAvatar, chatPartnerIcon, partner?.profilePicId || null, (partner?.username||'U').charAt(0).toUpperCase(), 'w_90,h_90,c_fill,g_face,r_max');
       messagesScroll.innerHTML = '';
       const col = collection(db,'artifacts',appId,'public','data','dm_threads', threadId, 'messages');
@@ -401,12 +385,6 @@
       await updateDoc(ref, { updatedAt: serverTimestamp(), lastMessage: { text: text.trim(), senderId: currentUser.uid, ts: serverTimestamp() } });
     }
 
-    composerForm.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      const t = messageInput.value || '';
-      if(!t.trim()) return;
-      try{ await sendMessage(t); messageInput.value=''; scrollToBottom(); }catch(err){ console.error(err); showToast('Failed to send','error'); }
-    });
 
     convSearch.addEventListener('input', ()=>{
       const q = (convSearch.value||'').trim();
