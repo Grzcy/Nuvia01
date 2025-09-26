@@ -162,6 +162,23 @@
     .image-viewer-overlay img{width:auto;height:auto;max-width:98vw;max-height:96vh;object-fit:contain;border-radius:16px;border:1px solid var(--border-light);box-shadow:0 8px 25px rgba(0,0,0,.5);background:var(--card-background)}
     .image-viewer-close{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border-light);background:rgba(255,255,255,.06);color:var(--white);cursor:pointer}
     .image-viewer-close:hover{background:rgba(255,255,255,.12)}
+  /* Call overlay styles */
+    #callOverlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:2000;background:rgba(0,0,0,.75);backdrop-filter:blur(6px)}
+    #callOverlay.active{display:flex}
+    #callOverlay .video-streams{position:relative;width:min(960px,92vw);height:min(540px,52vh);background:var(--card-background);border:1px solid var(--border-light);border-radius:16px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.45);margin-bottom:12px}
+    #remoteVideo{width:100%;height:100%;object-fit:cover;display:none}
+    #localVideo{position:absolute;right:10px;bottom:10px;width:160px;height:90px;object-fit:cover;border-radius:10px;border:1px solid var(--border-light);display:none}
+    #callOverlay.voice-call .video-streams{display:none}
+    #callOverlay .call-status{text-align:center;color:var(--white);margin-bottom:10px}
+    #callOverlay .call-status-icon{font-size:3rem;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+    #callOverlay .call-status-text{margin:6px 0;font-weight:800;font-family:Poppins,sans-serif}
+    #callOverlay .call-timer{font-weight:700;opacity:.85}
+    #callOverlay .call-actions{display:flex;gap:10px;justify-content:center}
+    #callOverlay .call-actions button{width:56px;height:56px;border-radius:50%;border:1px solid var(--border-light);background:rgba(255,255,255,.1);color:var(--white);cursor:pointer}
+    #callOverlay .call-actions .accept-call-btn{background:linear-gradient(135deg,#2ed573,#1dd1a1);border:0}
+    #callOverlay .call-actions .decline-call-btn,#callOverlay .call-actions .end-call-btn{background:linear-gradient(135deg,#ff4757,#ff3838);border:0}
+    #callOverlay .call-actions .toggle-mute-btn.active,#callOverlay .call-actions .toggle-video-btn.active{background:rgba(255,255,255,.25)}
+    .chat-call-actions{display:inline-flex;gap:8px;margin-left:auto}
   </style>
 
   <script>
@@ -249,6 +266,10 @@
           <i id="chatPartnerIcon" class="fas fa-user-circle chat-partner-icon"></i>
           <div>
             <h3 id="chatTitle" class="chat-title"></h3>
+          </div>
+          <div class="chat-call-actions">
+            <button id="audioCallBtn" class="icon-button" title="Voice call" aria-label="Voice call"><i class="fas fa-phone"></i></button>
+            <button id="videoCallBtn" class="icon-button" title="Video call" aria-label="Video call"><i class="fas fa-video"></i></button>
           </div>
           <span id="chatPresence" class="presence-pill chat-presence is-hidden" aria-live="polite" aria-atomic="true"></span>
           <span id="chatLastSeen" class="presence-pill is-hidden" aria-live="polite"></span>
@@ -625,7 +646,7 @@
       if(chatPresence){ chatPresence.classList.add('is-hidden'); chatPresence.textContent=''; chatPresence.classList.remove('online'); chatPresence.classList.remove('typing'); }
       try{ if(lastSeenTimer){ clearInterval(lastSeenTimer); lastSeenTimer=null; } }catch(_){}
       partnerLastActiveMs = 0;
-      currentThreadId = threadId; currentPartnerId = partnerId; markThreadAsRead(threadId, Date.now()); partnerLastActiveMs = 0;
+      currentThreadId = threadId; currentPartnerId = partnerId; try{ window.__currentPartnerId = partnerId; }catch(_){ } markThreadAsRead(threadId, Date.now()); partnerLastActiveMs = 0;
       const partner = partnerId ? await fetchUserProfile(partnerId) : null;
       chatTitle.textContent = partner?.username || 'Chat';
       partnerLastActiveMs = partner && partner.lastActive ? tsToMs(partner.lastActive) : 0;
@@ -780,6 +801,324 @@
         });
       }catch(e){console.error('JCHAT_ERROR startPagePresence', e);} }
     startPagePresence();
+  </script>
+
+  <!-- Call Overlay -->
+  <div id="callOverlay" role="dialog" aria-modal="true" aria-labelledby="callStatusText">
+    <div class="video-streams">
+      <video id="remoteVideo" autoplay playsinline></video>
+      <video id="localVideo" autoplay playsinline muted></video>
+    </div>
+    <div class="call-status">
+      <i id="callStatusIcon" class="fas fa-phone call-status-icon"></i>
+      <h2 id="callStatusText" class="call-status-text">Preparing call…</h2>
+      <div id="callTimer" class="call-timer" style="display:none;">00:00</div>
+    </div>
+    <div class="call-actions" id="callActions">
+      <button id="acceptCallBtn" class="accept-call-btn" style="display:none;" aria-label="Accept Call"><i class="fas fa-phone"></i></button>
+      <button id="declineCallBtn" class="decline-call-btn" style="display:none;" aria-label="Decline Call"><i class="fas fa-phone-slash"></i></button>
+      <button id="toggleMuteBtn" class="toggle-mute-btn" style="display:none;" title="Mute/Unmute" aria-label="Toggle Mute"><i class="fas fa-microphone"></i></button>
+      <button id="toggleVideoBtn" class="toggle-video-btn" style="display:none;" title="Turn Video On/Off" aria-label="Toggle Video"><i class="fas fa-video"></i></button>
+      <button id="endCallBtn" class="end-call-btn" style="display:none;" aria-label="End Call"><i class="fas fa-phone-slash"></i></button>
+    </div>
+  </div>
+
+  <script type="module">
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, doc, getDoc, onSnapshot, updateDoc, serverTimestamp, query, where, arrayUnion } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+
+    const appId = (typeof window !== 'undefined' && window.__nuviaAppId) ? window.__nuviaAppId : (typeof __app_id !== 'undefined' ? __app_id : 'default-app-id');
+    const auth = getAuth();
+    const db = getFirestore();
+
+    const audioCallBtn = document.getElementById('audioCallBtn');
+    const videoCallBtn = document.getElementById('videoCallBtn');
+    const callOverlay = document.getElementById('callOverlay');
+    const callStatusIcon = document.getElementById('callStatusIcon');
+    const callStatusText = document.getElementById('callStatusText');
+    const callTimerDisplay = document.getElementById('callTimer');
+    const acceptCallBtn = document.getElementById('acceptCallBtn');
+    const declineCallBtn = document.getElementById('declineCallBtn');
+    const endCallBtn = document.getElementById('endCallBtn');
+    const toggleMuteBtn = document.getElementById('toggleMuteBtn');
+    const toggleVideoBtn = document.getElementById('toggleVideoBtn');
+    const localVideo = document.getElementById('localVideo');
+    const remoteVideo = document.getElementById('remoteVideo');
+
+    let localStream = null;
+    let remoteStream = null;
+    let peerConnection = null;
+    let callRef = null;
+    let callState = 'idle';
+    let isIncomingCall = false;
+    let currentCallType = null;
+    let callDuration = 0;
+    let callDurationInterval = null;
+    let callTimeoutId = null;
+    let isMuted = false;
+    let isVideoOff = false;
+    let currentUser = null;
+
+    const iceServers = { iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' },
+      { urls: 'stun:stun2.l.google.com:19302' },
+      { urls: 'stun:stun3.l.google.com:19302' },
+      { urls: 'stun:stun4.l.google.com:19302' }
+    ]};
+
+    function createPeerConnection(){
+      const pc = new RTCPeerConnection(iceServers);
+      pc.onicecandidate = (event) => {
+        if (event.candidate && callRef) {
+          const cand = JSON.parse(JSON.stringify(event.candidate));
+          if (isIncomingCall) {
+            updateDoc(callRef, { receiverCandidates: arrayUnion(cand) }).catch(()=>{});
+          } else {
+            updateDoc(callRef, { callerCandidates: arrayUnion(cand) }).catch(()=>{});
+          }
+        }
+      };
+      pc.ontrack = (event) => {
+        if (event.streams && event.streams[0]) {
+          remoteVideo.srcObject = event.streams[0];
+          remoteVideo.style.display = 'block';
+          remoteStream = event.streams[0];
+        } else {
+          if (!remoteStream) {
+            remoteStream = new MediaStream();
+            remoteVideo.srcObject = remoteStream;
+            remoteVideo.style.display = 'block';
+          }
+          remoteStream.addTrack(event.track);
+        }
+      };
+      return pc;
+    }
+
+    function resetOverlay(){
+      callOverlay.classList.remove('active','voice-call','video-call');
+      callStatusIcon.style.animation = 'none';
+      callTimerDisplay.textContent = '00:00';
+      callTimerDisplay.style.display = 'none';
+      acceptCallBtn.style.display = 'none';
+      declineCallBtn.style.display = 'none';
+      endCallBtn.style.display = 'none';
+      toggleMuteBtn.style.display = 'none';
+      toggleVideoBtn.style.display = 'none';
+      localVideo.style.display = 'none';
+      remoteVideo.style.display = 'none';
+    }
+
+    async function endCall(updateFirestore = true){
+      clearInterval(callDurationInterval);
+      clearTimeout(callTimeoutId);
+      if (peerConnection){ try{ peerConnection.close(); }catch(_){} peerConnection=null; }
+      if (localStream){ try{ localStream.getTracks().forEach(t=>t.stop()); }catch(_){} localStream=null; }
+      if (remoteStream){ try{ remoteStream.getTracks().forEach(t=>t.stop()); }catch(_){} remoteStream=null; }
+      localVideo.srcObject = null;
+      remoteVideo.srcObject = null;
+      if (updateFirestore && callRef){ try{ await updateDoc(callRef, { status: 'ended', lastActivity: serverTimestamp() }); }catch(_){ } }
+      try{ if (currentUser){ await updateDoc(doc(db,'artifacts',appId,'public','data','users', currentUser.uid), { inCall:false }); } }catch(_){ }
+      callRef = null;
+      callState = 'idle';
+      isIncomingCall = false;
+      callDuration = 0;
+      resetOverlay();
+    }
+
+    function updateTimer(){
+      callDuration++;
+      const m = Math.floor(callDuration/60).toString().padStart(2,'0');
+      const s = (callDuration%60).toString().padStart(2,'0');
+      callTimerDisplay.textContent = `${m}:${s}`;
+    }
+
+    function setOverlayFor(type, text){
+      callOverlay.classList.add('active');
+      callOverlay.classList.remove('voice-call','video-call');
+      callOverlay.classList.add(type==='voice'?'voice-call':'video-call');
+      callStatusIcon.className = `fas fa-${type==='voice'?'phone':'video'} call-status-icon`;
+      callStatusText.textContent = text || '';
+    }
+
+    async function startOutgoingCall(callType){
+      if (!currentUser) return;
+      const partnerId = window.__currentPartnerId || (new URL(location.href).searchParams.get('partnerId')||'');
+      if (!partnerId) return;
+      try{
+        currentCallType = callType;
+        callState = 'calling';
+        isIncomingCall = false;
+        setOverlayFor(callType, `Calling…`);
+        const profileSnap = await getDoc(doc(db,'artifacts',appId,'public','data','users', partnerId)).catch(()=>null);
+        const partnerName = profileSnap && profileSnap.exists()? (profileSnap.data().username || 'User') : 'User';
+        callStatusText.textContent = `Calling ${partnerName}…`;
+
+        try{ await updateDoc(doc(db,'artifacts',appId,'public','data','users', currentUser.uid), { inCall:true }); }catch(_){ }
+
+        peerConnection = createPeerConnection();
+        localStream = await navigator.mediaDevices.getUserMedia({ audio:true, video: callType==='video' });
+        localVideo.srcObject = localStream;
+        if (callType==='video'){ localVideo.style.display='block'; }
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+        const callsCol = collection(db,'artifacts',appId,'public','data','calls');
+        callRef = await addDoc(callsCol, {
+          callerId: currentUser.uid,
+          receiverId: partnerId,
+          callType: callType,
+          status: 'ringing',
+          createdAt: serverTimestamp(),
+          lastActivity: serverTimestamp(),
+          callerCandidates: [],
+          receiverCandidates: []
+        });
+
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        await updateDoc(callRef, { offer: { type: offer.type, sdp: offer.sdp } });
+
+        onSnapshot(callRef, async (docSnap)=>{
+          if (!docSnap.exists()) { await endCall(false); return; }
+          const data = docSnap.data();
+          if (data.status === 'declined' || data.status === 'busy' || data.status === 'no-answer') { await endCall(false); return; }
+          if (data.answer && !peerConnection.currentRemoteDescription){
+            try{
+              await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+              callState = 'connected';
+              callStatusText.textContent = `Call connected`;
+              callTimerDisplay.style.display = 'block';
+              endCallBtn.style.display = 'block';
+              toggleMuteBtn.style.display = 'block';
+              toggleVideoBtn.style.display = (callType==='video') ? 'block' : 'none';
+              clearInterval(callDurationInterval);
+              callDurationInterval = setInterval(updateTimer, 1000);
+            }catch(_){}
+          }
+          if (Array.isArray(data.receiverCandidates) && data.receiverCandidates.length){
+            for (const c of data.receiverCandidates){
+              try{ await peerConnection.addIceCandidate(new RTCIceCandidate(c)); }catch(_){}
+            }
+            try{ await updateDoc(callRef, { receiverCandidates: [] }); }catch(_){}
+          }
+          if (data.status === 'ended' && callState !== 'idle'){ await endCall(false); }
+        });
+
+        callTimeoutId = setTimeout(async ()=>{
+          if (callState === 'calling'){
+            try{ await updateDoc(callRef, { status:'no-answer', lastActivity: serverTimestamp() }); }catch(_){}
+            await endCall(false);
+          }
+        }, 20000);
+
+      }catch(e){
+        await endCall(false);
+      }
+    }
+
+    async function acceptIncomingCall(){
+      if (!callRef || callState!=='ringing') return;
+      try{
+        callState = 'connected';
+        callTimerDisplay.style.display = 'block';
+        endCallBtn.style.display = 'block';
+        toggleMuteBtn.style.display = 'block';
+        toggleVideoBtn.style.display = (currentCallType==='video') ? 'block' : 'none';
+        clearInterval(callDurationInterval);
+        callDurationInterval = setInterval(updateTimer, 1000);
+
+        localStream = await navigator.mediaDevices.getUserMedia({ audio:true, video: currentCallType==='video' });
+        localVideo.srcObject = localStream;
+        if (currentCallType==='video'){ localVideo.style.display='block'; }
+
+        try{ await updateDoc(doc(db,'artifacts',appId,'public','data','users', currentUser.uid), { inCall:true }); }catch(_){ }
+
+        peerConnection = createPeerConnection();
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+        const callDoc = await getDoc(callRef);
+        const callData = callDoc.data();
+
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(callData.offer));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        await updateDoc(callRef, { status:'accepted', answer: { type: answer.type, sdp: answer.sdp }, lastActivity: serverTimestamp() });
+
+        if (Array.isArray(callData.callerCandidates) && callData.callerCandidates.length){
+          for (const c of callData.callerCandidates){ try{ await peerConnection.addIceCandidate(new RTCIceCandidate(c)); }catch(_){ } }
+          try{ await updateDoc(callRef, { callerCandidates: [] }); }catch(_){}
+        }
+
+        onSnapshot(callRef, async (docSnap)=>{
+          if (!docSnap.exists()) { await endCall(false); return; }
+          const data = docSnap.data();
+          if (Array.isArray(data.callerCandidates) && data.callerCandidates.length){
+            for (const c of data.callerCandidates){ try{ await peerConnection.addIceCandidate(new RTCIceCandidate(c)); }catch(_){ } }
+            try{ await updateDoc(callRef, { callerCandidates: [] }); }catch(_){}
+          }
+          if (data.status === 'ended' && callState !== 'idle'){ await endCall(false); }
+        });
+
+      }catch(e){
+        await endCall(true);
+      }
+    }
+
+    function declineIncomingCall(){
+      if (!callRef) return;
+      updateDoc(callRef, { status:'declined', lastActivity: serverTimestamp() }).catch(()=>{}).finally(()=> endCall(false));
+    }
+
+    function toggleMute(){
+      if (localStream){
+        localStream.getAudioTracks().forEach(t => { t.enabled = !t.enabled; isMuted = !t.enabled; });
+        toggleMuteBtn.classList.toggle('active', isMuted);
+        const i = toggleMuteBtn.querySelector('i'); if (i) i.className = isMuted ? 'fas fa-microphone-slash' : 'fas fa-microphone';
+      }
+    }
+
+    function toggleVideo(){
+      if (localStream){
+        localStream.getVideoTracks().forEach(t => { t.enabled = !t.enabled; isVideoOff = !t.enabled; localVideo.style.display = t.enabled ? 'block' : 'none'; });
+        toggleVideoBtn.classList.toggle('active', isVideoOff);
+        const i = toggleVideoBtn.querySelector('i'); if (i) i.className = isVideoOff ? 'fas fa-video-slash' : 'fas fa-video';
+      }
+    }
+
+    function startIncomingListenerForCurrentChat(partnerId){
+      if (!partnerId) return;
+      const callsCol = collection(db,'artifacts',appId,'public','data','calls');
+      const q = query(callsCol, where('receiverId','==', currentUser.uid), where('status','==','ringing'), where('callerId','==', partnerId));
+      onSnapshot(q, async (snap)=>{
+        if (snap.empty) return;
+        const d = snap.docs[0];
+        callRef = d.ref;
+        isIncomingCall = true;
+        callState = 'ringing';
+        currentCallType = (d.data().callType === 'video') ? 'video' : 'voice';
+        setOverlayFor(currentCallType, `Incoming ${currentCallType} call…`);
+        acceptCallBtn.style.display = 'block';
+        declineCallBtn.style.display = 'block';
+        endCallBtn.style.display = 'none';
+        toggleMuteBtn.style.display = 'none';
+        toggleVideoBtn.style.display = 'none';
+      });
+    }
+
+    if (audioCallBtn) audioCallBtn.addEventListener('click', ()=> startOutgoingCall('voice'));
+    if (videoCallBtn) videoCallBtn.addEventListener('click', ()=> startOutgoingCall('video'));
+    if (acceptCallBtn) acceptCallBtn.addEventListener('click', acceptIncomingCall);
+    if (declineCallBtn) declineCallBtn.addEventListener('click', declineIncomingCall);
+    if (endCallBtn) endCallBtn.addEventListener('click', ()=> endCall(true));
+    if (toggleMuteBtn) toggleMuteBtn.addEventListener('click', toggleMute);
+    if (toggleVideoBtn) toggleVideoBtn.addEventListener('click', toggleVideo);
+
+    onAuthStateChanged(auth, (user)=>{
+      currentUser = user || null;
+      const pid = window.__currentPartnerId || (new URL(location.href).searchParams.get('partnerId')||'');
+      if (user && pid) startIncomingListenerForCurrentChat(pid);
+    });
   </script>
 
   <script type="module" src="nuvia-global-call-service.js" defer></script>
