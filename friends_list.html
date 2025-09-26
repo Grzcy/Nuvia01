@@ -839,6 +839,18 @@
             align-items: center;
             justify-content: center;
         }
+        .friend-item .typing-badge {
+            background-color: rgba(0, 213, 255, 0.2);
+            color: var(--white);
+            border: 1px solid rgba(0, 213, 255, 0.35);
+            border-radius: 999px;
+            padding: 2px 8px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-align: center;
+            margin-right: 8px;
+            display: none;
+        }
 
 
         /* Responsive Adjustments */
@@ -1378,6 +1390,19 @@
         function getChatRoomId(uid1, uid2) {
             return uid1 < uid2 ? `${uid1}_${uid2}` : `${uid2}_${uid1}`;
         }
+        function subscribeFriendTyping(friendId){
+            try{
+                const threadId = getChatRoomId(currentUser.uid, friendId);
+                const typingRef = doc(db, 'artifacts', appId, 'public', 'data', 'dm_threads', threadId, 'typing', friendId);
+                const unsub = onSnapshot(typingRef, (snap)=>{
+                    const data = snap.exists()? snap.data(): null;
+                    const fresh = data && data.active && data.updatedAt && (Date.now() - (data.updatedAt?.toDate ? data.updatedAt.toDate().getTime() : (data.updatedAt.seconds? data.updatedAt.seconds*1000 : 0))) <= 6000;
+                    const el = document.querySelector(`[data-typing-id="${friendId}"]`);
+                    if(el){ el.style.display = fresh ? 'inline-flex' : 'none'; }
+                }, ()=>{});
+                unsubscribeAllFriendUnreadListeners.push(unsub);
+            }catch(_){ }
+        }
 
         /**
          * Renders the list of current friends.
@@ -1422,6 +1447,7 @@
                         <p>Friend since: ${new Date(friend.addedAt?.toDate ? friend.addedAt.toDate() : friend.addedAt).toLocaleDateString()}</p>
                     </div>
                     <div class="friend-actions">
+                        <span class="typing-badge" data-typing-id="${friend.userId}" style="display:none;">Typing…</span>
                         <span class="message-badge" style="display: ${unreadCount > 0 ? 'flex' : 'none'};">
                             ${unreadCount}
                         </span>
@@ -1445,6 +1471,7 @@
                 });
 
                 friendsList.appendChild(friendItem);
+                subscribeFriendTyping(friend.userId);
             }
         }
 
