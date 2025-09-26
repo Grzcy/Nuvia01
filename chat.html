@@ -299,6 +299,20 @@
     function tsToMs(ts){ try{ if(!ts) return 0; if(typeof ts.toMillis === 'function') return ts.toMillis(); if(typeof ts === 'number') return ts; if(ts.seconds) return ts.seconds*1000; const d = new Date(ts); const ms = d.getTime(); return isFinite(ms)? ms : 0; }catch(_){ return 0; } }
     function isActiveFromData(data){ try{ const online = Boolean(data && data.online); const last = tsToMs(data && data.lastActive); if(!online) return false; if(!last) return false; return (Date.now() - last) <= PRESENCE_STALE_MS; }catch(_){ return false; } }
 
+    function escapeHtml(value){
+      if(value === null || value === undefined) return '';
+      return value.toString().replace(/[&<>"]|'/g, (char)=>{
+        switch(char){
+          case '&': return '&amp;';
+          case '<': return '&lt;';
+          case '>': return '&gt;';
+          case '"': return '&quot;';
+          case "'": return '&#39;';
+          default: return char;
+        }
+      });
+    }
+
     function getQueryParam(k){ try{ return new URL(window.location.href).searchParams.get(k); }catch(_){ return null; } }
     function makeThreadId(a, b){ const x=(a||'').toString(); const y=(b||'').toString(); return x<y?`${x}_${y}`:`${y}_${x}`; }
 
