@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Nuvia - Chat</title>
+  <meta property="og:title" content="Nuvia - Chat">
+  <meta property="og:description" content="Private messages with friends on Nuvia.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://nuvia.app/chat.html">
+  <meta property="og:site_name" content="Nuvia">
+  <meta property="og:image" content="https://cdn.builder.io/api/v1/image/assets%2Faaaa97254b5c4256a69bb9a7bf91885c%2F9ed0b590d93440a085bb243bd84ed163?format=png&width=1200">
+  <meta property="og:image:alt" content="Nuvia logo">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Nuvia - Chat">
+  <meta name="twitter:description" content="Private messages with friends on Nuvia.">
+  <meta name="twitter:image" content="https://cdn.builder.io/api/v1/image/assets%2Faaaa97254b5c4256a69bb9a7bf91885c%2F9ed0b590d93440a085bb243bd84ed163?format=png&width=1200">
+  <link rel="canonical" href="https://nuvia.app/chat.html" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="theme-color" content="#1a1a2e" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://firebaseio.com" crossorigin />
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" onload="this.rel='stylesheet'" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /></noscript>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" defer crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="/assets/js/share-utils.js" defer></script>
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box}
+    :root{
+      --pink:#ff2e92;--blue:#00d5ff;--glass-black:rgba(10,10,10,.75);--glass-blue:rgba(0,213,255,.15);--radius:20px;--transition:.3s ease;
+      --white:#fff;--text-light:rgba(255,255,255,.7);--background-main:rgba(10,10,10,.75);
+      --background-gradient-1:#00d5ff;--background-gradient-2:#ff2e92;--card-background:linear-gradient(145deg,rgba(255,255,255,.03),rgba(255,255,255,.01));
+      --header-background:linear-gradient(135deg,rgba(10,10,10,.85),rgba(10,10,10,.75));--border-light:rgba(255,255,255,.05);
+      --input-background:rgba(255,255,255,.05);--button-background:linear-gradient(90deg,var(--blue),var(--pink));--button-shadow:0 4px 15px var(--blue),0 4px 15px var(--pink);
+      --background-color-primary:#1a1a2e;--background-color-secondary:#0f0f1f;--header-background-color:#2a2a4a;--footer-background-color:#2a2a4a;--content-background-color:#20203a;--card-background-color:#2a2a4a;--text-color-primary:#e0e0e0;--text-color-secondary:#b0b0d0;--status-online:#4CAF50;--status-offline:#6c757d;--status-away:#FFC107;--delete-button-color:#dc3545;--warning-color:#ffc107;--accent-color:#00d5ff;--accent-color-dark:#00aaff;--border-color:#3a3a5a;--theme-gold:#ffd700
+    }
+    body{min-height:100vh;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background-color:var(--background-main);background-image:radial-gradient(circle at top left,var(--background-gradient-1),transparent 100px),radial-gradient(circle at bottom right,var(--background-gradient-2),transparent 150px);color:var(--white)}
+    header{position:fixed;top:0;left:0;right:0;z-index:20;background:var(--header-background);border-bottom:1px solid var(--border-light);backdrop-filter:saturate(140%) blur(6px);height:55px;display:flex;align-items:center;justify-content:center}
+    .header-content-wrapper{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;width:100%}
+    .logo{font-family:Poppins,sans-serif;font-weight:800;letter-spacing:-.03em;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;font-size:1.8rem;text-decoration:none}
+    #sidebarToggleFab{width:32px;height:32px;border-radius:50%;border:0;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(45deg,var(--blue),var(--pink));color:var(--white);cursor:pointer;transition:transform .2s ease;box-shadow:0 4px 15px rgba(0,213,255,.3),0 4px 15px rgba(255,46,146,.3)}
+    #sidebarToggleFab:hover{transform:scale(1.1)}
+
+    /* Sidebar (same look/feel as Groups) */
+    #sidebarNav{position:fixed;top:0;left:0;height:100%;width:clamp(220px,60vw,340px);background:var(--header-background);border-right:1px solid var(--border-light);box-shadow:6px 0 24px rgba(0,0,0,.35);transform:translateX(-100%);transition:transform .32s cubic-bezier(.22,.61,.36,1);z-index:90;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-gutter:stable both-edges}
+    #sidebarNav.sidebar-visible{transform:translateX(0)}
+    #sidebarNav .sidebar-header{position:sticky;top:0;background:var(--header-background);display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border-light);z-index:1}
+    .sidebar-title{font-family:Poppins,sans-serif;font-weight:800;letter-spacing:-.02em;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+    #sidebarCloseBtn{background:transparent;border:0;color:var(--white);width:32px;height:32px;border-radius:8px;cursor:pointer}
+    #sidebarCloseBtn:hover{background-color:rgba(255,255,255,.1)}
+    .sidebar-links{display:flex;flex-direction:column;padding:8px}
+    .sidebar-nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;text-decoration:none;color:var(--white);transition:background-color .2s ease}
+    .sidebar-nav-item:hover{background-color:rgba(255,255,255,.08)}
+    .sidebar-nav-item.active{background-color:rgba(0,213,255,.15)}
+    .sidebar-nav-item i{font-size:1.2rem;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+    .sidebar-nav-item span{background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+    .sidebar-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);backdrop-filter:blur(4px);opacity:0;visibility:hidden;transition:opacity .25s ease;z-index:85}
+    .sidebar-backdrop.show{opacity:1;visibility:visible}
+
+    main{max-width:1100px;margin:0 auto;padding:18px;padding-top:73px}
+
+    /* Chat layout */
+    .chat-layout{display:grid;grid-template-columns:320px 1fr;gap:14px}
+    @media (max-width:900px){.chat-layout{grid-template-columns:1fr}}
+
+    .panel{background:var(--card-background);border:1px solid var(--glass-blue);backdrop-filter:blur(10px) saturate(180%);border-radius:16px;box-shadow:0 8px 25px rgba(0,0,0,.3)}
+
+    /* Conversations list */
+    .conversations-panel{display:flex;flex-direction:column;min-height:60vh}
+    .list-toolbar{display:flex;align-items:center;gap:8px;padding:10px;border-bottom:1px solid var(--border-light)}
+    .search-input{flex:1 1 auto;padding:10px 12px;border-radius:12px;border:1px solid var(--border-light);background:var(--input-background);color:var(--white);outline:none}
+    .conversation-list{display:flex;flex-direction:column;gap:8px;padding:10px;max-height:calc(100vh - 200px);overflow:auto}
+    .conversation-item{display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;border:1px solid var(--border-light);background:rgba(255,255,255,.03);cursor:pointer}
+    .conversation-item:hover{background:rgba(255,255,255,.08)}
+    .conv-avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--blue)}
+    .conv-title{margin:0;font-weight:700}
+    .conv-sub{margin:0;color:var(--text-light);font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+
+    /* Messages panel */
+    .messages-panel{display:flex;flex-direction:column;height:calc(100vh - 130px);min-height:60vh}
+    .chat-header{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid var(--border-light)}
+    .chat-title{font-family:Poppins,sans-serif;font-weight:800;margin:0}
+    .chat-scroll{flex:1 1 auto;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+    .bubble-row{display:flex;gap:8px;align-items:flex-end}
+    .bubble-row.mine{justify-content:flex-end}
+    .bubble{max-width:70%;padding:10px 12px;border-radius:14px;border:1px solid var(--border-light);background:rgba(255,255,255,.06);color:var(--white)}
+    .bubble.mine{background:linear-gradient(90deg,var(--blue),var(--pink));color:#fff;border-color:transparent}
+    .bubble-meta{margin-top:4px;color:var(--text-light);font-size:.75rem}
+    .composer{display:flex;align-items:center;gap:8px;padding:10px;border-top:1px solid var(--border-light)}
+    .composer-input{flex:1 1 auto;min-height:44px;padding:10px 12px;border-radius:12px;border:1px solid var(--border-light);background:var(--input-background);color:var(--white);outline:none}
+    .icon-button{width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border-light);background:transparent;color:var(--white);cursor:pointer;transition:transform .2s ease,background-color .2s ease}
+    .icon-button:hover{transform:scale(1.05);background-color:rgba(255,255,255,.06)}
+    .send-btn{background:var(--button-background);box-shadow:var(--button-shadow);border:0;width:auto;padding:10px 14px;border-radius:12px}
+
+    /* Small enhancements */
+    .empty-state{padding:18px;margin:10px;border-radius:12px;border:1px dashed var(--border-light);color:var(--text-light);text-align:center}
+
+    /* Header compatibility with other pages */
+    .notification-icon-wrapper{position:relative;margin-right:15px}
+    .notification-icon-wrapper a{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.06));border:2px solid rgba(255,255,255,.25);backdrop-filter:blur(15px);transition:all .3s ease;position:relative;overflow:hidden;color:inherit;text-decoration:none}
+    .notification-icon-wrapper i{font-size:1.2rem;color:#ffffff;text-shadow:0 0 10px rgba(255,215,0,.8),0 0 15px rgba(255,142,83,.6)}
+    .notification-badge{position:absolute;top:-8px;right:-8px;background:linear-gradient(135deg,#ff4757,#ff3742);color:#ffffff;border-radius:50%;padding:3px 7px;font-size:.75rem;font-weight:900;min-width:20px;height:20px;text-align:center;box-shadow:0 2px 8px rgba(255,71,87,.6),0 0 0 2px #ffffff,0 0 0 3px rgba(255,71,87,.3);display:flex;align-items:center;justify-content:center;animation:pulse-notification 2s infinite;z-index:2;line-height:1}
+    @keyframes pulse-notification{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+
+    /* Scrollbar */
+    #sidebarNav::-webkit-scrollbar{width:8px}
+    #sidebarNav::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--blue),var(--pink));border-radius:6px}
+    #sidebarNav::-webkit-scrollbar-track{background:transparent}
+    .chat-scroll::-webkit-scrollbar{width:10px}
+    .chat-scroll::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--blue),var(--pink));border-radius:6px}
+    .chat-scroll::-webkit-scrollbar-track{background:transparent}
+  </style>
+
+  <script>
+    // Share theme CSS from index.html, keep appearance consistent across pages
+    (async function(){
+      async function injectSharedThemes(){
+        try{
+          if (document.getElementById('shared-theme-styles')) return;
+          let css = null;
+          try { css = sessionStorage.getItem('shared_theme_css') || null; } catch(_){ css=null; }
+          if (!css){
+            const res = await fetch('index.html', { credentials: 'same-origin' });
+            if (res.ok) {
+              const html = await res.text();
+              const matches = html.match(/body\.(?:theme|premium-theme)-[a-z0-9-\s\S]*?\{[\s\S]*?\}/gi) || [];
+              css = matches.join('\n\n');
+              try { sessionStorage.setItem('shared_theme_css', css); } catch(_){ }
+            }
+          }
+          if (css){ const style = document.createElement('style'); style.id='shared-theme-styles'; style.textContent=css; document.head.appendChild(style); }
+        }catch(_){ }
+      }
+      function applySavedTheme(){
+        try{
+          const body = document.body;
+          const saved = localStorage.getItem('jchat-theme') || localStorage.getItem('nuvia-theme') || 'theme-dark-mode';
+          [...body.classList].filter(c => c.startsWith('theme-') || c.startsWith('premium-theme-')).forEach(c => body.classList.remove(c));
+          body.classList.add(saved);
+        }catch(_){ }
+      }
+      try { if (!localStorage.getItem('jchat-theme')) localStorage.setItem('jchat-theme', 'theme-dark-mode'); } catch(_){ }
+      await injectSharedThemes();
+      applySavedTheme();
+      window.addEventListener('storage', (e)=>{ if (e.key==='jchat-theme' || e.key==='nuvia-theme') applySavedTheme(); });
+    })();
+  </script>
+</head>
+<body class="theme-dark-mode">
+  <header>
+    <div class="header-content-wrapper">
+      <button id="sidebarToggleFab" aria-label="Toggle Navigation"><i class="fas fa-bars"></i></button>
+      <a href="/index.html" class="logo"><span>Nuvia</span></a>
+      <div class="user-profile-header" style="display:flex;align-items:center;gap:10px">
+        <div class="notification-icon-wrapper">
+          <a href="/notifications.html" id="notificationToggle" aria-label="Notifications">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" id="notificationCount">0</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+  <aside id="sidebarNav" class="sidebar-hidden" role="navigation" aria-label="Main Navigation">
+    <div class="sidebar-header">
+      <span class="sidebar-title">Nuvia Menu</span>
+      <button id="sidebarCloseBtn" aria-label="Close Menu"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="sidebar-links">
+      <a href="/index.html" class="sidebar-nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+      <a href="/explore.html" class="sidebar-nav-item"><i class="fas fa-hashtag"></i><span>Explore</span></a>
+      <a href="/profile.html" class="sidebar-nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+      <a href="/chat.html" class="sidebar-nav-item active" id="chatLink"><i class="fas fa-comment-dots"></i><span>Chat</span></a>
+      <a href="/find_friends.html" class="sidebar-nav-item" id="findFriendsLink"><i class="fas fa-users"></i><span>Users</span></a>
+      <a href="/friends.html" class="sidebar-nav-item" id="friendsLink"><i class="fas fa-user-friends"></i><span>Friends</span></a>
+      <a href="/groups.html" class="sidebar-nav-item" id="groupsLink"><i class="fas fa-layer-group"></i><span>Groups</span></a>
+      <a href="/leaderboard.html" class="sidebar-nav-item" id="leaderboardLink"><i class="fas fa-trophy"></i><span>Leaderboard</span></a>
+      <a href="#" id="sidebarThemeLink" class="sidebar-nav-item"><i class="fas fa-palette"></i><span>Appearance</span></a>
+      <a href="/settings.html" class="sidebar-nav-item"><i class="fas fa-cog"></i><span>Settings</span></a>
+      <a href="/about_us.html" class="sidebar-nav-item"><i class="fas fa-globe"></i><span>About Us</span></a>
+      <a href="/solution_center.html" class="sidebar-nav-item"><i class="fas fa-question-circle"></i><span>Solution Center</span></a>
+      <a href="/community_guidelines.html" class="sidebar-nav-item"><i class="fas fa-exclamation-triangle"></i><span>Community Guidelines</span></a>
+      <a href="/login.html" class="sidebar-nav-item"><i class="fas fa-sign-in-alt"></i><span>Login</span></a>
+    </div>
+  </aside>
+
+  <main>
+    <div class="chat-layout">
+      <!-- Conversations -->
+      <section class="panel conversations-panel" aria-label="Conversations">
+        <div class="list-toolbar">
+          <input id="convSearch" class="search-input" type="search" placeholder="Search chats" aria-label="Search chats" />
+          <button id="newChatBtn" class="icon-button" title="New chat" aria-label="New chat"><i class="fas fa-user-plus"></i></button>
+        </div>
+        <div id="conversationsList" class="conversation-list"></div>
+        <div id="convEmpty" class="empty-state" style="display:none">No conversations yet.</div>
+      </section>
+
+      <!-- Messages -->
+      <section class="panel messages-panel" aria-label="Messages">
+        <div class="chat-header">
+          <img id="chatPartnerAvatar" alt="Partner avatar" class="conv-avatar" style="display:none">
+          <i id="chatPartnerIcon" class="fas fa-user-circle" style="font-size:40px;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent"></i>
+          <div>
+            <h3 id="chatTitle" class="chat-title">Select a conversation</h3>
+            <div id="chatSubtitle" class="conv-sub"></div>
+          </div>
+        </div>
+        <div id="messagesScroll" class="chat-scroll"></div>
+        <form id="composerForm" class="composer">
+          <button id="emojiBtn" class="icon-button" type="button" aria-label="Emoji"><i class="far fa-face-smile"></i></button>
+          <input id="messageInput" class="composer-input" type="text" placeholder="Type a message" autocomplete="off" aria-label="Type a message" />
+          <button id="sendBtn" class="send-btn" type="submit" aria-label="Send"><i class="fas fa-paper-plane"></i>&nbsp;<span>Send</span></button>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <div id="messageBox" role="status" aria-live="polite" style="display:none"></div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
+    import { getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, serverTimestamp, onSnapshot, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+    import { registerSession } from './assets/js/session-manager.js';
+    import { getCloudinaryImageUrl, displayProfilePicture } from './assets/js/avatar-utils.js';
+
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+      apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+      authDomain: "jchat-1.firebaseapp.com",
+      databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+      projectId: "jchat-1",
+      storageBucket: "jchat-1.firebasestorage.app",
+      messagingSenderId: "328479683167",
+      appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
+      measurementId: "G-S6Z9GG0R9P"
+    };
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // UI refs
+    const conversationsList = document.getElementById('conversationsList');
+    const convEmpty = document.getElementById('convEmpty');
+    const convSearch = document.getElementById('convSearch');
+    const newChatBtn = document.getElementById('newChatBtn');
+
+    const messagesScroll = document.getElementById('messagesScroll');
+    const composerForm = document.getElementById('composerForm');
+    const messageInput = document.getElementById('messageInput');
+
+    const chatTitle = document.getElementById('chatTitle');
+    const chatSubtitle = document.getElementById('chatSubtitle');
+    const chatPartnerAvatar = document.getElementById('chatPartnerAvatar');
+    const chatPartnerIcon = document.getElementById('chatPartnerIcon');
+
+    // State
+    let currentUser = null;
+    let currentThreadId = null;
+    let currentPartnerId = null;
+    let messagesUnsub = null;
+    let allThreads = [];
+
+    function getQueryParam(k){ try{ return new URL(window.location.href).searchParams.get(k); }catch(_){ return null; } }
+
+    function makeThreadId(a, b){
+      const x = (a||'').toString();
+      const y = (b||'').toString();
+      return x < y ? `${x}_${y}` : `${y}_${x}`;
+    }
+
+    async function fetchUserProfile(uid){
+      try{
+        const snap = await getDoc(doc(db,'artifacts',appId,'public','data','users',uid));
+        if(!snap.exists()) return { uid, username: uid.slice(0,6), profilePicId: null };
+        const d = snap.data();
+        return { uid, username: d.username || (d.displayName||uid.slice(0,6)), profilePicId: d.profilePicId || d.avatarId || null };
+      }catch(_){ return { uid, username: uid.slice(0,6), profilePicId: null }; }
+    }
+
+    function showToast(msg, type='info', timeout=2500){
+      const box = document.getElementById('messageBox');
+      if(!box) return; box.textContent = msg; box.style.display='block';
+      box.className = ''; box.classList.add('show');
+      if(timeout) setTimeout(()=>{ box.style.display='none'; }, timeout);
+    }
+
+    function renderConversationItem(t, filter=''){
+      const partnerId = (t.participants||[]).find(p=>p!==currentUser?.uid) || '';
+      const el = document.createElement('div');
+      el.className = 'conversation-item';
+      el.setAttribute('data-id', t.id);
+      const name = t.partner?.username || partnerId.slice(0,6);
+      const initial = (name||'U').charAt(0).toUpperCase();
+      const avatar = t.partner?.profilePicId ? getCloudinaryImageUrl(t.partner.profilePicId,'w_90,h_90,c_fill,g_face,r_max') : '';
+      el.innerHTML = `
+        ${avatar?`<img class="conv-avatar" src="${avatar}" alt="${name}">`:`<img class="conv-avatar" alt="${name}" src="https://placehold.co/44x44/CCCCCC/000000?text=${encodeURIComponent(initial)}">`}
+        <div style="flex:1 1 auto;min-width:0">
+          <p class="conv-title">${name}</p>
+          <p class="conv-sub">${t.lastMessage?.text ? t.lastMessage.text : 'Say hi 👋'}</p>
+        </div>
+      `;
+      el.addEventListener('click', ()=> openThread(t.id, partnerId));
+      if(filter){
+        const q = filter.toLowerCase();
+        const matches = name.toLowerCase().includes(q) || (t.lastMessage?.text||'').toLowerCase().includes(q);
+        el.style.display = matches ? '' : 'none';
+      }
+      return el;
+    }
+
+    async function loadConversations(){
+      if(!currentUser) return;
+      conversationsList.innerHTML = '';
+      convEmpty.style.display = 'none';
+      let items = [];
+      try{
+        const col = collection(db,'artifacts',appId,'public','data','dm_threads');
+        const qMine = query(col, where('participants','array-contains', currentUser.uid));
+        const snap = await getDocs(qMine);
+        items = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+      }catch(e){ items = []; }
+      // Enrich with partner profile and sort by updatedAt desc
+      const enriched = await Promise.all(items.map(async t=>{
+        const partnerId = (t.participants||[]).find(p=>p!==currentUser.uid);
+        const partner = partnerId ? await fetchUserProfile(partnerId) : null;
+        return { ...t, partner };
+      }));
+      enriched.sort((a,b)=> (b.updatedAt?.toMillis?.()||0) - (a.updatedAt?.toMillis?.()||0));
+      allThreads = enriched;
+      if(enriched.length===0){ convEmpty.style.display = 'block'; return; }
+      enriched.forEach(t=> conversationsList.appendChild(renderConversationItem(t)));
+    }
+
+    async function ensureThreadWith(partnerId){
+      const threadId = makeThreadId(currentUser.uid, partnerId);
+      const ref = doc(db,'artifacts',appId,'public','data','dm_threads', threadId);
+      const snap = await getDoc(ref);
+      if(!snap.exists()){
+        await setDoc(ref, {
+          participants: [currentUser.uid, partnerId],
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+          lastMessage: null
+        });
+      }
+      return threadId;
+    }
+
+    function scrollToBottom(){ try{ messagesScroll.scrollTop = messagesScroll.scrollHeight + 200; }catch(_){}}
+
+    function renderMessage(m){
+      const mine = m.senderId === currentUser.uid;
+      const row = document.createElement('div');
+      row.className = 'bubble-row' + (mine ? ' mine' : '');
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble' + (mine ? ' mine' : '');
+      bubble.textContent = m.text || '';
+      row.appendChild(bubble);
+      messagesScroll.appendChild(row);
+    }
+
+    async function openThread(threadId, partnerId){
+      if(messagesUnsub){ try{ messagesUnsub(); }catch(_){} messagesUnsub = null; }
+      currentThreadId = threadId; currentPartnerId = partnerId;
+      const partner = partnerId ? await fetchUserProfile(partnerId) : null;
+      chatTitle.textContent = partner?.username || 'Chat';
+      chatSubtitle.textContent = partnerId;
+      displayProfilePicture(chatPartnerAvatar, chatPartnerIcon, partner?.profilePicId || null, (partner?.username||'U').charAt(0).toUpperCase(), 'w_90,h_90,c_fill,g_face,r_max');
+      messagesScroll.innerHTML = '';
+      const col = collection(db,'artifacts',appId,'public','data','dm_threads', threadId, 'messages');
+      const qMsgs = query(col, orderBy('createdAt','asc'), limit(200));
+      messagesUnsub = onSnapshot(qMsgs, (snap)=>{
+        messagesScroll.innerHTML = '';
+        snap.docs.forEach(d=> renderMessage({ id:d.id, ...d.data() }));
+        scrollToBottom();
+      });
+    }
+
+    async function sendMessage(text){
+      if(!currentThreadId || !text.trim()) return;
+      const col = collection(db,'artifacts',appId,'public','data','dm_threads', currentThreadId, 'messages');
+      await addDoc(col, { text: text.trim(), senderId: currentUser.uid, createdAt: serverTimestamp(), type: 'text' });
+      const ref = doc(db,'artifacts',appId,'public','data','dm_threads', currentThreadId);
+      await updateDoc(ref, { updatedAt: serverTimestamp(), lastMessage: { text: text.trim(), senderId: currentUser.uid, ts: serverTimestamp() } });
+    }
+
+    composerForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const t = messageInput.value || '';
+      if(!t.trim()) return;
+      try{ await sendMessage(t); messageInput.value=''; scrollToBottom(); }catch(err){ console.error(err); showToast('Failed to send','error'); }
+    });
+
+    convSearch.addEventListener('input', ()=>{
+      const q = (convSearch.value||'').trim();
+      conversationsList.childNodes.forEach(node=>{ if(node.classList && node.classList.contains('conversation-item')){ /* will filter when re-rendering */ } });
+      // Simple re-render with filter
+      conversationsList.innerHTML = '';
+      allThreads.forEach(t=> conversationsList.appendChild(renderConversationItem(t, q)));
+    });
+
+    newChatBtn.addEventListener('click', ()=>{
+      window.location.href = '/find_friends.html';
+    });
+
+    async function tryOpenFromQuery(){
+      const pid = getQueryParam('partnerId');
+      if(!pid || !currentUser) return;
+      try{
+        const tid = await ensureThreadWith(pid);
+        await loadConversations();
+        await openThread(tid, pid);
+      }catch(_){ }
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      try{
+        if(!user){ await signInAnonymously(auth); return; }
+        currentUser = user;
+        try { localStorage.setItem('nuvia_auth_status','authenticated'); } catch(_){ }
+        registerSession(auth, db, appId).catch(()=>{});
+        await loadConversations();
+        await tryOpenFromQuery();
+      }catch(e){ console.error(e); }
+    });
+
+    // Sidebar controls
+    const sidebarNav = document.getElementById('sidebarNav');
+    const sidebarToggleFab = document.getElementById('sidebarToggleFab');
+    const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+    function openSidebar(){ document.body.classList.add('sidebar-open'); sidebarNav.classList.add('sidebar-visible'); sidebarNav.classList.remove('sidebar-hidden'); sidebarBackdrop.classList.add('show'); }
+    function closeSidebar(){ document.body.classList.remove('sidebar-open'); sidebarNav.classList.remove('sidebar-visible'); sidebarNav.classList.add('sidebar-hidden'); sidebarBackdrop.classList.remove('show'); }
+    function toggleSidebar(){ if (sidebarNav.classList.contains('sidebar-visible')) closeSidebar(); else openSidebar(); }
+    sidebarToggleFab?.addEventListener('click',(e)=>{ e.preventDefault(); toggleSidebar(); });
+    sidebarCloseBtn?.addEventListener('click',(e)=>{ e.preventDefault(); closeSidebar(); });
+    sidebarBackdrop?.addEventListener('click', closeSidebar);
+    document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeSidebar(); });
+  </script>
+
+  <script type="module">
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
+    import { getFirestore, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+    const APP_ID = 'jchat_1_0_0';
+    function startPagePresence(){
+      try{
+        onAuthStateChanged(getAuth(), (user) => {
+          if (!user || !user.uid) return;
+          const db = getFirestore();
+          const userDoc = doc(db, 'artifacts', APP_ID, 'public', 'data', 'users', user.uid);
+          const post = () => setDoc(userDoc, { online: navigator.onLine, lastActive: serverTimestamp(), currentPage: window.location.pathname }, { merge: true }).catch(()=>{});
+          post();
+          const tid = setInterval(post, 15000);
+          const debounced = () => post();
+          window.addEventListener('online', debounced);
+          window.addEventListener('offline', debounced);
+          document.addEventListener('visibilitychange', debounced);
+          window.addEventListener('beforeunload', () => { try{ post(); } catch(_){} });
+        });
+      }catch(e){console.error('JCHAT_ERROR startPagePresence', e);} }
+    startPagePresence();
+  </script>
+
+  <script type="module" src="nuvia-global-call-service.js" defer></script>
+</body>
+</html>
