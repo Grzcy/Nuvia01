@@ -179,6 +179,23 @@
     #callOverlay .call-actions .decline-call-btn,#callOverlay .call-actions .end-call-btn,#callOverlay .call-actions .cancel-call-btn{background:linear-gradient(135deg,#ff4757,#ff3838);border:0}
     #callOverlay .call-actions .toggle-mute-btn.active,#callOverlay .call-actions .toggle-video-btn.active{background:rgba(255,255,255,.25)}
     .chat-call-actions{display:inline-flex;gap:8px;margin-left:auto}
+
+    /* Voice note styles */
+    .record-btn{background:linear-gradient(90deg,var(--blue),var(--pink));border:0;color:#fff}
+    .recording-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid var(--border-light);background:rgba(255,255,255,.08);color:var(--white)}
+    .recording-chip .rec-dot{width:10px;height:10px;border-radius:50%;background:#ff4757;box-shadow:0 0 0 0 rgba(255,71,87,.7);animation:pulseRec 1.6s infinite}
+    @keyframes pulseRec{0%{transform:scale(.9);box-shadow:0 0 0 0 rgba(255,71,87,.7)}70%{transform:scale(1);box-shadow:0 0 0 10px rgba(255,71,87,0)}100%{transform:scale(.9);box-shadow:0 0 0 0 rgba(255,71,87,0)}}
+    .voice-bubble{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;border:1px solid var(--border-light);background:rgba(255,255,255,.06);color:var(--white);max-width:80%}
+    .mine .voice-bubble{background:linear-gradient(90deg,var(--blue),var(--pink));border-color:transparent;color:#fff}
+    .voice-play{width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.15);border:1px solid var(--border-light);cursor:pointer}
+    .mine .voice-play{background:rgba(255,255,255,.25)}
+    .voice-timeline{position:relative;flex:1 1 auto;height:4px;border-radius:4px;background:rgba(255,255,255,.25);overflow:hidden}
+    .voice-progress{position:absolute;left:0;top:0;bottom:0;width:0;background:#fff}
+    .voice-duration{font-size:.8rem;opacity:.9;min-width:46px;text-align:right}
+
+    /* Call overlay visual tweak to closer match provided UI */
+    #callOverlay.active{background:linear-gradient(180deg,rgba(96,51,141,.85),rgba(27,10,48,.9))}
+    #callOverlay .call-actions button{backdrop-filter:blur(6px)}
   </style>
 
   <script>
@@ -276,6 +293,11 @@
         </div>
         <div id="messagesScroll" class="chat-scroll"></div>
         <div class="composer">
+          <button id="recordBtn" class="icon-button record-btn" aria-label="Record voice note" title="Record voice note"><i class="fas fa-microphone"></i></button>
+          <div id="recordingChip" class="recording-chip" aria-live="polite" aria-atomic="true" style="display:none;">
+            <span class="rec-dot" aria-hidden="true"></span>
+            <span id="recordTimer" class="rec-timer">00:00</span>
+          </div>
           <textarea id="messageInput" class="composer-input" rows="1" placeholder="Type a message" aria-label="Type a message"></textarea>
           <button id="sendBtn" class="send-btn" aria-label="Send"><i class="fas fa-paper-plane"></i></button>
         </div>
@@ -327,6 +349,9 @@
     const chatPresence = document.getElementById('chatPresence');
     const messageInput = document.getElementById('messageInput');
     const sendBtn = document.getElementById('sendBtn');
+    const recordBtn = document.getElementById('recordBtn');
+    const recordingChip = document.getElementById('recordingChip');
+    const recordTimerEl = document.getElementById('recordTimer');
 
     const imageViewer = document.getElementById('imageViewer');
     const imageViewerImg = document.getElementById('imageViewerImg');
@@ -571,10 +596,37 @@
       const mine = m.senderId === currentUser.uid;
       const row = document.createElement('div');
       row.className = 'bubble-row' + (mine ? ' mine' : '');
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble' + (mine ? ' mine' : '');
-      bubble.textContent = m.deleted ? 'Message deleted' : (m.text || '');
-      row.appendChild(bubble);
+      if (m.type === 'audio' && (m.audioBase64 || m.fileUrl)){
+        const bubble = document.createElement('div');
+        bubble.className = 'voice-bubble' + (mine ? ' mine' : '');
+        const play = document.createElement('button');
+        play.className = 'voice-play';
+        play.setAttribute('data-id', m.id);
+        play.setAttribute('aria-label','Play voice note');
+        play.innerHTML = '<i class="fas fa-play"></i>';
+        const timeline = document.createElement('div');
+        timeline.className = 'voice-timeline';
+        const prog = document.createElement('div');
+        prog.className = 'voice-progress';
+        timeline.appendChild(prog);
+        const dur = document.createElement('span');
+        dur.className = 'voice-duration';
+        const seconds = Math.max(1, Math.round(Number(m.durationSec)||0));
+        const mStr = String(Math.floor(seconds/60)).padStart(2,'0');
+        const sStr = String(seconds%60).padStart(2,'0');
+        dur.textContent = `${mStr}:${sStr}`;
+        bubble.appendChild(play);
+        bubble.appendChild(timeline);
+        bubble.appendChild(dur);
+        row.appendChild(bubble);
+        row.dataset.audioSrc = m.fileUrl || m.audioBase64 || '';
+        row.dataset.mime = m.mimeType || 'audio/webm';
+      } else {
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble' + (mine ? ' mine' : '');
+        bubble.textContent = m.deleted ? 'Message deleted' : (m.text || '');
+        row.appendChild(bubble);
+      }
       if (mine && !m.deleted) {
         const del = document.createElement('button');
         del.className = 'action-btn delete-msg';
@@ -742,6 +794,85 @@
     messageInput?.addEventListener('input', ()=>{ autoResize(); notifyTyping(); });
     messageInput?.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); const txt=(messageInput.value||''); sendMessage(txt).then(()=>{ messageInput.value=''; autoResize(); scrollToBottom(); }); } });
     sendBtn?.addEventListener('click', ()=>{ const txt=(messageInput.value||''); sendMessage(txt).then(()=>{ messageInput.value=''; autoResize(); scrollToBottom(); }); });
+
+    // Voice note recording
+    let mediaRecorder = null; let recChunks=[]; let recStart=0; let recTimer=null; let recStream=null; let recAudioCtx=null; let recAnalyser=null; let recSource=null;
+
+    function updateRecTimer(){
+      const elapsed = Math.max(0, Math.floor((Date.now()-recStart)/1000));
+      const m = String(Math.floor(elapsed/60)).padStart(2,'0'); const s = String(elapsed%60).padStart(2,'0');
+      if (recordTimerEl) recordTimerEl.textContent = `${m}:${s}`;
+    }
+
+    async function startRecording(){
+      if (mediaRecorder) return;
+      try{
+        recStream = await navigator.mediaDevices.getUserMedia({ audio:true });
+        mediaRecorder = new MediaRecorder(recStream, { mimeType: (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm') });
+        recChunks = []; recStart = Date.now();
+        mediaRecorder.ondataavailable = (e)=>{ if(e.data && e.data.size) recChunks.push(e.data); };
+        mediaRecorder.onstop = handleRecordingComplete;
+        mediaRecorder.start();
+        if (recordingChip) recordingChip.style.display='inline-flex';
+        updateRecTimer();
+        clearInterval(recTimer); recTimer = setInterval(updateRecTimer, 500);
+      }catch(e){ console.error('recording failed', e); }
+    }
+
+    function stopRecording(){ try{ mediaRecorder && mediaRecorder.state!=='inactive' && mediaRecorder.stop(); }catch(_){} }
+
+    async function handleRecordingComplete(){
+      clearInterval(recTimer); if (recordingChip) recordingChip.style.display='none';
+      const durationSec = Math.max(1, Math.round((Date.now()-recStart)/1000));
+      const blob = new Blob(recChunks, { type: (mediaRecorder && mediaRecorder.mimeType) || 'audio/webm' });
+      try{ recStream && recStream.getTracks().forEach(t=>t.stop()); }catch(_){ }
+      mediaRecorder = null; recStream=null;
+      const base64 = await blobToBase64(blob);
+      await sendAudioMessage(base64, blob.type||'audio/webm', durationSec);
+    }
+
+    function blobToBase64(blob){
+      return new Promise((resolve, reject)=>{ const fr = new FileReader(); fr.onload=()=> resolve(String(fr.result)); fr.onerror=reject; fr.readAsDataURL(blob); });
+    }
+
+    async function sendAudioMessage(dataUrl, mime, durationSec){
+      if(!currentThreadId || !dataUrl) return;
+      const col = collection(db,'artifacts',appId,'public','data','dm_threads', currentThreadId, 'messages');
+      try{ await setDoc(doc(db,'artifacts',appId,'public','data','dm_threads', currentThreadId), { participants:[currentUser.uid, currentPartnerId], createdAt: serverTimestamp() }, { merge: true }); }catch(_){ }
+      await addDoc(col, { type:'audio', audioBase64:dataUrl, mimeType:mime||'audio/webm', durationSec, senderId: currentUser.uid, createdAt: serverTimestamp() });
+      const ref = doc(db,'artifacts',appId,'public','data','dm_threads', currentThreadId);
+      await updateDoc(ref, { updatedAt: serverTimestamp(), lastMessage: { text: 'Voice message', senderId: currentUser.uid, ts: serverTimestamp() } });
+      scrollToBottom();
+    }
+
+    if (recordBtn){
+      recordBtn.addEventListener('click', ()=>{ if (mediaRecorder) stopRecording(); else startRecording(); });
+    }
+
+    // Playback handler for voice notes
+    let currentAudio = null; let currentRow = null; let playInterval=null;
+    function stopCurrentAudio(){ if(currentAudio){ try{ currentAudio.pause(); }catch(_){} } currentAudio=null; if(playInterval){ clearInterval(playInterval); playInterval=null; } if(currentRow){ const btn=currentRow.querySelector('.voice-play i'); if(btn) btn.className='fas fa-play'; const prog=currentRow.querySelector('.voice-progress'); if(prog) prog.style.width='0%'; currentRow=null; } }
+
+    messagesScroll.addEventListener('click', (e)=>{
+      const btn = e.target.closest && e.target.closest('.voice-play');
+      if(!btn) return;
+      const row = btn.closest('.bubble-row'); if(!row) return;
+      if (currentRow && row!==currentRow) stopCurrentAudio();
+      const icon = btn.querySelector('i');
+      if (currentAudio && !currentAudio.paused){ stopCurrentAudio(); return; }
+      const src = row.dataset.audioSrc; const mime = row.dataset.mime || 'audio/webm';
+      if(!src) return;
+      currentAudio = new Audio(src);
+      currentRow = row;
+      icon.className='fas fa-pause';
+      const prog = row.querySelector('.voice-progress');
+      currentAudio.addEventListener('ended', ()=> stopCurrentAudio());
+      currentAudio.play().then(()=>{
+        playInterval = setInterval(()=>{
+          if(!currentAudio || !prog) return; const pct = (currentAudio.currentTime / Math.max(1,currentAudio.duration)) * 100; prog.style.width = pct + '%';
+        }, 200);
+      }).catch(()=>{ stopCurrentAudio(); });
+    });
 
     function scheduleStopTyping(){ if(typingStopTimer){ clearTimeout(typingStopTimer); } typingStopTimer = setTimeout(()=>{ try{ if(currentThreadId && currentUser){ const ref=doc(db,'artifacts',appId,'public','data','dm_threads', currentThreadId, 'typing', currentUser.uid); setDoc(ref,{ active:false, updatedAt: serverTimestamp() },{ merge:true }).catch(()=>{}); } }catch(_){} }, 4000); }
     async function notifyTyping(){ try{ if(!currentThreadId || !currentUser) return; const ref = doc(db,'artifacts',appId,'public','data','dm_threads', currentThreadId, 'typing', currentUser.uid); await setDoc(ref, { active:true, updatedAt: serverTimestamp() }, { merge:true }); scheduleStopTyping(); }catch(_){} }
