@@ -80,6 +80,7 @@
     .conv-avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid var(--blue)}
     .conv-title{margin:0;font-weight:700}
     .conv-sub{margin:0;color:var(--text-light);font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+    .conv-last-seen{margin-left:6px;color:var(--text-light);font-size:.75rem;opacity:.85}
     .conversation-item.unread{border-color:rgba(0,213,255,.6);background:rgba(0,213,255,.12)}
     .conversation-header-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
     .conversation-header-row .conv-title{flex:1 1 auto}
@@ -361,6 +362,9 @@
       const lastMessageTimestamp = tsToMs(t.lastMessage?.ts || t.lastMessage?.createdAt || t.updatedAt);
       const isUnread = Boolean(t.lastMessage && t.lastMessage.senderId && t.lastMessage.senderId !== currentUser?.uid && lastMessageTimestamp > getThreadReadTimestamp(t.id));
       const active = isActiveFromData(t.partner);
+      const lastActiveMs = tsToMs(t.partner?.lastActive);
+      const showLastSeen = !active && !isTyping && lastActiveMs;
+      const lastSeenHtml = showLastSeen ? ` <span class=\"conv-last-seen\">• Last seen ${formatTimeAgo(lastActiveMs)}</span>` : '';
       const badgeHtml = isUnread ? `<span class=\"conversation-badge\" role=\"status\" aria-live=\"polite\" aria-label=\"New unread message\"><i class=\"fas fa-envelope\"></i></span>` : '';
       el.className = 'conversation-item' + (isUnread ? ' unread' : '');
       el.setAttribute('data-id', t.id);
@@ -375,7 +379,7 @@
             <p class="conv-title">${safeName}</p>
             ${badgeHtml}
           </div>
-          <p class="conv-sub${isTyping ? ' typing' : ''}">${safeLastText}${isTyping ? ' <span class=\"typing-dots\"><span></span><span></span><span></span></span>' : ''}</p>
+          <p class="conv-sub${isTyping ? ' typing' : ''}">${safeLastText}${isTyping ? ' <span class=\"typing-dots\"><span></span><span></span><span></span></span>' : ''}${lastSeenHtml}</p>
         </div>
       `;
       el.addEventListener('click', ()=> { try{ document.body.classList.add('show-chat'); }catch(_){}; openThread(t.id, partnerId); });
@@ -472,6 +476,13 @@
               const dot = document.getElementById(`presence-dot-${partnerId}`);
               const active = isActiveFromData(data);
               if(dot){ if(active){ dot.classList.add('online'); } else { dot.classList.remove('online'); } }
+              try{
+                const idx = allThreads.findIndex(entry=>entry.id===t.id);
+                if(idx>=0){
+                  allThreads[idx] = { ...allThreads[idx], partner: { ...(allThreads[idx].partner||{}), online: Boolean(data&&data.online), lastActive: data?data.lastActive:null } };
+                  renderConversationsList(convSearch.value || '');
+                }
+              }catch(_){}
             },()=>{});
             presenceUnsubs.set(partnerId, unsub);
           }catch(_){ }
