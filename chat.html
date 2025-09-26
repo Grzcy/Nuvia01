@@ -340,6 +340,58 @@
     }
 
     function clearPresenceListeners(){ presenceUnsubs.forEach(u=>{ try{ u(); }catch(_){} }); presenceUnsubs.clear(); }
+    function clearThreadMetaListeners(){ threadMetaUnsubs.forEach(u=>{ try{ u(); }catch(_){} }); threadMetaUnsubs.clear(); }
+
+    function loadReadState(uid){
+      if(!uid) return {};
+      try{
+        const raw = localStorage.getItem(READ_STORAGE_KEY);
+        if(!raw) return {};
+        const parsed = JSON.parse(raw);
+        if(!parsed || typeof parsed !== 'object') return {};
+        const userState = parsed[uid];
+        if(!userState || typeof userState !== 'object') return {};
+        return userState;
+      }catch(_){ return {}; }
+    }
+
+    function persistReadState(uid){
+      if(!uid) return;
+      try{
+        const raw = localStorage.getItem(READ_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        parsed[uid] = readState;
+        localStorage.setItem(READ_STORAGE_KEY, JSON.stringify(parsed));
+      }catch(_){ }
+    }
+
+    function getThreadReadTimestamp(threadId){
+      if(!threadId) return 0;
+      const value = readState?.[threadId];
+      return Number(value) || 0;
+    }
+
+    function setThreadReadTimestamp(threadId, timestamp){
+      if(!threadId) return false;
+      const nextValue = timestamp || Date.now();
+      const currentValue = getThreadReadTimestamp(threadId);
+      if(currentValue >= nextValue) return false;
+      readState[threadId] = nextValue;
+      persistReadState(currentUser?.uid);
+      return true;
+    }
+
+    function markThreadAsRead(threadId, timestamp){
+      const updated = setThreadReadTimestamp(threadId, tsToMs(timestamp) || Date.now());
+      if(updated){ renderConversationsList(convSearch.value || ''); }
+    }
+
+    function renderConversationsList(filterTerm=''){
+      const filterValue = (filterTerm || '').trim();
+      conversationsList.innerHTML = '';
+      allThreads.forEach(t => conversationsList.appendChild(renderConversationItem(t, filterValue)));
+      setConvEmptyVisible(!allThreads.length);
+    }
 
     async function loadConversations(){
       if(!currentUser) return;
