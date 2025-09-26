@@ -508,7 +508,7 @@
   <script type="module">
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js';
     import { getFirestore, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js';
-    const APP_ID = 'jchat_1_0_0';
+    const APP_ID = (typeof window !== 'undefined' && window.__nuviaAppId) ? window.__nuviaAppId : (typeof __app_id !== 'undefined' ? __app_id : 'default-app-id');
     function startPagePresence(){
       try{
         const authInstance = getAuth();
