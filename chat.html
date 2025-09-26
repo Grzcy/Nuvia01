@@ -176,7 +176,7 @@
     #callOverlay .call-actions{display:flex;gap:10px;justify-content:center}
     #callOverlay .call-actions button{width:56px;height:56px;border-radius:50%;border:1px solid var(--border-light);background:rgba(255,255,255,.1);color:var(--white);cursor:pointer}
     #callOverlay .call-actions .accept-call-btn{background:linear-gradient(135deg,#2ed573,#1dd1a1);border:0}
-    #callOverlay .call-actions .decline-call-btn,#callOverlay .call-actions .end-call-btn{background:linear-gradient(135deg,#ff4757,#ff3838);border:0}
+    #callOverlay .call-actions .decline-call-btn,#callOverlay .call-actions .end-call-btn,#callOverlay .call-actions .cancel-call-btn{background:linear-gradient(135deg,#ff4757,#ff3838);border:0}
     #callOverlay .call-actions .toggle-mute-btn.active,#callOverlay .call-actions .toggle-video-btn.active{background:rgba(255,255,255,.25)}
     .chat-call-actions{display:inline-flex;gap:8px;margin-left:auto}
   </style>
@@ -817,6 +817,7 @@
     <div class="call-actions" id="callActions">
       <button id="acceptCallBtn" class="accept-call-btn" style="display:none;" aria-label="Accept Call"><i class="fas fa-phone"></i></button>
       <button id="declineCallBtn" class="decline-call-btn" style="display:none;" aria-label="Decline Call"><i class="fas fa-phone-slash"></i></button>
+      <button id="cancelCallBtn" class="end-call-btn" style="display:none;" aria-label="Cancel Call"><i class="fas fa-phone-slash"></i></button>
       <button id="toggleMuteBtn" class="toggle-mute-btn" style="display:none;" title="Mute/Unmute" aria-label="Toggle Mute"><i class="fas fa-microphone"></i></button>
       <button id="toggleVideoBtn" class="toggle-video-btn" style="display:none;" title="Turn Video On/Off" aria-label="Toggle Video"><i class="fas fa-video"></i></button>
       <button id="endCallBtn" class="end-call-btn" style="display:none;" aria-label="End Call"><i class="fas fa-phone-slash"></i></button>
@@ -839,6 +840,7 @@
     const callTimerDisplay = document.getElementById('callTimer');
     const acceptCallBtn = document.getElementById('acceptCallBtn');
     const declineCallBtn = document.getElementById('declineCallBtn');
+    const cancelCallBtn = document.getElementById('cancelCallBtn');
     const endCallBtn = document.getElementById('endCallBtn');
     const toggleMuteBtn = document.getElementById('toggleMuteBtn');
     const toggleVideoBtn = document.getElementById('toggleVideoBtn');
@@ -903,6 +905,7 @@
       callTimerDisplay.style.display = 'none';
       acceptCallBtn.style.display = 'none';
       declineCallBtn.style.display = 'none';
+      if (typeof cancelCallBtn !== 'undefined' && cancelCallBtn) cancelCallBtn.style.display = 'none';
       endCallBtn.style.display = 'none';
       toggleMuteBtn.style.display = 'none';
       toggleVideoBtn.style.display = 'none';
@@ -954,6 +957,12 @@
         const profileSnap = await getDoc(doc(db,'artifacts',appId,'public','data','users', partnerId)).catch(()=>null);
         const partnerName = profileSnap && profileSnap.exists()? (profileSnap.data().username || 'User') : 'User';
         callStatusText.textContent = `Calling ${partnerName}…`;
+        if (cancelCallBtn) cancelCallBtn.style.display = 'block';
+        acceptCallBtn.style.display = 'none';
+        declineCallBtn.style.display = 'none';
+        endCallBtn.style.display = 'none';
+        toggleMuteBtn.style.display = 'none';
+        toggleVideoBtn.style.display = 'none';
 
         try{ await updateDoc(doc(db,'artifacts',appId,'public','data','users', currentUser.uid), { inCall:true }); }catch(_){ }
 
@@ -989,6 +998,7 @@
               callState = 'connected';
               callStatusText.textContent = `Call connected`;
               callTimerDisplay.style.display = 'block';
+              if (cancelCallBtn) cancelCallBtn.style.display = 'none';
               endCallBtn.style.display = 'block';
               toggleMuteBtn.style.display = 'block';
               toggleVideoBtn.style.display = (callType==='video') ? 'block' : 'none';
@@ -1022,6 +1032,9 @@
       try{
         callState = 'connected';
         callTimerDisplay.style.display = 'block';
+        acceptCallBtn.style.display = 'none';
+        declineCallBtn.style.display = 'none';
+        if (cancelCallBtn) cancelCallBtn.style.display = 'none';
         endCallBtn.style.display = 'block';
         toggleMuteBtn.style.display = 'block';
         toggleVideoBtn.style.display = (currentCallType==='video') ? 'block' : 'none';
@@ -1100,6 +1113,7 @@
         setOverlayFor(currentCallType, `Incoming ${currentCallType} call…`);
         acceptCallBtn.style.display = 'block';
         declineCallBtn.style.display = 'block';
+        if (cancelCallBtn) cancelCallBtn.style.display = 'none';
         endCallBtn.style.display = 'none';
         toggleMuteBtn.style.display = 'none';
         toggleVideoBtn.style.display = 'none';
@@ -1110,6 +1124,7 @@
     if (videoCallBtn) videoCallBtn.addEventListener('click', ()=> startOutgoingCall('video'));
     if (acceptCallBtn) acceptCallBtn.addEventListener('click', acceptIncomingCall);
     if (declineCallBtn) declineCallBtn.addEventListener('click', declineIncomingCall);
+    if (cancelCallBtn) cancelCallBtn.addEventListener('click', ()=> endCall(true));
     if (endCallBtn) endCallBtn.addEventListener('click', ()=> endCall(true));
     if (toggleMuteBtn) toggleMuteBtn.addEventListener('click', toggleMute);
     if (toggleVideoBtn) toggleVideoBtn.addEventListener('click', toggleVideo);
