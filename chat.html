@@ -86,6 +86,7 @@
     /* Messages panel */
     .messages-panel{display:none;flex-direction:column;height:calc(100vh - 130px);min-height:60vh}
     body.show-chat .messages-panel{display:flex}
+    body.show-chat .conversations-panel{display:none}
     .chat-header{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid var(--border-light)}
     .chat-title{font-family:Poppins,sans-serif;font-weight:800;margin:0}
     .chat-scroll{flex:1 1 auto;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
@@ -202,6 +203,7 @@
       <!-- Messages -->
       <section class="panel messages-panel" aria-label="Messages">
         <div class="chat-header">
+          <button id="backToListBtn" class="icon-button" type="button" aria-label="Back to friends"><i class="fas fa-arrow-left"></i></button>
           <img id="chatPartnerAvatar" alt="Partner avatar" class="conv-avatar" style="display:none">
           <i id="chatPartnerIcon" class="fas fa-user-circle" style="font-size:40px;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent"></i>
           <div>
@@ -247,9 +249,9 @@
     const messagesScroll = document.getElementById('messagesScroll');
 
     const chatTitle = document.getElementById('chatTitle');
-    const chatSubtitle = document.getElementById('chatSubtitle');
     const chatPartnerAvatar = document.getElementById('chatPartnerAvatar');
     const chatPartnerIcon = document.getElementById('chatPartnerIcon');
+    const backToListBtn = document.getElementById('backToListBtn');
 
     // State
     let currentUser = null;
@@ -399,6 +401,7 @@
         const tid = await ensureThreadWith(pid);
         await loadConversations();
         await openThread(tid, pid);
+        try{ document.body.classList.add('show-chat'); }catch(_){ }
       }catch(_){ }
     }
 
@@ -412,6 +415,9 @@
         await tryOpenFromQuery();
       }catch(e){ console.error(e); }
     });
+
+    // Back to list
+    backToListBtn?.addEventListener('click', ()=>{ try{ document.body.classList.remove('show-chat'); }catch(_){} });
 
     // Sidebar controls
     const sidebarNav = document.getElementById('sidebarNav');
