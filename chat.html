@@ -505,24 +505,33 @@
   </script>
 
   <script type="module">
-    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
-    import { getFirestore, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js';
+    import { getFirestore, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js';
     const APP_ID = 'jchat_1_0_0';
     function startPagePresence(){
       try{
-        onAuthStateChanged(getAuth(), (user) => {
+        const authInstance = getAuth();
+        const firestore = getFirestore(authInstance.app);
+        let intervalId = null;
+        const debouncedHandlers = new Set();
+        const ensureListener = (eventName, handler) => {
+          if (debouncedHandlers.has(eventName)) return;
+          window.addEventListener(eventName, handler);
+          debouncedHandlers.add(eventName);
+        };
+        onAuthStateChanged(authInstance, (user) => {
+          if (intervalId){ clearInterval(intervalId); intervalId = null; }
           if (!user || !user.uid) return;
-          const db = getFirestore();
-          const userDoc = doc(db, 'artifacts', APP_ID, 'public', 'data', 'users', user.uid);
+          const userDoc = doc(firestore, 'artifacts', APP_ID, 'public', 'data', 'users', user.uid);
           const computeOnline = () => navigator.onLine && document.visibilityState === 'visible';
           const post = () => setDoc(userDoc, { online: computeOnline(), lastActive: serverTimestamp(), currentPage: window.location.pathname }, { merge: true }).catch(()=>{});
           post();
-          const tid = setInterval(post, 15000);
           const debounced = () => post();
-          window.addEventListener('online', debounced);
-          window.addEventListener('offline', debounced);
+          ensureListener('online', debounced);
+          ensureListener('offline', debounced);
           document.addEventListener('visibilitychange', debounced);
-          window.addEventListener('beforeunload', () => { try{ post(); } catch(_){} });
+          window.addEventListener('beforeunload', () => { try{ post(); } catch(_){} }, { once: true });
+          intervalId = window.setInterval(post, 15000);
         });
       }catch(e){console.error('JCHAT_ERROR startPagePresence', e);} }
     startPagePresence();
