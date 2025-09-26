@@ -512,26 +512,27 @@
       try{
         const authInstance = getAuth();
         const firestore = getFirestore(authInstance.app);
-        let intervalId = null;
-        const debouncedHandlers = new Set();
-        const ensureListener = (eventName, handler) => {
-          if (debouncedHandlers.has(eventName)) return;
-          window.addEventListener(eventName, handler);
-          debouncedHandlers.add(eventName);
-        };
+        let cleanupCallbacks = [];
         onAuthStateChanged(authInstance, (user) => {
-          if (intervalId){ clearInterval(intervalId); intervalId = null; }
+          cleanupCallbacks.forEach(fn => { try{ fn(); } catch(_){} });
+          cleanupCallbacks = [];
           if (!user || !user.uid) return;
           const userDoc = doc(firestore, 'artifacts', APP_ID, 'public', 'data', 'users', user.uid);
           const computeOnline = () => navigator.onLine && document.visibilityState === 'visible';
           const post = () => setDoc(userDoc, { online: computeOnline(), lastActive: serverTimestamp(), currentPage: window.location.pathname }, { merge: true }).catch(()=>{});
           post();
+          const intervalId = window.setInterval(post, 15000);
+          cleanupCallbacks.push(() => clearInterval(intervalId));
           const debounced = () => post();
-          ensureListener('online', debounced);
-          ensureListener('offline', debounced);
+          ['online','offline'].forEach(evt => {
+            window.addEventListener(evt, debounced);
+            cleanupCallbacks.push(() => window.removeEventListener(evt, debounced));
+          });
           document.addEventListener('visibilitychange', debounced);
-          window.addEventListener('beforeunload', () => { try{ post(); } catch(_){} }, { once: true });
-          intervalId = window.setInterval(post, 15000);
+          cleanupCallbacks.push(() => document.removeEventListener('visibilitychange', debounced));
+          const beforeUnloadHandler = () => { try{ post(); } catch(_){} };
+          window.addEventListener('beforeunload', beforeUnloadHandler);
+          cleanupCallbacks.push(() => window.removeEventListener('beforeunload', beforeUnloadHandler));
         });
       }catch(e){console.error('JCHAT_ERROR startPagePresence', e);} }
     startPagePresence();
