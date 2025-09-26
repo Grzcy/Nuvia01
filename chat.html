@@ -169,7 +169,9 @@
         #headerDisplayName { font-weight: 600; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; background-image: linear-gradient(90deg, var(--blue), var(--pink)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
 
         main { flex-grow: 1; display: flex; flex-direction: column; padding-top: 55px; width: 100%; max-width: 900px; margin: 0 auto; background: var(--card-background); border-left: 1px solid var(--border-light); border-right: 1px solid var(--border-light); box-shadow: 0 0 20px rgba(0,0,0,0.3); border-radius: var(--radius); overflow: hidden; }
-        .chat-header { background: var(--header-background); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-light); }
+
+        /* Chat view */
+        .chat-header { background: var(--header-background); padding: 12px 16px; display: none; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-light); }
         .chat-partner { display: flex; align-items: center; gap: 10px; }
         .partner-pic { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-color); display: none; }
         .partner-icon { font-size: 32px; color: var(--text-light); display: block; }
@@ -177,12 +179,10 @@
         .chat-actions { display: flex; align-items: center; gap: 8px; }
         .icon-btn { width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border-light); background: transparent; color: var(--white); cursor: pointer; transition: transform .2s ease, background-color .2s ease; }
         .icon-btn:hover { transform: scale(1.05); background-color: rgba(255,255,255,.06); }
-
-        .chat-messages { flex-grow: 1; padding: 10px 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+        .chat-messages { display: none; flex-grow: 1; padding: 10px 16px; overflow-y: auto; display: none; flex-direction: column; gap: 6px; }
         .chat-messages::-webkit-scrollbar { width: 8px; }
         .chat-messages::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 10px; }
         .chat-messages::-webkit-scrollbar-thumb { background: linear-gradient(to bottom, var(--blue), var(--pink)); border-radius: 10px; }
-
         .message-item { display: flex; align-items: flex-start; gap: 6px; max-width: 60%; position: relative; }
         .message-item.sent { margin-left: auto; flex-direction: row-reverse; }
         .message-item.received { margin-right: auto; }
@@ -202,8 +202,7 @@
         .message-item:hover .message-actions { opacity: 1; visibility: visible; }
         .message-actions button { background: none; border: none; color: var(--text-light); cursor: pointer; font-size: 0.75rem; padding: 2px 4px; border-radius: 4px; }
         .message-actions button:hover { color: var(--white); background-color: rgba(255,255,255,0.08); }
-
-        .chat-input-area { flex-shrink: 0; padding: 10px 16px; border-top: 1px solid var(--border-light); background: var(--header-background); display: flex; flex-direction: column; gap: 8px; align-items: center; }
+        .chat-input-area { display: none; flex-shrink: 0; padding: 10px 16px; border-top: 1px solid var(--border-light); background: var(--header-background); flex-direction: column; gap: 8px; align-items: center; }
         .input-row { display: flex; gap: 8px; width: 100%; align-items: center; }
         #messageInput { flex-grow: 1; padding: 8px 12px; border-radius: 18px; background: var(--input-background); border: 1px solid var(--border-light); color: var(--text-color-primary); font-size: 0.95rem; outline: none; resize: none; min-height: 38px; max-height: 120px; overflow-y: auto; }
         #messageInput:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,213,255,0.2); }
@@ -213,13 +212,25 @@
         #attachMediaButton { background: var(--input-background); color: var(--text-light); border: 1px solid var(--border-light); box-shadow: none; }
         #attachMediaButton:hover { background-color: rgba(255,255,255,0.1); color: var(--white); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .hidden-input { display: none; }
-
         #mediaPreviewContainer { width: 100%; display: none; align-items: center; gap: 8px; background: var(--input-background); border: 1px solid var(--border-light); border-radius: 8px; padding: 8px; margin-top: 2px; }
         #mediaPreview { max-width: 70px; max-height: 70px; object-fit: contain; border-radius: 4px; }
         #videoPreview { max-width: 70px; max-height: 70px; border-radius: 4px; }
         #mediaFileName { flex-grow: 1; color: var(--text-color-primary); font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         #removeMediaButton { background: none; border: none; color: var(--delete-button-color); font-size: 1.1rem; cursor: pointer; padding: 4px; border-radius: 50%; }
         #removeMediaButton:hover { background-color: rgba(220,53,69,0.2); }
+
+        /* Friends list view */
+        .friends-list-view { display: none; padding: 16px; }
+        .friends-list-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+        .friends-list-title { font-family: 'Poppins', sans-serif; font-size: 1.6rem; font-weight: 700; margin: 0; background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-image: linear-gradient(90deg, var(--blue), var(--pink)); }
+        .friends-list { display: flex; flex-direction: column; gap: 10px; background: var(--glass-black); border: 1px solid var(--blue); border-radius: 12px; padding: 12px; max-height: calc(100vh - 160px); overflow-y: auto; }
+        .friend-item { display: flex; align-items: center; gap: 10px; background: var(--glass-blue); border: 1px solid var(--blue); border-radius: 12px; padding: 10px 12px; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease; }
+        .friend-item:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,213,255,0.3); background-color: rgba(0,213,255,0.22); }
+        .friend-avatar { position: relative; width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid var(--pink); box-shadow: 0 2px 8px rgba(0,0,0,0.3); display: none; }
+        .friend-avatar-icon { position: relative; width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; background: linear-gradient(45deg, var(--blue), var(--pink)); color: var(--white); box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+        .friend-name { flex: 1; font-weight: 700; font-size: 1rem; color: var(--white); }
+        .friend-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--status-offline); box-shadow: none; }
+        .friend-dot.online { background: var(--status-online); box-shadow: 0 0 8px rgba(76,175,80,0.7); }
 
         #messageBox { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); background-color: var(--card-background-color); color: var(--text-color-primary); padding: 10px 15px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 1000; display: none; opacity: 0; transition: opacity 0.3s ease-in-out, top 0.3s ease-in-out; min-width: 200px; max-width: 300px; text-align: center; display: flex; align-items: center; gap: 10px; }
         #messageBox.show { opacity: 1; display: flex; top: 60px; }
@@ -276,7 +287,18 @@
     </header>
 
     <main>
-        <div class="chat-header">
+        <!-- Friends List View (shown when no partner selected) -->
+        <section id="friendListView" class="friends-list-view" aria-label="Friends list">
+            <div class="friends-list-header">
+                <h2 class="friends-list-title">Friends</h2>
+            </div>
+            <div id="friendsList" class="friends-list">
+                <p id="friendsLoading" class="messages-loading-text" style="text-align:center;color:var(--text-light)">Loading friends...</p>
+            </div>
+        </section>
+
+        <!-- Chat View (shown when a partner is selected) -->
+        <div class="chat-header" id="chatHeader">
             <div class="chat-partner">
                 <img id="partnerProfilePic" class="partner-pic" src="" alt="Partner Picture">
                 <i id="partnerAvatarIcon" class="fas fa-user-circle partner-icon" aria-hidden="true"></i>
@@ -290,7 +312,7 @@
         <div class="chat-messages" id="chatMessages">
             <p class="messages-loading-text" id="messagesLoadingText" style="text-align:center;color:var(--text-light)">Loading messages...</p>
         </div>
-        <div class="chat-input-area">
+        <div class="chat-input-area" id="chatInputArea">
             <div id="mediaPreviewContainer">
                 <img id="mediaPreview" src="" alt="Media Preview">
                 <video id="videoPreview" controls></video>
@@ -319,7 +341,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, where, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
         import { getCloudinaryImageUrl, displayProfilePicture } from "./assets/js/avatar-utils.js";
 
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
@@ -346,15 +368,21 @@
         const notificationCountElement = document.getElementById('notificationCount');
         const profileLink = document.getElementById('profileLink');
 
+        const friendListView = document.getElementById('friendListView');
+        const friendsList = document.getElementById('friendsList');
+        const friendsLoading = document.getElementById('friendsLoading');
+
+        const chatHeader = document.getElementById('chatHeader');
         const partnerProfilePic = document.getElementById('partnerProfilePic');
         const partnerAvatarIcon = document.getElementById('partnerAvatarIcon');
         const partnerDisplayName = document.getElementById('partnerDisplayName');
+        const chatMessages = document.getElementById('chatMessages');
+        const messagesLoadingText = document.getElementById('messagesLoadingText');
+        const chatInputArea = document.getElementById('chatInputArea');
 
         const backToUsersBtn = document.getElementById('backToUsersBtn');
         const backToFriendsBtn = document.getElementById('backToFriendsBtn');
 
-        const chatMessages = document.getElementById('chatMessages');
-        const messagesLoadingText = document.getElementById('messagesLoadingText');
         const messageInput = document.getElementById('messageInput');
         const sendMessageButton = document.getElementById('sendMessageButton');
         const mediaInput = document.getElementById('mediaInput');
@@ -378,6 +406,7 @@
         let conversationId = null;
         let selectedMediaFile = null;
         let unsubscribeChat = null;
+        const presenceUnsubs = new Map();
 
         function showMessage(type, text, duration = 3000) {
             if (messageBox.timeoutId) { clearTimeout(messageBox.timeoutId); messageBox.timeoutId = null; }
@@ -388,10 +417,7 @@
             messageBox.timeoutId = setTimeout(()=>{ messageBox.classList.remove('show'); messageBox.addEventListener('transitionend', function h(){ messageBox.style.display='none'; messageBox.removeEventListener('transitionend', h); }, { once:true }); }, duration);
         }
 
-        function getParam(name) {
-            const url = new URL(window.location.href);
-            return url.searchParams.get(name);
-        }
+        function getParam(name) { const url = new URL(window.location.href); return url.searchParams.get(name); }
         function getFriendshipId(uid1, uid2) { return uid1 < uid2 ? `${uid1}_${uid2}` : `${uid2}_${uid1}`; }
 
         async function fetchAndDisplayHeaderProfile(user) {
@@ -399,16 +425,9 @@
                 const privateProfileDocRef = doc(db, "artifacts", appId, "users", user.uid, "profiles", "user_profile");
                 const privateDocSnap = await getDoc(privateProfileDocRef);
                 let profileData = null;
-                if (privateDocSnap.exists()) {
-                    profileData = privateDocSnap.data();
-                } else {
-                    profileData = {
-                        username: user.displayName || `User_${user.uid.substring(0, 8)}`,
-                        email: user.email || "",
-                        profilePicId: user.photoURL || null,
-                        createdAt: new Date(), updatedAt: new Date(),
-                        visibility: { displayName: true, profilePic: true }
-                    };
+                if (privateDocSnap.exists()) { profileData = privateDocSnap.data(); }
+                else {
+                    profileData = { username: user.displayName || `User_${user.uid.substring(0, 8)}`, email: user.email || "", profilePicId: user.photoURL || null, createdAt: new Date(), updatedAt: new Date(), visibility: { displayName: true, profilePic: true } };
                     await setDoc(privateProfileDocRef, profileData);
                     const publicProfileDocRef = doc(db, "artifacts", appId, "public", "data", "users", user.uid);
                     await setDoc(publicProfileDocRef, { username: profileData.username, profilePicId: profileData.profilePicId, createdAt: profileData.createdAt, updatedAt: profileData.updatedAt, visibility: profileData.visibility }, { merge: true });
@@ -418,22 +437,16 @@
                 displayProfilePicture(headerProfilePic, headerAvatarIcon, profileData?.profilePicId, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
                 headerDisplayName.textContent = profileData.username || 'User';
                 if (profileLink) profileLink.href = `./profile.html?userId=${user.uid}`;
-            } catch (e) {
-                console.error(e);
-                showMessage('error', `Error loading profile: ${e.message}`);
-            }
+            } catch (e) { console.error(e); showMessage('error', `Error loading profile: ${e.message}`); }
         }
 
         async function fetchNotificationCount(userId) {
             try {
                 const notificationsCollectionRef = collection(db, "artifacts", appId, "users", userId, "notifications");
-                const q = query(notificationsCollectionRef, where("read", "==", false));
-                const querySnapshot = await getDocs(q);
-                const unreadCount = querySnapshot.size;
-                if (notificationCountElement) {
-                    if (unreadCount > 0) { notificationCountElement.textContent = unreadCount; notificationCountElement.style.display = 'flex'; }
-                    else { notificationCountElement.style.display = 'none'; }
-                }
+                const qy = query(notificationsCollectionRef, where("read", "==", false));
+                const qs = await getDocs(qy);
+                const unreadCount = qs.size;
+                if (notificationCountElement) { if (unreadCount > 0) { notificationCountElement.textContent = unreadCount; notificationCountElement.style.display = 'flex'; } else { notificationCountElement.style.display = 'none'; } }
             } catch (_) { if (notificationCountElement) notificationCountElement.style.display = 'none'; }
         }
 
@@ -452,151 +465,150 @@
             }
         }
 
+        // Friends list logic
+        function clearPresenceListeners() { presenceUnsubs.forEach((fn)=>{ try{ fn(); }catch{} }); presenceUnsubs.clear(); }
+
+        function subscribePresence(uid, dotEl) {
+            try {
+                const sRef = doc(db, 'artifacts', appId, 'sessions', uid);
+                const unsub = onSnapshot(sRef, (snap)=>{
+                    let online = false;
+                    if (snap.exists()) {
+                        const data = snap.data();
+                        const lastSeenTs = data.lastSeen?.toDate ? data.lastSeen.toDate() : (data.lastSeen || null);
+                        if (data.sessionId && lastSeenTs) {
+                            const diff = Date.now() - new Date(lastSeenTs).getTime();
+                            online = diff < 120000; // 2 minutes window
+                        }
+                    }
+                    dotEl.classList.toggle('online', online);
+                }, (err)=>{
+                    dotEl.classList.remove('online');
+                });
+                presenceUnsubs.set(uid, unsub);
+            } catch { dotEl.classList.remove('online'); }
+        }
+
+        function createFriendRow(uid, profile) {
+            const item = document.createElement('div');
+            item.className = 'friend-item';
+            const avatarImg = document.createElement('img');
+            avatarImg.className = 'friend-avatar';
+            const avatarIcon = document.createElement('div');
+            avatarIcon.className = 'friend-avatar-icon';
+            avatarIcon.innerHTML = '<i class="fas fa-user-circle"></i>';
+            const name = document.createElement('div');
+            name.className = 'friend-name';
+            name.textContent = profile.username || `User_${uid.substring(0,8)}`;
+            const dot = document.createElement('span');
+            dot.className = 'friend-dot';
+
+            const initial = (name.textContent || 'U').charAt(0).toUpperCase();
+            const picId = profile.profilePicId || null;
+            if (picId) {
+                const url = getCloudinaryImageUrl(picId, 'w_100,h_100,c_fill,g_face,r_max');
+                avatarImg.src = url; avatarImg.style.display = 'block'; avatarImg.onerror = ()=>{ avatarImg.style.display='none'; avatarIcon.style.display='flex'; };
+                avatarIcon.style.display = 'none';
+            }
+
+            item.appendChild(avatarImg);
+            item.appendChild(avatarIcon);
+            item.appendChild(name);
+            item.appendChild(dot);
+
+            item.addEventListener('click', ()=>{ window.location.href = `./chat.html?partnerId=${encodeURIComponent(uid)}`; });
+            subscribePresence(uid, dot);
+            return item;
+        }
+
+        async function loadFriendsList() {
+            if (!currentUser) return;
+            friendsList.innerHTML = '';
+            friendsLoading.style.display = 'block';
+            clearPresenceListeners();
+            try {
+                const friendsCol = collection(db, 'artifacts', appId, 'public', 'data', 'friends');
+                onSnapshot(friendsCol, async (snap)=>{
+                    const friendUids = new Set();
+                    snap.forEach(docSnap=>{
+                        const d = docSnap.data();
+                        if (d.user1Id === currentUser.uid) friendUids.add(d.user2Id);
+                        else if (d.user2Id === currentUser.uid) friendUids.add(d.user1Id);
+                    });
+                    friendsList.innerHTML = '';
+                    if (friendUids.size === 0) {
+                        const p = document.createElement('p'); p.style.textAlign='center'; p.style.color='var(--text-light)'; p.textContent = 'No friends yet.'; friendsList.appendChild(p); friendsLoading.style.display='none'; return;
+                    }
+                    const loads = Array.from(friendUids).map(async (uid)=>{
+                        const uref = doc(db, 'artifacts', appId, 'public', 'data', 'users', uid);
+                        const usnap = await getDoc(uref).catch(()=>null);
+                        const pdata = usnap && usnap.exists() ? usnap.data() : { username: `User_${uid.substring(0,8)}` };
+                        friendsList.appendChild(createFriendRow(uid, pdata));
+                    });
+                    await Promise.all(loads);
+                    friendsLoading.style.display = 'none';
+                }, (err)=>{
+                    friendsList.innerHTML = '';
+                    const p = document.createElement('p'); p.style.textAlign='center'; p.style.color='var(--text-light)'; p.textContent = 'Failed to load friends.'; friendsList.appendChild(p);
+                    friendsLoading.style.display = 'none';
+                });
+            } catch (e) {
+                friendsList.innerHTML = '';
+                const p = document.createElement('p'); p.style.textAlign='center'; p.style.color='var(--text-light)'; p.textContent = 'Failed to load friends.'; friendsList.appendChild(p);
+                friendsLoading.style.display = 'none';
+            }
+        }
+
+        // Chat logic
         function renderMessage(docId, data) {
             const isSent = data.senderId === currentUser.uid;
             const wrapper = document.createElement('div');
             wrapper.className = `message-item ${isSent ? 'sent' : 'received'}`;
-
-            const avatarEl = document.createElement('div');
-            avatarEl.className = 'avatar-icon';
-            avatarEl.innerHTML = '<i class="fas fa-user"></i>';
-
-            const contentWrap = document.createElement('div');
-            contentWrap.className = 'message-content-wrapper';
-
-            const sender = document.createElement('div');
-            sender.className = 'message-sender';
-            sender.textContent = isSent ? (currentUserProfileData?.username || 'You') : (partnerDisplayName.textContent || 'User');
-
-            const bubble = document.createElement('div');
-            bubble.className = 'message-bubble';
-            const hasText = typeof data.text === 'string' && data.text.trim() !== '';
-            if (hasText) bubble.textContent = data.text;
-
+            const avatarEl = document.createElement('div'); avatarEl.className = 'avatar-icon'; avatarEl.innerHTML = '<i class="fas fa-user"></i>';
+            const contentWrap = document.createElement('div'); contentWrap.className = 'message-content-wrapper';
+            const sender = document.createElement('div'); sender.className = 'message-sender'; sender.textContent = isSent ? (currentUserProfileData?.username || 'You') : (partnerDisplayName.textContent || 'User');
+            const bubble = document.createElement('div'); bubble.className = 'message-bubble'; const hasText = typeof data.text === 'string' && data.text.trim() !== ''; if (hasText) bubble.textContent = data.text;
             if (data.mediaUrl && data.mediaType) {
-                if (data.mediaType.startsWith('image')) {
-                    const img = document.createElement('img');
-                    img.src = data.mediaUrl; img.alt = 'Image'; img.className = 'message-media image';
-                    img.addEventListener('click', ()=>openViewer('image', data.mediaUrl));
-                    bubble.appendChild(document.createElement('br'));
-                    bubble.appendChild(img);
-                } else if (data.mediaType.startsWith('video')) {
-                    const vid = document.createElement('video');
-                    vid.src = data.mediaUrl; vid.controls = true; vid.className = 'message-media video';
-                    vid.addEventListener('click', ()=>openViewer('video', data.mediaUrl));
-                    bubble.appendChild(document.createElement('br'));
-                    bubble.appendChild(vid);
-                }
+                if (data.mediaType.startsWith('image')) { const img = document.createElement('img'); img.src = data.mediaUrl; img.alt = 'Image'; img.className = 'message-media image'; img.addEventListener('click', ()=>openViewer('image', data.mediaUrl)); bubble.appendChild(document.createElement('br')); bubble.appendChild(img); }
+                else if (data.mediaType.startsWith('video')) { const vid = document.createElement('video'); vid.src = data.mediaUrl; vid.controls = true; vid.className = 'message-media video'; vid.addEventListener('click', ()=>openViewer('video', data.mediaUrl)); bubble.appendChild(document.createElement('br')); bubble.appendChild(vid); }
             }
-
-            const ts = document.createElement('div');
-            ts.className = 'message-timestamp';
-            const date = data.createdAt?.toDate ? data.createdAt.toDate() : (data.createdAt || new Date());
-            ts.textContent = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' }).format(date);
-
-            const acts = document.createElement('div');
-            acts.className = 'message-actions';
-            if (isSent) {
-                const copyBtn = document.createElement('button');
-                copyBtn.textContent = 'Copy';
-                copyBtn.addEventListener('click', async ()=>{
-                    try { await navigator.clipboard.writeText(data.text || ''); showMessage('success','Copied'); } catch(e){ showMessage('error','Copy failed'); }
-                });
-                acts.appendChild(copyBtn);
-            }
-
-            contentWrap.appendChild(sender);
-            contentWrap.appendChild(bubble);
-            contentWrap.appendChild(ts);
-            contentWrap.appendChild(acts);
-
-            wrapper.appendChild(avatarEl);
-            wrapper.appendChild(contentWrap);
-            return wrapper;
+            const ts = document.createElement('div'); ts.className = 'message-timestamp'; const date = data.createdAt?.toDate ? data.createdAt.toDate() : (data.createdAt || new Date()); ts.textContent = new Intl.DateTimeFormat(undefined, { hour: '2-digit', minute: '2-digit' }).format(date);
+            const acts = document.createElement('div'); acts.className = 'message-actions'; if (isSent) { const copyBtn = document.createElement('button'); copyBtn.textContent = 'Copy'; copyBtn.addEventListener('click', async ()=>{ try { await navigator.clipboard.writeText(data.text || ''); showMessage('success','Copied'); } catch(e){ showMessage('error','Copy failed'); } }); acts.appendChild(copyBtn); }
+            contentWrap.appendChild(sender); contentWrap.appendChild(bubble); contentWrap.appendChild(ts); contentWrap.appendChild(acts);
+            wrapper.appendChild(avatarEl); wrapper.appendChild(contentWrap); return wrapper;
         }
 
         function scrollToBottom() { chatMessages.scrollTop = chatMessages.scrollHeight; }
-
-        function openViewer(type, url) {
-            if (type === 'image') { viewerImage.src = url; viewerImage.style.display = 'block'; viewerVideo.style.display = 'none'; viewerVideo.pause(); }
-            else { viewerVideo.src = url; viewerVideo.style.display = 'block'; viewerImage.style.display = 'none'; }
-            mediaViewerModal.classList.add('active');
-        }
+        function openViewer(type, url) { if (type === 'image') { viewerImage.src = url; viewerImage.style.display = 'block'; viewerVideo.style.display = 'none'; viewerVideo.pause(); } else { viewerVideo.src = url; viewerVideo.style.display = 'block'; viewerImage.style.display = 'none'; } mediaViewerModal.classList.add('active'); }
         closeMediaViewer.addEventListener('click', ()=>{ mediaViewerModal.classList.remove('active'); viewerVideo.pause(); });
         mediaViewerModal.addEventListener('click', (e)=>{ if (e.target === mediaViewerModal) { mediaViewerModal.classList.remove('active'); viewerVideo.pause(); } });
-
-        function bindInputAutoResize() {
-            const el = messageInput;
-            const resize = ()=>{ el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; };
-            el.addEventListener('input', resize); resize();
-        }
-
-        function showMediaPreview(file) {
-            if (!file) { mediaPreviewContainer.style.display = 'none'; mediaPreview.src = ''; videoPreview.src = ''; return; }
-            mediaFileName.textContent = file.name;
-            mediaPreviewContainer.style.display = 'flex';
-            if (file.type.startsWith('image')) { videoPreview.style.display = 'none'; mediaPreview.style.display = 'block'; mediaPreview.src = URL.createObjectURL(file); }
-            else if (file.type.startsWith('video')) { mediaPreview.style.display = 'none'; videoPreview.style.display = 'block'; videoPreview.src = URL.createObjectURL(file); }
-        }
-
+        function bindInputAutoResize() { const el = messageInput; const resize = ()=>{ el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px'; }; el.addEventListener('input', resize); resize(); }
+        function showMediaPreview(file) { if (!file) { mediaPreviewContainer.style.display = 'none'; mediaPreview.src = ''; videoPreview.src = ''; return; } mediaFileName.textContent = file.name; mediaPreviewContainer.style.display = 'flex'; if (file.type.startsWith('image')) { videoPreview.style.display = 'none'; mediaPreview.style.display = 'block'; mediaPreview.src = URL.createObjectURL(file); } else if (file.type.startsWith('video')) { mediaPreview.style.display = 'none'; videoPreview.style.display = 'block'; videoPreview.src = URL.createObjectURL(file); } }
         removeMediaButton.addEventListener('click', ()=>{ selectedMediaFile = null; mediaInput.value = ''; mediaPreviewContainer.style.display = 'none'; mediaPreview.src=''; videoPreview.src=''; });
         attachMediaButton.addEventListener('click', ()=> mediaInput.click());
         mediaInput.addEventListener('change', ()=>{ const f = mediaInput.files && mediaInput.files[0]; selectedMediaFile = f || null; showMediaPreview(selectedMediaFile); });
 
         async function uploadMediaToCloudinary(file) {
             showMessage('info', 'Uploading media...', 2000);
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', cloudinaryConfig.uploadPreset);
-            try {
-                const resp = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/auto/upload`, { method: 'POST', body: formData });
-                const data = await resp.json();
-                if (data && data.secure_url) return { url: data.secure_url, type: file.type };
-                throw new Error(data?.error?.message || 'Upload failed');
-            } catch (e) { showMessage('error', e.message || 'Upload failed'); return null; }
+            const formData = new FormData(); formData.append('file', file); formData.append('upload_preset', cloudinaryConfig.uploadPreset);
+            try { const resp = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/auto/upload`, { method: 'POST', body: formData }); const data = await resp.json(); if (data && data.secure_url) return { url: data.secure_url, type: file.type }; throw new Error(data?.error?.message || 'Upload failed'); } catch (e) { showMessage('error', e.message || 'Upload failed'); return null; }
         }
 
-        async function ensureConversationMeta(userA, userB) {
-            const cid = getFriendshipId(userA, userB);
-            const chatDocRef = doc(db, 'artifacts', appId, 'dm_chats', cid);
-            const snap = await getDoc(chatDocRef);
-            if (!snap.exists()) {
-                await setDoc(chatDocRef, { participants: [userA, userB], createdAt: serverTimestamp(), updatedAt: serverTimestamp() }, { merge: true });
-            } else {
-                await setDoc(chatDocRef, { updatedAt: serverTimestamp() }, { merge: true });
-            }
-            return cid;
-        }
+        async function ensureConversationMeta(userA, userB) { const cid = getFriendshipId(userA, userB); const chatDocRef = doc(db, 'artifacts', appId, 'dm_chats', cid); const snap = await getDoc(chatDocRef); if (!snap.exists()) { await setDoc(chatDocRef, { participants: [userA, userB], createdAt: serverTimestamp(), updatedAt: serverTimestamp() }, { merge: true }); } else { await setDoc(chatDocRef, { updatedAt: serverTimestamp() }, { merge: true }); } return cid; }
 
         async function sendMessage() {
             if (!currentUser || !partnerId) return;
-            let text = (messageInput.value || '').trim();
-            if (!text && !selectedMediaFile) return;
+            let text = (messageInput.value || '').trim(); if (!text && !selectedMediaFile) return;
             sendMessageButton.disabled = true;
             try {
-                let mediaPayload = null;
-                if (selectedMediaFile) {
-                    mediaPayload = await uploadMediaToCloudinary(selectedMediaFile);
-                }
-                const msg = {
-                    senderId: currentUser.uid,
-                    recipientId: partnerId,
-                    text: text || '',
-                    mediaUrl: mediaPayload?.url || null,
-                    mediaType: mediaPayload?.type || null,
-                    createdAt: serverTimestamp()
-                };
+                let mediaPayload = null; if (selectedMediaFile) { mediaPayload = await uploadMediaToCloudinary(selectedMediaFile); }
+                const msg = { senderId: currentUser.uid, recipientId: partnerId, text: text || '', mediaUrl: mediaPayload?.url || null, mediaType: mediaPayload?.type || null, createdAt: serverTimestamp() };
                 const msgsRef = collection(db, 'artifacts', appId, 'dm_chats', conversationId, 'messages');
                 await addDoc(msgsRef, msg);
-                messageInput.value = '';
-                selectedMediaFile = null; mediaInput.value = ''; mediaPreviewContainer.style.display = 'none'; mediaPreview.src=''; videoPreview.src='';
+                messageInput.value = ''; selectedMediaFile = null; mediaInput.value = ''; mediaPreviewContainer.style.display = 'none'; mediaPreview.src=''; videoPreview.src='';
                 showMessage('success', 'Sent');
-            } catch (e) {
-                console.error(e);
-                showMessage('error', 'Failed to send');
-            } finally {
-                sendMessageButton.disabled = false; messageInput.focus();
-            }
+            } catch (e) { console.error(e); showMessage('error', 'Failed to send'); }
+            finally { sendMessageButton.disabled = false; messageInput.focus(); }
         }
 
         function subscribeToMessages() {
@@ -606,23 +618,27 @@
             unsubscribeChat = onSnapshot(qy, (snap)=>{
                 if (messagesLoadingText) messagesLoadingText.style.display = 'none';
                 chatMessages.innerHTML = '';
-                snap.forEach(docSnap=>{
-                    const el = renderMessage(docSnap.id, docSnap.data());
-                    chatMessages.appendChild(el);
-                });
+                snap.forEach(docSnap=>{ const el = renderMessage(docSnap.id, docSnap.data()); chatMessages.appendChild(el); });
                 scrollToBottom();
-            }, (err)=>{
-                console.error(err);
-                showMessage('error', 'Failed to load messages');
-                if (messagesLoadingText) messagesLoadingText.textContent = 'Failed to load messages';
-            });
+            }, (err)=>{ console.error(err); showMessage('error', 'Failed to load messages'); if (messagesLoadingText) messagesLoadingText.textContent = 'Failed to load messages'; });
+        }
+
+        function showListMode() {
+            friendListView.style.display = 'block';
+            chatHeader.style.display = 'none';
+            chatMessages.style.display = 'none';
+            chatInputArea.style.display = 'none';
+        }
+        function showChatMode() {
+            friendListView.style.display = 'none';
+            chatHeader.style.display = 'flex';
+            chatMessages.style.display = 'flex';
+            chatInputArea.style.display = 'flex';
         }
 
         function wireEvents() {
             sendMessageButton.addEventListener('click', sendMessage);
-            messageInput.addEventListener('keydown', (e)=>{
-                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-            });
+            messageInput.addEventListener('keydown', (e)=>{ if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
             backToUsersBtn.addEventListener('click', ()=>{ window.location.href = './find_friends.html'; });
             backToFriendsBtn.addEventListener('click', ()=>{ window.location.href = './friends.html'; });
             bindInputAutoResize();
@@ -634,8 +650,14 @@
                 currentUser = user;
                 await fetchAndDisplayHeaderProfile(user);
                 await fetchNotificationCount(user.uid);
+
                 partnerId = getParam('partnerId');
-                if (!partnerId) { showMessage('warning', 'No partner specified'); return; }
+                if (!partnerId) {
+                    showListMode();
+                    await loadFriendsList();
+                    return;
+                }
+                showChatMode();
                 await fetchPartnerProfile(partnerId);
                 conversationId = await ensureConversationMeta(user.uid, partnerId);
                 subscribeToMessages();
