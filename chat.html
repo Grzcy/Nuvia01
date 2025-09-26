@@ -1268,6 +1268,15 @@
         endCallBtn.style.display = 'none';
         toggleMuteBtn.style.display = 'none';
         toggleVideoBtn.style.display = 'none';
+
+        // Stop ringing when call status changes or call is removed
+        onSnapshot(callRef, (docSnap)=>{
+          if (!docSnap.exists()) { stopRingTone(); endCall(false); return; }
+          const data = docSnap.data();
+          if (data.status && data.status !== 'ringing' && callState === 'ringing'){
+            stopRingTone();
+          }
+        });
       });
     }
 
