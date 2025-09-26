@@ -318,7 +318,7 @@
     imageViewer?.addEventListener('click', (e)=>{ if(e.target===imageViewer) closeImageViewer(); });
     document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && imageViewer?.classList.contains('show')) closeImageViewer(); });
 
-    chatPartnerAvatar?.addEventListener('click', ()=>{ const src = chatPartnerAvatar.getAttribute('src'); if(src){ openImageViewer(src, chatTitle?.textContent||'Profile picture'); } });
+    chatPartnerAvatar?.addEventListener('click', ()=>{ const src = chatPartnerAvatar.getAttribute('data-fullsrc') || chatPartnerAvatar.getAttribute('src'); if(src){ openImageViewer(src, chatTitle?.textContent||'Profile picture'); } });
 
     const typingStates = new Map();
     const typingUnsubs = new Map();
@@ -379,10 +379,11 @@
       const safeName = escapeHtml(name);
       const initial = (name||'U').charAt(0).toUpperCase();
       const avatar = t.partner?.profilePicId ? getCloudinaryImageUrl(t.partner.profilePicId,'w_90,h_90,c_fill,g_face,r_max') : '';
+      const fullAvatar = t.partner?.profilePicId ? getCloudinaryImageUrl(t.partner.profilePicId,'f_auto,q_auto') : (avatar || '');
       const presenceId = `presence-dot-${partnerId}`;
       const lastTextRaw = t.lastMessage?.text ? t.lastMessage.text : '';
       const isTyping = Boolean(typingStates.get(t.id));
-      const safeLastText = isTyping ? 'Typing���' : escapeHtml(lastTextRaw);
+      const safeLastText = isTyping ? 'Typing…' : escapeHtml(lastTextRaw);
       const lastMessageTimestamp = tsToMs(t.lastMessage?.ts || t.lastMessage?.createdAt || t.updatedAt);
       const isUnread = Boolean(t.lastMessage && t.lastMessage.senderId && t.lastMessage.senderId !== currentUser?.uid && lastMessageTimestamp > getThreadReadTimestamp(t.id));
       const active = isActiveFromData(t.partner);
@@ -395,7 +396,7 @@
       el.setAttribute('data-unread', isUnread ? 'true' : 'false');
       el.innerHTML = `
         <div class="presence-wrapper">
-          ${avatar?`<img class=\"conv-avatar\" src=\"${avatar}\" alt=\"${safeName}\">`:`<img class=\"conv-avatar\" alt=\"${safeName}\" src=\"https://placehold.co/44x44/CCCCCC/000000?text=${encodeURIComponent(initial)}\">`}
+          ${avatar?`<img class=\"conv-avatar\" src=\"${avatar}\" data-fullsrc=\"${fullAvatar}\" alt=\"${safeName}\">`:`<img class=\"conv-avatar\" alt=\"${safeName}\" src=\"https://placehold.co/44x44/CCCCCC/000000?text=${encodeURIComponent(initial)}\">`}
           <span class="presence-dot ${active ? 'online' : ''}" id="${presenceId}" aria-hidden="true"></span>
         </div>
         <div class="conversation-details">
@@ -407,7 +408,7 @@
         </div>
       `;
       const av = el.querySelector('.conv-avatar');
-      if(av){ av.addEventListener('click', (e)=>{ e.stopPropagation(); const src = av.getAttribute('src'); if(src){ openImageViewer(src, safeName); } }); }
+      if(av){ av.addEventListener('click', (e)=>{ e.stopPropagation(); const src = av.getAttribute('data-fullsrc') || av.getAttribute('src'); if(src){ openImageViewer(src, safeName); } }); }
       el.addEventListener('click', ()=> { try{ document.body.classList.add('show-chat'); }catch(_){}; openThread(t.id, partnerId); });
       if(filter){ const q=filter.toLowerCase(); const matches=name.toLowerCase().includes(q)||lastTextRaw.toLowerCase().includes(q); el.style.display=matches?'':'none'; }
       return el;
@@ -629,6 +630,7 @@
       chatTitle.textContent = partner?.username || 'Chat';
       partnerLastActiveMs = partner && partner.lastActive ? tsToMs(partner.lastActive) : 0;
       displayProfilePicture(chatPartnerAvatar, chatPartnerIcon, partner?.profilePicId || null, (partner?.username||'U').charAt(0).toUpperCase(), 'w_90,h_90,c_fill,g_face,r_max');
+      try{ if(partner?.profilePicId){ chatPartnerAvatar?.setAttribute('data-fullsrc', getCloudinaryImageUrl(partner.profilePicId,'f_auto,q_auto')); } }catch(_){}
       setChatPresence(partner ? isActiveFromData(partner) : null);
       try{
         const pref = doc(db,'artifacts',appId,'public','data','users', partnerId);
