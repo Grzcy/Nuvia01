@@ -1475,7 +1475,7 @@
             toggleVideoBtn.style.display = 'none';
 
             // Stop ringing when call status changes or call is removed
-            perCallUnsub = onSnapshot(callRef, (docSnap)=>{
+            perCallUnsub = onSnapshot(callRef, async (docSnap)=>{
               try{
                 if (!docSnap.exists()) { stopRingTone(); endCall(false); return; }
                 const data = docSnap.data();
@@ -1552,7 +1552,7 @@
               toggleMuteBtn.style.display = 'none';
               toggleVideoBtn.style.display = 'none';
 
-              perCallUnsub = onSnapshot(callRef, (docSnap)=>{
+              perCallUnsub = onSnapshot(callRef, async (docSnap)=>{
                 try{
                   if (!docSnap.exists()) { stopRingTone(); endCall(false); return; }
                   const data2 = docSnap.data();
