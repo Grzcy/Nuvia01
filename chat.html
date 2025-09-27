@@ -1161,6 +1161,7 @@
       callOverlay.classList.add(type==='voice'?'voice-call':'video-call');
       callStatusIcon.className = `fas fa-${type==='voice'?'phone':'video'} call-status-icon`;
       callStatusText.textContent = text || '';
+      try{ const cb = document.getElementById('callBanner'); if(cb) cb.style.display = 'flex'; }catch(_){ }
     }
 
     async function startOutgoingCall(callType){
