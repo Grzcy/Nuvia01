@@ -1127,8 +1127,9 @@
 
         peerConnection = createPeerConnection();
         localStream = await navigator.mediaDevices.getUserMedia({ audio:true, video: callType==='video' });
-        localVideo.srcObject = localStream;
-        if (callType==='video'){ localVideo.style.display='block'; }
+        localVideo.srcObject = localStream; // attach local stream for sending only (no local preview)
+        // do not display local preview in small overlay; keep it hidden
+        try{ localVideo.style.display = 'none'; }catch(_){ }
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
         const callsCol = collection(db,'artifacts',appId,'public','data','calls');
