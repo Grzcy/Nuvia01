@@ -167,6 +167,7 @@ try{ if (window.Notification && Notification.permission === 'default'){ Notifica
 
 (function init(){
   try{
+    if ((typeof window !== 'undefined') && (window.__nuviaHasCallUI || document.getElementById('callOverlay'))){ try{ console.log('NUVIA global call service: call UI present, skipping service init'); }catch(_){ } return; }
     const auth = getAuth();
     onAuthStateChanged(auth, (user) => {
       if(user && user.uid){
