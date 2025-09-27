@@ -1036,6 +1036,12 @@
     let incomingGlobalUnsub = null; // listener for any incoming calls when no partner selected
     let perCallUnsub = null;
 
+    function stopIncomingCallListeners(){
+      try{ if (perCallUnsub){ perCallUnsub(); perCallUnsub = null; } }catch(_){ }
+      try{ if (incomingListenerUnsub){ incomingListenerUnsub(); incomingListenerUnsub = null; } }catch(_){ }
+      try{ if (incomingGlobalUnsub){ incomingGlobalUnsub(); incomingGlobalUnsub = null; } }catch(_){ }
+    }
+
     // Outgoing caller tone
     const callerToneUrl = 'https://cdn.builder.io/o/assets%2Ffc8049673cdb4f1597f82a1bce1a2e4f%2F4245609d0c1a49b28b335ff394a24919?alt=media&token=63f139b2-8b3a-406c-90f2-2e4137b337bb&apiKey=fc8049673cdb4f1597f82a1bce1a2e4f';
     let callerTone = null;
