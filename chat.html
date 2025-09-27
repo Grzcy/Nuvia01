@@ -1050,18 +1050,39 @@
         }
       };
       pc.ontrack = (event) => {
-        if (event.streams && event.streams[0]) {
-          remoteVideo.srcObject = event.streams[0];
-          remoteVideo.style.display = 'block';
-          remoteStream = event.streams[0];
-        } else {
-          if (!remoteStream) {
-            remoteStream = new MediaStream();
-            remoteVideo.srcObject = remoteStream;
-            remoteVideo.style.display = 'block';
+        try{
+          const stream = (event.streams && event.streams[0]) ? event.streams[0] : null;
+          // If the incoming stream has video tracks, attach to remoteVideo. Otherwise attach audio to remoteAudio.
+          if (stream) {
+            const hasVideo = stream.getVideoTracks && stream.getVideoTracks().length > 0;
+            const hasAudio = stream.getAudioTracks && stream.getAudioTracks().length > 0;
+            if (hasVideo) {
+              remoteVideo.srcObject = stream;
+              remoteVideo.style.display = 'block';
+              // ensure remoteAudio is not playing same stream
+              try{ remoteAudio.srcObject = null; }catch(_){ }
+              remoteStream = stream;
+            } else if (hasAudio) {
+              // attach to audio element for audio-only calls
+              try{ remoteAudio.srcObject = stream; remoteAudio.play().catch(()=>{}); }catch(_){ }
+              remoteStream = stream;
+              // hide remoteVideo for audio-only calls
+              try{ remoteVideo.style.display = 'none'; }catch(_){ }
+            } else {
+              // no tracks, fallback to old behavior
+              remoteVideo.srcObject = stream;
+              remoteVideo.style.display = 'block';
+              remoteStream = stream;
+            }
+          } else {
+            // event.track-based handling
+            if (!remoteStream){ remoteStream = new MediaStream(); }
+            remoteStream.addTrack(event.track);
+            const hasVideo = remoteStream.getVideoTracks().length>0;
+            if (hasVideo){ remoteVideo.srcObject = remoteStream; remoteVideo.style.display = 'block'; }
+            else { remoteAudio.srcObject = remoteStream; remoteAudio.play().catch(()=>{}); try{ remoteVideo.style.display = 'none'; }catch(_){ } }
           }
-          remoteStream.addTrack(event.track);
-        }
+        }catch(e){ console.error('ontrack error', e); }
       };
       return pc;
     }
