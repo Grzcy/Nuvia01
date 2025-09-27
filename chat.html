@@ -1088,13 +1088,25 @@
       stopRingTone();
       // Unsubscribe per-call listener if present
       try{ if (perCallUnsub){ perCallUnsub(); perCallUnsub = null; } }catch(_){ }
-      try{ if (incomingListenerUnsub){ incomingListenerUnsub(); /* keep incomingListenerUnsub null if you want to stop listening globally */ } }catch(_){ }
+      try{ if (incomingListenerUnsub){ incomingListenerUnsub(); incomingListenerUnsub = null; } }catch(_){ }
+      try{ if (incomingGlobalUnsub){ incomingGlobalUnsub(); incomingGlobalUnsub = null; } }catch(_){ }
       if (peerConnection){ try{ peerConnection.close(); }catch(_){} peerConnection=null; }
       if (localStream){ try{ localStream.getTracks().forEach(t=>t.stop()); }catch(_){} localStream=null; }
       if (remoteStream){ try{ remoteStream.getTracks().forEach(t=>t.stop()); }catch(_){} remoteStream=null; }
       localVideo.srcObject = null;
       remoteVideo.srcObject = null;
-      if (updateFirestore && callRef){ try{ await updateDoc(callRef, { status: 'ended', lastActivity: serverTimestamp() }); }catch(_){ } }
+      if (updateFirestore && callRef){
+        try{ await updateDoc(callRef, { status: 'ended', lastActivity: serverTimestamp() }); }catch(_){ }
+        // try to clear inCall flags for both participants
+        try{
+          const callDoc = await getDoc(callRef).catch(()=>null);
+          const cdata = callDoc && callDoc.exists()? callDoc.data() : null;
+          const a = cdata && cdata.callerId ? cdata.callerId : null;
+          const b = cdata && cdata.receiverId ? cdata.receiverId : null;
+          if (a){ try{ await updateDoc(doc(db,'artifacts',appId,'public','data','users', a), { inCall:false }); }catch(_){ } }
+          if (b){ try{ await updateDoc(doc(db,'artifacts',appId,'public','data','users', b), { inCall:false }); }catch(_){ } }
+        }catch(_){ }
+      }
       try{ if (currentUser){ await updateDoc(doc(db,'artifacts',appId,'public','data','users', currentUser.uid), { inCall:false }); } }catch(_){ }
       callRef = null;
       callState = 'idle';
