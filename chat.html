@@ -177,7 +177,10 @@
     .video-bottom-controls .call-actions{display:flex;gap:12px;justify-content:center;align-items:center}
     .video-bottom-controls .call-actions button{width:56px;height:56px;border-radius:50%;border:1px solid var(--border-light);background:rgba(255,255,255,.06);color:var(--white);cursor:pointer}
 
-    #callOverlay.voice-call .video-streams{display:none}
+    /* For voice calls, hide the remote video element but keep the video container and bottom controls visible */
+    #callOverlay.voice-call #remoteVideo{display:none}
+    #callOverlay.voice-call .video-bottom-controls{display:flex}
+    #callOverlay.voice-call .video-streams{background:linear-gradient(180deg,#2b0b3a,#18051e)}
     @media (max-width:720px){
       #callOverlay .video-streams{width:calc(100vw - 24px);height:calc(52vh);}
       #remoteVideo{object-fit:cover}
