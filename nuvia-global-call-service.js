@@ -10,6 +10,7 @@ function escapeHtml(s){ return String(s||'').replace(/[&<>\"]+/g, c => ({'&':'&a
 
 function createNotificationOverlay(callId, callData){
   try{
+    const own = document.getElementById('callOverlay'); try{ if (own && own.classList.contains('active')) { return; } }catch(_){ }
     const existing = document.getElementById('globalCallNotification'); if(existing) existing.remove();
     const overlay = document.createElement('div'); overlay.id = 'globalCallNotification';
     const isVideo = (callData && (callData.callType === 'video' || callData.video === true));
@@ -65,14 +66,14 @@ function createNotificationOverlay(callId, callData){
 
     // Browser notification when hidden
     try{ if (document.hidden && window.Notification && Notification.permission === 'granted'){ const isVid = (callData && (callData.callType === 'video' || callData.video === true)); new Notification(isVid ? 'Incoming video call' : 'Incoming voice call', { body: callerName ? `From ${callerName}` : 'Incoming call' }); } }catch(_){ }
-    setTimeout(()=>{ if(document.getElementById('globalCallNotification')){ declineGlobalCall(callId).catch(()=>{}); removeOverlay(); }}, 30000);
+    setTimeout(()=>{ if(document.getElementById('globalCallNotification')){ declineGlobalCall(callId).catch(()=>{}); removeOverlay(); }}, 45000);
   }catch(e){ console.error('NUVIA_ERROR createNotificationOverlay', e); }
 }
 
 function removeOverlay(){ try{ const el=document.getElementById('globalCallNotification'); if(el) el.remove(); const s=document.getElementById('globalCallNotificationStyles'); if(s) s.remove(); }catch(e){}
 }
 
-function playRingtone(){ try{ const audio = new Audio('https://cdn.builder.io/o/assets%2Fc5542eb63b564e86810556e73a332186%2Ffa802bcb41594c9fb0a35733e90d7cee?alt=media&token=adb505bd-f77f-4840-a50b-b13c040e0dca&apiKey=c5542eb63b564e86810556e73a332186'); audio.loop = true; audio.volume = 0.35; audio.play().catch(()=>{}); setTimeout(()=>{ try{ audio.pause(); }catch(e){} }, 20000);}catch(e){} }
+function playRingtone(){ try{ if (typeof window !== 'undefined' && window.__nuviaCallRinging === true) return; const audio = new Audio('https://cdn.builder.io/o/assets%2Fc5542eb63b564e86810556e73a332186%2Ffa802bcb41594c9fb0a35733e90d7cee?alt=media&token=adb505bd-f77f-4840-a50b-b13c040e0dca&apiKey=c5542eb63b564e86810556e73a332186'); audio.loop = true; audio.volume = 0.35; audio.play().catch(()=>{}); setTimeout(()=>{ try{ audio.pause(); }catch(e){} }, 20000);}catch(e){} }
 
 async function answerGlobalCall(callerId){ try{ if(!callerId) return; window.location.href = `/chat.html?partnerId=${encodeURIComponent(callerId)}`; }catch(e){ console.error('NUVIA_ERROR answerGlobalCall', e); } }
 
