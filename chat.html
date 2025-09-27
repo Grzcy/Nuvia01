@@ -1138,7 +1138,7 @@
         currentCallType = callType;
         callState = 'calling';
         isIncomingCall = false;
-        setOverlayFor(callType, `Calling…`);
+        setOverlayFor(callType, `Calling��`);
         const profileSnap = await getDoc(doc(db,'artifacts',appId,'public','data','users', partnerId)).catch(()=>null);
         const partnerName = profileSnap && profileSnap.exists()? (profileSnap.data().username || 'User') : 'User';
         callStatusText.textContent = `Calling ${partnerName}…`;
@@ -1170,6 +1170,7 @@
           callerCandidates: [],
           receiverCandidates: []
         });
+        console.log('Outgoing call created', callRef.id, { callerId: currentUser.uid, receiverId: partnerId, callType });
 
         const offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
