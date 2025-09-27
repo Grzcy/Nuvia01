@@ -1274,7 +1274,17 @@
         stopCallerTone();
         stopRingTone();
         if (callRef){
-          try{ await updateDoc(callRef, { status: reason || 'ended', lastActivity: serverTimestamp(), endedBy: currentUser? currentUser.uid : null }); }catch(e){ console.error('terminateCall updateDoc failed', e); }
+          try{
+            // read call doc to know participants
+            const callDoc = await getDoc(callRef).catch(()=>null);
+            const callData = callDoc && callDoc.exists() ? callDoc.data() : null;
+            const callerId = callData && callData.callerId ? callData.callerId : null;
+            const receiverId = callData && callData.receiverId ? callData.receiverId : null;
+            await updateDoc(callRef, { status: reason || 'ended', lastActivity: serverTimestamp(), endedBy: currentUser? currentUser.uid : null, endedAt: serverTimestamp() });
+            // ensure both users have inCall=false
+            if (callerId){ try{ await updateDoc(doc(db,'artifacts',appId,'public','data','users', callerId), { inCall:false }); }catch(_){ } }
+            if (receiverId){ try{ await updateDoc(doc(db,'artifacts',appId,'public','data','users', receiverId), { inCall:false }); }catch(_){ } }
+          }catch(e){ console.error('terminateCall updateDoc failed', e); }
         }
       }catch(e){ console.error('terminateCall error', e); }
       try{ await endCall(false); }catch(_){ }
