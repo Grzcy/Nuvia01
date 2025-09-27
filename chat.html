@@ -1100,6 +1100,7 @@
       toggleVideoBtn.style.display = 'none';
       localVideo.style.display = 'none';
       remoteVideo.style.display = 'none';
+      try{ if (remoteAudio){ remoteAudio.pause(); remoteAudio.srcObject = null; } }catch(_){ }
     }
 
     async function endCall(updateFirestore = true){
