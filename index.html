@@ -5457,6 +5457,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
     <div id="callOverlay" role="dialog" aria-modal="true" aria-labelledby="callStatusText">
         <div class="video-streams">
             <video id="remoteVideo" autoplay playsinline preload="metadata" aria-label="Remote Video Stream"></video>
+            <audio id="remoteAudio" autoplay playsinline aria-hidden="true"></audio>
             <video id="localVideo" autoplay playsinline muted preload="metadata" aria-label="Local Video Stream"></video>
         </div>
         <i id="callStatusIcon" class="fas fa-phone" role="img" aria-label="Call Status Icon"></i>
@@ -7235,6 +7236,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 endCallBtn = document.getElementById('endCallBtn');
                 localVideo = document.getElementById('localVideo');
                 remoteVideo = document.getElementById('remoteVideo');
+                remoteAudio = document.getElementById('remoteAudio');
                 toggleMuteBtn = document.getElementById('toggleMuteBtn');
                 toggleVideoBtn = document.getElementById('toggleVideoBtn');
 
@@ -7253,7 +7255,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         let chatLink, findFriendsLink, friendsLink, groupsLink, jcoinShopLink;
         let maintenanceOverlay, maintenanceAnnouncementText, callOverlay, callStatusIcon;
         let callStatusText, callTimerDisplay, callActions, acceptCallBtn, declineCallBtn;
-        let endCallBtn, localVideo, remoteVideo, toggleMuteBtn, toggleVideoBtn;
+        let endCallBtn, localVideo, remoteVideo, remoteAudio, toggleMuteBtn, toggleVideoBtn;
 
         // --- Global State Variables ---
         let currentUser = null; // Stores the Firebase authenticated user object.
@@ -11360,6 +11362,16 @@ async function fetchAndDisplayPosts() {
          * Sets up onicecandidate and ontrack event handlers.
          * @returns {RTCPeerConnection} The initialized peer connection.
          */
+        function ensureRemoteAudioPlaying(){
+            try{
+                if(!remoteAudio) return;
+                remoteAudio.muted = false;
+                remoteAudio.volume = 1.0;
+                const tryPlay = ()=>{ try{ remoteAudio.play().catch(()=>{}); }catch(_){} };
+                try{ remoteAudio.addEventListener('canplay', tryPlay, { once: true }); }catch(_){ }
+                tryPlay();
+            }catch(_){ }
+        }
         function createPeerConnection() {
             const pc = new RTCPeerConnection(iceServers);
 
@@ -11384,19 +11396,40 @@ async function fetchAndDisplayPosts() {
 
             // Event handler for remote media tracks.
             pc.ontrack = (event) => {
-                // Attach remote stream to remoteVideo element.
+                // Prefer audio element for voice-only calls; video element when video track exists
                 if (event.streams && event.streams[0]) {
-                    remoteVideo.srcObject = event.streams[0];
-                    remoteVideo.style.display = 'block';
-                    remoteStream = event.streams[0];
+                    const stream = event.streams[0];
+                    const hasVideo = typeof stream.getVideoTracks === 'function' && stream.getVideoTracks().length > 0;
+                    const hasAudio = typeof stream.getAudioTracks === 'function' && stream.getAudioTracks().length > 0;
+                    if (hasVideo) {
+                        remoteVideo.srcObject = stream;
+                        remoteVideo.style.display = 'block';
+                        try{ if (remoteAudio) remoteAudio.srcObject = null; }catch(_){ }
+                        remoteStream = stream;
+                    } else if (hasAudio) {
+                        if (remoteAudio) { remoteAudio.srcObject = stream; ensureRemoteAudioPlaying(); }
+                        try{ remoteVideo.style.display = 'none'; }catch(_){ }
+                        remoteStream = stream;
+                    } else {
+                        remoteVideo.srcObject = stream;
+                        remoteVideo.style.display = 'block';
+                        remoteStream = stream;
+                    }
                 } else {
                     // Fallback for older browsers or individual tracks.
                     if (!remoteStream) {
                         remoteStream = new MediaStream();
-                        remoteVideo.srcObject = remoteStream;
-                        remoteVideo.style.display = 'block';
                     }
                     remoteStream.addTrack(event.track);
+                    const hasVideo = remoteStream.getVideoTracks().length > 0;
+                    if (hasVideo) {
+                        remoteVideo.srcObject = remoteStream;
+                        remoteVideo.style.display = 'block';
+                        try{ if (remoteAudio) remoteAudio.srcObject = null; }catch(_){ }
+                    } else {
+                        if (remoteAudio) { remoteAudio.srcObject = remoteStream; ensureRemoteAudioPlaying(); }
+                        try{ remoteVideo.style.display = 'none'; }catch(_){ }
+                    }
                 }
             };
 
@@ -11513,6 +11546,7 @@ async function fetchAndDisplayPosts() {
             callState = 'connected'; // Update call state.
             callStatusText.textContent = `Call with ${recipientUserProfileData?.username || 'user'}`;
             callTimerDisplay.style.display = 'block'; // Show call timer.
+            try{ ensureRemoteAudioPlaying(); }catch(_){ }
             callActions.style.display = 'flex'; // Show call action buttons.
             acceptCallBtn.style.display = 'none';
             declineCallBtn.style.display = 'none';
@@ -11718,6 +11752,7 @@ async function fetchAndDisplayPosts() {
             // Reset video element sources and display.
             localVideo.srcObject = null;
             remoteVideo.srcObject = null;
+            try{ if (remoteAudio){ remoteAudio.pause(); remoteAudio.srcObject = null; } }catch(_){ }
             localVideo.style.display = 'none';
             remoteVideo.style.display = 'none';
 
