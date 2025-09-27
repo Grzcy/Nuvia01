@@ -811,10 +811,15 @@
       try{ if(!user){ await signInAnonymously(auth); return; } currentUser = user; try { localStorage.setItem('nuvia_auth_status','authenticated'); } catch(_){ } registerSession(auth, db, appId).catch(()=>{}); await loadConversations(); await tryOpenFromQuery(); }catch(e){ console.error(e); }
     });
 
-    backToListBtn?.addEventListener('click', ()=>{ try{ document.body.classList.remove('show-chat'); }catch(_){ } try{ currentPartnerId = null; window.__currentPartnerId = null; // restart global listener
-        try{ if (incomingListenerUnsub){ incomingListenerUnsub(); incomingListenerUnsub = null; } }catch(_){ }
-        try{ if (incomingGlobalUnsub){ incomingGlobalUnsub(); incomingGlobalUnsub = null; } }catch(_){ }
-        startGlobalIncomingListener(); }catch(_){ } });
+    backToListBtn?.addEventListener('click', ()=>{
+      try{ document.body.classList.remove('show-chat'); }catch(_){ }
+      try{
+        currentPartnerId = null;
+        window.__currentPartnerId = null;
+        window.stopIncomingCallListeners?.();
+        window.startGlobalIncomingListener?.(); // restart global listener
+      }catch(_){ }
+    });
 
     function autoResize(){ try{ messageInput.style.height=''; messageInput.style.height = Math.min(180, Math.max(44, messageInput.scrollHeight)) + 'px'; }catch(_){}}
     messageInput?.addEventListener('input', ()=>{ autoResize(); notifyTyping(); });
