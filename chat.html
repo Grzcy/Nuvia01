@@ -18,6 +18,8 @@
   <link rel="canonical" href="https://nuvia.app/chat.html" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="prefetch" href="/index.html" />
+  <link rel="prerender" href="/index.html" />
+  <script type="speculationrules">{"prerender":[{"source":"list","urls":["/index.html"]}],"prefetch":[{"source":"list","urls":["/index.html"]}]}</script>
   <meta name="theme-color" content="#1a1a2e" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -262,6 +264,9 @@
 <body class="theme-dark-mode">
 
   <a href="/index.html" class="home-back-fab" aria-label="Back to Home"><i class="fas fa-arrow-left"></i></a>
+  <style>
+    .home-back-fab::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(255,255,255,.15);box-shadow:0 0 12px rgba(0,213,255,.35),0 0 12px rgba(255,46,146,.35);pointer-events:none}
+  </style>
   <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true"></div>
   <aside id="sidebarNav" class="sidebar-hidden" role="navigation" aria-label="Main Navigation">
     <div class="sidebar-header">
@@ -1660,5 +1665,22 @@
     }catch(_){ }
   </script>
 
-  </body>
+    <script>
+    (function(){
+      try{
+        const btn=document.querySelector('.home-back-fab');
+        if(btn){
+          btn.addEventListener('click',function(e){
+            e.preventDefault();
+            try{
+              const ref=document.referrer?new URL(document.referrer, location.href):null;
+              if(ref && /\/index\.html$/.test(ref.pathname)) { history.back(); return; }
+            }catch(_){ }
+            window.location.replace('/index.html');
+          });
+        }
+      }catch(_){ }
+    })();
+  </script>
+</body>
 </html>
