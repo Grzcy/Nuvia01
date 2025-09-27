@@ -4649,6 +4649,74 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
     })();
     </script>
 
+    <header>
+        <div class="header-content-wrapper">
+            <!-- Sidebar Toggle Button in Header -->
+            <button id="sidebarToggleFab" aria-label="Toggle Navigation">
+                <i class="fas fa-bars"></i>
+            </button>
+            <a href="/index.html" class="logo">
+                <span>Nuvia</span>
+            </a>
+            <div id="nuvia3dArea" aria-hidden="true"></div>
+            <!-- Removed Header Navigation (Home, Profile) -->
+            <div class="user-profile-header">
+                <!-- Admin Icon Link (visible only to admin) -->
+                <a href="/admin.html" id="adminIconLink" aria-label="Admin Dashboard" style="display: none;">
+                    <i class="fas fa-user-cog"></i>
+                </a>
+                <!-- Notification Icon with Badge -->
+                <div class="notification-icon-wrapper">
+                    <a href="/notifications.html" id="notificationToggle" aria-label="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notificationCount">0</span>
+                    </a>
+                    <!-- Notification Dropdown -->
+                    <div id="notificationDropdown" class="notification-dropdown" style="display: none;">
+                        <div class="notification-header">
+                            <h3>Recent Notifications</h3>
+                            <a href="/notifications.html" class="view-all-link">View All</a>
+                        </div>
+                        <div id="notificationList" class="notification-list">
+                            <div class="notification-loading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Loading notifications...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Chat Icon in Header -->
+                <div class="notification-icon-wrapper">
+                    <a href="/chat.html" id="headerChatLink" aria-label="Chat">
+                        <!-- inline SVG chat bubble: deep blue body with three white dots -->
+                        <svg class="chat-icon-svg" width="36" height="36" viewBox="0 0 24 24" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+                          <g fill="none" fill-rule="evenodd">
+                            <path class="chat-bubble-body" d="M2 4.5C2 3.12 3.12 2 4.5 2h15C20.88 2 22 3.12 22 4.5v9c0 1.38-1.12 2.5-2.5 2.5H7.5L3 19.5V4.5z" fill="#007bff"/>
+                            <g class="chat-dots" transform="translate(6,7)" fill="#ffffff">
+                              <circle cx="2" cy="1.5" r="1.25" />
+                              <circle cx="7" cy="1.5" r="1.25" />
+                              <circle cx="12" cy="1.5" r="1.25" />
+                            </g>
+                          </g>
+                        </svg>
+                    </a>
+                </div>
+                <!-- Premium Request Button -->
+                <button id="premiumRequestBtn" class="premium-request-btn" aria-label="Request Premium Access" style="display:none;">
+                    <i class="fas fa-crown"></i>
+                    <span>Get Premium</span>
+                </button>
+
+                <!-- Profile Link with Picture and Name -->
+                <a href="./profile.html" id="profileLink" aria-label="View Profile">
+                    <img id="headerProfilePic" src="" alt="Profile Picture" loading="lazy" decoding="async">
+                    <i id="headerAvatarIcon" class="fas fa-user-circle" role="img" aria-label="User Avatar"></i>
+                    <span id="headerDisplayName">Loading...</span>
+                    <span id="headerPremiumBadge" class="premium-badge" style="display: none;"></span>
+                </a>
+            </div>
+        </div>
+    </header>
     <div class="secondary-header-bar" role="region" aria-label="Level, JCoins and rate">
       <div class="header-content-wrapper">
         <div id="homeChipsRow" class="home-chips-row" aria-live="polite">
