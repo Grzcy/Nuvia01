@@ -954,19 +954,21 @@
     <div class="video-streams">
       <video id="remoteVideo" autoplay playsinline></video>
       <video id="localVideo" autoplay playsinline muted></video>
-    </div>
-    <div class="call-status">
-      <i id="callStatusIcon" class="fas fa-phone call-status-icon"></i>
-      <h2 id="callStatusText" class="call-status-text">Preparing call…</h2>
-      <div id="callTimer" class="call-timer" style="display:none;">00:00</div>
-    </div>
-    <div class="call-actions" id="callActions">
-      <button id="acceptCallBtn" class="accept-call-btn" style="display:none;" aria-label="Accept Call"><i class="fas fa-phone"></i></button>
-      <button id="declineCallBtn" class="decline-call-btn" style="display:none;" aria-label="Decline Call"><i class="fas fa-phone-slash"></i></button>
-      <button id="cancelCallBtn" class="end-call-btn" style="display:none;" aria-label="Cancel Call"><i class="fas fa-phone-slash"></i></button>
-      <button id="toggleMuteBtn" class="toggle-mute-btn" style="display:none;" title="Mute/Unmute" aria-label="Toggle Mute"><i class="fas fa-microphone"></i></button>
-      <button id="toggleVideoBtn" class="toggle-video-btn" style="display:none;" title="Turn Video On/Off" aria-label="Toggle Video"><i class="fas fa-video"></i></button>
-      <button id="endCallBtn" class="end-call-btn" style="display:none;" aria-label="End Call"><i class="fas fa-phone-slash"></i></button>
+      <div class="video-bottom-controls">
+        <div class="call-status">
+          <i id="callStatusIcon" class="fas fa-phone call-status-icon"></i>
+          <h2 id="callStatusText" class="call-status-text">Preparing call…</h2>
+          <div id="callTimer" class="call-timer" style="display:none;">00:00</div>
+        </div>
+        <div class="call-actions" id="callActions">
+          <button id="acceptCallBtn" class="accept-call-btn" style="display:none;" aria-label="Accept Call"><i class="fas fa-phone"></i></button>
+          <button id="declineCallBtn" class="decline-call-btn" style="display:none;" aria-label="Decline Call"><i class="fas fa-phone-slash"></i></button>
+          <button id="cancelCallBtn" class="end-call-btn" style="display:none;" aria-label="Cancel Call"><i class="fas fa-phone-slash"></i></button>
+          <button id="toggleMuteBtn" class="toggle-mute-btn" style="display:none;" title="Mute/Unmute" aria-label="Toggle Mute"><i class="fas fa-microphone"></i></button>
+          <button id="toggleVideoBtn" class="toggle-video-btn" style="display:none;" title="Turn Video On/Off" aria-label="Toggle Video"><i class="fas fa-video"></i></button>
+          <button id="endCallBtn" class="end-call-btn" style="display:none;" aria-label="End Call"><i class="fas fa-phone-slash"></i></button>
+        </div>
+      </div>
     </div>
   </div>
 
