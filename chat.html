@@ -1110,6 +1110,7 @@
       localVideo.style.display = 'none';
       remoteVideo.style.display = 'none';
       try{ if (remoteAudio){ remoteAudio.pause(); remoteAudio.srcObject = null; } }catch(_){ }
+      try{ const cb = document.getElementById('callBanner'); if(cb) cb.style.display = 'none'; }catch(_){ }
     }
 
     async function endCall(updateFirestore = true){
