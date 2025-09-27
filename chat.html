@@ -1298,7 +1298,7 @@
         perCallUnsub = onSnapshot(callRef, async (docSnap)=>{
           if (!docSnap.exists()) { await endCall(false); return; }
           const data = docSnap.data();
-          if (data.status === 'declined' || data.status === 'busy' || data.status === 'no-answer') { await endCall(false); return; }
+          if (data.status === 'declined' || data.status === 'busy' || data.status === 'no-answer') { try{ const snap=await getDoc(callRef).catch(()=>null); const cdata=snap&&snap.exists()? snap.data(): null; await postCallSummaryOnce(callRef.id, cdata||{ callerId: currentUser?.uid, receiverId: (window.__currentPartnerId||null), callType: currentCallType, status: data.status }, data.status); }catch(_){ } await endCall(false); return; }
           if (data.answer && !peerConnection.currentRemoteDescription){
             try{
               stopCallerTone();
