@@ -1150,6 +1150,16 @@
       isIncomingCall = false;
       callDuration = 0;
       resetOverlay();
+      // Restart incoming call listeners so the user can receive new calls after this one ends
+      try{
+        const pid = (typeof window !== 'undefined' && (window.__currentPartnerId || (new URL(location.href).searchParams.get('partnerId')||''))) || '';
+        const inChat = (typeof document !== 'undefined' && document.body && document.body.classList && document.body.classList.contains('show-chat'));
+        if (pid && inChat && typeof window.startIncomingListenerForCurrentChat === 'function') {
+          window.startIncomingListenerForCurrentChat(pid);
+        } else if (typeof window.startGlobalIncomingListener === 'function') {
+          window.startGlobalIncomingListener();
+        }
+      }catch(_){ }
     }
 
     function updateTimer(){
@@ -1226,7 +1236,7 @@
         await peerConnection.setLocalDescription(offer);
         await updateDoc(callRef, { offer: { type: offer.type, sdp: offer.sdp } });
 
-        onSnapshot(callRef, async (docSnap)=>{
+        perCallUnsub = onSnapshot(callRef, async (docSnap)=>{
           if (!docSnap.exists()) { await endCall(false); return; }
           const data = docSnap.data();
           if (data.status === 'declined' || data.status === 'busy' || data.status === 'no-answer') { await endCall(false); return; }
@@ -1304,7 +1314,7 @@
           try{ await updateDoc(callRef, { callerCandidates: [] }); }catch(_){}
         }
 
-        onSnapshot(callRef, async (docSnap)=>{
+        perCallUnsub = onSnapshot(callRef, async (docSnap)=>{
           if (!docSnap.exists()) { await endCall(false); return; }
           const data = docSnap.data();
           if (Array.isArray(data.callerCandidates) && data.callerCandidates.length){
