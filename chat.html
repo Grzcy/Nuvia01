@@ -1460,6 +1460,12 @@
               setOverlayFor(currentCallType, `Incoming ${currentCallType} call…`);
               // populate banner
               try{ const bannerName = document.getElementById('callBannerName'); const bannerAvatar = document.getElementById('callBannerAvatar'); const callerName = data.callerUsername || data.callerDisplayName || data.callerName || 'Caller'; if(bannerName) bannerName.textContent = callerName; if(bannerAvatar) bannerAvatar.src = data.callerAvatar || `https://placehold.co/56x56/000/fff?text=${String(callerName).charAt(0).toUpperCase()}`; }catch(_){ }
+              // if avatar missing, try fetching caller user doc
+              try{
+                if (!data.callerAvatar && data.callerId){
+                  getDoc(doc(db,'artifacts',appId,'public','data','users', data.callerId)).then(snap=>{ if (snap && snap.exists()){ const md = snap.data(); try{ const bannerAvatar = document.getElementById('callBannerAvatar'); if(bannerAvatar) bannerAvatar.src = md.photoURL || md.profilePicId || bannerAvatar.src; const bannerName = document.getElementById('callBannerName'); if(bannerName) bannerName.textContent = md.displayName || md.username || bannerName.textContent; }catch(_){ } } }).catch(()=>{});
+                }
+              }catch(_){ }
               playRingTone();
               acceptCallBtn.style.display = 'block';
               declineCallBtn.style.display = 'block';
