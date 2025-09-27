@@ -1344,15 +1344,79 @@
     if (toggleMuteBtn) toggleMuteBtn.addEventListener('click', toggleMute);
     if (toggleVideoBtn) toggleVideoBtn.addEventListener('click', toggleVideo);
 
+    function startGlobalIncomingListener(){
+      try{
+        if (!currentUser) return;
+        // If partner-specific listener is active, don't start global
+        if (incomingListenerUnsub) return;
+        try{ if (incomingGlobalUnsub){ incomingGlobalUnsub(); incomingGlobalUnsub = null; } }catch(_){ }
+        const callsCol = collection(db,'artifacts',appId,'public','data','calls');
+        const q = query(callsCol, where('receiverId','==', currentUser.uid), where('status','==','ringing'));
+        incomingGlobalUnsub = onSnapshot(q, (snap)=>{
+          try{
+            if (snap.empty) return;
+            // If multiple calls, pick the first one not already handled
+            for (const d of snap.docs){
+              const data = d.data();
+              if (!d) continue;
+              // Ignore if already handling same call
+              if (callRef && callRef.id === d.id) continue;
+              console.log('Global incoming call detected', d.id, data);
+              // If we have a partner-specific listener for this caller, allow that to handle
+              const callerId = data.callerId;
+              const pid = window.__currentPartnerId || (new URL(location.href).searchParams.get('partnerId')||'');
+              if (pid && pid === callerId){
+                // let partner-specific handle it
+                continue;
+              }
+              // Otherwise show overlay for incoming call
+              // Unsubscribe any previous per-call listener
+              try{ if (perCallUnsub){ perCallUnsub(); perCallUnsub = null; } }catch(_){ }
+              callRef = d.ref;
+              isIncomingCall = true;
+              callState = 'ringing';
+              currentCallType = (data.callType === 'video') ? 'video' : 'voice';
+              setOverlayFor(currentCallType, `Incoming ${currentCallType} call…`);
+              playRingTone();
+              acceptCallBtn.style.display = 'block';
+              declineCallBtn.style.display = 'block';
+              if (cancelCallBtn) cancelCallBtn.style.display = 'none';
+              endCallBtn.style.display = 'none';
+              toggleMuteBtn.style.display = 'none';
+              toggleVideoBtn.style.display = 'none';
+
+              perCallUnsub = onSnapshot(callRef, (docSnap)=>{
+                try{
+                  if (!docSnap.exists()) { stopRingTone(); endCall(false); return; }
+                  const data2 = docSnap.data();
+                  if (data2.status && data2.status !== 'ringing' && callState === 'ringing'){
+                    stopRingTone();
+                  }
+                }catch(e){ console.error('perCallOnSnapshot error', e); }
+              });
+
+              break; // handle only first
+            }
+          }catch(e){ console.error('incomingGlobal listener error', e); }
+        }, (err)=>{ console.error('incomingGlobal onSnapshot error', err); });
+      }catch(e){ console.error('startGlobalIncomingListener failed', e); }
+    }
+
     onAuthStateChanged(auth, (user)=>{
       currentUser = user || null;
       const pid = window.__currentPartnerId || (new URL(location.href).searchParams.get('partnerId')||'');
-      if (user && pid) startIncomingListenerForCurrentChat(pid);
+      // Prefer partner-specific listener if partnerId present (user is viewing that chat), otherwise start global listener
+      try{ if (incomingListenerUnsub){ incomingListenerUnsub(); incomingListenerUnsub = null; } }catch(_){ }
+      try{ if (incomingGlobalUnsub){ incomingGlobalUnsub(); incomingGlobalUnsub = null; } }catch(_){ }
+      if (user){
+        if (pid) startIncomingListenerForCurrentChat(pid);
+        else startGlobalIncomingListener();
+      }
       console.log('Call module auth state changed. user=', user && user.uid, 'pid=', pid);
     });
 
     // Expose the function so other scripts (openThread) can attach the listener when a thread is opened
-    try{ window.startIncomingListenerForCurrentChat = startIncomingListenerForCurrentChat; }catch(_){ }
+    try{ window.startIncomingListenerForCurrentChat = startIncomingListenerForCurrentChat; window.startGlobalIncomingListener = startGlobalIncomingListener; }catch(_){ }
   </script>
 
   <script type="module" src="nuvia-global-call-service.js" defer></script>
