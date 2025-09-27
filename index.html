@@ -15424,6 +15424,7 @@ startPagePresence();
   if(toggleMuteBtn) toggleMuteBtn.addEventListener('click', toggleMute);
   if(toggleVideoBtn) toggleVideoBtn.addEventListener('click', toggleVideo);
   onAuthStateChanged(auth,(user)=>{ currentUser=user||null; try{ if(incomingGlobalUnsub){ incomingGlobalUnsub(); incomingGlobalUnsub=null; } }catch(_){ } if(user){ startGlobalIncomingListener(); } });
+  setTimeout(()=>{ try{ if(!currentUser){ const u=getAuth().currentUser; if(u){ currentUser=u; startGlobalIncomingListener(); } } }catch(_){ } }, 1200);
 </script>
 </body>
 </html>
