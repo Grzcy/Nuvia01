@@ -443,37 +443,51 @@
     // Header controls (notifications, profile, logout)
     const headerControls = document.querySelector('.header-user-controls');
     function buildHeaderUI(user){
-      if (!headerControls) return;
-      headerControls.innerHTML = `
-        <div class="notification-icon-wrapper">
-          <a href="/notifications.html" aria-label="Notifications">
-            <i class="fas fa-bell"></i>
-            <span class="notification-badge" id="notificationCount">0</span>
+      // If legacy container exists, render the legacy header UI
+      if (headerControls){
+        headerControls.innerHTML = `
+          <div class="notification-icon-wrapper">
+            <a href="/notifications.html" aria-label="Notifications">
+              <i class="fas fa-bell"></i>
+              <span class="notification-badge" id="notificationCount">0</span>
+            </a>
+          </div>
+          <a href="/profile.html" id="profileLink" aria-label="Profile">
+            <img id="headerProfilePic" src="" alt="User Profile Picture">
+            <i id="headerAvatarIcon" class="fas fa-user-circle"></i>
           </a>
-        </div>
-        <a href="/profile.html" id="profileLink" aria-label="Profile">
-          <img id="headerProfilePic" src="" alt="User Profile Picture">
-          <i id="headerAvatarIcon" class="fas fa-user-circle"></i>
-        </a>
-        <button id="logoutButton" aria-label="Logout" disabled>
-          <i class="fas fa-sign-out-alt"></i>
-        </button>
-      `;
-      const headerProfilePic = document.getElementById('headerProfilePic');
-      const headerAvatarIcon = document.getElementById('headerAvatarIcon');
-      const headerLogoutButton = document.getElementById('logoutButton');
-      const profileLink = document.getElementById('profileLink');
-      if (user){
-        const usernameInitial = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
-        displayProfilePicture(headerProfilePic, headerAvatarIcon, user.photoURL || null, usernameInitial, 'w_70,h_70,c_fill,g_face,r_max');
-        if (profileLink) profileLink.href = `/profile.html?userId=${user.uid}`;
-        if (headerLogoutButton){
-          headerLogoutButton.disabled = false;
-          headerLogoutButton.addEventListener('click', async ()=>{
-            try{ await signOut(auth); window.location.href = '/login.html'; }catch(_){ }
-          });
+          <button id="logoutButton" aria-label="Logout" disabled>
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        `;
+        const headerProfilePic = document.getElementById('headerProfilePic');
+        const headerAvatarIcon = document.getElementById('headerAvatarIcon');
+        const headerLogoutButton = document.getElementById('logoutButton');
+        const profileLink = document.getElementById('profileLink');
+        if (user){
+          const usernameInitial = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
+          displayProfilePicture(headerProfilePic, headerAvatarIcon, user.photoURL || null, usernameInitial, 'w_70,h_70,c_fill,g_face,r_max');
+          if (profileLink) profileLink.href = `/profile.html?userId=${user.uid}`;
+          if (headerLogoutButton){
+            headerLogoutButton.disabled = false;
+            headerLogoutButton.addEventListener('click', async ()=>{
+              try{ await signOut(auth); window.location.href = '/login.html'; }catch(_){ }
+            });
+          }
         }
+        return;
       }
+      // Fallback: update existing index header elements directly
+      try{
+        const headerProfilePic = document.getElementById('headerProfilePic');
+        const headerAvatarIcon = document.getElementById('headerAvatarIcon');
+        const profileLink = document.getElementById('profileLink');
+        if (user){
+          const usernameInitial = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
+          displayProfilePicture(headerProfilePic, headerAvatarIcon, user.photoURL || null, usernameInitial, 'w_70,h_70,c_fill,g_face,r_max');
+          if (profileLink) profileLink.href = `/profile.html?userId=${user.uid}`;
+        }
+      }catch(_){ }
     }
 
     function fetchNotificationCount(userId){
