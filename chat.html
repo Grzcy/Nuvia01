@@ -1313,6 +1313,7 @@
               toggleVideoBtn.style.display = (callType==='video') ? 'block' : 'none';
               clearInterval(callDurationInterval);
               callDurationInterval = setInterval(updateTimer, 1000);
+              try{ await updateDoc(callRef, { connectedAt: serverTimestamp(), lastActivity: serverTimestamp() }); }catch(_){ }
             }catch(_){}
           }
           if (Array.isArray(data.receiverCandidates) && data.receiverCandidates.length){
