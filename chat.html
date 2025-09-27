@@ -265,8 +265,7 @@
 
   <a href="/index.html" class="home-back-fab" aria-label="Back to Home"><i class="fas fa-arrow-left"></i></a>
   <style>
-    .home-back-fab{display:none}
-    body.show-chat .home-back-fab{display:inline-flex}
+    .home-back-fab{display:inline-flex}
     .home-back-fab::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(255,255,255,.15);box-shadow:0 0 12px rgba(0,213,255,.35),0 0 12px rgba(255,46,146,.35);pointer-events:none}
   </style>
   <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true"></div>
@@ -307,6 +306,7 @@
       <section class="panel messages-panel" aria-label="Messages">
         <div class="chat-header">
           <button id="backToListBtn" class="icon-button" type="button" aria-label="Back to friends"><i class="fas fa-arrow-left"></i></button>
+          <button id="backHomeBtn" class="icon-button" type="button" aria-label="Back to home" title="Home"><i class="fas fa-home"></i></button>
           <img id="chatPartnerAvatar" alt="Partner avatar" class="conv-avatar chat-partner-avatar">
           <i id="chatPartnerIcon" class="fas fa-user-circle chat-partner-icon"></i>
           <div>
@@ -1681,6 +1681,23 @@
             window.location.replace('/index.html');
           });
         }
+      }catch(_){ }
+    })();
+  </script>
+  <script>
+    (function(){
+      function goHome(){
+        try{
+          const ref=document.referrer?new URL(document.referrer, location.href):null;
+          if(ref && /\/index\.html$/.test(ref.pathname)) { history.back(); return; }
+        }catch(_){ }
+        window.location.replace('/index.html');
+      }
+      try{
+        const fab=document.querySelector('.home-back-fab');
+        if(fab){ fab.addEventListener('click', function(e){ e.preventDefault(); goHome(); }); }
+        const headerBtn=document.getElementById('backHomeBtn');
+        if(headerBtn){ headerBtn.addEventListener('click', function(e){ e.preventDefault(); goHome(); }); }
       }catch(_){ }
     })();
   </script>
