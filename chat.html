@@ -1561,6 +1561,7 @@
                   }
                   if (data2.status && ['ended','declined','cancelled','no-answer','busy'].includes(data2.status)){
                     stopRingTone();
+                    try{ const snap=docSnap; const cdata=snap&&snap.exists()? snap.data(): null; await postCallSummaryOnce(callRef.id, cdata||{ callerId: cdata?.callerId, receiverId: cdata?.receiverId, callType: currentCallType, status: data2.status }, data2.status); }catch(_){ }
                     endCall(false);
                   }
                 }catch(e){ console.error('perCallOnSnapshot error', e); }
