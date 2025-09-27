@@ -699,6 +699,8 @@
       try{ if(lastSeenTimer){ clearInterval(lastSeenTimer); lastSeenTimer=null; } }catch(_){}
       partnerLastActiveMs = 0;
       currentThreadId = threadId; currentPartnerId = partnerId; try{ window.__currentPartnerId = partnerId; }catch(_){ } markThreadAsRead(threadId, Date.now()); partnerLastActiveMs = 0;
+      // Ensure incoming call listener is active for this partner while viewing thread
+      try{ if (typeof window.startIncomingListenerForCurrentChat === 'function'){ window.startIncomingListenerForCurrentChat(partnerId); } }catch(_){ }
       const partner = partnerId ? await fetchUserProfile(partnerId) : null;
       chatTitle.textContent = partner?.username || 'Chat';
       partnerLastActiveMs = partner && partner.lastActive ? tsToMs(partner.lastActive) : 0;
@@ -991,6 +993,9 @@
     let isMuted = false;
     let isVideoOff = false;
     let currentUser = null;
+    // Incoming call listener unsubs
+    let incomingListenerUnsub = null;
+    let perCallUnsub = null;
 
     // Outgoing caller tone
     const callerToneUrl = 'https://cdn.builder.io/o/assets%2Ffc8049673cdb4f1597f82a1bce1a2e4f%2F4245609d0c1a49b28b335ff394a24919?alt=media&token=63f139b2-8b3a-406c-90f2-2e4137b337bb&apiKey=fc8049673cdb4f1597f82a1bce1a2e4f';
@@ -1057,10 +1062,14 @@
     }
 
     async function endCall(updateFirestore = true){
+      console.log('END_CALL invoked, updateFirestore=', updateFirestore);
       clearInterval(callDurationInterval);
       clearTimeout(callTimeoutId);
       stopCallerTone();
       stopRingTone();
+      // Unsubscribe per-call listener if present
+      try{ if (perCallUnsub){ perCallUnsub(); perCallUnsub = null; } }catch(_){ }
+      try{ if (incomingListenerUnsub){ incomingListenerUnsub(); /* keep incomingListenerUnsub null if you want to stop listening globally */ } }catch(_){ }
       if (peerConnection){ try{ peerConnection.close(); }catch(_){} peerConnection=null; }
       if (localStream){ try{ localStream.getTracks().forEach(t=>t.stop()); }catch(_){} localStream=null; }
       if (remoteStream){ try{ remoteStream.getTracks().forEach(t=>t.stop()); }catch(_){} remoteStream=null; }
@@ -1250,34 +1259,50 @@
     }
 
     function startIncomingListenerForCurrentChat(partnerId){
-      if (!partnerId) return;
-      const callsCol = collection(db,'artifacts',appId,'public','data','calls');
-      const q = query(callsCol, where('receiverId','==', currentUser.uid), where('status','==','ringing'), where('callerId','==', partnerId));
-      onSnapshot(q, async (snap)=>{
-        if (snap.empty) return;
-        const d = snap.docs[0];
-        callRef = d.ref;
-        isIncomingCall = true;
-        callState = 'ringing';
-        currentCallType = (d.data().callType === 'video') ? 'video' : 'voice';
-        setOverlayFor(currentCallType, `Incoming ${currentCallType} call…`);
-        playRingTone();
-        acceptCallBtn.style.display = 'block';
-        declineCallBtn.style.display = 'block';
-        if (cancelCallBtn) cancelCallBtn.style.display = 'none';
-        endCallBtn.style.display = 'none';
-        toggleMuteBtn.style.display = 'none';
-        toggleVideoBtn.style.display = 'none';
+      try{
+        console.log('startIncomingListenerForCurrentChat', partnerId);
+        if (!partnerId || !currentUser) return;
+        // Clear existing incoming listener
+        try{ if (incomingListenerUnsub){ incomingListenerUnsub(); incomingListenerUnsub = null; } }catch(_){ }
+        const callsCol = collection(db,'artifacts',appId,'public','data','calls');
+        const q = query(callsCol, where('receiverId','==', currentUser.uid), where('status','==','ringing'), where('callerId','==', partnerId));
+        incomingListenerUnsub = onSnapshot(q, async (snap)=>{
+          try{
+            if (snap.empty) return;
+            const d = snap.docs[0];
+            if (!d) return;
+            // If already handling this callRef, ignore
+            if (callRef && callRef.id === d.id && callState === 'ringing') return;
+            // Unsubscribe any previous per-call listener
+            try{ if (perCallUnsub){ perCallUnsub(); perCallUnsub = null; } }catch(_){ }
+            callRef = d.ref;
+            isIncomingCall = true;
+            callState = 'ringing';
+            currentCallType = (d.data().callType === 'video') ? 'video' : 'voice';
+            console.log('Incoming call detected', d.id, d.data());
+            setOverlayFor(currentCallType, `Incoming ${currentCallType} call…`);
+            playRingTone();
+            acceptCallBtn.style.display = 'block';
+            declineCallBtn.style.display = 'block';
+            if (cancelCallBtn) cancelCallBtn.style.display = 'none';
+            endCallBtn.style.display = 'none';
+            toggleMuteBtn.style.display = 'none';
+            toggleVideoBtn.style.display = 'none';
 
-        // Stop ringing when call status changes or call is removed
-        onSnapshot(callRef, (docSnap)=>{
-          if (!docSnap.exists()) { stopRingTone(); endCall(false); return; }
-          const data = docSnap.data();
-          if (data.status && data.status !== 'ringing' && callState === 'ringing'){
-            stopRingTone();
-          }
-        });
-      });
+            // Stop ringing when call status changes or call is removed
+            perCallUnsub = onSnapshot(callRef, (docSnap)=>{
+              try{
+                if (!docSnap.exists()) { stopRingTone(); endCall(false); return; }
+                const data = docSnap.data();
+                if (data.status && data.status !== 'ringing' && callState === 'ringing'){
+                  stopRingTone();
+                }
+              }catch(e){ console.error('perCallOnSnapshot error', e); }
+            });
+
+          }catch(e){ console.error('incoming listener error', e); }
+        }, (err) => { console.error('incoming listener onSnapshot error', err); });
+      }catch(e){ console.error('startIncomingListenerForCurrentChat failed', e); }
     }
 
     if (audioCallBtn) audioCallBtn.addEventListener('click', ()=> startOutgoingCall('voice'));
@@ -1293,7 +1318,11 @@
       currentUser = user || null;
       const pid = window.__currentPartnerId || (new URL(location.href).searchParams.get('partnerId')||'');
       if (user && pid) startIncomingListenerForCurrentChat(pid);
+      console.log('Call module auth state changed. user=', user && user.uid, 'pid=', pid);
     });
+
+    // Expose the function so other scripts (openThread) can attach the listener when a thread is opened
+    try{ window.startIncomingListenerForCurrentChat = startIncomingListenerForCurrentChat; }catch(_){ }
   </script>
 
   <script type="module" src="nuvia-global-call-service.js" defer></script>
