@@ -1548,8 +1548,12 @@
     });
 
     // Expose the function so other scripts (openThread) can attach the listener when a thread is opened
-    try{ window.startIncomingListenerForCurrentChat = startIncomingListenerForCurrentChat; window.startGlobalIncomingListener = startGlobalIncomingListener; }catch(_){ }
+    try{
+      window.startIncomingListenerForCurrentChat = startIncomingListenerForCurrentChat;
+      window.startGlobalIncomingListener = startGlobalIncomingListener;
+      window.stopIncomingCallListeners = stopIncomingCallListeners;
+    }catch(_){ }
   </script>
 
-</body>
+  </body>
 </html>
