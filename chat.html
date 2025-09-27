@@ -1322,7 +1322,7 @@
             }
             try{ await updateDoc(callRef, { receiverCandidates: [] }); }catch(_){}
           }
-          if (data.status === 'ended' && callState !== 'idle'){ await endCall(false); }
+          if (data.status === 'ended' && callState !== 'idle'){ try{ const snap=await getDoc(callRef).catch(()=>null); const cdata=snap&&snap.exists()? snap.data(): null; await postCallSummaryOnce(callRef.id, cdata||{ callerId: currentUser?.uid, receiverId: (window.__currentPartnerId||null), callType: currentCallType, status: 'ended' }, 'ended'); }catch(_){ } await endCall(false); }
         });
 
         callTimeoutId = setTimeout(async ()=>{
@@ -1384,7 +1384,7 @@
             for (const c of data.callerCandidates){ try{ await peerConnection.addIceCandidate(new RTCIceCandidate(c)); }catch(_){ } }
             try{ await updateDoc(callRef, { callerCandidates: [] }); }catch(_){}
           }
-          if (data.status === 'ended' && callState !== 'idle'){ await endCall(false); }
+          if (data.status === 'ended' && callState !== 'idle'){ try{ const snap=await getDoc(callRef).catch(()=>null); const cdata=snap&&snap.exists()? snap.data(): null; await postCallSummaryOnce(callRef.id, cdata||{ callerId: currentUser?.uid, receiverId: (window.__currentPartnerId||null), callType: currentCallType, status: 'ended' }, 'ended'); }catch(_){ } await endCall(false); }
         });
 
       }catch(e){
