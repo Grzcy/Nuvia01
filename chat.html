@@ -1042,6 +1042,17 @@
     function playRingTone(){ try{ if(!ringTone){ ringTone = new Audio(ringToneUrl); ringTone.loop = true; ringTone.preload = 'auto'; } ringTone.currentTime = 0; ringTone.play().catch(()=>{}); }catch(_){} }
     function stopRingTone(){ try{ if(ringTone){ ringTone.pause(); ringTone.currentTime = 0; } }catch(_){} }
 
+    function ensureRemoteAudioPlaying(){
+      try{
+        if(!remoteAudio) return;
+        remoteAudio.muted = false;
+        remoteAudio.volume = 1.0;
+        const tryPlay = ()=>{ try{ remoteAudio.play().catch(()=>{}); }catch(_){} };
+        try{ remoteAudio.addEventListener('canplay', tryPlay, { once: true }); }catch(_){ }
+        tryPlay();
+      }catch(_){ }
+    }
+
     const iceServers = { iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },
       { urls: 'stun:stun1.l.google.com:19302' },
@@ -1077,7 +1088,7 @@
               remoteStream = stream;
             } else if (hasAudio) {
               // attach to audio element for audio-only calls
-              try{ remoteAudio.srcObject = stream; remoteAudio.play().catch(()=>{}); }catch(_){ }
+              try{ remoteAudio.srcObject = stream; ensureRemoteAudioPlaying(); }catch(_){ }
               remoteStream = stream;
               // hide remoteVideo for audio-only calls
               try{ remoteVideo.style.display = 'none'; }catch(_){ }
@@ -1093,7 +1104,7 @@
             remoteStream.addTrack(event.track);
             const hasVideo = remoteStream.getVideoTracks().length>0;
             if (hasVideo){ remoteVideo.srcObject = remoteStream; remoteVideo.style.display = 'block'; }
-            else { remoteAudio.srcObject = remoteStream; remoteAudio.play().catch(()=>{}); try{ remoteVideo.style.display = 'none'; }catch(_){ } }
+            else { remoteAudio.srcObject = remoteStream; ensureRemoteAudioPlaying(); try{ remoteVideo.style.display = 'none'; }catch(_){ } }
           }
         }catch(e){ console.error('ontrack error', e); }
       };
@@ -1236,6 +1247,7 @@
         await peerConnection.setLocalDescription(offer);
         await updateDoc(callRef, { offer: { type: offer.type, sdp: offer.sdp } });
 
+        try{ if (perCallUnsub){ perCallUnsub(); perCallUnsub = null; } }catch(_){ }
         perCallUnsub = onSnapshot(callRef, async (docSnap)=>{
           if (!docSnap.exists()) { await endCall(false); return; }
           const data = docSnap.data();
@@ -1247,6 +1259,7 @@
               callState = 'connected';
               callStatusText.textContent = `Call connected`;
               callTimerDisplay.style.display = 'block';
+        try{ ensureRemoteAudioPlaying(); }catch(_){ }
               if (cancelCallBtn) cancelCallBtn.style.display = 'none';
               endCallBtn.style.display = 'block';
               toggleMuteBtn.style.display = 'block';
@@ -1283,6 +1296,7 @@
         stopRingTone();
         callState = 'connected';
         callTimerDisplay.style.display = 'block';
+        try{ ensureRemoteAudioPlaying(); }catch(_){ }
         acceptCallBtn.style.display = 'none';
         declineCallBtn.style.display = 'none';
         if (cancelCallBtn) cancelCallBtn.style.display = 'none';
@@ -1314,6 +1328,7 @@
           try{ await updateDoc(callRef, { callerCandidates: [] }); }catch(_){}
         }
 
+        try{ if (perCallUnsub){ perCallUnsub(); perCallUnsub = null; } }catch(_){ }
         perCallUnsub = onSnapshot(callRef, async (docSnap)=>{
           if (!docSnap.exists()) { await endCall(false); return; }
           const data = docSnap.data();
