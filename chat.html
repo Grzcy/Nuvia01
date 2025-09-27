@@ -1444,6 +1444,8 @@
               callState = 'ringing';
               currentCallType = (data.callType === 'video') ? 'video' : 'voice';
               setOverlayFor(currentCallType, `Incoming ${currentCallType} call…`);
+              // populate banner
+              try{ const bannerName = document.getElementById('callBannerName'); const bannerAvatar = document.getElementById('callBannerAvatar'); const callerName = data.callerUsername || data.callerDisplayName || data.callerName || 'Caller'; if(bannerName) bannerName.textContent = callerName; if(bannerAvatar) bannerAvatar.src = data.callerAvatar || `https://placehold.co/56x56/000/fff?text=${String(callerName).charAt(0).toUpperCase()}`; }catch(_){ }
               playRingTone();
               acceptCallBtn.style.display = 'block';
               declineCallBtn.style.display = 'block';
