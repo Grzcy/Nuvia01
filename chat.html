@@ -1369,7 +1369,7 @@
         await peerConnection.setRemoteDescription(new RTCSessionDescription(callData.offer));
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
-        await updateDoc(callRef, { status:'accepted', answer: { type: answer.type, sdp: answer.sdp }, lastActivity: serverTimestamp() });
+        await updateDoc(callRef, { status:'accepted', answer: { type: answer.type, sdp: answer.sdp }, lastActivity: serverTimestamp(), connectedAt: serverTimestamp() });
 
         if (Array.isArray(callData.callerCandidates) && callData.callerCandidates.length){
           for (const c of callData.callerCandidates){ try{ await peerConnection.addIceCandidate(new RTCIceCandidate(c)); }catch(_){ } }
