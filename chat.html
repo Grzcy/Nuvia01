@@ -335,7 +335,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
     import { getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, serverTimestamp, onSnapshot, query, where, orderBy, limit, deleteDoc } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
     import { registerSession } from './assets/js/session-manager.js';
     import { getCloudinaryImageUrl, displayProfilePicture } from './assets/js/avatar-utils.js';
@@ -377,6 +377,56 @@
     const imageViewer = document.getElementById('imageViewer');
     const imageViewerImg = document.getElementById('imageViewerImg');
     const imageViewerClose = document.getElementById('imageViewerClose');
+
+    // Header controls (notifications, profile, logout)
+    const headerControls = document.querySelector('.header-user-controls');
+    function buildHeaderUI(user){
+      if (!headerControls) return;
+      headerControls.innerHTML = `
+        <div class="notification-icon-wrapper">
+          <a href="/notifications.html" aria-label="Notifications">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" id="notificationCount">0</span>
+          </a>
+        </div>
+        <a href="/profile.html" id="profileLink" aria-label="Profile">
+          <img id="headerProfilePic" src="" alt="User Profile Picture">
+          <i id="headerAvatarIcon" class="fas fa-user-circle"></i>
+        </a>
+        <button id="logoutButton" aria-label="Logout" disabled>
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      `;
+      const headerProfilePic = document.getElementById('headerProfilePic');
+      const headerAvatarIcon = document.getElementById('headerAvatarIcon');
+      const headerLogoutButton = document.getElementById('logoutButton');
+      const profileLink = document.getElementById('profileLink');
+      if (user){
+        const usernameInitial = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
+        displayProfilePicture(headerProfilePic, headerAvatarIcon, user.photoURL || null, usernameInitial, 'w_70,h_70,c_fill,g_face,r_max');
+        if (profileLink) profileLink.href = `/profile.html?userId=${user.uid}`;
+        if (headerLogoutButton){
+          headerLogoutButton.disabled = false;
+          headerLogoutButton.addEventListener('click', async ()=>{
+            try{ await signOut(auth); window.location.href = '/login.html'; }catch(_){ }
+          });
+        }
+      }
+    }
+
+    function fetchNotificationCount(userId){
+      try{
+        const c = collection(db, 'artifacts', appId, 'users', userId, 'notifications');
+        const q = query(c, where('read','==', false));
+        onSnapshot(q, (snap)=>{
+          const el = document.getElementById('notificationCount');
+          if (!el) return;
+          const n = snap.size;
+          if (n>0){ el.textContent = String(n); el.style.display = 'flex'; }
+          else { el.style.display = 'none'; }
+        }, ()=>{ const el = document.getElementById('notificationCount'); if (el) el.style.display='none'; });
+      }catch(_){ }
+    }
 
     function closeImageViewer(){ try{ if(imageViewer){ imageViewer.classList.remove('show'); imageViewer.setAttribute('aria-hidden','true'); } if(imageViewerImg){ imageViewerImg.removeAttribute('src'); } document.body.style.overflow=''; }catch(_){}}
     function openImageViewer(src, altText){ try{ if(!src || !imageViewer || !imageViewerImg) return; imageViewerImg.src=src; imageViewerImg.alt=altText||'Profile picture'; imageViewer.classList.add('show'); imageViewer.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }catch(_){}}
@@ -807,7 +857,7 @@
 
     async function tryOpenFromQuery(){ const pid=getQueryParam('partnerId'); if(!pid || !currentUser) return; try{ const tid=await ensureThreadWith(pid); await loadConversations(); await openThread(tid, pid); try{ document.body.classList.add('show-chat'); }catch(_){ } }catch(_){ } }
 
-    onAuthStateChanged(auth, async (user) => {
+    onAuthStateChanged(auth, async (user) => { if (user) { buildHeaderUI(user); fetchNotificationCount(user.uid); } else { if (headerControls) headerControls.innerHTML = ''; }
       try{ if(!user){ await signInAnonymously(auth); return; } currentUser = user; try { localStorage.setItem('nuvia_auth_status','authenticated'); } catch(_){ } registerSession(auth, db, appId).catch(()=>{}); await loadConversations(); await tryOpenFromQuery(); }catch(e){ console.error(e); }
     });
 
