@@ -1482,15 +1482,16 @@
 
     onAuthStateChanged(auth, (user)=>{
       currentUser = user || null;
-      const pid = window.__currentPartnerId || (new URL(location.href).searchParams.get('partnerId')||'');
-      // Prefer partner-specific listener if partnerId present (user is viewing that chat), otherwise start global listener
+      const urlPid = (new URL(location.href).searchParams.get('partnerId')||'');
+      const pid = (document.body.classList && document.body.classList.contains('show-chat')) ? (window.__currentPartnerId || urlPid) : '';
+      // Prefer partner-specific listener if partnerId present (user is actively viewing that chat), otherwise start global listener
       try{ if (incomingListenerUnsub){ incomingListenerUnsub(); incomingListenerUnsub = null; } }catch(_){ }
       try{ if (incomingGlobalUnsub){ incomingGlobalUnsub(); incomingGlobalUnsub = null; } }catch(_){ }
       if (user){
         if (pid) startIncomingListenerForCurrentChat(pid);
         else startGlobalIncomingListener();
       }
-      console.log('Call module auth state changed. user=', user && user.uid, 'pid=', pid);
+      console.log('Call module auth state changed. user=', user && user.uid, 'pid=', pid, 'urlPid=', urlPid);
     });
 
     // Expose the function so other scripts (openThread) can attach the listener when a thread is opened
