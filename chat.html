@@ -1031,6 +1031,43 @@
     let isMuted = false;
     let isVideoOff = false;
     let currentUser = null;
+
+    function makeThreadId(a, b){ try{ const x=String(a||''); const y=String(b||''); return x<y?`${x}_${y}`:`${y}_${x}`; }catch(_){ return `${a||''}_${b||''}`; } }
+    function formatDuration(sec){ const s=Math.max(0,Math.floor(Number(sec)||0)); const m=Math.floor(s/60).toString().padStart(2,'0'); const r=(s%60).toString().padStart(2,'0'); return `${m}:${r}`; }
+
+    async function postCallSummaryOnce(callId, callData, reason){
+      try{
+        if(!callData) return;
+        const callerId = callData.callerId, receiverId = callData.receiverId;
+        if(!callerId || !receiverId) return;
+        const threadId = makeThreadId(callerId, receiverId);
+        const callType = (callData.callType === 'video') ? 'Video' : 'Voice';
+        let durationSec = callDuration>0 ? callDuration : 0;
+        try{
+          const connectedAt = callData.connectedAt && (callData.connectedAt.toMillis? callData.connectedAt.toMillis(): (callData.connectedAt.seconds? callData.connectedAt.seconds*1000: 0));
+          const endedAt = callData.endedAt && (callData.endedAt.toMillis? callData.endedAt.toMillis(): (callData.endedAt.seconds? callData.endedAt.seconds*1000: 0));
+          if(!durationSec && connectedAt && endedAt){ durationSec = Math.max(0, Math.floor((endedAt - connectedAt)/1000)); }
+        }catch(_){ }
+        let text = '';
+        const r = String(reason||callData.status||'').toLowerCase();
+        if (r === 'declined') text = `${callType} call declined`;
+        else if (r === 'cancelled') text = `${callType} call cancelled`;
+        else if (r === 'no-answer') text = `Missed ${callType.toLowerCase()} call`;
+        else if (r === 'busy') text = `${callType} call busy`;
+        else if (durationSec>0) text = `${callType} call ended — ${formatDuration(durationSec)}`;
+        else text = `${callType} call ended`;
+        await setDoc(doc(db,'artifacts',appId,'public','data','dm_threads', threadId), { participants:[callerId, receiverId], createdAt: serverTimestamp() }, { merge:true });
+        await setDoc(doc(db,'artifacts',appId,'public','data','dm_threads', threadId, 'messages', `call_${callId}`), { type:'text', text, senderId: currentUser && currentUser.uid ? currentUser.uid : (callerId||receiverId), createdAt: serverTimestamp(), meta:{ callId, callType: callData.callType||'voice', reason: r, durationSec: Math.max(0, durationSec) } }, { merge:true });
+        await updateDoc(doc(db,'artifacts',appId,'public','data','dm_threads', threadId), { updatedAt: serverTimestamp(), lastMessage: { text, senderId: currentUser && currentUser.uid ? currentUser.uid : (callerId||receiverId), ts: serverTimestamp() } });
+        try{
+          const users = [callerId, receiverId];
+          for (const uid of users){
+            await setDoc(doc(db, 'artifacts', appId, 'users', uid, 'notifications', `call_${callId}_${uid}`), { type:'call_summary', text, callId, callType: callData.callType||'voice', durationSec: Math.max(0, durationSec), read: false, createdAt: serverTimestamp() }, { merge:true });
+          }
+        }catch(_){ }
+      }catch(e){ console.error('postCallSummaryOnce error', e); }
+    }
+
     // Incoming call listener unsubs
     let incomingListenerUnsub = null; // listener scoped to current partner
     let incomingGlobalUnsub = null; // listener for any incoming calls when no partner selected
