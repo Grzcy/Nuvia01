@@ -3788,134 +3788,6 @@
             color: var(--text-light);
         }
 
-        /* Call Overlay Styles (NEW) */
-        #callOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            color: var(--white);
-            font-family: 'Poppins', sans-serif;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease;
-        }
-        #callOverlay .call-status-icon {
-            font-size: 5rem;
-            color: var(--accent-color);
-            margin-bottom: 20px;
-            /* Animation for calling/ringing state */
-            animation: pulse-color 2s infinite alternate;
-        }
-        /* New animation for call icon when active */
-        @keyframes pulse-color {
-            0% { color: var(--accent-color); }
-            100% { color: var(--pink); }
-        }
-        #callOverlay .call-status-text {
-            font-size: 2rem;
-            font-weight: 800;
-            margin-bottom: 10px;
-        }
-        #callOverlay .call-timer {
-            font-size: 1.5rem;
-            color: var(--text-light);
-            margin-bottom: 30px;
-        }
-        #callOverlay .call-actions {
-            display: flex;
-            gap: 20px;
-            margin-top: 20px;
-        }
-        #callOverlay .call-actions button {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            color: var(--white);
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        #callOverlay .call-actions button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-        }
-        #callOverlay .call-actions button.accept-call-btn {
-            background: #28a745;
-        }
-        #callOverlay .call-actions button.decline-call-btn,
-        #callOverlay .call-actions button.end-call-btn {
-            background: var(--delete-button-color);
-        }
-        #callOverlay .call-actions button.toggle-mute-btn {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        #callOverlay .call-actions button.toggle-mute-btn.active {
-            background: #ccc; /* Grey when muted */
-            color: #333;
-        }
-        #callOverlay .call-actions button.toggle-video-btn {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        #callOverlay .call-actions button.toggle-video-btn.active {
-            background: #ccc; /* Grey when video off */
-            color: #333;
-        }
-
-        /* Video elements within call overlay */
-        #callOverlay .video-streams {
-            position: relative;
-            width: 90%;
-            max-width: 800px;
-            height: 50%;
-            max-height: 450px;
-            background: #000;
-            border-radius: 15px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.6);
-        }
-        #remoteVideo {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            background-color: #000;
-            display: none; /* Hidden by default until stream is active */
-        }
-        #localVideo {
-            position: absolute;
-            bottom: 15px;
-            right: 15px;
-            width: 120px;
-            height: 90px;
-            border-radius: 10px;
-            object-fit: cover;
-            border: 2px solid var(--accent-color);
-            background-color: #333;
-            z-index: 1;
-            transform: scaleX(-1); /* Mirror local video */
-            display: none; /* Hidden by default until stream is active */
-        }
-        /* For voice calls, hide only the video elements but keep the container available for audio */
-        #callOverlay.voice-call #remoteVideo,
-        #callOverlay.voice-call #localVideo {
-            display: none;
-        }
         /* Responsive Adjustments */
         @media (max-width: 600px) {
             header .header-content-wrapper {
@@ -5345,7 +5217,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                         
                         <div class="premium-tier-option" data-tier="elite">
                             <div class="tier-header">
-                                <span class="tier-badge">�� Elite</span>
+                                <span class="tier-badge">���� Elite</span>
                                 <span class="tier-price">$39.99/month</span>
                             </div>
                             <ul class="tier-features">
@@ -5454,24 +5326,6 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         <i class="fas fa-tools" role="img" aria-label="Maintenance Icon"></i>
         <h2 id="maintenanceOverlayTitle">Maintenance Mode</h2>
         <p id="maintenanceAnnouncementText">Nuvia is currently undergoing scheduled maintenance. We'll be back online shortly!</p>
-    </div>
-    <!-- Call Overlay (NEW) -->
-    <div id="callOverlay" role="dialog" aria-modal="true" aria-labelledby="callStatusText">
-        <div class="video-streams">
-            <video id="remoteVideo" autoplay playsinline preload="metadata" aria-label="Remote Video Stream"></video>
-            <audio id="remoteAudio" autoplay playsinline aria-hidden="true"></audio>
-            <video id="localVideo" autoplay playsinline muted preload="metadata" aria-label="Local Video Stream"></video>
-        </div>
-        <i id="callStatusIcon" class="fas fa-phone" role="img" aria-label="Call Status Icon"></i>
-        <p id="callStatusText" class="call-status-text">Calling...</p>
-        <p id="callTimer" class="call-timer" style="display: none;" aria-live="polite">00:00</p>
-        <div class="call-actions" id="callActions">
-            <button id="acceptCallBtn" class="accept-call-btn" style="display: none;" aria-label="Accept Call"><i class="fas fa-phone"></i></button>
-            <button id="declineCallBtn" class="decline-call-btn" style="display: none;" aria-label="Decline Call"><i class="fas fa-phone-slash"></i></button>
-            <button id="toggleMuteBtn" class="toggle-mute-btn" style="display: none;" title="Mute/Unmute" aria-label="Toggle Mute"><i class="fas fa-microphone"></i></button>
-            <button id="toggleVideoBtn" class="toggle-video-btn" style="display: none;" title="Turn Video On/Off" aria-label="Toggle Video"><i class="fas fa-video"></i></button>
-            <button id="endCallBtn" class="end-call-btn" style="display: none;" aria-label="End Call"><i class="fas fa-phone-slash"></i></button>
-        </div>
     </div>
     <!-- Sidebar Navigation -->
     <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true"></div>
@@ -11893,20 +11747,7 @@ async function fetchAndDisplayPosts() {
                     const m = document.getElementById('walletLockedModal');
                     if (m) { m.classList.remove('active'); setTimeout(()=>m.style.display='none',200); }
                 });
-                                        // Start listening for calls only after settings are loaded and calls are enabled.
-                if (currentSystemSettings.enableCalls) {
-                    listenForIncomingCalls();
-                } else {
-                    if (unsubscribeCallListener) {
-                        unsubscribeCallListener(); // Stop listening if calls are disabled.
-                        unsubscribeCallListener = null;
-                    }
-                    if (callState !== 'idle') {
-                        endCall(false); // End any active call if feature is disabled.
-                        showMessageBox("Call ended: Calls are now disabled by administrators.", "warning", true, 5000);
-                    }
-                }
-
+                        
                 // Subscribe to theme entitlements for the authenticated user
                 const unsubscribeThemeEntitlements = subscribeThemeEntitlements(user.uid);
                 if (unsubscribeThemeEntitlements) {
@@ -12384,12 +12225,6 @@ async function fetchAndDisplayPosts() {
                 }
             });
 
-            // Call Overlay Button Listeners (NEW)
-            if (acceptCallBtn) acceptCallBtn.addEventListener('click', acceptCall);
-            if (declineCallBtn) declineCallBtn.addEventListener('click', declineCall);
-            if (endCallBtn) endCallBtn.addEventListener('click', () => endCall(true)); // Pass true to update Firestore.
-            if (toggleMuteBtn) toggleMuteBtn.addEventListener('click', toggleMute);
-            if (toggleVideoBtn) toggleVideoBtn.addEventListener('click', toggleVideo);
 
             // Notification Dropdown Event Listeners
             const notificationToggle = document.getElementById('notificationToggle');
@@ -14856,7 +14691,7 @@ async function fetchAndDisplayPosts() {
                     ${postData.premiumOptions ? `
                         <div class="premium-post-indicators">
                             ${postData.premiumOptions.priority ? '<span class="premium-indicator priority">⭐ Priority</span>' : ''}
-                            ${postData.premiumOptions.exclusive ? '<span class="premium-indicator exclusive">���� Exclusive</span>' : ''}
+                            ${postData.premiumOptions.exclusive ? '<span class="premium-indicator exclusive">����� Exclusive</span>' : ''}
                             ${postData.premiumOptions.custom ? '<span class="premium-indicator custom">✨ Custom</span>' : ''}
                         </div>
                     ` : ''}
