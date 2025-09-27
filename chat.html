@@ -165,13 +165,14 @@
   /* Call overlay styles */
     #callOverlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:2000;background:rgba(0,0,0,.75);backdrop-filter:blur(6px)}
     #callOverlay.active{display:flex}
-    #callOverlay .video-streams{position:relative;width:min(960px,92vw);height:min(540px,52vh);background:var(--card-background);border:1px solid var(--border-light);border-radius:16px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.45);margin-bottom:12px}
-    #remoteVideo{width:100%;height:100%;object-fit:contain;display:none;background:#000}
+    #callOverlay .video-streams{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;width:min(960px,92vw);height:min(540px,52vh);background:var(--card-background);border:1px solid var(--border-light);border-radius:16px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.45);margin-bottom:12px}
+    #remoteVideo{width:100%;height:100%;object-fit:contain;display:block;background:#000}
     /* Hide local preview by default (we send stream out but don't show local preview on screen) */
-    #localVideo{position:static;width:0;height:0;display:none;border-radius:10px;border:1px solid var(--border-light);max-width:0;max-height:0}
+    #localVideo{display:none!important;position:absolute;right:12px;bottom:12px;width:0;height:0;min-width:0;min-height:0;border-radius:10px;border:1px solid var(--border-light);opacity:0}
     #callOverlay.voice-call .video-streams{display:none}
     @media (max-width:720px){
       #callOverlay .video-streams{width:calc(100vw - 24px);height:calc(52vh);}
+      #remoteVideo{object-fit:cover}
     }
     #callOverlay .call-status{text-align:center;color:var(--white);margin-bottom:10px}
     #callOverlay .call-status-icon{font-size:3rem;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
