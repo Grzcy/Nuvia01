@@ -1236,10 +1236,23 @@
       }
     }
 
+    async function terminateCall(reason){
+      try{
+        console.log('terminateCall called, reason=', reason, 'callRef=', callRef && callRef.id);
+        stopCallerTone();
+        stopRingTone();
+        if (callRef){
+          try{ await updateDoc(callRef, { status: reason || 'ended', lastActivity: serverTimestamp(), endedBy: currentUser? currentUser.uid : null }); }catch(e){ console.error('terminateCall updateDoc failed', e); }
+        }
+      }catch(e){ console.error('terminateCall error', e); }
+      try{ await endCall(false); }catch(_){ }
+    }
+
     function declineIncomingCall(){
       if (!callRef) return;
+      // Stop ringing locally and signal decline to other side
       stopRingTone();
-      updateDoc(callRef, { status:'declined', lastActivity: serverTimestamp() }).catch(()=>{}).finally(()=> endCall(false));
+      terminateCall('declined');
     }
 
     function toggleMute(){
