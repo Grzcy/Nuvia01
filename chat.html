@@ -1405,6 +1405,7 @@
         if (!partnerId || !currentUser) return;
         // Clear existing incoming listener
         try{ if (incomingListenerUnsub){ incomingListenerUnsub(); incomingListenerUnsub = null; } }catch(_){ }
+        try{ if (incomingGlobalUnsub){ incomingGlobalUnsub(); incomingGlobalUnsub = null; } }catch(_){ }
         const callsCol = collection(db,'artifacts',appId,'public','data','calls');
         const q = query(callsCol, where('receiverId','==', currentUser.uid), where('status','==','ringing'), where('callerId','==', partnerId));
         incomingListenerUnsub = onSnapshot(q, async (snap)=>{
