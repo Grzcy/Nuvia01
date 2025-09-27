@@ -1352,6 +1352,11 @@
                 if (data.status && data.status !== 'ringing' && callState === 'ringing'){
                   stopRingTone();
                 }
+                // If call was ended/declined/cancelled while we are listening, end locally
+                if (data.status && ['ended','declined','cancelled','no-answer','busy'].includes(data.status)){
+                  stopRingTone();
+                  endCall(false);
+                }
               }catch(e){ console.error('perCallOnSnapshot error', e); }
             });
 
