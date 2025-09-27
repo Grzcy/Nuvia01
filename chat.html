@@ -1334,7 +1334,7 @@
             isIncomingCall = true;
             callState = 'ringing';
             currentCallType = (d.data().callType === 'video') ? 'video' : 'voice';
-            console.log('Incoming call detected', d.id, d.data());
+            console.log('Partner-specific incoming call detected', d.id, { callType: d.data().callType, callerId: d.data().callerId, receiverId: d.data().receiverId, status: d.data().status });
             setOverlayFor(currentCallType, `Incoming ${currentCallType} call…`);
             playRingTone();
             acceptCallBtn.style.display = 'block';
