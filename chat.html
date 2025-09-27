@@ -1146,10 +1146,8 @@
       clearTimeout(callTimeoutId);
       stopCallerTone();
       stopRingTone();
-      // Unsubscribe per-call listener if present
-      try{ if (perCallUnsub){ perCallUnsub(); perCallUnsub = null; } }catch(_){ }
-      try{ if (incomingListenerUnsub){ incomingListenerUnsub(); incomingListenerUnsub = null; } }catch(_){ }
-      try{ if (incomingGlobalUnsub){ incomingGlobalUnsub(); incomingGlobalUnsub = null; } }catch(_){ }
+      // Unsubscribe listeners and clean up snapshots
+      stopIncomingCallListeners();
       if (peerConnection){ try{ peerConnection.close(); }catch(_){} peerConnection=null; }
       if (localStream){ try{ localStream.getTracks().forEach(t=>t.stop()); }catch(_){} localStream=null; }
       if (remoteStream){ try{ remoteStream.getTracks().forEach(t=>t.stop()); }catch(_){} remoteStream=null; }
