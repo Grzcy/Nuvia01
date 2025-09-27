@@ -1328,6 +1328,7 @@
         callTimeoutId = setTimeout(async ()=>{
           if (callState === 'calling'){
             try{ await updateDoc(callRef, { status:'no-answer', lastActivity: serverTimestamp() }); }catch(_){}
+            try{ const snap=await getDoc(callRef).catch(()=>null); const cdata=snap&&snap.exists()? snap.data(): null; await postCallSummaryOnce(callRef.id, cdata||{ callerId: currentUser?.uid, receiverId: (window.__currentPartnerId||null), callType: currentCallType, status: 'no-answer' }, 'no-answer'); }catch(_){ }
             await endCall(false);
           }
         }, 20000);
