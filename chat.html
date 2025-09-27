@@ -1322,8 +1322,8 @@
     if (videoCallBtn) videoCallBtn.addEventListener('click', ()=> startOutgoingCall('video'));
     if (acceptCallBtn) acceptCallBtn.addEventListener('click', acceptIncomingCall);
     if (declineCallBtn) declineCallBtn.addEventListener('click', declineIncomingCall);
-    if (cancelCallBtn) cancelCallBtn.addEventListener('click', ()=> endCall(true));
-    if (endCallBtn) endCallBtn.addEventListener('click', ()=> endCall(true));
+    if (cancelCallBtn) cancelCallBtn.addEventListener('click', ()=> terminateCall('cancelled'));
+    if (endCallBtn) endCallBtn.addEventListener('click', ()=> terminateCall('ended'));
     if (toggleMuteBtn) toggleMuteBtn.addEventListener('click', toggleMute);
     if (toggleVideoBtn) toggleVideoBtn.addEventListener('click', toggleVideo);
 
