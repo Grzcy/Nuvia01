@@ -1406,6 +1406,7 @@
             const callerId = callData && callData.callerId ? callData.callerId : null;
             const receiverId = callData && callData.receiverId ? callData.receiverId : null;
             await updateDoc(callRef, { status: reason || 'ended', lastActivity: serverTimestamp(), endedBy: currentUser? currentUser.uid : null, endedAt: serverTimestamp() });
+            try{ await postCallSummaryOnce(callRef.id, { ...(callData||{}), callerId, receiverId }, reason||'ended'); }catch(_){ }
             // ensure both users have inCall=false
             if (callerId){ try{ await updateDoc(doc(db,'artifacts',appId,'public','data','users', callerId), { inCall:false }); }catch(_){ } }
             if (receiverId){ try{ await updateDoc(doc(db,'artifacts',appId,'public','data','users', receiverId), { inCall:false }); }catch(_){ } }
