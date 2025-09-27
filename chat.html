@@ -165,10 +165,18 @@
   /* Call overlay styles */
     #callOverlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:2000;background:rgba(0,0,0,.75);backdrop-filter:blur(6px)}
     #callOverlay.active{display:flex}
-    #callOverlay .video-streams{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;width:min(960px,92vw);height:min(540px,52vh);background:var(--card-background);border:1px solid var(--border-light);border-radius:16px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.45);margin-bottom:12px}
-    #remoteVideo{width:100%;height:100%;object-fit:contain;display:block;background:#000}
+    #callOverlay .video-streams{position:relative;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;width:min(1100px,96vw);height:min(640px,70vh);background:var(--card-background);border:1px solid var(--border-light);border-radius:16px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.45);margin-bottom:12px}
+    #remoteVideo{width:100%;height:100%;object-fit:cover;display:block;background:#000}
     /* Hide local preview by default (we send stream out but don't show local preview on screen) */
     #localVideo{display:none!important;position:absolute;right:12px;bottom:12px;width:0;height:0;min-width:0;min-height:0;border-radius:10px;border:1px solid var(--border-light);opacity:0}
+
+    /* Bottom controls inside the video container: status + actions */
+    .video-bottom-controls{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:12px;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,0.35));}
+    .video-bottom-controls .call-status{margin:0;color:var(--white);text-align:center}
+    .video-bottom-controls .call-status .call-status-icon{font-size:1.6rem}
+    .video-bottom-controls .call-actions{display:flex;gap:12px;justify-content:center;align-items:center}
+    .video-bottom-controls .call-actions button{width:56px;height:56px;border-radius:50%;border:1px solid var(--border-light);background:rgba(255,255,255,.06);color:var(--white);cursor:pointer}
+
     #callOverlay.voice-call .video-streams{display:none}
     @media (max-width:720px){
       #callOverlay .video-streams{width:calc(100vw - 24px);height:calc(52vh);}
