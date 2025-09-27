@@ -1198,7 +1198,18 @@
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
         const callsCol = collection(db,'artifacts',appId,'public','data','calls');
-        callRef = await addDoc(callsCol, {
+        // include caller metadata to help receivers show banner without extra lookups
+        let callerMeta = {};
+        try{
+          const myProfile = await getDoc(doc(db,'artifacts',appId,'public','data','users', currentUser.uid)).catch(()=>null);
+          if (myProfile && myProfile.exists()){
+            const md = myProfile.data();
+            callerMeta.callerUsername = md.username || md.displayName || null;
+            callerMeta.callerDisplayName = md.displayName || md.username || null;
+            callerMeta.callerAvatar = md.photoURL || md.profilePicId || null;
+          }
+        }catch(_){ }
+        callRef = await addDoc(callsCol, Object.assign({
           callerId: currentUser.uid,
           receiverId: partnerId,
           callType: callType,
@@ -1207,8 +1218,8 @@
           lastActivity: serverTimestamp(),
           callerCandidates: [],
           receiverCandidates: []
-        });
-        console.log('Outgoing call created', callRef.id, { callerId: currentUser.uid, receiverId: partnerId, callType });
+        }, callerMeta));
+        console.log('Outgoing call created', callRef.id, { callerId: currentUser.uid, receiverId: partnerId, callType, callerMeta });
 
         const offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
