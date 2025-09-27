@@ -1370,6 +1370,8 @@
             currentCallType = (d.data().callType === 'video') ? 'video' : 'voice';
             console.log('Partner-specific incoming call detected', d.id, { callType: d.data().callType, callerId: d.data().callerId, receiverId: d.data().receiverId, status: d.data().status });
             setOverlayFor(currentCallType, `Incoming ${currentCallType} call…`);
+            // populate banner with caller info if available
+            try{ const bannerName = document.getElementById('callBannerName'); const bannerAvatar = document.getElementById('callBannerAvatar'); const callerName = d.data().callerUsername || d.data().callerDisplayName || d.data().callerName || 'Caller'; if(bannerName) bannerName.textContent = callerName; if(bannerAvatar) bannerAvatar.src = d.data().callerAvatar || `https://placehold.co/56x56/000/fff?text=${String(callerName).charAt(0).toUpperCase()}`; }catch(_){ }
             playRingTone();
             acceptCallBtn.style.display = 'block';
             declineCallBtn.style.display = 'block';
