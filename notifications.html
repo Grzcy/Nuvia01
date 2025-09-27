@@ -272,6 +272,17 @@
       function loadCachedAndRender(){ try{ const raw = localStorage.getItem('nuvia_notifications_cache'); if(raw){ items = JSON.parse(raw).map(c=>({...c, createdAt:new Date(c.createdAt)})); } }catch(e){} render(); }
       function cacheItems(){ try{ localStorage.setItem('nuvia_notifications_cache', JSON.stringify(items.map(i=>({...i, createdAt: i.createdAt.getTime()})))); }catch(e){} }
       function updateGlobalUnreadCount(){ try{ const count = items.filter(i=>i.unread).length; localStorage.setItem('nuvia_unread_count', String(count)); try{ if(typeof window.updateNotificationBadge === 'function'){ window.updateNotificationBadge(count); } else { const el = document.getElementById('notificationCount'); if (el) { if (count>0){ el.textContent = String(count); el.style.display='flex'; } else { el.style.display='none'; } } } }catch(_){} try{ window.dispatchEvent(new CustomEvent('nuvia:unreadChange',{ detail: count })); }catch(_){} }catch(e){} }
+
+      // Provide a global fallback so other pages can update the header badge reliably
+      try{
+        if (!window.updateNotificationBadge || typeof window.updateNotificationBadge !== 'function'){
+          window.updateNotificationBadge = function(count){ try{ const el = document.getElementById('notificationCount'); if(el){ if(Number(count) > 0){ el.textContent = String(count); el.style.display = 'flex'; } else { el.style.display = 'none'; } } localStorage.setItem('nuvia_unread_count', String(count)); }catch(_){} };
+        }
+      }catch(_){ }
+
+      // Expose a small API for external scripts to interact with notifications UI
+      try{ window.nuviaNotificationsApi = window.nuviaNotificationsApi || { refresh: ()=>{ render(); }, markAllRead: async ()=>{ await markAllAsRead(); } }; }catch(_){ }
+
       function syncUrl(){ try{ const u = new URL(window.location.href); if(currentTab && currentTab!=='all') u.searchParams.set('tab', currentTab); else u.searchParams.delete('tab'); const qv = (searchInput.value||'').trim(); if(qv) u.searchParams.set('q', qv); else u.searchParams.delete('q'); window.history.replaceState({}, '', u.toString()); }catch(_){} }
       function getCurrentFilteredItems(){ const q = (searchInput.value||'').toLowerCase().trim(); return items.filter(i=> (currentTab==='all' || i.type===currentTab) && (!q || (`${i.text} ${i.actor.name}`.toLowerCase().includes(q))) && !prefs.muted.includes(i.threadId) && !isSnoozed(i.threadId)); }
 
