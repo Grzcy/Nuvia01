@@ -3911,8 +3911,10 @@
             transform: scaleX(-1); /* Mirror local video */
             display: none; /* Hidden by default until stream is active */
         }
-        #callOverlay.voice-call .video-streams {
-            display: none; /* Hide video streams for voice calls */
+        /* For voice calls, hide only the video elements but keep the container available for audio */
+        #callOverlay.voice-call #remoteVideo,
+        #callOverlay.voice-call #localVideo {
+            display: none;
         }
         /* Responsive Adjustments */
         @media (max-width: 600px) {
