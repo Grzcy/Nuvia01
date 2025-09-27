@@ -1270,7 +1270,7 @@
 
     function toggleVideo(){
       if (localStream){
-        localStream.getVideoTracks().forEach(t => { t.enabled = !t.enabled; isVideoOff = !t.enabled; localVideo.style.display = t.enabled ? 'block' : 'none'; });
+        localStream.getVideoTracks().forEach(t => { t.enabled = !t.enabled; isVideoOff = !t.enabled; /* keep local preview hidden */ });
         toggleVideoBtn.classList.toggle('active', isVideoOff);
         const i = toggleVideoBtn.querySelector('i'); if (i) i.className = isVideoOff ? 'fas fa-video-slash' : 'fas fa-video';
       }
