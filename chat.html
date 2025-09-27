@@ -17,6 +17,7 @@
   <meta name="twitter:image" content="https://cdn.builder.io/api/v1/image/assets%2Faaaa97254b5c4256a69bb9a7bf91885c%2F9ed0b590d93440a085bb243bd84ed163?format=png&width=1200">
   <link rel="canonical" href="https://nuvia.app/chat.html" />
   <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="prefetch" href="/index.html" />
   <meta name="theme-color" content="#1a1a2e" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -217,6 +218,11 @@
     /* Call overlay visual tweak to closer match provided UI */
     #callOverlay.active{background:linear-gradient(180deg,rgba(96,51,141,.85),rgba(27,10,48,.9))}
     #callOverlay .call-actions button{backdrop-filter:blur(6px)}
+    /* Floating Back-to-Home button */
+    .home-back-fab{position:fixed;top:12px;left:12px;width:40px;height:40px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(45deg,var(--blue),var(--pink));color:var(--white);border:0;cursor:pointer;text-decoration:none;z-index:120;box-shadow:0 4px 15px rgba(0,213,255,.3),0 4px 15px rgba(255,46,146,.3);transition:transform .2s ease}
+    .home-back-fab:hover{transform:scale(1.08)}
+    .home-back-fab:focus{outline:2px solid var(--accent-color);outline-offset:2px}
+    .home-back-fab i{font-size:1rem}
   </style>
 
   <script>
@@ -255,6 +261,7 @@
 </head>
 <body class="theme-dark-mode">
 
+  <a href="/index.html" class="home-back-fab" aria-label="Back to Home"><i class="fas fa-arrow-left"></i></a>
   <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true"></div>
   <aside id="sidebarNav" class="sidebar-hidden" role="navigation" aria-label="Main Navigation">
     <div class="sidebar-header">
