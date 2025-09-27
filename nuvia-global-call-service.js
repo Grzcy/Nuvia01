@@ -167,7 +167,10 @@ try{ if (window.Notification && Notification.permission === 'default'){ Notifica
 
 (function init(){
   try{
-    if ((typeof window !== 'undefined') && (window.__nuviaHasCallUI || document.getElementById('callOverlay'))){ try{ console.log('NUVIA global call service: call UI present, skipping service init'); }catch(_){ } return; }
+    if (typeof window !== 'undefined'){
+      const isChat = /chat\.html$/i.test(window.location.pathname || '');
+      if (isChat){ try{ console.log('NUVIA global call service: chat page has built-in call UI, skipping'); }catch(_){ } return; }
+    }
     const auth = getAuth();
     onAuthStateChanged(auth, (user) => {
       if(user && user.uid){
