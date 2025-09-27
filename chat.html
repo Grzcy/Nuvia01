@@ -992,6 +992,7 @@
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
     import { getFirestore, collection, addDoc, doc, getDoc, onSnapshot, updateDoc, serverTimestamp, query, where, arrayUnion } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
 
+    try{ window.__nuviaHasCallUI = true; }catch(_){ }
     const appId = (typeof window !== 'undefined' && window.__nuviaAppId) ? window.__nuviaAppId : (typeof __app_id !== 'undefined' ? __app_id : 'default-app-id');
     const auth = getAuth();
     const db = getFirestore();
@@ -1540,6 +1541,5 @@
     try{ window.startIncomingListenerForCurrentChat = startIncomingListenerForCurrentChat; window.startGlobalIncomingListener = startGlobalIncomingListener; }catch(_){ }
   </script>
 
-  <script type="module" src="nuvia-global-call-service.js" defer></script>
 </body>
 </html>
