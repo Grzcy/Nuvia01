@@ -1391,12 +1391,13 @@
               if (!d) continue;
               // Ignore if already handling same call
               if (callRef && callRef.id === d.id) continue;
-              console.log('Global incoming call detected', d.id, data);
+              console.log('Global incoming call detected', d.id, { callType: data.callType, callerId: data.callerId, receiverId: data.receiverId, status: data.status });
               // If we have a partner-specific listener for this caller, allow that to handle
               const callerId = data.callerId;
               const pid = window.__currentPartnerId || (new URL(location.href).searchParams.get('partnerId')||'');
               if (pid && pid === callerId){
                 // let partner-specific handle it
+                console.log('Global listener: skipping because partner-specific listener exists for caller', callerId);
                 continue;
               }
               // Otherwise show overlay for incoming call
