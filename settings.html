@@ -1081,12 +1081,6 @@ main { padding-top: 80px; }
                     <button id="contactSupportButton" class="action-button" aria-label="Contact Support">
                         <i class="fas fa-headset"></i> Contact Support
                     </button>
-                    <button id="changePasswordButton" class="action-button" aria-label="Change Password">
-                        <i class="fas fa-key"></i> Change Password
-                    </button>
-                    <button id="deleteAccountButton" class="action-button danger" aria-label="Delete Account">
-                        <i class="fas fa-trash-alt"></i> Delete Account
-                    </button>
                 </div>
 
                 <button id="saveSettingsButton" aria-label="Save Settings">
@@ -1129,7 +1123,7 @@ main { padding-top: 80px; }
         // Import Firebase modules (Updated to v11.6.1)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, runTransaction } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, runTransaction, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- Firebase & Canvas Environment Configuration ---
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
