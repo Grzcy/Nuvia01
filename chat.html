@@ -1174,6 +1174,7 @@
         const profileSnap = await getDoc(doc(db,'artifacts',appId,'public','data','users', partnerId)).catch(()=>null);
         const partnerName = profileSnap && profileSnap.exists()? (profileSnap.data().username || 'User') : 'User';
         callStatusText.textContent = `Calling ${partnerName}…`;
+        try{ const bannerName = document.getElementById('callBannerName'); const bannerAvatar = document.getElementById('callBannerAvatar'); if(bannerName) bannerName.textContent = partnerName; if(bannerAvatar) bannerAvatar.src = profileSnap && profileSnap.exists() && (profileSnap.data().photoURL || profileSnap.data().profilePicId) ? (profileSnap.data().photoURL || profileSnap.data().profilePicId) : `https://placehold.co/56x56/000/fff?text=${String(partnerName).charAt(0).toUpperCase()}`; }catch(_){ }
         playCallerTone();
         if (cancelCallBtn) cancelCallBtn.style.display = 'block';
         acceptCallBtn.style.display = 'none';
