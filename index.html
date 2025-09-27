@@ -5217,7 +5217,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                         
                         <div class="premium-tier-option" data-tier="elite">
                             <div class="tier-header">
-                                <span class="tier-badge">���� Elite</span>
+                                <span class="tier-badge">�� Elite</span>
                                 <span class="tier-price">$39.99/month</span>
                             </div>
                             <ul class="tier-features">
@@ -14691,7 +14691,7 @@ async function fetchAndDisplayPosts() {
                     ${postData.premiumOptions ? `
                         <div class="premium-post-indicators">
                             ${postData.premiumOptions.priority ? '<span class="premium-indicator priority">⭐ Priority</span>' : ''}
-                            ${postData.premiumOptions.exclusive ? '<span class="premium-indicator exclusive">����� Exclusive</span>' : ''}
+                            ${postData.premiumOptions.exclusive ? '<span class="premium-indicator exclusive">���� Exclusive</span>' : ''}
                             ${postData.premiumOptions.custom ? '<span class="premium-indicator custom">✨ Custom</span>' : ''}
                         </div>
                     ` : ''}
@@ -15263,7 +15263,7 @@ startPagePresence();
   onAuthStateChanged(auth,(user)=>{ currentUser=user||null; try{ if(incomingGlobalUnsub){ incomingGlobalUnsub(); incomingGlobalUnsub=null; } }catch(_){ } if(user){ startOnce(); } });
   let tries=0; const authRetry=setInterval(()=>{ try{ if(currentUser || ++tries>10){ clearInterval(authRetry); return; } const u=getAuth().currentUser; if(u){ currentUser=u; startOnce(); } }catch(_){ } }, 800);
 </script>
-<script type="module" src="nuvia-global-call-service.js" defer></script>
+
 </body>
 </html>
 <!-- test update -->
