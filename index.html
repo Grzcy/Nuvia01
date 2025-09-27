@@ -15426,6 +15426,7 @@ startPagePresence();
   onAuthStateChanged(auth,(user)=>{ currentUser=user||null; try{ if(incomingGlobalUnsub){ incomingGlobalUnsub(); incomingGlobalUnsub=null; } }catch(_){ } if(user){ startGlobalIncomingListener(); } });
   setTimeout(()=>{ try{ if(!currentUser){ const u=getAuth().currentUser; if(u){ currentUser=u; startGlobalIncomingListener(); } } }catch(_){ } }, 1200);
 </script>
+<script type="module" src="nuvia-global-call-service.js" defer></script>
 </body>
 </html>
 <!-- test update -->
