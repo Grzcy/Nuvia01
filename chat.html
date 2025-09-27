@@ -1009,7 +1009,8 @@
     let isVideoOff = false;
     let currentUser = null;
     // Incoming call listener unsubs
-    let incomingListenerUnsub = null;
+    let incomingListenerUnsub = null; // listener scoped to current partner
+    let incomingGlobalUnsub = null; // listener for any incoming calls when no partner selected
     let perCallUnsub = null;
 
     // Outgoing caller tone
