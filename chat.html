@@ -1205,8 +1205,8 @@
         callDurationInterval = setInterval(updateTimer, 1000);
 
         localStream = await navigator.mediaDevices.getUserMedia({ audio:true, video: currentCallType==='video' });
-        localVideo.srcObject = localStream;
-        if (currentCallType==='video'){ localVideo.style.display='block'; }
+        localVideo.srcObject = localStream; // don't show preview locally
+        try{ localVideo.style.display='none'; }catch(_){ }
 
         try{ await updateDoc(doc(db,'artifacts',appId,'public','data','users', currentUser.uid), { inCall:true }); }catch(_){ }
 
