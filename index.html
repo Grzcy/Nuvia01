@@ -11716,6 +11716,14 @@ async function fetchAndDisplayPosts() {
         /**
          * Updates the call timer display every second.
          */
+        function setInCallStatusSafe(flag){
+            try{
+                if (!currentUser || !currentUser.uid) return;
+                const ref = doc(db, "artifacts", appId, "public", "data", "users", currentUser.uid);
+                updateDoc(ref, { inCall: !!flag }).catch(()=>{});
+            }catch(_){ }
+        }
+
         function updateCallTimer() {
             callDuration++;
             const minutes = Math.floor(callDuration / 60);
@@ -11793,6 +11801,15 @@ async function fetchAndDisplayPosts() {
             }
             callRef = null; // Clear call reference.
         }
+        // Keep inCall=false when page is hidden and not in an active call
+        document.addEventListener('visibilitychange', ()=>{
+            try{
+                if (document.visibilityState === 'hidden' && callState !== 'connected' && callState !== 'calling' && callState !== 'ringing'){
+                    setInCallStatusSafe(false);
+                }
+            }catch(_){ }
+        });
+
         // --- Authentication State Listener ---
         // This is the primary entry point after the DOM is loaded.
         onAuthStateChanged(auth, async (user) => { try { document.documentElement.classList.add('auth-ready'); } catch(_){}
@@ -11826,6 +11843,8 @@ async function fetchAndDisplayPosts() {
                 isAuthReady = true; // Set to true early so profile fetching can proceed.
                 try { updateGuestHeaderKeysVisibility(false); } catch(e){}
                 await fetchAndDisplayHeaderProfile(user); // This sets currentUserProfileData and updates UI.
+                // Clear any stale inCall flag from previous sessions
+                setInCallStatusSafe(false);
                 try { document.documentElement.classList.remove('nuvia-loading'); } catch(_){}
                 console.log("Nuvia_DEBUG: Auth is ready. User ID:", currentUser.uid, "isAuthReady:", isAuthReady);
                 try{ // start session monitor to enforce single active session
