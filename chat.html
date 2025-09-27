@@ -167,8 +167,12 @@
     #callOverlay.active{display:flex}
     #callOverlay .video-streams{position:relative;width:min(960px,92vw);height:min(540px,52vh);background:var(--card-background);border:1px solid var(--border-light);border-radius:16px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.45);margin-bottom:12px}
     #remoteVideo{width:100%;height:100%;object-fit:cover;display:none}
-    #localVideo{position:absolute;right:10px;bottom:10px;width:160px;height:90px;object-fit:cover;border-radius:10px;border:1px solid var(--border-light);display:none}
+    #localVideo{position:absolute;right:10px;bottom:10px;width:160px;height:90px;object-fit:cover;border-radius:10px;border:1px solid var(--border-light);display:none;max-width:40%;max-height:30%;box-shadow:0 6px 18px rgba(0,0,0,.4)}
     #callOverlay.voice-call .video-streams{display:none}
+    @media (max-width:720px){
+      #localVideo{width:120px;height:72px;right:8px;bottom:8px;max-width:45%;max-height:35%}
+      #callOverlay .video-streams{width:calc(100vw - 24px);height:calc(52vh);}
+    }
     #callOverlay .call-status{text-align:center;color:var(--white);margin-bottom:10px}
     #callOverlay .call-status-icon{font-size:3rem;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
     #callOverlay .call-status-text{margin:6px 0;font-weight:800;font-family:Poppins,sans-serif}
