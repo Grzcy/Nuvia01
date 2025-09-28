@@ -6874,7 +6874,7 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
          */
         function displayProfilePicture(imgElement, iconElement, profilePicId, usernameInitial, transformations) {
             if (!imgElement) return;
-            const placeholder = '/assets/User.png';
+            const placeholder = 'https://cdn.builder.io/api/v1/image/assets%2Fdc1ea11569b147829fbadd1471027d2d%2F75ef042afa624d5c9e05f0933db7a146?format=webp&width=800';
             if (profilePicId) {
                 const imageUrl = getCloudinaryImageUrl(profilePicId, transformations);
                 imgElement.onerror = () => { imgElement.onerror = null; imgElement.src = placeholder; if (iconElement) iconElement.style.display = 'none'; };
