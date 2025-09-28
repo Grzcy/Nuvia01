@@ -1167,6 +1167,23 @@ main { padding-top: 80px; }
         </div>
     </div>
 
+    <div id="deleteAccountModal" class="modal-overlay" aria-modal="true" aria-hidden="true" role="dialog" aria-labelledby="deleteAccountTitle">
+        <div class="modal-content" role="document" tabindex="-1">
+            <h3 id="deleteAccountTitle">Delete your account?</h3>
+            <p id="deleteAccountDescription" class="modal-description">Deleting your account removes your conversations, coins, and profile permanently. Enter your password below to confirm.</p>
+            <div id="deleteAccountPasswordGroup" class="password-confirmation-group">
+                <label id="deleteAccountPasswordLabel" class="password-confirmation-label" for="deleteAccountPassword">Account password</label>
+                <input id="deleteAccountPassword" class="password-confirmation-input" type="password" autocomplete="current-password" placeholder="Enter your password" aria-invalid="false">
+                <p id="deleteAccountHint" class="password-confirmation-hint">This step verifies it’s really you.</p>
+            </div>
+            <p id="deleteAccountError" class="modal-error-text" role="alert"></p>
+            <div class="modal-buttons">
+                <button id="deleteAccountConfirmBtn" class="confirm-btn" aria-label="Confirm account deletion">Delete Account</button>
+                <button id="deleteAccountCancelBtn" class="cancel-btn" aria-label="Cancel account deletion">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         // Import Firebase modules (Updated to v11.6.1)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
