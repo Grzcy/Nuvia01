@@ -979,12 +979,12 @@
     function scheduleStopTyping(){ if(typingStopTimer){ clearTimeout(typingStopTimer); } typingStopTimer = setTimeout(()=>{ try{ if(currentThreadId && currentUser){ const ref=doc(db,'artifacts',appId,'public','data','dm_threads', currentThreadId, 'typing', currentUser.uid); setDoc(ref,{ active:false, updatedAt: serverTimestamp() },{ merge:true }).catch(()=>{}); } }catch(_){} }, 4000); }
     async function notifyTyping(){ try{ if(!currentThreadId || !currentUser) return; const ref = doc(db,'artifacts',appId,'public','data','dm_threads', currentThreadId, 'typing', currentUser.uid); await setDoc(ref, { active:true, updatedAt: serverTimestamp() }, { merge:true }); scheduleStopTyping(); }catch(_){} }
 
-    messagesScroll.addEventListener('click', (e)=>{
+    messagesScroll.addEventListener('click', async (e)=>{
       const btn = e.target.closest && e.target.closest('.delete-msg');
       if(!btn) return;
       const id = btn.getAttribute('data-id');
       if(!id) return;
-      const ok = window.confirm('Delete this message?\nThis action cannot be undone.');
+      const ok = await (window.openConfirmDialog && window.openConfirmDialog('Delete this message?','This action cannot be undone.'));
       if(!ok) return;
       deleteMessageById(id).catch(()=>{});
     });
@@ -1699,6 +1699,68 @@
         const headerBtn=document.getElementById('backHomeBtn');
         if(headerBtn){ headerBtn.addEventListener('click', function(e){ e.preventDefault(); goHome(); }); }
       }catch(_){ }
+    })();
+  </script>
+  <!-- Confirm Deletion Modal -->
+  <div id="confirmModal" class="confirm-overlay" aria-hidden="true">
+    <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+      <div class="confirm-icon" aria-hidden="true"><i class="fas fa-trash"></i></div>
+      <h2 id="confirmTitle" class="confirm-title">Delete this message?</h2>
+      <p id="confirmText" class="confirm-text">This action cannot be undone.</p>
+      <div class="confirm-actions">
+        <button id="confirmCancelBtn" class="confirm-btn cancel-btn" aria-label="Cancel">Cancel</button>
+        <button id="confirmOkBtn" class="confirm-btn danger-btn" aria-label="Delete">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .confirm-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);z-index:3000}
+    .confirm-overlay.show{display:flex}
+    .confirm-dialog{width:min(420px,92vw);background:var(--card-background);border:1px solid var(--border-light);border-radius:16px;box-shadow:0 12px 30px rgba(0,0,0,.45);padding:18px;text-align:center}
+    .confirm-icon{width:56px;height:56px;margin:0 auto 10px auto;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.06));border:2px solid rgba(255,255,255,.25);color:#fff}
+    .confirm-icon i{font-size:1.2rem;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+    .confirm-title{font-family:Poppins,sans-serif;font-weight:800;margin:8px 0}
+    .confirm-text{color:var(--text-light);margin:8px 0 16px 0}
+    .confirm-actions{display:flex;gap:10px;justify-content:flex-end}
+    .confirm-btn{min-width:100px;height:40px;border-radius:12px;border:1px solid var(--border-light);background:rgba(255,255,255,.06);color:var(--white);cursor:pointer}
+    .confirm-btn:hover{background:rgba(255,255,255,.12)}
+    .danger-btn{background:var(--button-background);border:0;box-shadow:var(--button-shadow)}
+    .cancel-btn{background:transparent}
+  </style>
+
+  <script>
+    (function(){
+      const overlay = document.getElementById('confirmModal');
+      const titleEl = document.getElementById('confirmTitle');
+      const textEl = document.getElementById('confirmText');
+      const okBtn = document.getElementById('confirmOkBtn');
+      const cancelBtn = document.getElementById('confirmCancelBtn');
+      let resolver = null;
+
+      function close(result){
+        try{ overlay.classList.remove('show'); overlay.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }catch(_){}
+        if (resolver){ const r = resolver; resolver = null; r(!!result); }
+        try{ okBtn.blur(); cancelBtn.blur(); }catch(_){}
+      }
+
+      function onKey(e){ if(e.key==='Escape'){ e.preventDefault(); close(false); } }
+      function onBackdrop(e){ if(e.target === overlay){ close(false); } }
+
+      window.openConfirmDialog = function(title, text){
+        try{ titleEl.textContent = title || 'Are you sure?'; textEl.textContent = text || ''; }catch(_){}
+        try{ overlay.classList.add('show'); overlay.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }catch(_){}
+        return new Promise((resolve)=>{
+          resolver = resolve;
+          const okHandler = ()=> close(true);
+          const cancelHandler = ()=> close(false);
+          okBtn.addEventListener('click', okHandler, { once:true });
+          cancelBtn.addEventListener('click', cancelHandler, { once:true });
+          overlay.addEventListener('click', onBackdrop, { once:true });
+          document.addEventListener('keydown', onKey, { once:true });
+          setTimeout(()=>{ try{ okBtn.focus(); }catch(_){} }, 0);
+        });
+      }
     })();
   </script>
 </body>
