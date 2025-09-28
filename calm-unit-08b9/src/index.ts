@@ -1,4 +1,5 @@
 // Cloudflare Worker: Nuvia share + embed + oEmbed endpoints
+import { neon } from '@neondatabase/serverless';
 // - /share/:id -> SEO/OG/Twitter meta for link previews (image/video)
 // - /embed/:id -> Lightweight HTML5 video player iframe (for twitter:player)
 // - /oembed?url=... -> oEmbed JSON for generic consumers
@@ -6,6 +7,7 @@
 
 export interface Env {
   MY_WORKFLOW: any;
+  DATABASE_URL: string;
 }
 
 // Static config (mirrors client config already public in repo)
@@ -100,6 +102,17 @@ export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url);
     const origin = `${url.protocol}//${url.host}`;
+
+    // DB health check endpoint (uses Neon serverless driver; does not expose secrets)
+    if (url.pathname === '/api/db/ping') {
+      try {
+        const sql = neon(env.DATABASE_URL);
+        const rows = await sql`select 1 as ok`;
+        return Response.json({ ok: rows[0]?.ok === 1 });
+      } catch (_) {
+        return new Response('DB error', { status: 500 });
+      }
+    }
 
     // /share/:id
     const shareMatch = url.pathname.match(/^\/(share|p)\/(.+)$/);
