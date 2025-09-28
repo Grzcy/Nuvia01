@@ -4542,8 +4542,10 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         }
         @media (min-width: 1024px) {
           .content-wrapper { max-width: none !important; padding-left: 6px !important; padding-right: 6px !important; }
-          #postCreationSection { max-width: 760px !important; }
-          .posts-feed-section { max-width: 760px !important; grid-template-columns: 1fr !important; }
+          header .header-content-wrapper, .secondary-header-bar .header-content-wrapper { max-width: none !important; }
+          .daily-inspiration-section, #postCreationSection, .posts-feed-section, #peopleMayKnow, #globalAnnouncementsSection, .unread-chat-banner { width: 100% !important; max-width: none !important; margin-left: 0 !important; margin-right: 0 !important; }
+          #postCreationSection { width: 100% !important; max-width: none !important; }
+          .posts-feed-section { width: 100% !important; max-width: none !important; grid-template-columns: 1fr !important; }
         }
         @media (min-width: 1280px) {
           .posts-feed-section { max-width: 820px !important; }
@@ -14697,7 +14699,7 @@ async function fetchAndDisplayPosts() {
                         <div class="premium-post-indicators">
                             ${postData.premiumOptions.priority ? '<span class="premium-indicator priority">⭐ Priority</span>' : ''}
                             ${postData.premiumOptions.exclusive ? '<span class="premium-indicator exclusive">���� Exclusive</span>' : ''}
-                            ${postData.premiumOptions.custom ? '<span class="premium-indicator custom">�� Custom</span>' : ''}
+                            ${postData.premiumOptions.custom ? '<span class="premium-indicator custom">✨ Custom</span>' : ''}
                         </div>
                     ` : ''}
                 </div>
