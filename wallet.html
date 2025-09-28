@@ -234,9 +234,8 @@
     function updateRateUI(){
       const rate = Number(currentSystemSettings?.jcoinNairaRate || 0.0005);
       const j = Number(currentProfile?.jCoins || 0);
-      const computedRate = (j * 0.005).toFixed(3); // Same as index.html wallet chip logic
       const rateEl = document.getElementById('jcoinRate');
-      if (rateEl) rateEl.textContent = computedRate;
+      if (rateEl) rateEl.textContent = Number(rate).toFixed(2);
       conversionBadge.textContent = `${j.toLocaleString()} JCoins → ${fmtNaira(j * rate)}`;
     }
 
