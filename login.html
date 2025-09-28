@@ -422,6 +422,8 @@
         }
         .unverified-banner { background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(236,72,153,0.12)); border: 1px solid var(--border-light); color: var(--white); padding: 12px 14px; border-radius: 12px; margin-bottom: 12px; font-size: 14px; }
         .unverified-banner .linklike { background: none; border: none; color: #60a5fa; cursor: pointer; padding: 0 2px; font-weight: 600; }
+        .verify-code-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+        .verify-code-input { flex: 1; padding: 10px 12px; border: 1px solid var(--border-light); border-radius: 10px; background: var(--input-background); color: var(--white); }
         .password-strength { margin-top: 8px; }
         .strength-bar { height: 6px; border-radius: 6px; background: rgba(255,255,255,0.12); position: relative; overflow: hidden; }
         .strength-bar::after { content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 0%; background: linear-gradient(90deg, var(--pink), var(--blue)); transition: width var(--transition); }
@@ -973,6 +975,10 @@
             <div id="unverifiedBanner" class="unverified-banner" role="status" aria-live="polite" style="display: none;">
                 We sent a verification link to <strong id="unverifiedEmailText"></strong>. Please verify your email to continue.
                 <button type="button" class="linklike" onclick="resendVerificationEmail()">Resend verification email</button>
+                <div class="verify-code-row" id="verifyCodeRow">
+                    <input type="text" id="verificationCodeInput" class="verify-code-input" placeholder="Paste verification code or link" inputmode="text" autocomplete="one-time-code" aria-label="Verification code">
+                    <button type="button" class="linklike" id="verifyCodeBtn" onclick="verifyWithCode()">Verify code</button>
+                </div>
             </div>
 
             <!-- Signup-only fields -->
@@ -2198,7 +2204,8 @@
             try {
                 showSmartLoader('Resending', 'Sending verification email...');
                 const { user } = await signInWithEmailAndPassword(auth, email, password);
-                await sendEmailVerification(user);
+                try { const actionUrl = `${window.location.origin.replace(/\/$/, '')}/login.html`; await sendEmailVerification(user, { url: actionUrl, handleCodeInApp: true }); }
+                catch (e) { await sendEmailVerification(user); }
                 try { await signOut(auth); } catch(_) {}
                 hideSmartLoader();
                 showSuccessModal(`Verification email sent to ${email}. Please check your inbox.`, () => {});
@@ -2209,6 +2216,40 @@
                 if (error.code === 'auth/user-not-found') msg = 'No account found with this email.';
                 if (error.code === 'auth/too-many-requests') msg = 'Too many attempts. Please try again later.';
                 showCustomModal('error', 'Resend Failed', msg);
+            }
+        };
+
+        function extractVerificationCode(raw){
+            try{
+                const s = String(raw || '').trim();
+                if (!s) return '';
+                try { const u = new URL(s); return u.searchParams.get('oobCode') || ''; } catch(_){ }
+                const m = s.match(/[?&]oobCode=([^&]+)/i);
+                if (m && m[1]) return decodeURIComponent(m[1]);
+                return s;
+            }catch(_){ return ''; }
+        }
+
+        window.verifyWithCode = async function(){
+            const input = document.getElementById('verificationCodeInput');
+            const btn = document.getElementById('verifyCodeBtn');
+            if (!input || !btn) return;
+            const raw = input.value;
+            const code = extractVerificationCode(raw);
+            if (!code) { showCustomModal('error','Code required','Paste the verification code or link from the email.'); return; }
+            input.disabled = true; btn.disabled = true;
+            showSmartLoader('Verifying code','Completing verification...');
+            try{
+                await applyActionCode(auth, code);
+                hideSmartLoader();
+                try { localStorage.removeItem('unverified_email'); } catch(_){}
+                hideUnverifiedBanner();
+                showSuccessModal('Your email has been verified! You can now sign in.', ()=>{});
+            }catch(e){
+                hideSmartLoader();
+                showCustomModal('error','Verification failed','Invalid or expired code. Please request a new email.');
+            }finally{
+                input.disabled = false; btn.disabled = false;
             }
         };
 
