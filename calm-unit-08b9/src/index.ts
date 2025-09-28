@@ -406,11 +406,11 @@ function shareHtml(origin: string, id: string, post: any) {
   const canonical = `${origin}/share/${encodeURIComponent(id)}`;
   const title = post?.title || "Nuvia";
   const desc = post?.description || "Shared from Nuvia";
+  const siteName = "Nuvia";
+  const logo = "https://cdn.builder.io/api/v1/image/assets%2Faaaa97254b5c4256a69bb9a7bf91885c%2F9ed0b590d93440a085bb243bd84ed163?format=png&width=512";
   const img = (post?.imageUrl || (post?.mediaType?.startsWith("video") ? null : post?.mediaUrl)) || logo;
   const hasVideo = !!(post?.mediaUrl && /\.(mp4|webm|ogg)(\?|$)/i.test(post.mediaUrl));
   const video = hasVideo ? post.mediaUrl : null;
-  const siteName = "Nuvia";
-  const logo = "https://cdn.builder.io/api/v1/image/assets%2Faaaa97254b5c4256a69bb9a7bf91885c%2F9ed0b590d93440a085bb243bd84ed163?format=png&width=512";
   const playerUrl = `${origin}/embed/${encodeURIComponent(id)}`;
   return `<!DOCTYPE html><html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
