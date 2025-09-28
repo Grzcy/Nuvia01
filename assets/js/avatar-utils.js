@@ -38,7 +38,7 @@ export function displayProfilePicture(imgElement, iconElement, profilePicId, use
       imgElement.onerror = null;
       imgElement.loading = "lazy";
       imgElement.decoding = "async";
-      imgElement.src = `https://placehold.co/40x40/CCCCCC/000000?text=${encodeURIComponent(initial)}`;
+      imgElement.src = 'https://cdn.builder.io/api/v1/image/assets%2Fdc1ea11569b147829fbadd1471027d2d%2F75ef042afa624d5c9e05f0933db7a146?format=webp&width=800';
       imgElement.style.display = "block";
     }
     if (iconElement) {
