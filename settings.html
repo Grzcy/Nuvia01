@@ -1122,8 +1122,8 @@ main { padding-top: 80px; }
     <script type="module">
         // Import Firebase modules (Updated to v11.6.1)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, runTransaction, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously, updateProfile, deleteUser, reauthenticateWithPopup, GoogleAuthProvider, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp, runTransaction, collection, query, where, onSnapshot, deleteDoc, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- Firebase & Canvas Environment Configuration ---
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
@@ -1877,6 +1877,86 @@ main { padding-top: 80px; }
         }
 
         // Reinstated Account Actions (with clarification)
+        async function deleteAllUserData(uid){
+            try{
+                // Delete user notifications
+                const notifCol = collection(db, "artifacts", appId, "users", uid, "notifications");
+                await (async()=>{ const snap = await getDocs(notifCol); let batch = writeBatch(db); let count = 0; for (const d of snap.docs){ batch.delete(d.ref); count++; if(count>=450){ await batch.commit(); batch = writeBatch(db); count=0; } } if (count>0) await batch.commit(); })();
+            }catch(e){ console.warn('JCHAT_WARN: notifications delete failed', e); }
+            try{
+                // Delete private friends subcollection if exists
+                const privFriendsCol = collection(db, "artifacts", appId, "users", uid, "friends");
+                const snap = await getDocs(privFriendsCol); if(!snap.empty){ let batch = writeBatch(db); let count=0; for(const d of snap.docs){ batch.delete(d.ref); count++; if(count>=450){ await batch.commit(); batch = writeBatch(db); count=0; } } if(count>0) await batch.commit(); }
+            }catch(e){ console.warn('JCHAT_WARN: private friends delete failed', e); }
+            try{
+                // Delete friend_requests (sender or receiver)
+                const frCol = collection(db, "artifacts", appId, "public", "data", "friend_requests");
+                for (const qy of [ query(frCol, where('senderId','==',uid)), query(frCol, where('receiverId','==',uid)) ]){
+                    const snap = await getDocs(qy); if(!snap.empty){ let batch = writeBatch(db); let count=0; for(const d of snap.docs){ batch.delete(d.ref); count++; if(count>=450){ await batch.commit(); batch = writeBatch(db); count=0; } } if(count>0) await batch.commit(); }
+                }
+            }catch(e){ console.warn('JCHAT_WARN: friend_requests delete failed', e); }
+            try{
+                // Delete friends entries where user is in either field
+                const friendsCol = collection(db, "artifacts", appId, "public", "data", "friends");
+                for (const qy of [ query(friendsCol, where('user1Id','==',uid)), query(friendsCol, where('user2Id','==',uid)) ]){
+                    const snap = await getDocs(qy); if(!snap.empty){ let batch = writeBatch(db); let count=0; for(const d of snap.docs){ batch.delete(d.ref); count++; if(count>=450){ await batch.commit(); batch = writeBatch(db); count=0; } } if(count>0) await batch.commit(); }
+                }
+            }catch(e){ console.warn('JCHAT_WARN: friends delete failed', e); }
+            try{
+                // Delete posts authored by user
+                const postsCol = collection(db, "artifacts", appId, "public", "data", "posts");
+                const snap = await getDocs(query(postsCol, where('authorId','==',uid)));
+                if(!snap.empty){ let batch = writeBatch(db); let count=0; for(const d of snap.docs){ batch.delete(d.ref); count++; if(count>=450){ await batch.commit(); batch = writeBatch(db); count=0; } } if(count>0) await batch.commit(); }
+            }catch(e){ console.warn('JCHAT_WARN: posts delete failed', e); }
+            try{ await deleteDoc(doc(db, "artifacts", appId, "users", uid, "profiles", "user_settings")); }catch(e){ console.warn('JCHAT_WARN: user_settings delete failed', e); }
+            try{ await deleteDoc(doc(db, "artifacts", appId, "users", uid, "profiles", "user_profile")); }catch(e){ console.warn('JCHAT_WARN: user_profile delete failed', e); }
+            try{ await deleteDoc(doc(db, "artifacts", appId, "public", "data", "users", uid)); }catch(e){ console.warn('JCHAT_WARN: public user delete failed', e); }
+        }
+
+        async function attemptDeleteAuthUser(){
+            if(!auth.currentUser) return;
+            try { await deleteUser(auth.currentUser); return; }
+            catch(e){
+                if (e && (e.code === 'auth/requires-recent-login' || e.message?.includes('requires-recent-login'))){
+                    try{
+                        const prov = auth.currentUser.providerData[0]?.providerId || '';
+                        if (prov === 'google.com'){
+                            const provider = new GoogleAuthProvider();
+                            await reauthenticateWithPopup(auth.currentUser, provider);
+                        } else if (prov === 'password'){
+                            const email = auth.currentUser.email || prompt('Confirm your email for re-authentication:','');
+                            const pwd = prompt('Enter your password to confirm deletion:','');
+                            if(!email || !pwd) throw new Error('Re-authentication cancelled.');
+                            const cred = EmailAuthProvider.credential(email, pwd);
+                            await reauthenticateWithCredential(auth.currentUser, cred);
+                        } else {
+                            throw new Error('Please sign out and sign back in, then retry account deletion.');
+                        }
+                        await deleteUser(auth.currentUser);
+                        return;
+                    }catch(err){ throw err; }
+                }
+                throw e;
+            }
+        }
+
+        async function handleSelfDelete(){
+            if (!currentUser){ showMessageBox('Please log in to delete your account.', 'error'); return; }
+            const ok = await showCustomConfirm('This will permanently delete your account and data. Continue?');
+            if (!ok){ showMessageBox('Account deletion cancelled.', 'info'); return; }
+            try{
+                deleteAccountButton.disabled = true;
+                showMessageBox('Deleting your account...', 'loading', true);
+                await deleteAllUserData(currentUser.uid);
+                await attemptDeleteAuthUser();
+                showMessageBox('Your account was deleted.', 'success');
+                setTimeout(()=>{ window.location.href = '/login.html'; }, 1500);
+            }catch(e){
+                console.error('JCHAT_ERROR: self delete failed', e);
+                showMessageBox(e.message || 'Failed to delete account. Please try again.', 'error');
+                deleteAccountButton.disabled = false;
+            }
+        }
         if (changePasswordButton) {
             changePasswordButton.addEventListener('click', async () => {
                 showMessageBox("To change your password, please visit the JCHAT web portal for a secure process.", "info");
@@ -1886,14 +1966,7 @@ main { padding-top: 80px; }
         }
         if (deleteAccountButton) {
             deleteAccountButton.addEventListener('click', async () => {
-                const confirmed = await showCustomConfirm("Are you sure you want to delete your account? This action is irreversible and will delete all your data. This process must be completed securely via our web portal.");
-                if (confirmed) {
-                    showMessageBox("Account deletion requires a secure process. Please visit the JCHAT web portal to proceed.", "warning");
-                    // In a real app, this would link to a secure deletion page or prompt for re-authentication.
-                    // window.open('https://jchat.example.com/delete-account', '_blank');
-                } else {
-                    showMessageBox("Account deletion cancelled.", "info");
-                }
+                await handleSelfDelete();
             });
         }
 
