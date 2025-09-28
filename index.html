@@ -11805,6 +11805,12 @@ async function fetchAndDisplayPosts() {
                         homeChipsRow.style.display = 'flex';
                         try {
                             if (typeof currentUserProfileData !== 'object' || !currentUserProfileData) currentUserProfileData = {};
+                            currentUserProfileData.jCoins = Number(data.jCoins || 0);
+                            if (walletChipAmount && jcoinRateSpan) {
+                                walletChipAmount.textContent = Number(currentUserProfileData.jCoins).toLocaleString();
+                                const rateNow = Number((currentSystemSettings && currentSystemSettings.jcoinNairaRate) || 0).toFixed(2);
+                                jcoinRateSpan.textContent = rateNow;
+                            }
                             currentUserProfileData.walletUnlocked = !!data.walletUnlocked;
                             const isUnlocked = currentUserProfileData.walletUnlocked === true;
                             if (_prevWalletUnlockedState !== isUnlocked) {
