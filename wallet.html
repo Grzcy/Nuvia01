@@ -197,6 +197,18 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // Real-time system settings rate listener (keeps Rate badge synced with profile/index)
+    let settingsUnsub = null;
+    try {
+      const __settingsRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'system_settings');
+      settingsUnsub = onSnapshot(__settingsRef, (snap) => {
+        if (snap.exists()) {
+          currentSystemSettings = Object.assign({}, currentSystemSettings, snap.data());
+          updateRateUI();
+        }
+      });
+    } catch(_) {}
+
     const balanceNaira = document.getElementById('balanceNaira');
     const balanceJcoin = document.getElementById('balanceJcoin');
     const walletStatusChip = document.getElementById('walletStatusChip');
@@ -213,7 +225,7 @@
 
     let currentUser = null;
     let currentProfile = null;
-    let currentSystemSettings = { jcoinNairaRate: 0.0005 };
+    let currentSystemSettings = { jcoinNairaRate: 7.5 };
     let txUnsub = null;
     let activeFilter = 'all';
 
@@ -330,6 +342,16 @@
         const snap = await getDoc(profileRef);
         currentProfile = snap.exists() ? snap.data() : { jCoins: 0, walletUnlocked: false };
         updateHeaderUI();
+        // Realtime profile listener to mirror index/profile balance & recalc conversion
+        try { if (window.__walletProfileUnsub) { window.__walletProfileUnsub(); window.__walletProfileUnsub = null; } } catch(_) {}
+        try {
+          window.__walletProfileUnsub = onSnapshot(profileRef, (psnap) => {
+            if (psnap.exists()) {
+              currentProfile = psnap.data();
+              updateHeaderUI();
+            }
+          });
+        } catch(_) {}
       } catch(_) { currentProfile = { jCoins: 0, walletUnlocked: false }; updateHeaderUI(); }
 
       try {
