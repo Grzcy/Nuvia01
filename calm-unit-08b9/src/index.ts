@@ -15,6 +15,368 @@ const FIREBASE_PROJECT_ID = "jchat-1";
 const FIREBASE_API_KEY = "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w";
 const APP_ID = "default-app-id"; // override in query ?appId=
 
+// ===== Database & API helpers =====
+const allowedTables = {
+  users: ["id"],
+  profiles: ["user_id"],
+  posts: ["id"],
+  comments: ["id"],
+  likes: ["user_id", "post_id"],
+  follows: ["follower_id", "following_id"],
+  messages: ["id"],
+  groups: ["id"],
+  group_members: ["group_id", "user_id"],
+  notifications: ["id"],
+  reports: ["id"],
+  wallets: ["user_id"],
+  transactions: ["id"],
+  levels: ["level"],
+  achievements: ["id"],
+  user_achievements: ["user_id", "achievement_id"],
+  settings: ["user_id"],
+} as const;
+
+type TableName = keyof typeof allowedTables;
+const columnsCache = new Map<string, string[]>();
+let schemaReady = false;
+
+const SCHEMA_SQL = `
+create table if not exists users (
+  id text primary key,
+  email text unique not null,
+  password_hash text,
+  display_name text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  deleted_at timestamptz
+);
+
+create table if not exists profiles (
+  user_id text primary key references users(id) on delete cascade,
+  bio text,
+  avatar_url text,
+  cover_url text,
+  location text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists posts (
+  id text primary key,
+  author_id text not null references users(id) on delete cascade,
+  content text not null,
+  media_url text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  deleted_at timestamptz
+);
+
+create index if not exists posts_author_id_idx on posts(author_id);
+
+create table if not exists comments (
+  id text primary key,
+  post_id text not null references posts(id) on delete cascade,
+  author_id text not null references users(id) on delete cascade,
+  content text not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  deleted_at timestamptz
+);
+
+create index if not exists comments_post_id_idx on comments(post_id);
+
+create table if not exists likes (
+  user_id text not null references users(id) on delete cascade,
+  post_id text not null references posts(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key(user_id, post_id)
+);
+
+create table if not exists follows (
+  follower_id text not null references users(id) on delete cascade,
+  following_id text not null references users(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  unique(follower_id, following_id),
+  check (follower_id <> following_id)
+);
+
+create table if not exists messages (
+  id text primary key,
+  sender_id text not null references users(id) on delete cascade,
+  recipient_id text not null references users(id) on delete cascade,
+  content text not null,
+  read_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists messages_pair_idx on messages(least(sender_id, recipient_id), greatest(sender_id, recipient_id));
+
+create table if not exists groups (
+  id text primary key,
+  name text not null unique,
+  owner_id text not null references users(id) on delete cascade,
+  description text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists group_members (
+  group_id text not null references groups(id) on delete cascade,
+  user_id text not null references users(id) on delete cascade,
+  role text not null default 'member',
+  joined_at timestamptz not null default now(),
+  primary key(group_id, user_id)
+);
+
+create table if not exists notifications (
+  id text primary key,
+  user_id text not null references users(id) on delete cascade,
+  type text not null,
+  data jsonb,
+  read_at timestamptz,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists reports (
+  id text primary key,
+  reporter_id text not null references users(id) on delete cascade,
+  target_type text not null,
+  target_id text not null,
+  reason text,
+  status text not null default 'open',
+  created_at timestamptz not null default now(),
+  resolved_at timestamptz
+);
+
+create table if not exists wallets (
+  user_id text primary key references users(id) on delete cascade,
+  balance numeric(20,8) not null default 0,
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists transactions (
+  id text primary key,
+  user_id text not null references users(id) on delete cascade,
+  amount numeric(20,8) not null,
+  kind text not null,
+  reference text,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists transactions_user_id_idx on transactions(user_id);
+
+create table if not exists levels (
+  level integer primary key,
+  name text not null,
+  min_xp integer not null,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists achievements (
+  id text primary key,
+  code text unique,
+  name text not null,
+  description text,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists user_achievements (
+  user_id text not null references users(id) on delete cascade,
+  achievement_id text not null references achievements(id) on delete cascade,
+  unlocked_at timestamptz not null default now(),
+  primary key(user_id, achievement_id)
+);
+
+create table if not exists settings (
+  user_id text primary key references users(id) on delete cascade,
+  prefs jsonb not null default '{}'
+);
+`;
+
+function placeholders(count: number, startAt = 1) {
+  return Array.from({ length: count }, (_, i) => `$${i + startAt}`).join(", ");
+}
+
+async function ensureSchema(sql: ReturnType<typeof neon>) {
+  if (schemaReady) return;
+  await sql(SCHEMA_SQL);
+  schemaReady = true;
+}
+
+async function getColumns(sql: ReturnType<typeof neon>, table: TableName) {
+  const key = String(table);
+  if (columnsCache.has(key)) return columnsCache.get(key)!;
+  const rows = await sql(
+    `select column_name from information_schema.columns where table_schema = 'public' and table_name = $1 order by ordinal_position`,
+    [key]
+  );
+  const cols = rows.map((r: any) => r.column_name as string);
+  columnsCache.set(key, cols);
+  return cols;
+}
+
+function cors() {
+  return {
+    'access-control-allow-origin': '*',
+    'access-control-allow-headers': 'content-type',
+    'access-control-allow-methods': 'GET,POST,PATCH,DELETE,OPTIONS'
+  } as Record<string, string>;
+}
+
+async function readJson<T = any>(req: Request): Promise<T> {
+  const text = await req.text();
+  if (!text) return {} as any;
+  return JSON.parse(text);
+}
+
+function nowIso() { return new Date().toISOString(); }
+
+async function handleApi(req: Request, env: Env, url: URL) {
+  const parts = url.pathname.split('/').filter(Boolean);
+  const table = parts[1] as TableName | undefined;
+  if (!table || !(table in allowedTables)) return new Response('Not found', { status: 404 });
+
+  const method = req.method.toUpperCase();
+  if (method === 'OPTIONS') return new Response(null, { headers: cors() });
+
+  const sql = neon(env.DATABASE_URL);
+  await ensureSchema(sql);
+
+  // Preload columns & whitelist
+  const cols = await getColumns(sql, table);
+  const pk = (allowedTables as any)[table] as string[];
+
+  // List
+  if (parts.length === 2 && method === 'GET') {
+    const limit = Math.min(parseInt(url.searchParams.get('limit') || '20', 10), 100);
+    const offset = Math.max(parseInt(url.searchParams.get('offset') || '0', 10), 0);
+
+    const where: string[] = [];
+    const params: any[] = [];
+    let p = 1;
+    for (const [k, v] of url.searchParams.entries()) {
+      if (k === 'limit' || k === 'offset' || k === 'order' || k === 'dir') continue;
+      if (!cols.includes(k)) continue;
+      where.push(`${k} = $${p++}`);
+      params.push(v);
+    }
+    const order = url.searchParams.get('order');
+    const dir = (url.searchParams.get('dir') || 'desc').toLowerCase() === 'asc' ? 'asc' : 'desc';
+    const orderBy = order && cols.includes(order) ? `order by ${order} ${dir}` : (cols.includes('created_at') ? `order by created_at desc` : '');
+    const whereSql = where.length ? `where ${where.join(' and ')}` : '';
+    const rows = await sql(
+      `select * from ${table} ${whereSql} ${orderBy} limit ${limit} offset ${offset}`,
+      params
+    );
+    return new Response(JSON.stringify(rows), { headers: { 'content-type': 'application/json', ...cors() } });
+  }
+
+  // Single by key(s)
+  if (parts.length === 3 && method === 'GET') {
+    const params: any[] = [];
+    const clauses: string[] = [];
+    let p = 1;
+    if (pk.length === 1) {
+      const key = pk[0];
+      const val = decodeURIComponent(parts[2]);
+      clauses.push(`${key} = $${p++}`);
+      params.push(val);
+    } else {
+      for (const key of pk) {
+        const val = url.searchParams.get(key);
+        if (!val) return new Response(`Missing key ${key}`, { status: 400, headers: cors() });
+        clauses.push(`${key} = $${p++}`);
+        params.push(val);
+      }
+    }
+    const row = await sql(
+      `select * from ${table} where ${clauses.join(' and ')} limit 1`,
+      params
+    );
+    return row[0]
+      ? new Response(JSON.stringify(row[0]), { headers: { 'content-type': 'application/json', ...cors() } })
+      : new Response('Not found', { status: 404, headers: cors() });
+  }
+
+  // Create
+  if (parts.length === 2 && method === 'POST') {
+    const body = await readJson<Record<string, any>>(req);
+    const data: Record<string, any> = {};
+    for (const k of cols) {
+      if (k in body) data[k] = body[k];
+    }
+    if (pk.length === 1 && !(pk[0] in data) && pk[0] === 'id') {
+      data.id = crypto.randomUUID();
+    }
+    if (Object.keys(data).length === 0) return new Response('Empty body', { status: 400, headers: cors() });
+
+    const keys = Object.keys(data);
+    const values = keys.map(k => data[k]);
+    const sqlText = `insert into ${table} (${keys.join(',')}) values (${placeholders(keys.length)}) returning *`;
+    const rows = await sql(sqlText, values);
+    return new Response(JSON.stringify(rows[0]), { status: 201, headers: { 'content-type': 'application/json', ...cors() } });
+  }
+
+  // Update
+  if (parts.length === 3 && (method === 'PATCH' || method === 'PUT')) {
+    const body = await readJson<Record<string, any>>(req);
+    const data: Record<string, any> = {};
+    for (const k of cols) {
+      if (k in body && !pk.includes(k)) data[k] = body[k];
+    }
+    if ('updated_at' in cols) {
+      (data as any).updated_at = nowIso();
+    }
+    const setKeys = Object.keys(data);
+    if (setKeys.length === 0) return new Response('No changes', { status: 400, headers: cors() });
+
+    const whereVals: any[] = [];
+    const whereClauses: string[] = [];
+    if (pk.length === 1) {
+      whereClauses.push(`${pk[0]} = $${setKeys.length + 1}`);
+      whereVals.push(decodeURIComponent(parts[2]));
+    } else {
+      let idx = setKeys.length + 1;
+      for (const key of pk) {
+        const v = url.searchParams.get(key);
+        if (!v) return new Response(`Missing key ${key}`, { status: 400, headers: cors() });
+        whereClauses.push(`${key} = $${idx++}`);
+        whereVals.push(v);
+      }
+    }
+
+    const sqlText = `update ${table} set ${setKeys.map((k, i) => `${k} = $${i + 1}`).join(', ')} where ${whereClauses.join(' and ')} returning *`;
+    const rows = await sql(sqlText, [...setKeys.map(k => data[k]), ...whereVals]);
+    return rows[0]
+      ? new Response(JSON.stringify(rows[0]), { headers: { 'content-type': 'application/json', ...cors() } })
+      : new Response('Not found', { status: 404, headers: cors() });
+  }
+
+  // Delete
+  if (parts.length === 3 && method === 'DELETE') {
+    const whereVals: any[] = [];
+    const whereClauses: string[] = [];
+    if (pk.length === 1) {
+      whereClauses.push(`${pk[0]} = $1`);
+      whereVals.push(decodeURIComponent(parts[2]));
+    } else {
+      let idx = 1;
+      for (const key of pk) {
+        const v = url.searchParams.get(key);
+        if (!v) return new Response(`Missing key ${key}`, { status: 400, headers: cors() });
+        whereClauses.push(`${key} = $${idx++}`);
+        whereVals.push(v);
+      }
+    }
+    const rows = await sql(`delete from ${table} where ${whereClauses.join(' and ')} returning *`, whereVals);
+    return rows[0]
+      ? new Response(JSON.stringify(rows[0]), { headers: { 'content-type': 'application/json', ...cors() } })
+      : new Response('Not found', { status: 404, headers: cors() });
+  }
+
+  return new Response('Method not allowed', { status: 405, headers: cors() });
+}
+
 // Utility: fetch post by id from Firestore public path
 async function fetchPost(id: string, appId = APP_ID) {
   const url = `https://firestore.googleapis.com/v1/projects/${encodeURIComponent(FIREBASE_PROJECT_ID)}/databases/(default)/documents/artifacts/${encodeURIComponent(appId)}/public/data/posts/${encodeURIComponent(id)}?key=${encodeURIComponent(FIREBASE_API_KEY)}`;
@@ -102,6 +464,15 @@ export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url);
     const origin = `${url.protocol}//${url.host}`;
+
+    // API router
+    if (url.pathname.startsWith('/api/')) {
+      try {
+        return await handleApi(req, env, url);
+      } catch (err: any) {
+        return new Response('Server error', { status: 500, headers: cors() });
+      }
+    }
 
     // DB health check endpoint (uses Neon serverless driver; does not expose secrets)
     if (url.pathname === '/api/db/ping') {
