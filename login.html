@@ -1571,6 +1571,8 @@
                 // Send email verification
                 try {
                     await sendEmailVerification(user);
+                    // Persist marker so the unverified banner remains until verification
+                    try { localStorage.setItem('unverified_email', user.email); } catch(_) {}
                     hideSmartLoader();
                     const verificationMessage = `Your Nuvia account is ready! We just sent a confirmation email to ${user.email}. Open the message, tap the confirm link, and check your spam or junk folder if you don't see it. You can sign in once your email is confirmed.`;
                     showCustomModal('success', 'Confirm your email', verificationMessage, () => {
