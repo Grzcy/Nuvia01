@@ -1551,10 +1551,6 @@ main { padding-top: 80px; }
                 deleteAccountCancelBtn.addEventListener('click', handleCancel);
                 deleteAccountModalOverlay.addEventListener('keydown', handleKeydown);
                 deleteAccountModalOverlay.addEventListener('click', handleOverlayClick);
-
-                if (requirePassword && modalContent) {
-                    modalContent.focus();
-                }
             });
         }
 
