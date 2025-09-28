@@ -2069,7 +2069,7 @@ main { padding-top: 80px; }
             try{ await deleteDoc(doc(db, "artifacts", appId, "public", "data", "users", uid)); }catch(e){ console.warn('JCHAT_WARN: public user delete failed', e); }
         }
 
-        async function attemptDeleteAuthUser(){
+        async function attemptDeleteAuthUser(passwordForReauth = ''){
             if(!auth.currentUser) return;
             try { await deleteUser(auth.currentUser); return; }
             catch(e){
@@ -2080,17 +2080,23 @@ main { padding-top: 80px; }
                             const provider = new GoogleAuthProvider();
                             await reauthenticateWithPopup(auth.currentUser, provider);
                         } else if (prov === 'password'){
-                            const email = auth.currentUser.email || prompt('Confirm your email for re-authentication:','');
-                            const pwd = prompt('Enter your password to confirm deletion:','');
-                            if(!email || !pwd) throw new Error('Re-authentication cancelled.');
-                            const cred = EmailAuthProvider.credential(email, pwd);
+                            const email = auth.currentUser.email;
+                            const passwordToUse = typeof passwordForReauth === 'string' ? passwordForReauth.trim() : '';
+                            if(!email) throw new Error('Unable to verify your email. Please sign in again and retry.');
+                            if(!passwordToUse) throw new Error('Please enter your password to confirm account deletion.');
+                            const cred = EmailAuthProvider.credential(email, passwordToUse);
                             await reauthenticateWithCredential(auth.currentUser, cred);
                         } else {
                             throw new Error('Please sign out and sign back in, then retry account deletion.');
                         }
                         await deleteUser(auth.currentUser);
                         return;
-                    }catch(err){ throw err; }
+                    }catch(err){
+                        if (err?.code === 'auth/wrong-password') {
+                            err.message = 'Incorrect password. Please try again.';
+                        }
+                        throw err;
+                    }
                 }
                 throw e;
             }
