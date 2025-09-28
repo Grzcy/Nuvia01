@@ -4988,7 +4988,15 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 </div>
             </div>
 
-            <div id="trendingHashtags" style="margin:8px 0;color:var(--text-light);font-size:0.9rem;"></div>
+            <style>
+              /* Sticky topic chips row */
+              .tag-chips-bar{ position: sticky; top: 64px; z-index: 15; padding: 6px 0; background: transparent; }
+              .tag-chips-row{ display:flex; gap:8px; align-items:center; overflow-x:auto; padding: 4px 0; }
+              .tag-chip{ display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border:1px solid var(--border-light); background: var(--card-background); color: var(--white); border-radius:999px; cursor:pointer; white-space:nowrap; }
+              .tag-chip.selected{ background: linear-gradient(90deg, var(--blue), var(--pink)); border-color: transparent; }
+              .clear-tags-btn{ margin-left:auto; padding:6px 10px; border:1px solid var(--border-light); background: transparent; color: var(--white); border-radius:999px; cursor:pointer; }
+            </style>
+            <div id="trendingHashtags" class="tag-chips-bar" style="margin:8px 0;color:var(--text-light);font-size:0.9rem;"></div>
 
 
             <!-- Posts Feed Section -->
@@ -10596,6 +10604,7 @@ async function fetchAndDisplayPosts() {
                     const savedOnly = !!(showSavedOnlyCheckbox && showSavedOnlyCheckbox.checked);
                     const followedOnly = !!(showFollowedOnlyCheckbox && showFollowedOnlyCheckbox.checked);
                     const followedSet = new Set(JSON.parse(localStorage.getItem('nuvia_followed_tags')||'[]').map(t=>t.toLowerCase()));
+                    const selectedTagsSet = getSelectedTags();
 
                     const newOrderedPostIds = []; // To maintain the correct order of posts in the DOM.
 
@@ -10609,6 +10618,10 @@ async function fetchAndDisplayPosts() {
                             if (pType !== typeFilter) return;
                         }
                         if (textSearch && !(post.content || '').toLowerCase().includes(textSearch)) return;
+                        if (selectedTagsSet && selectedTagsSet.size){
+                            const tags = ((post.content||'').match(/#\w{2,30}/g)||[]).map(t=>t.toLowerCase());
+                            if (!tags.some(t=>selectedTagsSet.has(t))) return;
+                        }
                         if (followedOnly) {
                             const tags = ((post.content||'').match(/#\w{2,30}/g)||[]).map(t=>t.toLowerCase());
                             if (!tags.some(t=>followedSet.has(t))) return;
@@ -13233,23 +13246,39 @@ async function fetchAndDisplayPosts() {
         }
 
         // Track hashtags for trending display
+        function getSelectedTagsFromURL(){
+            try{ const sp = new URL(location.href).searchParams; const raw = (sp.get('tags')||'').trim(); if(!raw) return new Set(); return new Set(raw.split(',').map(s=>('#'+s.trim().toLowerCase())).filter(Boolean)); }catch(_){ return new Set(); }
+        }
+        function getSelectedTags(){
+            try{ const fromUrl = getSelectedTagsFromURL(); if (fromUrl.size) return fromUrl; const saved = JSON.parse(localStorage.getItem('nuvia_selected_tags')||'[]'); return new Set(saved.map(s=>s.toLowerCase())); }catch(_){ return new Set(); }
+        }
+        function setSelectedTags(tagsSet){
+            try{
+                const arr = [...tagsSet].map(t=>t.replace(/^#+/,'').toLowerCase());
+                const url = new URL(location.href); if(arr.length){ url.searchParams.set('tags', arr.join(',')); } else { url.searchParams.delete('tags'); }
+                history.replaceState(null, '', url.toString());
+                localStorage.setItem('nuvia_selected_tags', JSON.stringify(arr.map(t=>'#'+t)));
+            }catch(_){ }
+        }
         function updateTrendingHashtags(allPosts) {
             const counts = new Map();
             allPosts.forEach(p => {
                 const matches = (p.content || '').match(/#\w{2,30}/g);
                 if (matches) matches.forEach(t => {
-                    counts.set(t, (counts.get(t) || 0) + 1);
+                    counts.set(t.toLowerCase(), (counts.get(t.toLowerCase()) || 0) + 1);
                 });
             });
-            const top = [...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,5);
+            const top = [...counts.entries()].sort((a,b)=>b[1]-a[1]).slice(0,8);
             if (trendingHashtagsDiv) {
                 if (top.length === 0) { trendingHashtagsDiv.textContent = ''; return; }
-                const followed = new Set(JSON.parse(localStorage.getItem('nuvia_followed_tags')||'[]').map(t=>t.toLowerCase()));
-                trendingHashtagsDiv.innerHTML = 'Trending: ' + top.map(([tag]) => {
-                    const t = tag.substring(1).toLowerCase();
-                    const isFollowed = followed.has('#'+t);
-                    return `<a href="#" class="hashtag-link" data-tag="${t}">${tag}</a> <button class="follow-tag-btn" data-tag="${t}">${isFollowed?'Unfollow':'Follow'}</button>`;
-                }).join(' �� ');
+                const selected = getSelectedTags();
+                const chips = top.map(([tag,count])=>{
+                    const t = tag.replace(/^#+/, '');
+                    const isSel = selected.has('#'+t);
+                    return `<button type="button" class="tag-chip${isSel?' selected':''}" data-tag="${t}">#${t} <span style="opacity:.7">${count}</span></button>`;
+                }).join('');
+                const clearBtn = selected.size ? `<button type="button" class="clear-tags-btn">Clear</button>` : '';
+                trendingHashtagsDiv.innerHTML = `<div class="tag-chips-row" role="toolbar" aria-label="Topic filters">${chips}${clearBtn}</div>`;
             }
         }
         // Feed skeleton helpers
@@ -13515,6 +13544,25 @@ async function fetchAndDisplayPosts() {
                     }
                     openSharePostModal(postShareBtn, postId || '', content || '', mediaUrl || '');
                 }catch(e){ console.error('postShareBtn handler error', e); }
+                return;
+            }
+            const chip = ev.target.closest('.tag-chip');
+            if (chip) {
+                ev.preventDefault();
+                const t = '#'+(chip.dataset.tag||'').toLowerCase();
+                const sel = getSelectedTags();
+                if (sel.has(t)) sel.delete(t); else sel.add(t);
+                setSelectedTags(sel);
+                updateTrendingHashtags([]);
+                fetchAndDisplayPosts();
+                return;
+            }
+            const clearBtn = ev.target.closest('.clear-tags-btn');
+            if (clearBtn){
+                ev.preventDefault();
+                setSelectedTags(new Set());
+                updateTrendingHashtags([]);
+                fetchAndDisplayPosts();
                 return;
             }
             const tagLink = ev.target.closest('.hashtag-link');
