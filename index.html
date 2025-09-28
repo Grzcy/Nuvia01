@@ -11718,7 +11718,7 @@ async function fetchAndDisplayPosts() {
                                         // Update wallet chip
                 if (homeChipsRow && walletChipAmount && jcoinRateSpan) {
                     const jCoinsBal = Number(currentUserProfileData?.jCoins || 0);
-                    walletChipAmount.textContent = String(jCoinsBal);
+                    walletChipAmount.textContent = Number(jCoinsBal).toLocaleString();
                     const rate = Number(currentSystemSettings?.jcoinNairaRate || 0).toFixed(2);
                     jcoinRateSpan.textContent = rate;
                 // Also update wallet.html oneJcoinRateDisplay if opened in same session/window (best-effort)
