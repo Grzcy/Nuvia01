@@ -4714,7 +4714,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 <span class="chip-title">JCoins</span>
                 <span id="walletChipAmount">0</span>
               </div>
-              <div class="chip-sub">Rate: <span id="jcoinRate">0.000</span></div>
+              <div class="chip-sub">Rate: ₦<span id="jcoinRate">0.00</span>/J</div>
             </div>
           </a>
         </div>
@@ -4787,7 +4787,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                     </div>
 
                     <div class="about-content">
-                        <h2 class="about-title" style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', monospace; letter-spacing:0.6px;">Nuvia ��� Autonomous Companion</h2>
+                        <h2 class="about-title" style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', monospace; letter-spacing:0.6px;">Nuvia ���� Autonomous Companion</h2>
 
                         <p class="about-description">Nuvia is an autonomous social companion engineered to surface short, meaningful content and provide fast access to sacred texts. Built with modular services and deterministic content generators, Nuvia optimizes for low friction interactions, human-centered privacy, and extensible third-party integrations.</p>
 
@@ -11719,8 +11719,8 @@ async function fetchAndDisplayPosts() {
                 if (homeChipsRow && walletChipAmount && jcoinRateSpan) {
                     const jCoinsBal = Number(currentUserProfileData?.jCoins || 0);
                     walletChipAmount.textContent = String(jCoinsBal);
-                    const computedRate = (jCoinsBal * 0.005).toFixed(3);
-                    jcoinRateSpan.textContent = computedRate;
+                    const rate = Number(currentSystemSettings?.jcoinNairaRate || 0).toFixed(2);
+                    jcoinRateSpan.textContent = rate;
                 // Also update wallet.html oneJcoinRateDisplay if opened in same session/window (best-effort)
                 try { if (window.parent && window.parent.document) { const oneEl = window.parent.document.getElementById('oneJcoinRateDisplay'); if (oneEl && currentSystemSettings?.jcoinNairaRate) oneEl.textContent = `���${(1/currentSystemSettings.jcoinNairaRate).toFixed(2)} NGN`; } } catch(e) {}
                     homeChipsRow.style.display = 'flex';
