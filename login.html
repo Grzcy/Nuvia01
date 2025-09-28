@@ -2325,13 +2325,7 @@
                 updatePasswordStrength();
             }
 
-            // Show unverified banner if stored
-            try {
-                const unv = localStorage.getItem('unverified_email');
-                if (unv) {
-                    showUnverifiedBanner(unv);
-                }
-            } catch(_) {}
+            // Do not auto-show verification banner on page load. The banner will be shown when a user attempts to sign in and is unverified.
 
             // Add focus effects to inputs with performance optimization
             const inputs = document.querySelectorAll('input[type="email"], input[type="password"], input[type="text"], textarea');
