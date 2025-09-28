@@ -2248,28 +2248,6 @@
         };
 
 
-        window.verifyWithCode = async function(){
-            const input = document.getElementById('verificationCodeInput');
-            const btn = document.getElementById('verifyCodeBtn');
-            if (!input || !btn) return;
-            const raw = input.value;
-            const code = extractVerificationCode(raw);
-            if (!code) { showCustomModal('error','Code required','Paste the verification code or link from the email.'); return; }
-            input.disabled = true; btn.disabled = true;
-            showSmartLoader('Verifying code','Completing verification...');
-            try{
-                await applyActionCode(auth, code);
-                hideSmartLoader();
-                try { localStorage.removeItem('unverified_email'); } catch(_){}
-                hideUnverifiedBanner();
-                showSuccessModal('Your email has been verified! You can now sign in.', ()=>{});
-            }catch(e){
-                hideSmartLoader();
-                showCustomModal('error','Verification failed','Invalid or expired code. Please request a new email.');
-            }finally{
-                input.disabled = false; btn.disabled = false;
-            }
-        };
 
         // Create floating particles with performance optimization
         function createFloatingParticles() {
