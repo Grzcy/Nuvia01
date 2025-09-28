@@ -2247,16 +2247,6 @@
             }
         };
 
-        function extractVerificationCode(raw){
-            try{
-                const s = String(raw || '').trim();
-                if (!s) return '';
-                try { const u = new URL(s); return u.searchParams.get('oobCode') || ''; } catch(_){ }
-                const m = s.match(/[?&]oobCode=([^&]+)/i);
-                if (m && m[1]) return decodeURIComponent(m[1]);
-                return s;
-            }catch(_){ return ''; }
-        }
 
         window.verifyWithCode = async function(){
             const input = document.getElementById('verificationCodeInput');
