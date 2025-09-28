@@ -2098,7 +2098,7 @@
 
                 if (reserved.has(username.toLowerCase())) {
                     feedback.className = 'username-feedback taken';
-                    feedback.textContent = 'This name is reserved. Try another 🙂';
+                    feedback.textContent = 'This name is reserved. Try another ��';
                     return;
                 }
 
@@ -2193,29 +2193,63 @@
         window.resendVerificationEmail = async function() {
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
-            if (!email || !isValidEmail(email)) {
-                showCustomModal('error', 'Email Required', 'Enter a valid email in the form to resend verification.');
+            const btn = document.querySelector('button[onclick="resendVerificationEmail()"]');
+            const now = Date.now();
+            const getRemain = () => Math.max(0, Math.ceil(((parseInt(localStorage.getItem('verify_resend_cooldown_until')||'0',10)) - Date.now())/1000));
+            const startCountdown = () => {
+                const tick = () => {
+                    const remain = getRemain();
+                    if (btn) { btn.disabled = remain>0; btn.textContent = remain>0 ? `Resend in ${remain}s` : 'Resend verification email'; }
+                    if (remain<=0) { try { clearInterval(window.__resendTimer); } catch(_){} }
+                };
+                try { clearInterval(window.__resendTimer); } catch(_){}
+                window.__resendTimer = setInterval(tick, 1000);
+                tick();
+            };
+            const until = parseInt(localStorage.getItem('verify_resend_cooldown_until')||'0',10);
+            if (until > now) {
+                const secs = Math.ceil((until-now)/1000);
+                showCustomModal('info','Please wait',`Try again in ${secs}s due to rate limits.`);
+                startCountdown();
                 return;
             }
-            if (!password) {
-                showCustomModal('error', 'Password Required', 'Enter your password to verify account ownership.');
-                return;
-            }
+            if (!email || !isValidEmail(email)) { showCustomModal('error','Email Required','Enter a valid email to resend.'); return; }
+            if (!password) { showCustomModal('error','Password Required','Enter your password to verify ownership.'); return; }
             try {
-                showSmartLoader('Resending', 'Sending verification email...');
+                if (btn){ btn.disabled = true; btn.textContent = 'Sending...'; }
+                showSmartLoader('Resending','Sending verification email...');
                 const { user } = await signInWithEmailAndPassword(auth, email, password);
-                try { const actionUrl = `${window.location.origin.replace(/\/$/, '')}/login.html`; await sendEmailVerification(user, { url: actionUrl, handleCodeInApp: true }); }
-                catch (e) { await sendEmailVerification(user); }
+                try {
+                    const actionUrl = `${window.location.origin.replace(/\/$/, '')}/login.html`;
+                    await sendEmailVerification(user, { url: actionUrl, handleCodeInApp: true });
+                } catch (e) {
+                    await sendEmailVerification(user);
+                }
                 try { await signOut(auth); } catch(_) {}
                 hideSmartLoader();
-                showSuccessModal(`Verification email sent to ${email}. Please check your inbox.`, () => {});
+                const coolMs = 60*1000; // 60s soft cooldown
+                localStorage.setItem('verify_resend_cooldown_until', String(Date.now()+coolMs));
+                startCountdown();
+                showSuccessModal(`Verification email sent to ${email}. Please check your inbox.`, ()=>{});
             } catch (error) {
                 hideSmartLoader();
-                let msg = 'Could not resend verification email.';
-                if (error.code === 'auth/wrong-password') msg = 'Incorrect password. Please try again.';
-                if (error.code === 'auth/user-not-found') msg = 'No account found with this email.';
-                if (error.code === 'auth/too-many-requests') msg = 'Too many attempts. Please try again later.';
-                showCustomModal('error', 'Resend Failed', msg);
+                const raw = (error && (error.message||'')).toString();
+                if (/UNAUTHORIZED_DOMAIN/i.test(raw)) {
+                    showCustomModal('error','Domain not allowed', 'Add this domain to Firebase Auth → Authorized domains, then try again.');
+                } else if (error.code === 'auth/too-many-requests' || /TOO_MANY_ATTEMPTS_TRY_LATER/i.test(raw)) {
+                    const coolMs = 60*60*1000; // 1h hard cooldown
+                    localStorage.setItem('verify_resend_cooldown_until', String(Date.now()+coolMs));
+                    startCountdown();
+                    showCustomModal('info','Rate limited','Too many attempts. Please try again in about an hour.');
+                } else if (error.code === 'auth/wrong-password') {
+                    showCustomModal('error','Incorrect password','Please try again.');
+                } else if (error.code === 'auth/user-not-found') {
+                    showCustomModal('error','No account found','Check the email address and try again.');
+                } else {
+                    showCustomModal('error','Resend Failed','Could not resend verification email. Please try again later.');
+                }
+            } finally {
+                if (btn && getRemain()<=0) { btn.disabled = false; btn.textContent = 'Resend verification email'; }
             }
         };
 
