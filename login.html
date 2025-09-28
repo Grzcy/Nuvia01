@@ -1137,7 +1137,7 @@
         // Import Firebase modules
         import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, updateProfile, setPersistence, browserLocalPersistence, browserSessionPersistence, signOut, fetchSignInMethodsForEmail, applyActionCode } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
-        import { initializeFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, getDocs, runTransaction, increment } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+        import { initializeFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, getDocs, runTransaction, increment, addDoc } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
 
         // Firebase configuration (using your existing config)
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
