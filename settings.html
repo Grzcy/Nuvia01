@@ -1472,6 +1472,92 @@ main { padding-top: 80px; }
             });
         }
 
+        function showDeleteAccountConfirm({ requirePassword = false } = {}) {
+            return new Promise((resolve) => {
+                if (!deleteAccountModalOverlay || !deleteAccountConfirmBtn || !deleteAccountCancelBtn) {
+                    console.error('JCHAT_ERROR: Delete account modal elements not found.');
+                    resolve({ confirmed: false, password: '' });
+                    return;
+                }
+
+                const modalContent = deleteAccountModalOverlay.querySelector('.modal-content');
+                const descriptionText = requirePassword
+                    ? 'Deleting your account removes every conversation, coin, and profile detail. Enter your password below to confirm.'
+                    : 'Deleting your account removes every conversation, coin, and profile detail. You will verify this action with your sign-in provider.';
+
+                deleteAccountDescription.textContent = descriptionText;
+                deleteAccountError.textContent = '';
+                deleteAccountPasswordInput.value = '';
+                deleteAccountPasswordInput.setAttribute('aria-invalid', 'false');
+                deleteAccountModalOverlay.classList.add('active');
+                deleteAccountModalOverlay.setAttribute('aria-hidden', 'false');
+
+                if (requirePassword) {
+                    deleteAccountPasswordGroup.hidden = false;
+                    deleteAccountHint.textContent = 'Enter the password you use for Nuvia to permanently delete your account.';
+                    requestAnimationFrame(() => deleteAccountPasswordInput.focus());
+                } else {
+                    deleteAccountPasswordGroup.hidden = true;
+                    deleteAccountHint.textContent = 'You will finish confirmation with your sign-in provider.';
+                    if (modalContent) {
+                        requestAnimationFrame(() => modalContent.focus());
+                    }
+                }
+
+                const cleanup = () => {
+                    deleteAccountModalOverlay.classList.remove('active');
+                    deleteAccountModalOverlay.setAttribute('aria-hidden', 'true');
+                    deleteAccountConfirmBtn.removeEventListener('click', handleConfirm);
+                    deleteAccountCancelBtn.removeEventListener('click', handleCancel);
+                    deleteAccountModalOverlay.removeEventListener('keydown', handleKeydown);
+                    deleteAccountModalOverlay.removeEventListener('click', handleOverlayClick);
+                    deleteAccountPasswordInput.setAttribute('aria-invalid', 'false');
+                };
+
+                const handleConfirm = () => {
+                    const passwordValue = deleteAccountPasswordInput.value.trim();
+                    if (requirePassword && !passwordValue) {
+                        deleteAccountError.textContent = 'Enter your password to continue.';
+                        deleteAccountPasswordInput.setAttribute('aria-invalid', 'true');
+                        deleteAccountPasswordInput.focus();
+                        return;
+                    }
+                    cleanup();
+                    resolve({ confirmed: true, password: passwordValue });
+                };
+
+                const handleCancel = () => {
+                    cleanup();
+                    resolve({ confirmed: false, password: '' });
+                };
+
+                const handleKeydown = (event) => {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        handleConfirm();
+                    } else if (event.key === 'Escape') {
+                        event.preventDefault();
+                        handleCancel();
+                    }
+                };
+
+                const handleOverlayClick = (event) => {
+                    if (event.target === deleteAccountModalOverlay) {
+                        handleCancel();
+                    }
+                };
+
+                deleteAccountConfirmBtn.addEventListener('click', handleConfirm);
+                deleteAccountCancelBtn.addEventListener('click', handleCancel);
+                deleteAccountModalOverlay.addEventListener('keydown', handleKeydown);
+                deleteAccountModalOverlay.addEventListener('click', handleOverlayClick);
+
+                if (requirePassword && modalContent) {
+                    modalContent.focus();
+                }
+            });
+        }
+
 
         /**
          * Toggles loading state for a button.
