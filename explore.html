@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Nuvia - Explore</title>
+  <link rel="canonical" href="/explore.html">
+  <meta name="theme-color" content="#1a1a2e">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" onload="this.rel='stylesheet'" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"></noscript>
+  <style>
+    :root {
+      --pink: #ff2e92;
+      --blue: #00d5ff;
+      --glass-black: rgba(10, 10, 10, .75);
+      --glass-blue: rgba(0, 213, 255, .15);
+      --radius: 20px;
+      --transition: .3s ease;
+      --white: #fff;
+      --text-light: rgba(255, 255, 255, .7);
+      --background-main: rgba(10, 10, 10, .75);
+      --background-gradient-1: #00d5ff;
+      --background-gradient-2: #ff2e92;
+      --card-background: linear-gradient(145deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01));
+      --header-background: linear-gradient(135deg, rgba(10, 10, 10, .85), rgba(10, 10, 10, .75));
+      --border-light: rgba(255, 255, 255, .05);
+      --input-background: rgba(255, 255, 255, 0.05);
+      --button-background: linear-gradient(90deg, var(--blue), var(--pink));
+      --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+      --accent-color: #00d5ff;
+      --accent-color-dark: #00aaff;
+    }
+    body { margin:0; font-family: 'Inter', sans-serif; background:#1a1a2e; color: var(--white); }
+    header { position: sticky; top:0; z-index:10; background: var(--header-background); border-bottom:1px solid var(--border-light); height:55px; display:flex; align-items:center; justify-content:center; }
+    .header-content { width:100%; max-width:1200px; padding:0 30px; display:flex; align-items:center; justify-content:space-between; }
+    .logo { font-family:'Poppins',sans-serif; font-size:1.6rem; font-weight:800; background-image: linear-gradient(90deg, var(--blue), var(--pink)); -webkit-background-clip:text; background-clip:text; color:transparent; text-decoration:none; letter-spacing:-0.03em; }
+    .icon-btn { width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.06)); border:2px solid rgba(255,255,255,0.25); color:#fff; text-decoration:none; transition:transform .2s; }
+    .icon-btn:hover { transform: translateY(-1px); }
+    main { max-width: 980px; margin: 20px auto; padding: 0 16px 28px; }
+    .explore-card { background: var(--card-background); border:1px solid var(--border-light); border-radius:12px; padding:16px; box-shadow:0 8px 30px rgba(0,0,0,0.25); }
+    .explore-title { margin:0 0 10px 0; font-size:1.4rem; font-weight:800; }
+    .search-row { display:flex; gap:8px; align-items:center; margin: 10px 0 14px; }
+    .tag-input { flex:1; background: var(--input-background); border:1px solid var(--border-light); color: var(--white); border-radius:10px; padding:10px 12px; font-size:1rem; outline:none; }
+    .primary-btn { background: var(--button-background); color:#fff; border:none; border-radius:10px; padding:10px 14px; font-weight:700; cursor:pointer; box-shadow: var(--button-shadow); }
+    .muted-btn { background: rgba(255,255,255,0.05); color: var(--white); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:10px 14px; font-weight:700; cursor:pointer; }
+    .section-title { font-size:1.05rem; margin: 14px 0 8px 0; font-weight:800; color: var(--white); }
+    .chips { display:flex; flex-wrap: wrap; gap:8px; }
+    .chip { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; background: rgba(255,255,255,0.03); color: var(--white); border:1px solid rgba(255,255,255,0.06); border-radius:999px; font-weight:700; cursor:pointer; text-decoration:none; }
+    .chip.selected { outline: 2px solid var(--accent-color); background: rgba(0,213,255,0.12); }
+    .chip .tag-text { letter-spacing:.01em; }
+    .chip .follow-btn { background: transparent; border:none; color: var(--text-light); cursor:pointer; font-size:.9rem; padding:0; }
+    .helper { color: var(--text-light); font-size:.9rem; margin: 6px 0 0 0; }
+    .footer { text-align:center; color: var(--text-light); font-size:.85rem; margin-top:16px; }
+    @media (max-width: 600px) { .search-row { flex-direction: column; align-items: stretch; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/index.html" class="logo">Nuvia</a>
+      <nav style="display:flex; gap:10px; align-items:center;">
+        <a href="/settings.html" class="icon-btn" aria-label="Settings"><i class="fas fa-cog"></i></a>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <section class="explore-card">
+      <h1 class="explore-title">Explore Tags</h1>
+      <div class="search-row">
+        <input id="tagInput" class="tag-input" type="text" placeholder="#inspiration, #bible, #quran" aria-label="Search or add tags">
+        <button id="addTagBtn" class="primary-btn">Add</button>
+        <button id="clearTagsBtn" class="muted-btn">Clear</button>
+      </div>
+      <p class="helper">Tip: use #tag format or type words and we'll convert.</p>
+
+      <h2 class="section-title">Trending</h2>
+      <div id="trendingChips" class="chips" aria-live="polite"></div>
+
+      <h2 class="section-title">Selected</h2>
+      <div id="selectedChips" class="chips"></div>
+
+      <div class="search-row" style="margin-top:14px;">
+        <button id="applyBtn" class="primary-btn" style="flex:1;">View Feed with Tags</button>
+        <a id="homeBtn" class="muted-btn" href="/index.html" style="text-align:center; text-decoration:none;">Home</a>
+      </div>
+    </section>
+    <div class="footer">©Nuvia 2025 · <a href="/report.html" class="chip" style="padding:6px 10px;">Report</a></div>
+  </main>
+
+  <script>
+    (function(){
+      const d = document;
+      const trendingEl = d.getElementById('trendingChips');
+      const selectedEl = d.getElementById('selectedChips');
+      const tagInput = d.getElementById('tagInput');
+      const addBtn = d.getElementById('addTagBtn');
+      const clearBtn = d.getElementById('clearTagsBtn');
+      const applyBtn = d.getElementById('applyBtn');
+
+      function readSet(key){ try{ return new Set(JSON.parse(localStorage.getItem(key)||'[]').map(s=>s.toLowerCase())); }catch(_){ return new Set(); } }
+      function writeSet(key, set){ try{ localStorage.setItem(key, JSON.stringify([...set])); }catch(_){ } }
+
+      function parseTags(input){
+        if (!input) return [];
+        return input.split(/[ ,]+/).map(t=>t.trim()).filter(Boolean).map(t=>{
+          if (!t.startsWith('#')) t = '#'+t;
+          return t.replace(/^#+/,'#').toLowerCase();
+        });
+      }
+
+      function getSelected(){
+        // Respect index.html convention: nuvia_selected_tags stores array of strings without forcing '#', but our chips include '#'
+        try{
+          const fromUrl = new URL(location.href).searchParams.get('tags')||'';
+          if (fromUrl) return new Set(fromUrl.split(',').map(s=>('#'+s.trim().toLowerCase())).filter(Boolean));
+        }catch(_){ }
+        const saved = readSet('nuvia_selected_tags');
+        return new Set([...saved].map(s=> s.startsWith('#')? s : ('#'+s)));
+      }
+
+      function setSelected(set){
+        // Save without leading '#'
+        const arr = [...set].map(s=>s.replace(/^#+/,''));
+        writeSet('nuvia_selected_tags', new Set(arr));
+      }
+
+      function getFollowed(){ return readSet('nuvia_followed_tags'); }
+      function setFollowed(set){ writeSet('nuvia_followed_tags', set); }
+
+      function getTrending(){
+        // Merge followed + selected + smart defaults
+        const sel = getSelected();
+        const fol = getFollowed();
+        const defaults = ['#inspiration','#bible','#quran','#jcoin','#levels','#groups','#friends','#music','#photos'];
+        return Array.from(new Set([ ...sel, ...fol, ...defaults ]));
+      }
+
+      function render(){
+        const sel = getSelected();
+        const fol = getFollowed();
+        // Trending
+        const trending = getTrending();
+        trendingEl.innerHTML = '';
+        if (trending.length === 0){ trendingEl.textContent = 'No trending yet.'; }
+        trending.forEach(tag=>{
+          const a = d.createElement('a');
+          a.href = `/index.html?tags=${encodeURIComponent(tag.replace(/^#+/,''))}`;
+          a.className = 'chip'+(sel.has(tag)?' selected':'');
+          a.dataset.tag = tag;
+          a.innerHTML = `<span class="tag-text">${tag}</span>`;
+          const btn = d.createElement('button');
+          btn.className = 'follow-btn';
+          btn.type = 'button';
+          btn.title = fol.has(tag.replace(/^#+/,''))? 'Unfollow' : 'Follow';
+          btn.innerHTML = fol.has(tag.replace(/^#+/,''))? '<i class="fas fa-star"></i>' : '<i class="far fa-star"></i>';
+          btn.addEventListener('click', (ev)=>{
+            ev.preventDefault(); ev.stopPropagation();
+            const t = tag.replace(/^#+/,'');
+            const f = getFollowed();
+            if (f.has(t)) f.delete(t); else f.add(t);
+            setFollowed(f);
+            render();
+          });
+          a.addEventListener('click',(ev)=>{
+            // Toggle selected locally (without leaving page) if user holds meta/ctrl, else follow link
+            if (ev.metaKey || ev.ctrlKey){ ev.preventDefault(); const s = getSelected(); if (s.has(tag)) s.delete(tag); else s.add(tag); setSelected(s); render(); }
+          });
+          a.appendChild(btn);
+          trendingEl.appendChild(a);
+        });
+        // Selected
+        selectedEl.innerHTML='';
+        if (sel.size === 0){ const p = d.createElement('p'); p.className='helper'; p.textContent='No tags selected yet.'; selectedEl.appendChild(p); }
+        sel.forEach(tag=>{
+          const chip = d.createElement('span');
+          chip.className='chip selected';
+          chip.textContent = tag;
+          chip.addEventListener('click', ()=>{ const s = getSelected(); s.delete(tag); setSelected(s); render(); });
+          selectedEl.appendChild(chip);
+        });
+      }
+
+      addBtn.addEventListener('click', ()=>{
+        const tags = parseTags(tagInput.value);
+        if (!tags.length) return;
+        const s = getSelected();
+        tags.forEach(t=> s.add(t));
+        setSelected(s);
+        tagInput.value='';
+        render();
+      });
+      tagInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ e.preventDefault(); addBtn.click(); }});
+      clearBtn.addEventListener('click', ()=>{ setSelected(new Set()); render(); });
+      applyBtn.addEventListener('click', ()=>{
+        const sel = getSelected();
+        const arr = [...sel].map(s=>s.replace(/^#+/,''));
+        const url = new URL('/index.html', location.origin);
+        if (arr.length) url.searchParams.set('tags', arr.join(','));
+        location.href = url.toString();
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>
