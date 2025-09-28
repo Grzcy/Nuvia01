@@ -2104,13 +2104,18 @@ main { padding-top: 80px; }
 
         async function handleSelfDelete(){
             if (!currentUser){ showMessageBox('Please log in to delete your account.', 'error'); return; }
-            const ok = await showCustomConfirm('This will permanently delete your account and data. Continue?');
-            if (!ok){ showMessageBox('Account deletion cancelled.', 'info'); return; }
+            const providerId = auth.currentUser?.providerData[0]?.providerId || '';
+            const requiresPassword = providerId === 'password';
+            const confirmation = await showDeleteAccountConfirm({ requirePassword: requiresPassword });
+            if (!confirmation.confirmed){
+                showMessageBox('Account deletion cancelled.', 'info');
+                return;
+            }
             try{
                 deleteAccountButton.disabled = true;
                 showMessageBox('Deleting your account...', 'loading', true);
                 await deleteAllUserData(currentUser.uid);
-                await attemptDeleteAuthUser();
+                await attemptDeleteAuthUser(requiresPassword ? confirmation.password : '');
                 showMessageBox('Your account was deleted.', 'success');
                 setTimeout(()=>{ window.location.href = '/login.html'; }, 1500);
             }catch(e){
