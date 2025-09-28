@@ -984,7 +984,7 @@
       if(!btn) return;
       const id = btn.getAttribute('data-id');
       if(!id) return;
-      const ok = window.confirm('Delete this message?');
+      const ok = window.confirm('Delete this message?\nThis action cannot be undone.');
       if(!ok) return;
       deleteMessageById(id).catch(()=>{});
     });
