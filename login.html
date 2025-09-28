@@ -1572,13 +1572,15 @@
                 try {
                     await sendEmailVerification(user);
                     hideSmartLoader();
-                    showSuccessModal(`Welcome to JCHAT, ${fullName}! Please verify your email at ${user.email} before signing in.`, () => {
+                    const verificationMessage = `Your Nuvia account is ready! We just sent a confirmation email to ${user.email}. Open the message, tap the confirm link, and check your spam or junk folder if you don't see it. You can sign in once your email is confirmed.`;
+                    showCustomModal('success', 'Confirm your email', verificationMessage, () => {
                         window.location.href = 'login.html';
                     });
                 } catch (verificationError) {
                     console.warn('Email verification failed:', verificationError);
                     hideSmartLoader();
-                    showSuccessModal(`Welcome to JCHAT, ${fullName}! Email verification could not be sent right now. Please try "Forgot password" later to trigger a new email or contact support.`, () => {
+                    const delayedMessage = `Your Nuvia account is ready, ${fullName}, but we couldn't send the confirmation email right now. Please use "Resend verification email" on the login page or contact support, and remember you'll need to confirm your email before signing in. As soon as the message arrives, check your inbox and spam folder for the link.`;
+                    showCustomModal('info', 'Email verification pending', delayedMessage, () => {
                         window.location.href = 'login.html';
                     });
                 }
