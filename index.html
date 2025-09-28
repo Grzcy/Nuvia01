@@ -4796,7 +4796,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                             <ul style="margin:8px 0 12px 18px;color:var(--text-light);">
                                 <li><strong>Deterministic inspiration</strong> — time-seeded algorithms deliver consistent, non-repetitive daily prompts.</li>
                                 <li><strong>Scripture indexing</strong> ��� fast chapter and verse lookup with offline resume and reading progress persistence.</li>
-                                <li><strong>Privacy-first profiles</strong> — local-first defaults with optional cloud sync for registered users.</li>
+                                <li><strong>Privacy-first profiles</strong> �� local-first defaults with optional cloud sync for registered users.</li>
                                 <li><strong>Content safety</strong> ��� layered moderation combining heuristics and community signals.</li>
                             </ul>
                         </div>
@@ -11684,10 +11684,18 @@ async function fetchAndDisplayPosts() {
                 currentUser = user;
                 isAuthReady = true; // Set to true early so profile fetching can proceed.
                 try { updateGuestHeaderKeysVisibility(false); } catch(e){}
-                await fetchAndDisplayHeaderProfile(user); // This sets currentUserProfileData and updates UI.
+                try {
+                    if (headerProfilePic && headerAvatarIcon && headerDisplayName) {
+                        const usernameInitial = (user.displayName || "J").charAt(0).toUpperCase();
+                        displayProfilePicture(headerProfilePic, headerAvatarIcon, user.photoURL, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
+                        headerDisplayName.textContent = user.displayName || "Nuvia User";
+                    }
+                } catch (_){ }
+                (async()=>{ try { await fetchAndDisplayHeaderProfile(user); } catch(_){ } })();
                 // Clear any stale inCall flag from previous sessions
                 setInCallStatusSafe(false);
                 try { document.documentElement.classList.remove('nuvia-loading'); } catch(_){}
+                fetchAndDisplayPosts();
                 console.log("Nuvia_DEBUG: Auth is ready. User ID:", currentUser.uid, "isAuthReady:", isAuthReady);
                 try{ // start session monitor to enforce single active session
                     registerSession(auth, db, appId).then(unreg => { window.__jchat_session_unreg = unreg; }).catch(e=>console.error('registerSession failed', e));
@@ -11752,10 +11760,8 @@ async function fetchAndDisplayPosts() {
                 unsubscribeListeners.push(unsubscribeSettings); // Add to list to unsubscribe on unload.
 
                 if (navigator.onLine) { 
-                    try { 
-                        await fetchSystemSettings(); 
-                        // Check for announcements after initial fetch
-                        await checkGlobalAnnouncements();
+                    try {
+                        Promise.allSettled([fetchSystemSettings(), checkGlobalAnnouncements()]);
                     } catch(_){} 
                 } else { 
                     console.warn('Nuvia_WARN: offline, skipping system settings fetch'); 
@@ -11852,7 +11858,6 @@ async function fetchAndDisplayPosts() {
                         }
                     }
                 } catch(e) { console.warn('saved widget load', e); }
-                await fetchAndDisplayPosts(); // This will setup all real-time listeners for posts and comments.
                 fetchNotificationCount(user.uid);
                 startUnreadChatBanner();
 
@@ -12189,6 +12194,7 @@ async function fetchAndDisplayPosts() {
             toggleInteractiveElements(false, false);
             try { updateGuestHeaderKeysVisibility(false); } catch(e){}
             console.log(`Nuvia_DEBUG: Initial postContentInput disabled state: ${postContentInput ? postContentInput.disabled : 'N/A (element not found)'}`);
+            try { const cached = parseInt(localStorage.getItem('nuvia_unread_count')||'0',10); updateNotificationBadge(isNaN(cached)?0:cached); } catch(_) {}
 
             // Sticky feed footer on small screens: add/remove body class and adjust padding
             function updateFeedFooterSticky() {
