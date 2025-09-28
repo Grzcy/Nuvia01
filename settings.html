@@ -746,6 +746,54 @@
             transform: translateY(-2px);
             background: rgba(255, 255, 255, 0.1);
         }
+        .modal-description {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 0;
+        }
+        .password-confirmation-group {
+            margin-top: 20px;
+            text-align: left;
+            width: 100%;
+        }
+        .password-confirmation-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-light);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .password-confirmation-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            background: var(--input-background);
+            color: var(--white);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .password-confirmation-input:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 3px rgba(0, 213, 255, 0.2);
+        }
+        .password-confirmation-hint {
+            margin-top: 8px;
+            color: var(--text-light);
+            font-size: 0.85rem;
+        }
+        .modal-error-text {
+            margin-top: 12px;
+            color: var(--delete-button-color);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .modal-overlay.active .password-confirmation-input[aria-invalid="true"] {
+            border-color: var(--delete-button-color);
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.3);
+        }
 
         /* Responsive Adjustments */
         @media (max-width: 600px) {
