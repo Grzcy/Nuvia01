@@ -970,7 +970,11 @@
             <div class="error-message" id="errorMessage" role="alert" aria-live="assertive" aria-atomic="true" aria-hidden="true" tabindex="-1">
                 Invalid email or password. Please try again.
             </div>
-            
+            <div id="unverifiedBanner" class="unverified-banner" role="status" aria-live="polite" style="display: none;">
+                We sent a verification link to <strong id="unverifiedEmailText"></strong>. Please verify your email to continue.
+                <button type="button" class="linklike" onclick="resendVerificationEmail()">Resend verification email</button>
+            </div>
+
             <!-- Signup-only fields -->
             <div class="form-group signup-only" style="display: none;">
                 <label for="fullName">Full Name</label>
@@ -2022,15 +2026,20 @@
         }
 
         // Check authentication state with enhanced loading
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                // User is signed in, show loading and redirect to home
-                console.log('User already authenticated:', user.email);
-                showSmartLoader('Welcome Back!', 'Taking you to your account...');
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 1000);
-            }
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) return;
+            try {
+                if (!user.emailVerified) {
+                    try { localStorage.setItem('unverified_email', user.email || ''); } catch(_) {}
+                    showUnverifiedBanner(user.email || '');
+                    hideSmartLoader();
+                    try { await signOut(auth); } catch(_) {}
+                    return;
+                }
+            } catch(_) {}
+            console.log('User already authenticated:', user.email);
+            showSmartLoader('Welcome Back!', 'Taking you to your account...');
+            setTimeout(() => { window.location.href = 'index.html'; }, 1000);
         });
 
         // Username availability checking (robust, case-insensitive check against stored usernames)
