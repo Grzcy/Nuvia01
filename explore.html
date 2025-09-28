@@ -6,6 +6,19 @@
   <title>Nuvia - Explore</title>
   <link rel="canonical" href="/explore.html">
   <meta name="theme-color" content="#1a1a2e">
+  <meta name="description" content="Explore trending tags and filter your Nuvia feed by interests like #inspiration, #bible, and #quran.">
+  <meta name="keywords" content="Nuvia, explore, tags, trends, bible, quran, inspiration, social, feed filters">
+  <meta property="og:title" content="Nuvia - Explore">
+  <meta property="og:description" content="Discover trending tags and personalize your feed.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://cdn.builder.io/api/v1/image/assets%2Faaaa97254b5c4256a69bb9a7bf91885c%2F9ed0b590d93440a085bb243bd84ed163?format=png&width=1200">
+  <meta property="og:image:alt" content="Nuvia logo">
+  <meta property="og:site_name" content="Nuvia">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Nuvia - Explore">
+  <meta name="twitter:description" content="Discover trending tags and personalize your feed.">
+  <meta name="twitter:image" content="https://cdn.builder.io/api/v1/image/assets%2Faaaa97254b5c4256a69bb9a7bf91885c%2F9ed0b590d93440a085bb243bd84ed163?format=png&width=1200">
+  <link rel="image_src" href="https://cdn.builder.io/api/v1/image/assets%2Faaaa97254b5c4256a69bb9a7bf91885c%2F9ed0b590d93440a085bb243bd84ed163?format=png&width=1200">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
@@ -100,6 +113,20 @@
       const clearBtn = d.getElementById('clearTagsBtn');
       const applyBtn = d.getElementById('applyBtn');
 
+      function logEvent(name, data){
+        try {
+          const k = 'nuvia_analytics';
+          const s = JSON.parse(localStorage.getItem(k) || '{}');
+          s[name] = (s[name] || 0) + 1;
+          localStorage.setItem(k, JSON.stringify(s));
+          window.dispatchEvent(new CustomEvent('analytics', { detail: { name, data, ts: Date.now() } }));
+          if (navigator.sendBeacon) {
+            const payload = new Blob([JSON.stringify({ name, data, ts: Date.now() })], { type: 'application/json' });
+            navigator.sendBeacon('/__noop', payload);
+          }
+        } catch(_){}
+      }
+
       function readSet(key){ try{ return new Set(JSON.parse(localStorage.getItem(key)||'[]').map(s=>s.toLowerCase())); }catch(_){ return new Set(); } }
       function writeSet(key, set){ try{ localStorage.setItem(key, JSON.stringify([...set])); }catch(_){ } }
 
@@ -112,7 +139,6 @@
       }
 
       function getSelected(){
-        // Respect index.html convention: nuvia_selected_tags stores array of strings without forcing '#', but our chips include '#'
         try{
           const fromUrl = new URL(location.href).searchParams.get('tags')||'';
           if (fromUrl) return new Set(fromUrl.split(',').map(s=>('#'+s.trim().toLowerCase())).filter(Boolean));
@@ -122,7 +148,6 @@
       }
 
       function setSelected(set){
-        // Save without leading '#'
         const arr = [...set].map(s=>s.replace(/^#+/,''));
         writeSet('nuvia_selected_tags', new Set(arr));
       }
@@ -131,7 +156,6 @@
       function setFollowed(set){ writeSet('nuvia_followed_tags', set); }
 
       function getTrending(){
-        // Merge followed + selected + smart defaults
         const sel = getSelected();
         const fol = getFollowed();
         const defaults = ['#inspiration','#bible','#quran','#jcoin','#levels','#groups','#friends','#music','#photos'];
@@ -141,7 +165,6 @@
       function render(){
         const sel = getSelected();
         const fol = getFollowed();
-        // Trending
         const trending = getTrending();
         trendingEl.innerHTML = '';
         if (trending.length === 0){ trendingEl.textContent = 'No trending yet.'; }
@@ -160,25 +183,25 @@
             ev.preventDefault(); ev.stopPropagation();
             const t = tag.replace(/^#+/,'');
             const f = getFollowed();
+            const willFollow = !f.has(t);
             if (f.has(t)) f.delete(t); else f.add(t);
             setFollowed(f);
+            logEvent('explore_follow_toggle', { tag: t, followed: willFollow });
             render();
           });
           a.addEventListener('click',(ev)=>{
-            // Toggle selected locally (without leaving page) if user holds meta/ctrl, else follow link
-            if (ev.metaKey || ev.ctrlKey){ ev.preventDefault(); const s = getSelected(); if (s.has(tag)) s.delete(tag); else s.add(tag); setSelected(s); render(); }
+            if (ev.metaKey || ev.ctrlKey){ ev.preventDefault(); const s = getSelected(); const willSelect = !s.has(tag); if (s.has(tag)) s.delete(tag); else s.add(tag); setSelected(s); logEvent('explore_select_toggle', { tag: tag.replace(/^#+/,'') , selected: willSelect }); render(); }
           });
-          a.appendChild(btn);
           trendingEl.appendChild(a);
+          a.appendChild(btn);
         });
-        // Selected
         selectedEl.innerHTML='';
         if (sel.size === 0){ const p = d.createElement('p'); p.className='helper'; p.textContent='No tags selected yet.'; selectedEl.appendChild(p); }
         sel.forEach(tag=>{
           const chip = d.createElement('span');
           chip.className='chip selected';
           chip.textContent = tag;
-          chip.addEventListener('click', ()=>{ const s = getSelected(); s.delete(tag); setSelected(s); render(); });
+          chip.addEventListener('click', ()=>{ const s = getSelected(); s.delete(tag); setSelected(s); logEvent('explore_select_remove', { tag: tag.replace(/^#+/,'') }); render(); });
           selectedEl.appendChild(chip);
         });
       }
@@ -189,16 +212,18 @@
         const s = getSelected();
         tags.forEach(t=> s.add(t));
         setSelected(s);
+        logEvent('explore_add_tags', { count: tags.length });
         tagInput.value='';
         render();
       });
       tagInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter'){ e.preventDefault(); addBtn.click(); }});
-      clearBtn.addEventListener('click', ()=>{ setSelected(new Set()); render(); });
+      clearBtn.addEventListener('click', ()=>{ setSelected(new Set()); logEvent('explore_clear'); render(); });
       applyBtn.addEventListener('click', ()=>{
         const sel = getSelected();
         const arr = [...sel].map(s=>s.replace(/^#+/,''));
         const url = new URL('/index.html', location.origin);
         if (arr.length) url.searchParams.set('tags', arr.join(','));
+        logEvent('explore_apply', { tags: arr });
         location.href = url.toString();
       });
 

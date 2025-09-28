@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Page Not Found · Nuvia</title>
+  <meta name="theme-color" content="#1a1a2e">
+  <style>
+    :root {
+      --pink: #ff2e92;
+      --blue: #00d5ff;
+      --white: #fff;
+      --text-light: rgba(255, 255, 255, .7);
+      --card-background: linear-gradient(145deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01));
+      --border-light: rgba(255, 255, 255, .05);
+      --button-background: linear-gradient(90deg, var(--blue), var(--pink));
+      --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+    }
+    body { margin:0; font-family: 'Inter', sans-serif; background:#1a1a2e; color: var(--white); display:flex; align-items:center; justify-content:center; min-height:100vh; padding:16px; }
+    .card { background: var(--card-background); border:1px solid var(--border-light); border-radius:12px; padding:24px; max-width:520px; width:100%; text-align:center; box-shadow:0 8px 30px rgba(0,0,0,0.25); }
+    h1 { margin:0 0 8px; font-size:1.6rem; font-weight:800; }
+    p { margin:0 0 14px; color: var(--text-light); }
+    .actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+    a.btn { display:inline-flex; align-items:center; justify-content:center; padding:10px 14px; border-radius:10px; text-decoration:none; font-weight:800; color:#fff; background: var(--button-background); box-shadow: var(--button-shadow); }
+    a.secondary { background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.06); box-shadow:none; }
+  </style>
+</head>
+<body>
+  <main class="card" role="main">
+    <h1>Page Not Found</h1>
+    <p>The page you requested doesn’t exist or may have moved.</p>
+    <div class="actions">
+      <a class="btn" href="/index.html">Go to Home</a>
+      <a class="btn secondary" href="/explore.html">Open Explore</a>
+    </div>
+  </main>
+</body>
+</html>
