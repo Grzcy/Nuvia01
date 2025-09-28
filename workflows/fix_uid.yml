@@ -1,0 +1,50 @@
+name: UID Fixer
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+
+jobs:
+  replace-uid:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Run UID fixer
+        run: |
+          python3 scripts/fix_uid.py --root . --backup-dir .github/uid_fixer_backups
+
+      - name: Commit & push changes (if any)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -A
+            # Ensure backups are not committed
+            git reset -- .github/uid_fixer_backups || true
+            # only commit if there are staged changes
+            if ! git diff --staged --quiet; then
+              git commit -m "chore(uid-fix): replace old admin UID with new UID"
+              git push
+              echo "✅ Committed & pushed UID replacements."
+            else
+              echo "ℹ️  No staged changes to commit after excluding backups."
+            fi
+          else
+            echo "ℹ️  No changes made by the script."
+          fi
