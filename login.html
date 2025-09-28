@@ -1417,24 +1417,32 @@
             // Awards: inviter + new user once per account creation
             async function processReferralReward(newUserId){
                 try{
-                    const inviterId = (parseReferrerFromInput() || referrerIdFromUrl);
-                    if(!inviterId || inviterId === newUserId) return; // no self-referrals
+                    // Resolve inviter from input/url; support full URLs and usernames
+                    let rawRef = (parseReferrerFromInput() || referrerIdFromUrl || '').trim();
+                    if (!rawRef || rawRef === newUserId) return;
+                    try { const u = new URL(rawRef); rawRef = (u.searchParams.get('ref') || u.searchParams.get('referrer') || u.searchParams.get('refer') || '').trim() || rawRef; } catch(_){ }
+
+                    let inviterId = rawRef;
+                    if (!/^[A-Za-z0-9]{20,}/.test(inviterId)) {
+                        // Try resolve by username -> uid from public profiles
+                        try {
+                            const qRef = query(collection(db, 'artifacts', appId, 'public', 'data', 'users'), where('username','==', inviterId.toLowerCase()));
+                            const qs = await getDocs(qRef);
+                            if (!qs.empty) inviterId = (qs.docs[0].data().userId || qs.docs[0].id);
+                        } catch(_){ /* ignore */ }
+                    }
+                    if (!inviterId || inviterId === newUserId) return;
+
                     const newUserPrivateRef = doc(db, 'artifacts', appId, 'users', newUserId, 'profiles', 'user_profile');
                     const inviterPrivateRef = doc(db, 'artifacts', appId, 'users', inviterId, 'profiles', 'user_profile');
-                    const inviterReferralRef = doc(db, 'artifacts', appId, 'users', inviterId, 'referrals', newUserId);
 
+                    // STEP 1: Immediately credit NEW USER only (always allowed)
+                    let didCreditNew = false;
                     await runTransaction(db, async (tx)=>{
-                        const newUserSnap = await tx.get(newUserPrivateRef);
-                        if (!newUserSnap.exists()) return; // must exist from earlier creation
-                        const nu = newUserSnap.data() || {};
-                        if (nu.referral?.rewarded === true) return; // already rewarded
-
-                        const inviterSnap = await tx.get(inviterPrivateRef);
-                        if (!inviterSnap.exists()) return; // inviter must exist
-                        const inviteLinkSnap = await tx.get(inviterReferralRef);
-                        if (inviteLinkSnap.exists()) return; // already credited for this pair
-
-                        // Credit new user: +20 gas, +10 JCoins
+                        const nuSnap = await tx.get(newUserPrivateRef);
+                        if (!nuSnap.exists()) return;
+                        const nu = nuSnap.data() || {};
+                        if (nu.referral?.rewarded === true) return; // already credited
                         tx.update(newUserPrivateRef, {
                             gas: increment(20),
                             totalGasEarned: increment(20),
@@ -1442,26 +1450,48 @@
                             referral: { referrerId: inviterId, rewarded: true, rewardedAt: serverTimestamp() },
                             updatedAt: serverTimestamp()
                         });
-                        // Credit inviter: +20 gas, +5 JCoins and record link doc
-                        tx.update(inviterPrivateRef, {
-                            gas: increment(20),
-                            totalGasEarned: increment(20),
-                            jCoins: increment(5),
-                            successfulReferrals: increment(1),
-                            updatedAt: serverTimestamp()
-                        });
-                        tx.set(inviterReferralRef, { newUserId, createdAt: serverTimestamp() });
+                        didCreditNew = true;
                     });
 
-                    // Best-effort: reflect JCoins in public summaries (if present)
+                    // Reflect NEW USER in public summary (best-effort)
+                    try { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', newUserId), { jCoins: increment(10), totalGasEarned: increment(20), updatedAt: serverTimestamp() }); } catch(_){ }
+
+                    // STEP 2: Try to credit INVITER directly; on failure, create pending reward for auto-approve/admin
+                    let inviterCredited = false;
                     try{
-                        const newUserPublicRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', newUserId);
-                        const inviterPublicRef = doc(db, 'artifacts', appId, 'public', 'data', 'users', inviterId);
-                        await Promise.all([
-                            updateDoc(newUserPublicRef, { jCoins: increment(10), totalGasEarned: increment(20), updatedAt: serverTimestamp() }).catch(()=>{}),
-                            updateDoc(inviterPublicRef, { jCoins: increment(5), totalGasEarned: increment(20), updatedAt: serverTimestamp() }).catch(()=>{})
-                        ]);
-                    }catch(_){ /* non-fatal */ }
+                        await runTransaction(db, async (tx)=>{
+                            const invSnap = await tx.get(inviterPrivateRef);
+                            if (!invSnap.exists()) return; // inviter must exist
+                            tx.update(inviterPrivateRef, {
+                                gas: increment(20),
+                                totalGasEarned: increment(20),
+                                jCoins: increment(5),
+                                successfulReferrals: increment(1),
+                                updatedAt: serverTimestamp()
+                            });
+                        });
+                        inviterCredited = true;
+                    }catch(err){
+                        // Permission denied or other failure -> queue pending reward
+                        try {
+                            await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'pending_activity_rewards'), {
+                                userId: inviterId,
+                                username: null,
+                                activityType: 'referral_inviter',
+                                suggestedJCoinAmount: 5,
+                                suggestedXpAmount: 0,
+                                suggestedGasAmount: 20,
+                                status: 'pending',
+                                timestamp: serverTimestamp(),
+                                relatedEntityId: newUserId,
+                                notes: `Referral from ${newUserId}. Auto-approve to credit inviter.`
+                            });
+                        } catch(_){ /* ignore */ }
+                    }
+
+                    // Reflect INVITER in public summary if directly credited
+                    if (inviterCredited) { try { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', inviterId), { jCoins: increment(5), totalGasEarned: increment(20), updatedAt: serverTimestamp() }); } catch(_){ } }
+
                 }catch(e){ console.warn('Referral reward failed or skipped:', e?.message || e); }
             }
             // Get additional signup fields
