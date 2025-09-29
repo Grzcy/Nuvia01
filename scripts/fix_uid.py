@@ -13,7 +13,7 @@ import subprocess
 
 # CONFIG - set to your UIDs
 OLD_UID = "cc96gdhCRPO72NFZtleRCujHvIq2"
-NEW_UID = "RxKuP9OjYrhmSiMSF6CZHK3JZQq1"
+NEW_UID = "RJZ8xhsjEsdKBGFYveWO0Rsq1Zz1"
 
 # default exclusions
 EXCLUDED_DIRS = {
