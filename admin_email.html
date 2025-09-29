@@ -16,19 +16,20 @@
     .brand { display:flex; align-items:center; gap:12px; font-weight:600; letter-spacing:.2px; color:var(--text); text-decoration:none; }
     .brand i { color: var(--accent-2); }
     .admin-chip { padding:4px 10px; border-radius:999px; background:rgba(34,211,238,0.12); color:#8be9ff; font-size:12px; border:1px solid rgba(34,211,238,0.25); }
-    main { max-width:920px; margin:28px auto; padding:0 16px; }
+    main { max-width:980px; margin:28px auto; padding:0 16px; }
     .card { background: var(--panel); border:1px solid rgba(255,255,255,0.06); border-radius:14px; box-shadow: 0 8px 30px rgba(0,0,0,0.25); }
     .card-header { padding:16px 18px; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:space-between; }
     .card-header h2 { margin:0; font-size:18px; font-weight:600; }
     .card-body { padding:18px; }
     .grid { display:grid; grid-template-columns:1fr; gap:14px; }
-    @media (min-width: 720px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+    @media (min-width: 860px) { .grid-3 { grid-template-columns: 1.3fr 1fr 1fr; } .grid-2 { grid-template-columns:1fr 1fr; } }
     label { display:block; font-size:13px; color: var(--muted); margin-bottom:6px; }
-    input[type="email"], input[type="text"], textarea { width:100%; background:#0c1320; border:1px solid rgba(255,255,255,0.08); color:var(--text); border-radius:10px; padding:12px 12px; outline:none; }
-    textarea { min-height:180px; resize:vertical; }
-    .actions { display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
+    input[type="email"], input[type="text"], textarea, select { width:100%; background:#0c1320; border:1px solid rgba(255,255,255,0.08); color:var(--text); border-radius:10px; padding:12px 12px; outline:none; }
+    textarea { min-height:200px; resize:vertical; }
+    .actions { display:flex; gap:10px; justify-content:flex-end; margin-top:12px; flex-wrap: wrap; }
     .btn { display:inline-flex; align-items:center; gap:8px; border:1px solid transparent; background:var(--accent); color:white; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600; }
     .btn.secondary { background:transparent; border-color: rgba(255,255,255,0.12); color:var(--text); }
+    .btn.danger { background: var(--danger); }
     .btn:disabled { opacity:.6; cursor:not-allowed; }
     .message-box { display:none; align-items:center; gap:10px; padding:12px 14px; border-radius:10px; margin:16px 0; border:1px solid transparent; }
     .message-box.show { display:flex; }
@@ -57,26 +58,55 @@
       </div>
       <div class="card-body">
         <form id="emailForm" novalidate>
-          <div class="grid grid-2">
+          <div class="grid grid-3">
             <div>
               <label for="toEmail">Recipient Email</label>
               <input id="toEmail" type="email" placeholder="user@example.com" required />
               <div class="hint">Enter the user's email address.</div>
             </div>
             <div>
+              <label for="recipientName">Recipient Name (optional)</label>
+              <input id="recipientName" type="text" placeholder="e.g. Jane" />
+            </div>
+            <div>
+              <label for="themeSelect">Theme</label>
+              <select id="themeSelect">
+                <option value="brand">Brand</option>
+                <option value="success">Success</option>
+                <option value="warning">Warning</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-2" style="margin-top:14px;">
+            <div>
               <label for="subject">Subject</label>
               <input id="subject" type="text" placeholder="Subject" required />
             </div>
+            <div>
+              <label for="ctaLabel">CTA Button Label (optional)</label>
+              <input id="ctaLabel" type="text" placeholder="Open Dashboard" />
+            </div>
           </div>
-          <div style="margin-top:14px;">
-            <label for="message">Message</label>
-            <textarea id="message" placeholder="Write your message..." required></textarea>
+
+          <div class="grid grid-2" style="margin-top:14px;">
+            <div>
+              <label for="message">Message</label>
+              <textarea id="message" placeholder="Write your message..." required></textarea>
+            </div>
+            <div>
+              <label for="ctaUrl">CTA Button URL (optional)</label>
+              <input id="ctaUrl" type="text" placeholder="https://example.com" />
+              <div class="hint">If both label and URL are provided, a button is included.</div>
+            </div>
           </div>
+
           <div class="actions">
             <button type="button" id="previewBtn" class="btn secondary"><i class="fa-regular fa-eye"></i> Preview</button>
             <button type="submit" id="sendBtn" class="btn"><i class="fa-regular fa-paper-plane"></i> Send</button>
+            <button type="button" id="clearBtn" class="btn danger"><i class="fa-regular fa-trash-can"></i> Clear</button>
           </div>
-          <p class="hint">This writes to Firestore mail queue. Requires Firebase Extension "Trigger Email" (or a backend) to actually deliver.</p>
+          <p class="hint">Emails are queued to Firestore collection "mail". Delivery requires the Firebase Extension "Trigger Email" or a compatible backend.</p>
         </form>
       </div>
     </section>
@@ -113,13 +143,84 @@
 
     const emailForm = document.getElementById('emailForm');
     const toEmailEl = document.getElementById('toEmail');
+    const recipientNameEl = document.getElementById('recipientName');
     const subjectEl = document.getElementById('subject');
     const messageEl = document.getElementById('message');
     const previewBtn = document.getElementById('previewBtn');
     const sendBtn = document.getElementById('sendBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const ctaLabelEl = document.getElementById('ctaLabel');
+    const ctaUrlEl = document.getElementById('ctaUrl');
+    const themeSelect = document.getElementById('themeSelect');
 
     function validateEmail(email){
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
+    }
+
+    function esc(str=''){ return (''+str).replace(/[&<>]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[s])); }
+
+    function toPlainText(html){ return String(html).replace(/<br\s*\/?>(?=\n)?/gi,'\n').replace(/<[^>]+>/g,''); }
+
+    function palette(theme){
+      if(theme === 'success') return { top:'#0ea5e9', bottom:'#22c55e', accent:'#16a34a' };
+      if(theme === 'warning') return { top:'#f59e0b', bottom:'#ef4444', accent:'#e11d48' };
+      return { top:'#3b82f6', bottom:'#22d3ee', accent:'#3b82f6' };
+    }
+
+    function buildEmailHtml({ recipientName, subject, body, ctaLabel, ctaUrl, theme='brand' }){
+      const p = palette(theme);
+      const greeting = recipientName ? `Hi ${esc(recipientName)},` : 'Hello,';
+      const bodyHtml = esc(body).replace(/\n/g,'<br>');
+      const button = (ctaLabel && ctaUrl) ? `
+        <tr>
+          <td align="center" style="padding: 24px 24px 0 24px;">
+            <a href="${ctaUrl}" target="_blank" style="display:inline-block;background:${p.accent};color:#ffffff;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:10px;">${esc(ctaLabel)}</a>
+          </td>
+        </tr>` : '';
+
+      return `<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>${esc(subject || 'Message')}</title>
+  <style>
+    body { margin:0; padding:0; background:#0b0f14; }
+    table { border-collapse: collapse; }
+    .container { width:100%; background: #0b0f14; padding: 20px 0; }
+    .wrapper { max-width: 640px; margin:0 auto; }
+  </style>
+</head>
+<body>
+  <table role="presentation" width="100%" class="container">
+    <tr>
+      <td>
+        <table role="presentation" class="wrapper" width="100%">
+          <tr>
+            <td style="background: linear-gradient(135deg, ${p.top}, ${p.bottom}); padding: 28px 24px; border-radius: 14px 14px 0 0; text-align:center; color:#fff; font-family: Inter,Segoe UI,Arial,Helvetica,sans-serif;">
+              <div style="font-size:22px; font-weight:700; letter-spacing:.3px;">Nuvia</div>
+              <div style="opacity:.9; font-size:13px; margin-top:6px;">Official ${recipientName ? 'message for ' + esc(recipientName) : 'notification'}</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="background:#0f1620; border:1px solid rgba(255,255,255,0.06); border-top: none; padding: 22px 24px; color:#e8f0f7; font-family: Inter,Segoe UI,Arial,Helvetica,sans-serif;">
+              <p style="margin:0 0 12px 0; font-size:14px;">${greeting}</p>
+              <p style="margin:0; font-size:14px; line-height:1.6;">${bodyHtml}</p>
+            </td>
+          </tr>
+          ${button}
+          <tr>
+            <td style="background:#0f1620; border:1px solid rgba(255,255,255,0.06); border-top:none; padding: 16px 24px 22px 24px; color:#8aa0b2; font-family: Inter,Segoe UI,Arial,Helvetica,sans-serif; border-radius:0 0 14px 14px;">
+              <div style="font-size:12px;">— Nuvia Team</div>
+              <div style="font-size:12px; margin-top:8px; opacity:.9;">You are receiving this email because an admin sent you a message.</div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
     }
 
     onAuthStateChanged(auth, async (user) => {
@@ -132,9 +233,16 @@
       const toEmail = toEmailEl.value.trim();
       const subject = subjectEl.value.trim();
       const body = messageEl.value.trim();
+      const recipientName = recipientNameEl.value.trim();
+      const ctaLabel = ctaLabelEl.value.trim();
+      const ctaUrl = ctaUrlEl.value.trim();
+      const theme = themeSelect.value;
       if (!validateEmail(toEmail) || !subject || !body) { showMessageBox('Fill recipient, subject and message.', 'error'); return; }
-      const url = `mailto:${encodeURIComponent(toEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      window.open(url, '_blank', 'noopener');
+      const html = buildEmailHtml({ recipientName, subject, body, ctaLabel, ctaUrl, theme });
+      const w = window.open('', '_blank');
+      w.document.open();
+      w.document.write(html);
+      w.document.close();
     });
 
     emailForm.addEventListener('submit', async (e) => {
@@ -142,21 +250,28 @@
       const toEmail = toEmailEl.value.trim();
       const subject = subjectEl.value.trim();
       const body = messageEl.value.trim();
+      const recipientName = recipientNameEl.value.trim();
+      const ctaLabel = ctaLabelEl.value.trim();
+      const ctaUrl = ctaUrlEl.value.trim();
+      const theme = themeSelect.value;
+
       if (!validateEmail(toEmail)) { showMessageBox('Enter a valid email address.', 'error'); return; }
       if (!subject) { showMessageBox('Subject is required.', 'error'); return; }
       if (!body) { showMessageBox('Message is required.', 'error'); return; }
 
       sendBtn.disabled = true; showMessageBox('Queueing email…', 'info');
       try {
+        const html = buildEmailHtml({ recipientName, subject, body, ctaLabel, ctaUrl, theme });
         await addDoc(collection(db, 'mail'), {
           to: toEmail,
-          message: { subject, text: body, html: `<p>${body.replace(/\n/g,'<br>')}</p>` },
+          message: { subject, text: toPlainText(html), html },
           createdAt: serverTimestamp(),
           createdBy: ADMIN_UID,
-          appId
+          appId,
+          meta: { recipientName, theme, hasCta: Boolean(ctaLabel && ctaUrl) }
         });
         await addDoc(collection(db, 'artifacts', appId, 'public', 'logs', 'admin_email_logs'), {
-          to: toEmail, subject, textSize: body.length, createdAt: serverTimestamp(), createdBy: ADMIN_UID
+          to: toEmail, subject, textSize: body.length, createdAt: serverTimestamp(), createdBy: ADMIN_UID, theme, hasCta: Boolean(ctaLabel && ctaUrl)
         });
         showMessageBox('Email queued successfully.', 'success');
         emailForm.reset();
@@ -165,6 +280,8 @@
         showMessageBox(err?.message || 'Failed to queue email.', 'error', true);
       } finally { sendBtn.disabled = false; }
     });
+
+    clearBtn.addEventListener('click', () => { emailForm.reset(); showMessageBox('Cleared.', 'info'); });
   </script>
 </body>
 </html>
