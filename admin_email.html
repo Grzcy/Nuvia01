@@ -16,16 +16,16 @@
     .brand { display:flex; align-items:center; gap:12px; font-weight:600; letter-spacing:.2px; color:var(--text); text-decoration:none; }
     .brand i { color: var(--accent-2); }
     .admin-chip { padding:4px 10px; border-radius:999px; background:rgba(34,211,238,0.12); color:#8be9ff; font-size:12px; border:1px solid rgba(34,211,238,0.25); }
-    main { max-width:980px; margin:28px auto; padding:0 16px; }
+    main { max-width:1040px; margin:28px auto; padding:0 16px; }
     .card { background: var(--panel); border:1px solid rgba(255,255,255,0.06); border-radius:14px; box-shadow: 0 8px 30px rgba(0,0,0,0.25); }
     .card-header { padding:16px 18px; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:space-between; }
     .card-header h2 { margin:0; font-size:18px; font-weight:600; }
     .card-body { padding:18px; }
     .grid { display:grid; grid-template-columns:1fr; gap:14px; }
-    @media (min-width: 860px) { .grid-3 { grid-template-columns: 1.3fr 1fr 1fr; } .grid-2 { grid-template-columns:1fr 1fr; } }
+    @media (min-width: 980px) { .grid-3 { grid-template-columns: 1.2fr 1fr 1fr; } .grid-2 { grid-template-columns:1fr 1fr; } }
     label { display:block; font-size:13px; color: var(--muted); margin-bottom:6px; }
     input[type="email"], input[type="text"], textarea, select { width:100%; background:#0c1320; border:1px solid rgba(255,255,255,0.08); color:var(--text); border-radius:10px; padding:12px 12px; outline:none; }
-    textarea { min-height:200px; resize:vertical; }
+    textarea { min-height:220px; resize:vertical; }
     .actions { display:flex; gap:10px; justify-content:flex-end; margin-top:12px; flex-wrap: wrap; }
     .btn { display:inline-flex; align-items:center; gap:8px; border:1px solid transparent; background:var(--accent); color:white; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600; }
     .btn.secondary { background:transparent; border-color: rgba(255,255,255,0.12); color:var(--text); }
@@ -39,6 +39,7 @@
     .message-box.loading-pulse { animation: pulse 1.2s ease-in-out infinite; }
     @keyframes pulse { 0%,100%{ opacity:.7 } 50%{ opacity:1 } }
     .hint { color: var(--muted); font-size:12px; margin-top:6px; }
+    .preview-note { color:var(--muted); font-size:12px; margin: 10px 0 -4px; }
   </style>
 </head>
 <body>
@@ -78,14 +79,18 @@
             </div>
           </div>
 
-          <div class="grid grid-2" style="margin-top:14px;">
+          <div class="grid grid-3" style="margin-top:14px;">
             <div>
               <label for="subject">Subject</label>
               <input id="subject" type="text" placeholder="Subject" required />
             </div>
             <div>
-              <label for="ctaLabel">CTA Button Label (optional)</label>
-              <input id="ctaLabel" type="text" placeholder="Open Dashboard" />
+              <label for="replyTo">Reply-To (optional)</label>
+              <input id="replyTo" type="email" placeholder="support@nuvia.app" />
+            </div>
+            <div>
+              <label for="preheader">Preheader (optional)</label>
+              <input id="preheader" type="text" placeholder="Short summary shown in inbox preview" />
             </div>
           </div>
 
@@ -95,12 +100,38 @@
               <textarea id="message" placeholder="Write your message..." required></textarea>
             </div>
             <div>
-              <label for="ctaUrl">CTA Button URL (optional)</label>
-              <input id="ctaUrl" type="text" placeholder="https://example.com" />
-              <div class="hint">If both label and URL are provided, a button is included.</div>
+              <label for="footerNote">Footer Note (optional)</label>
+              <textarea id="footerNote" placeholder="e.g. Need help? Reply to this email or visit our Help Center."></textarea>
             </div>
           </div>
 
+          <div class="grid grid-3" style="margin-top:14px;">
+            <div>
+              <label for="ctaLabel">CTA Button Label (optional)</label>
+              <input id="ctaLabel" type="text" placeholder="Open Dashboard" />
+            </div>
+            <div>
+              <label for="ctaUrl">CTA Button URL (optional)</label>
+              <input id="ctaUrl" type="text" placeholder="https://example.com" />
+            </div>
+            <div>
+              <label for="logoUrl">Logo URL (optional)</label>
+              <input id="logoUrl" type="text" placeholder="https://.../logo.png" />
+            </div>
+          </div>
+
+          <div class="grid grid-2" style="margin-top:14px;">
+            <div>
+              <label for="bannerUrl">Hero/Banner Image URL (optional)</label>
+              <input id="bannerUrl" type="text" placeholder="https://.../banner.jpg" />
+            </div>
+            <div>
+              <label for="socialLinks">Social Links (comma separated, optional)</label>
+              <input id="socialLinks" type="text" placeholder="https://x.com/nuvia, https://instagram.com/nuvia" />
+            </div>
+          </div>
+
+          <div class="preview-note">Use Preview to see the exact email your users will receive.</div>
           <div class="actions">
             <button type="button" id="previewBtn" class="btn secondary"><i class="fa-regular fa-eye"></i> Preview</button>
             <button type="submit" id="sendBtn" class="btn"><i class="fa-regular fa-paper-plane"></i> Send</button>
@@ -128,7 +159,6 @@
       measurementId: "G-S6Z9GG0R9P"
     };
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
     const ADMIN_UID = 'RJZ8xhsjEsdKBGFYveWO0Rsq1Zz1';
 
     const app = initializeApp(firebaseConfig);
@@ -152,31 +182,47 @@
     const ctaLabelEl = document.getElementById('ctaLabel');
     const ctaUrlEl = document.getElementById('ctaUrl');
     const themeSelect = document.getElementById('themeSelect');
+    const replyToEl = document.getElementById('replyTo');
+    const preheaderEl = document.getElementById('preheader');
+    const footerNoteEl = document.getElementById('footerNote');
+    const logoUrlEl = document.getElementById('logoUrl');
+    const bannerUrlEl = document.getElementById('bannerUrl');
+    const socialLinksEl = document.getElementById('socialLinks');
 
     function validateEmail(email){
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
     }
-
     function esc(str=''){ return (''+str).replace(/[&<>]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[s])); }
-
     function toPlainText(html){ return String(html).replace(/<br\s*\/?>(?=\n)?/gi,'\n').replace(/<[^>]+>/g,''); }
-
     function palette(theme){
       if(theme === 'success') return { top:'#0ea5e9', bottom:'#22c55e', accent:'#16a34a' };
       if(theme === 'warning') return { top:'#f59e0b', bottom:'#ef4444', accent:'#e11d48' };
       return { top:'#3b82f6', bottom:'#22d3ee', accent:'#3b82f6' };
     }
 
-    function buildEmailHtml({ recipientName, subject, body, ctaLabel, ctaUrl, theme='brand' }){
+    function parseSocialLinks(input){
+      return (input||'').split(',').map(s=>s.trim()).filter(Boolean).slice(0,4);
+    }
+
+    function buildEmailHtml({ recipientName, subject, body, ctaLabel, ctaUrl, theme='brand', preheader, footerNote, logoUrl, bannerUrl, socialLinks }){
       const p = palette(theme);
       const greeting = recipientName ? `Hi ${esc(recipientName)},` : 'Hello,';
       const bodyHtml = esc(body).replace(/\n/g,'<br>');
       const button = (ctaLabel && ctaUrl) ? `
         <tr>
-          <td align="center" style="padding: 24px 24px 0 24px;">
+          <td align="center" style="padding: 22px 24px 0 24px;">
             <a href="${ctaUrl}" target="_blank" style="display:inline-block;background:${p.accent};color:#ffffff;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:10px;">${esc(ctaLabel)}</a>
           </td>
         </tr>` : '';
+      const footer = footerNote ? `<div style="margin-top:10px; opacity:.9;">${esc(footerNote).replace(/\n/g,'<br>')}</div>` : '';
+      const socials = (socialLinks && socialLinks.length) ? `
+        <div style="margin-top:12px;">
+          ${socialLinks.map(h=>`<a href="${h}" target="_blank" style="color:#8aa0b2; margin-right:12px; text-decoration:none;">${esc(new URL(h).host)}</a>`).join('')}
+        </div>` : '';
+
+      const logo = logoUrl ? `<img src="${logoUrl}" alt="Nuvia" width="120" style="display:block; margin:0 auto 8px auto; border-radius:14px;"/>` : `<div style="font-size:22px; font-weight:700; letter-spacing:.3px;">Nuvia</div>`;
+      const banner = bannerUrl ? `<tr><td style="background:#0f1620; border-left:1px solid rgba(255,255,255,0.06); border-right:1px solid rgba(255,255,255,0.06);"><img src="${bannerUrl}" alt="Banner" width="100%" style="display:block; max-width:640px; width:100%; height:auto;"></td></tr>` : '';
+      const pre = preheader ? `<div style="display:none; overflow:hidden; line-height:1px; opacity:0; max-height:0; max-width:0;">${esc(preheader)}</div>` : '';
 
       return `<!DOCTYPE html>
 <html>
@@ -184,40 +230,36 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>${esc(subject || 'Message')}</title>
-  <style>
-    body { margin:0; padding:0; background:#0b0f14; }
-    table { border-collapse: collapse; }
-    .container { width:100%; background: #0b0f14; padding: 20px 0; }
-    .wrapper { max-width: 640px; margin:0 auto; }
-  </style>
+  <style> body { margin:0; padding:0; background:#0b0f14; } table { border-collapse: collapse; } </style>
 </head>
 <body>
-  <table role="presentation" width="100%" class="container">
-    <tr>
-      <td>
-        <table role="presentation" class="wrapper" width="100%">
-          <tr>
-            <td style="background: linear-gradient(135deg, ${p.top}, ${p.bottom}); padding: 28px 24px; border-radius: 14px 14px 0 0; text-align:center; color:#fff; font-family: Inter,Segoe UI,Arial,Helvetica,sans-serif;">
-              <div style="font-size:22px; font-weight:700; letter-spacing:.3px;">Nuvia</div>
-              <div style="opacity:.9; font-size:13px; margin-top:6px;">Official ${recipientName ? 'message for ' + esc(recipientName) : 'notification'}</div>
-            </td>
-          </tr>
-          <tr>
-            <td style="background:#0f1620; border:1px solid rgba(255,255,255,0.06); border-top: none; padding: 22px 24px; color:#e8f0f7; font-family: Inter,Segoe UI,Arial,Helvetica,sans-serif;">
-              <p style="margin:0 0 12px 0; font-size:14px;">${greeting}</p>
-              <p style="margin:0; font-size:14px; line-height:1.6;">${bodyHtml}</p>
-            </td>
-          </tr>
-          ${button}
-          <tr>
-            <td style="background:#0f1620; border:1px solid rgba(255,255,255,0.06); border-top:none; padding: 16px 24px 22px 24px; color:#8aa0b2; font-family: Inter,Segoe UI,Arial,Helvetica,sans-serif; border-radius:0 0 14px 14px;">
-              <div style="font-size:12px;">— Nuvia Team</div>
-              <div style="font-size:12px; margin-top:8px; opacity:.9;">You are receiving this email because an admin sent you a message.</div>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
+  ${pre}
+  <table role="presentation" width="100%" style="background:#0b0f14; padding: 20px 0;">
+    <tr><td>
+      <table role="presentation" align="center" width="640" style="width:100%; max-width:640px; margin:0 auto;">
+        <tr>
+          <td style="background: linear-gradient(135deg, ${p.top}, ${p.bottom}); padding: 26px 24px; border-radius: 14px 14px 0 0; text-align:center; color:#fff; font-family: Inter,Segoe UI,Arial,Helvetica,sans-serif;">
+            ${logo}
+            <div style="opacity:.9; font-size:13px;">Official ${recipientName ? 'message for ' + esc(recipientName) : 'notification'}</div>
+          </td>
+        </tr>
+        ${banner}
+        <tr>
+          <td style="background:#0f1620; border:1px solid rgba(255,255,255,0.06); border-top: none; padding: 22px 24px; color:#e8f0f7; font-family: Inter,Segoe UI,Arial,Helvetica,sans-serif;">
+            <p style="margin:0 0 12px 0; font-size:14px;">${greeting}</p>
+            <p style="margin:0; font-size:14px; line-height:1.6;">${bodyHtml}</p>
+          </td>
+        </tr>
+        ${button}
+        <tr>
+          <td style="background:#0f1620; border:1px solid rgba(255,255,255,0.06); border-top:none; padding: 16px 24px 22px 24px; color:#8aa0b2; font-family: Inter,Segoe UI,Arial,Helvetica,sans-serif; border-radius:0 0 14px 14px;">
+            <div style="font-size:12px;">— Nuvia Team</div>
+            ${footer}
+            ${socials}
+          </td>
+        </tr>
+      </table>
+    </td></tr>
   </table>
 </body>
 </html>`;
@@ -229,52 +271,55 @@
       showMessageBox('Admin verified. You can send email.', 'success');
     });
 
+    function collectInputs(){
+      return {
+        toEmail: toEmailEl.value.trim(),
+        subject: subjectEl.value.trim(),
+        body: messageEl.value.trim(),
+        recipientName: recipientNameEl.value.trim(),
+        ctaLabel: ctaLabelEl.value.trim(),
+        ctaUrl: ctaUrlEl.value.trim(),
+        theme: themeSelect.value,
+        replyTo: replyToEl.value.trim(),
+        preheader: preheaderEl.value.trim(),
+        footerNote: footerNoteEl.value.trim(),
+        logoUrl: logoUrlEl.value.trim(),
+        bannerUrl: bannerUrlEl.value.trim(),
+        socialLinks: parseSocialLinks(socialLinksEl.value)
+      };
+    }
+
     previewBtn.addEventListener('click', () => {
-      const toEmail = toEmailEl.value.trim();
-      const subject = subjectEl.value.trim();
-      const body = messageEl.value.trim();
-      const recipientName = recipientNameEl.value.trim();
-      const ctaLabel = ctaLabelEl.value.trim();
-      const ctaUrl = ctaUrlEl.value.trim();
-      const theme = themeSelect.value;
-      if (!validateEmail(toEmail) || !subject || !body) { showMessageBox('Fill recipient, subject and message.', 'error'); return; }
-      const html = buildEmailHtml({ recipientName, subject, body, ctaLabel, ctaUrl, theme });
-      const w = window.open('', '_blank');
-      w.document.open();
-      w.document.write(html);
-      w.document.close();
+      const v = collectInputs();
+      if (!validateEmail(v.toEmail) || !v.subject || !v.body) { showMessageBox('Fill recipient, subject and message.', 'error'); return; }
+      const html = buildEmailHtml(v);
+      const w = window.open('', '_blank'); w.document.open(); w.document.write(html); w.document.close();
     });
 
     emailForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const toEmail = toEmailEl.value.trim();
-      const subject = subjectEl.value.trim();
-      const body = messageEl.value.trim();
-      const recipientName = recipientNameEl.value.trim();
-      const ctaLabel = ctaLabelEl.value.trim();
-      const ctaUrl = ctaUrlEl.value.trim();
-      const theme = themeSelect.value;
-
-      if (!validateEmail(toEmail)) { showMessageBox('Enter a valid email address.', 'error'); return; }
-      if (!subject) { showMessageBox('Subject is required.', 'error'); return; }
-      if (!body) { showMessageBox('Message is required.', 'error'); return; }
+      const v = collectInputs();
+      if (!validateEmail(v.toEmail)) { showMessageBox('Enter a valid email address.', 'error'); return; }
+      if (!v.subject) { showMessageBox('Subject is required.', 'error'); return; }
+      if (!v.body) { showMessageBox('Message is required.', 'error'); return; }
 
       sendBtn.disabled = true; showMessageBox('Queueing email…', 'info');
       try {
-        const html = buildEmailHtml({ recipientName, subject, body, ctaLabel, ctaUrl, theme });
-        await addDoc(collection(db, 'mail'), {
-          to: toEmail,
-          message: { subject, text: toPlainText(html), html },
+        const html = buildEmailHtml(v);
+        const payload = {
+          to: v.toEmail,
+          message: { subject: v.subject, text: toPlainText(html), html },
           createdAt: serverTimestamp(),
           createdBy: ADMIN_UID,
           appId,
-          meta: { recipientName, theme, hasCta: Boolean(ctaLabel && ctaUrl) }
-        });
+          meta: { recipientName: v.recipientName, theme: v.theme, hasCta: Boolean(v.ctaLabel && v.ctaUrl) }
+        };
+        if (validateEmail(v.replyTo)) payload.replyTo = v.replyTo;
+        await addDoc(collection(db, 'mail'), payload);
         await addDoc(collection(db, 'artifacts', appId, 'public', 'logs', 'admin_email_logs'), {
-          to: toEmail, subject, textSize: body.length, createdAt: serverTimestamp(), createdBy: ADMIN_UID, theme, hasCta: Boolean(ctaLabel && ctaUrl)
+          to: v.toEmail, subject: v.subject, textSize: v.body.length, createdAt: serverTimestamp(), createdBy: ADMIN_UID, theme: v.theme, hasCta: Boolean(v.ctaLabel && v.ctaUrl)
         });
-        showMessageBox('Email queued successfully.', 'success');
-        emailForm.reset();
+        showMessageBox('Email queued successfully.', 'success'); emailForm.reset();
       } catch (err) {
         console.error('Email queue error', err);
         showMessageBox(err?.message || 'Failed to queue email.', 'error', true);
