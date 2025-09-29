@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nuvia • Admin Email</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    :root { --bg:#0b0f14; --panel:#0f1620; --muted:#8aa0b2; --text:#e8f0f7; --accent:#3b82f6; --accent-2:#22d3ee; --danger:#ef4444; --success:#22c55e; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; color: var(--text); background: linear-gradient(180deg, #0a0f15, #0b1220 60%, #0a0f15); min-height:100vh; }
+    header { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid rgba(255,255,255,0.06); background:rgba(15,22,32,0.8); position:sticky; top:0; backdrop-filter: blur(8px); z-index:10; }
+    .brand { display:flex; align-items:center; gap:12px; font-weight:600; letter-spacing:.2px; color:var(--text); text-decoration:none; }
+    .brand i { color: var(--accent-2); }
+    .admin-chip { padding:4px 10px; border-radius:999px; background:rgba(34,211,238,0.12); color:#8be9ff; font-size:12px; border:1px solid rgba(34,211,238,0.25); }
+    main { max-width:920px; margin:28px auto; padding:0 16px; }
+    .card { background: var(--panel); border:1px solid rgba(255,255,255,0.06); border-radius:14px; box-shadow: 0 8px 30px rgba(0,0,0,0.25); }
+    .card-header { padding:16px 18px; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:space-between; }
+    .card-header h2 { margin:0; font-size:18px; font-weight:600; }
+    .card-body { padding:18px; }
+    .grid { display:grid; grid-template-columns:1fr; gap:14px; }
+    @media (min-width: 720px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+    label { display:block; font-size:13px; color: var(--muted); margin-bottom:6px; }
+    input[type="email"], input[type="text"], textarea { width:100%; background:#0c1320; border:1px solid rgba(255,255,255,0.08); color:var(--text); border-radius:10px; padding:12px 12px; outline:none; }
+    textarea { min-height:180px; resize:vertical; }
+    .actions { display:flex; gap:10px; justify-content:flex-end; margin-top:12px; }
+    .btn { display:inline-flex; align-items:center; gap:8px; border:1px solid transparent; background:var(--accent); color:white; padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600; }
+    .btn.secondary { background:transparent; border-color: rgba(255,255,255,0.12); color:var(--text); }
+    .btn:disabled { opacity:.6; cursor:not-allowed; }
+    .message-box { display:none; align-items:center; gap:10px; padding:12px 14px; border-radius:10px; margin:16px 0; border:1px solid transparent; }
+    .message-box.show { display:flex; }
+    .message-box.info { background:rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.35); }
+    .message-box.success { background:rgba(34,197,94,0.12); border-color: rgba(34,197,94,0.35); }
+    .message-box.error { background:rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.35); }
+    .message-box.loading-pulse { animation: pulse 1.2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{ opacity:.7 } 50%{ opacity:1 } }
+    .hint { color: var(--muted); font-size:12px; margin-top:6px; }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="brand" href="./index.html" aria-label="Home">
+      <i class="fa-solid fa-sparkles"></i>
+      <span>Nuvia</span>
+    </a>
+    <span class="admin-chip"><i class="fa-solid fa-shield-halved"></i> Admin</span>
+  </header>
+  <main>
+    <div id="messageBox" class="message-box info" role="status" aria-live="polite"></div>
+
+    <section class="card" aria-labelledby="emailTitle">
+      <div class="card-header">
+        <h2 id="emailTitle">Send Email to User</h2>
+      </div>
+      <div class="card-body">
+        <form id="emailForm" novalidate>
+          <div class="grid grid-2">
+            <div>
+              <label for="toEmail">Recipient Email</label>
+              <input id="toEmail" type="email" placeholder="user@example.com" required />
+              <div class="hint">Enter the user's email address.</div>
+            </div>
+            <div>
+              <label for="subject">Subject</label>
+              <input id="subject" type="text" placeholder="Subject" required />
+            </div>
+          </div>
+          <div style="margin-top:14px;">
+            <label for="message">Message</label>
+            <textarea id="message" placeholder="Write your message..." required></textarea>
+          </div>
+          <div class="actions">
+            <button type="button" id="previewBtn" class="btn secondary"><i class="fa-regular fa-eye"></i> Preview</button>
+            <button type="submit" id="sendBtn" class="btn"><i class="fa-regular fa-paper-plane"></i> Send</button>
+          </div>
+          <p class="hint">This writes to Firestore mail queue. Requires Firebase Extension "Trigger Email" (or a backend) to actually deliver.</p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js';
+    import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js';
+
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+      apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+      authDomain: "jchat-1.firebaseapp.com",
+      databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+      projectId: "jchat-1",
+      storageBucket: "jchat-1.firebasestorage.app",
+      messagingSenderId: "328479683167",
+      appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
+      measurementId: "G-S6Z9GG0R9P"
+    };
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+    const ADMIN_UID = 'RJZ8xhsjEsdKBGFYveWO0Rsq1Zz1';
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const messageBox = document.getElementById('messageBox');
+    function showMessageBox(message, type = 'info', isPersistent = false){
+      messageBox.textContent = message; messageBox.className = 'message-box show ' + type;
+      if (!isPersistent) { setTimeout(()=>{ messageBox.classList.remove('show'); }, 2500); }
+    }
+
+    const emailForm = document.getElementById('emailForm');
+    const toEmailEl = document.getElementById('toEmail');
+    const subjectEl = document.getElementById('subject');
+    const messageEl = document.getElementById('message');
+    const previewBtn = document.getElementById('previewBtn');
+    const sendBtn = document.getElementById('sendBtn');
+
+    function validateEmail(email){
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { showMessageBox('Please sign in.', 'error', true); setTimeout(()=>{ window.location.href = './login.html'; }, 800); return; }
+      if (user.uid !== ADMIN_UID) { showMessageBox('Unauthorized. Redirecting…', 'error', true); setTimeout(()=>{ window.location.href = './index.html'; }, 900); return; }
+      showMessageBox('Admin verified. You can send email.', 'success');
+    });
+
+    previewBtn.addEventListener('click', () => {
+      const toEmail = toEmailEl.value.trim();
+      const subject = subjectEl.value.trim();
+      const body = messageEl.value.trim();
+      if (!validateEmail(toEmail) || !subject || !body) { showMessageBox('Fill recipient, subject and message.', 'error'); return; }
+      const url = `mailto:${encodeURIComponent(toEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.open(url, '_blank', 'noopener');
+    });
+
+    emailForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const toEmail = toEmailEl.value.trim();
+      const subject = subjectEl.value.trim();
+      const body = messageEl.value.trim();
+      if (!validateEmail(toEmail)) { showMessageBox('Enter a valid email address.', 'error'); return; }
+      if (!subject) { showMessageBox('Subject is required.', 'error'); return; }
+      if (!body) { showMessageBox('Message is required.', 'error'); return; }
+
+      sendBtn.disabled = true; showMessageBox('Queueing email…', 'info');
+      try {
+        await addDoc(collection(db, 'mail'), {
+          to: toEmail,
+          message: { subject, text: body, html: `<p>${body.replace(/\n/g,'<br>')}</p>` },
+          createdAt: serverTimestamp(),
+          createdBy: ADMIN_UID,
+          appId
+        });
+        await addDoc(collection(db, 'artifacts', appId, 'public', 'logs', 'admin_email_logs'), {
+          to: toEmail, subject, textSize: body.length, createdAt: serverTimestamp(), createdBy: ADMIN_UID
+        });
+        showMessageBox('Email queued successfully.', 'success');
+        emailForm.reset();
+      } catch (err) {
+        console.error('Email queue error', err);
+        showMessageBox(err?.message || 'Failed to queue email.', 'error', true);
+      } finally { sendBtn.disabled = false; }
+    });
+  </script>
+</body>
+</html>
