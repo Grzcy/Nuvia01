@@ -185,7 +185,7 @@
     const db = getFirestore(app);
     (async ()=>{ try{ await enableMultiTabIndexedDbPersistence(db); } catch(e){ try{ await enableIndexedDbPersistence(db); }catch(_){} } })();
 
-    const ADMIN_UID = 'cc96gdhCRPO72NFZtleRCujHvIq2';
+    const ADMIN_UID = 'RJZ8xhsjEsdKBGFYveWO0Rsq1Zz1';
     const SYSTEM_SETTINGS_DOC_REF = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'system_settings');
 
     const logoutButton = document.getElementById('logoutButton');
