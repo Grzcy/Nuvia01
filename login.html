@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         * {
             margin: 0;
@@ -1170,7 +1171,7 @@
     <script type="module">
         // Import Firebase modules
         import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, updateProfile, setPersistence, browserLocalPersistence, browserSessionPersistence, signOut, fetchSignInMethodsForEmail, applyActionCode, checkActionCode, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, getAdditionalUserInfo } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, updateProfile, setPersistence, browserLocalPersistence, browserSessionPersistence, signOut, fetchSignInMethodsForEmail, applyActionCode, checkActionCode, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, getAdditionalUserInfo, signInWithCredential } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
         import { initializeFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, getDocs, runTransaction, increment, addDoc } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
 
         // Firebase configuration (using your existing config)
@@ -2387,6 +2388,31 @@
         }
 
         // Google Sign-In via Firebase modular SDK (redirect-based)
+        const GOOGLE_CLIENT_ID = '328479683167-4ib6vvg5easg05upvi2f4cvqs6l76lg7.apps.googleusercontent.com';
+        let __gisInitialized = false;
+        function initGoogleIdentity(){
+            try{
+                if (__gisInitialized) return;
+                if (!(window.google && google.accounts && google.accounts.id)) return;
+                google.accounts.id.initialize({
+                    client_id: GOOGLE_CLIENT_ID,
+                    callback: async (response)=>{
+                        try{
+                            if (!response || !response.credential) return;
+                            try { await setPersistence(auth, browserLocalPersistence); } catch(_){ }
+                            const cred = GoogleAuthProvider.credential(response.credential);
+                            const result = await signInWithCredential(auth, cred);
+                            await handleGoogleAuthResult(result);
+                        }catch(e){ handleGoogleError(e); }
+                    },
+                    auto_select: false,
+                    cancel_on_tap_outside: true,
+                    ux_mode: 'popup'
+                });
+                __gisInitialized = true;
+            }catch(_){ }
+        }
+        document.addEventListener('DOMContentLoaded', ()=>{ initGoogleIdentity(); });
         async function handleGoogleAuthResult(result){
             try{
                 if (!result || !result.user) return;
@@ -2427,6 +2453,10 @@
             try{
                 showSmartLoader('Continue with Google', 'Opening Google sign-in...');
                 try { await setPersistence(auth, browserLocalPersistence); } catch(_){ }
+                initGoogleIdentity();
+                if (__gisInitialized && window.google && google.accounts && google.accounts.id){
+                    try{ google.accounts.id.prompt(); return; }catch(_){ /* fall through to Firebase popup */ }
+                }
                 const provider = new GoogleAuthProvider();
                 provider.setCustomParameters({ prompt: 'select_account' });
                 try{
@@ -2435,19 +2465,8 @@
                     await handleGoogleAuthResult(res);
                 }catch(err){
                     if (err && (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user' || err.code === 'auth/operation-not-supported-in-this-environment')){
-                        // Fallback to redirect flow
-                        try{
-                            await signInWithRedirect(auth, provider);
-                            // After redirect back, getRedirectResult will handle the result
-                            return;
-                        }catch(rdErr){
-                            hideSmartLoader();
-                            handleGoogleError(rdErr);
-                        }
-                    } else {
-                        hideSmartLoader();
-                        handleGoogleError(err);
-                    }
+                        try{ await signInWithRedirect(auth, provider); return; }catch(rdErr){ hideSmartLoader(); handleGoogleError(rdErr); }
+                    } else { hideSmartLoader(); handleGoogleError(err); }
                 }
             }catch(e){ hideSmartLoader(); handleGoogleError(e); }
         }
