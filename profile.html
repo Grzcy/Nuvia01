@@ -5104,14 +5104,16 @@
   .verified-badge.md{font-size:1rem}
   .profile-avatar-anchor{position:relative;display:inline-block;z-index:3;margin-top:-100px}
   /* Avatar corner badges (Facebook-style) */
-  .profile-avatar-badge{position:absolute;display:flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;border:2px solid var(--background-main);box-shadow:0 0 0 1px rgba(0,0,0,0.2);z-index:2;animation:soft-glow 2.2s ease-in-out infinite;pointer-events:none}
-  .profile-avatar-badge i{font-size:24px;line-height:1}
-  .profile-avatar-badge.verified{right:10px;bottom:10px;background:radial-gradient(circle at 50% 50%,#4CB5FF 0%,#1DA1F2 70%);color:#fff;border-color:#fff;box-shadow:0 0 0 3px #fff,0 0 0 6px var(--background-main),0 0 12px rgba(29,161,242,.6),0 0 24px rgba(102,199,255,.4);animation:soft-glow 2.2s ease-in-out infinite}
+  .profile-avatar-badge{position:absolute;display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;border:2px solid var(--background-main);box-shadow:0 0 0 1px rgba(0,0,0,0.2);z-index:2;animation:soft-glow 2.2s ease-in-out infinite;pointer-events:none}
+  .profile-avatar-badge i{font-size:16px;line-height:1}
+.profile-avatar-badge::after{content:'';position:absolute;inset:-3px;border-radius:50%;box-shadow:0 0 0 3px #fff,0 2px 8px rgba(0,0,0,.25)}
+.profile-avatar-badge::before{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(transparent 60%, rgba(255,255,255,.25));pointer-events:none}
+  .profile-avatar-badge.verified{right:10px;bottom:10px;background:conic-gradient(from 220deg,#6FD3FF, #1DA1F2 70%, #6FD3FF);color:#fff;border-color:#fff;box-shadow:0 0 0 2px #fff,0 0 0 4px var(--background-main),0 4px 10px rgba(29,161,242,.45);animation:soft-glow 2.2s ease-in-out infinite}
     .profile-avatar-badge.premium{right:-8px;top:-8px;background:linear-gradient(135deg,#FFD700,#FFA500);color:#000;border-color:#FFD700;box-shadow:0 0 12px rgba(255,215,0,.8),0 0 22px rgba(255,165,0,.5)}
   @keyframes soft-glow{0%,100%{filter:drop-shadow(0 0 0 rgba(0,0,0,0))}50%{filter:drop-shadow(0 0 2px rgba(255,255,255,.4))}}
   @keyframes green-pulse{0%,100%{box-shadow:0 0 10px rgba(61,157,93,.7),0 0 20px rgba(61,157,93,.45)}50%{box-shadow:0 0 14px rgba(61,157,93,.85),0 0 26px rgba(61,157,93,.6)}}
   @keyframes gold-pulse{0%,100%{box-shadow:0 0 10px rgba(255,215,0,.75),0 0 20px rgba(255,165,0,.5),0 0 30px rgba(255,215,0,.35)}50%{box-shadow:0 0 14px rgba(255,215,0,.9),0 0 26px rgba(255,165,0,.65),0 0 40px rgba(255,215,0,.5)}}
-  @media (max-width:768px){.profile-avatar-badge{width:38px;height:38px}.profile-avatar-badge i{font-size:18px}.profile-avatar-badge.verified{right:8px;bottom:8px}.profile-avatar-anchor{margin-top:-80px}}
+  @media (max-width:768px){.profile-avatar-badge{width:26px;height:26px}.profile-avatar-badge i{font-size:14px}.profile-avatar-badge.verified{right:8px;bottom:8px}.profile-avatar-anchor{margin-top:-80px}}
 </style>
 <style id="nuvia-brand-style">.logo span,.brand-link span{background:linear-gradient(90deg,var(--pink),#ffd400);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}.logo{background-image:linear-gradient(90deg,var(--pink),#ffd400) !important;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}</style><script src="assets/js/lazy-images.js" defer></script>
 </head>
