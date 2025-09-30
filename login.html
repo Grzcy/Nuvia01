@@ -1618,10 +1618,23 @@
                 await processReferralReward(user.uid);
 
                 try { await sendEmailVerification(user, { url: `${window.location.origin}/login.html?mode=verifyEmail`, handleCodeInApp: true }); } catch(_) {}
+                try { await signOut(auth); } catch(_) {}
                 hideSmartLoader();
                 try { localStorage.setItem('unverified_email', user.email || email); } catch(_) {}
-                showSuccessModal('Account created! We sent a verification link to your email. Please verify to continue.', () => { try{ showUnverifiedBanner(user.email || email); }catch(_){} });
-                
+                showSuccessModal('Account created! We emailed your confirmation link. Copy the link or code, paste it here, and tap Verify to finish.', () => {
+                    try { showUnverifiedBanner(user.email || email); } catch(_) {}
+                    try {
+                        const container = document.querySelector('.login-container');
+                        if (container && container.classList.contains('signup-mode')) {
+                            toggleSignupMode();
+                        }
+                    } catch (_) {}
+                    try {
+                        const manualInput = document.getElementById('manualVerifyInput');
+                        if (manualInput) manualInput.focus();
+                    } catch (_) {}
+                });
+
             } catch (error) {
                 hideSmartLoader();
                 let errorMessage = 'Failed to create account. Please try again.';
