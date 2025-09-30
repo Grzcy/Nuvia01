@@ -979,12 +979,13 @@
         <form class="login-form" id="loginForm" role="form" aria-labelledby="loginHeading" aria-describedby="errorMessage">
             <div id="verifyEmailBanner" class="verify-banner" role="region" aria-live="polite" aria-atomic="true">
                 <div class="verify-banner-title"><i class="fas fa-envelope-open-text"></i> Verify your email</div>
-                <div class="verify-banner-message">We sent a verification link to <span id="verifyEmailAddress">your email</span>. Check your inbox and spam folder.</div>
+                <div class="verify-banner-message">We sent a verification link to <span id="verifyEmailAddress">your email</span>. Check your inbox and spam folder. Copy the confirmation link or code from that message and paste it below.</div>
                 <div class="verify-banner-actions">
                     <button type="button" id="resendVerifyEmailBtn" class="verify-resend-btn"><i class="fas fa-paper-plane"></i> Resend verification email</button>
-                    <input type="text" id="manualVerifyInput" class="verify-code-input" placeholder="Paste verification code or link here">
+                    <input type="text" id="manualVerifyInput" class="verify-code-input" placeholder="Paste verification code or link here" aria-describedby="verifyBannerHint">
                     <button type="button" id="applyVerifyCodeBtn" class="verify-resend-btn"><i class="fas fa-check"></i> Verify code</button>
                 </div>
+                <p class="verify-banner-hint" id="verifyBannerHint">Open your email, copy the confirmation link or code, paste it here, and press "Verify code" to confirm your account.</p>
             </div>
             <div class="error-message" id="errorMessage" role="alert" aria-live="assertive" aria-atomic="true" aria-hidden="true" tabindex="-1">
                 Invalid email or password. Please try again.
