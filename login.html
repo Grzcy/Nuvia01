@@ -1700,7 +1700,7 @@
                 try {
                     const msg = (error && (error.message || '')).toString();
                     if (msg.includes('Failed to fetch') || error.name === 'TypeError') {
-                        // perform a small network check
+                        // perform a small network check; if it fails, surface network error and exit
                         try {
                             const controller = new AbortController();
                             const timeout = setTimeout(() => controller.abort(), 3000);
@@ -1712,8 +1712,18 @@
                             showErrorModal(errorMessage);
                             return;
                         }
-                        // If network check passed, fall back to generic message
-                        errorMessage = 'Network error while communicating with authentication server. Please try again.';
+                        // If network check passed, continue to map auth errors instead of showing a network error
+                    }
+
+                    // Map common REST messages when error.code is missing
+                    if (/INVALID_LOGIN_CREDENTIALS/i.test(msg) || /invalid[_\s-]*credential/i.test(msg)) {
+                        errorMessage = 'Invalid login credentials. Please check your email and password.';
+                    } else if (/EMAIL_NOT_FOUND/i.test(msg)) {
+                        errorMessage = 'No account found with this email.';
+                    } else if (/INVALID_PASSWORD/i.test(msg)) {
+                        errorMessage = 'Incorrect password. Please try again or reset your password.';
+                    } else if (/USER_DISABLED/i.test(msg)) {
+                        errorMessage = 'This account has been disabled. Please contact support.';
                     }
                 } catch (_) {}
 
