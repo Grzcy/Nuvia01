@@ -5989,14 +5989,10 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
         })();
 
         // --- Global network error handling and safe fetch wrapper ---
-        // Lightweight non-blocking banner to show network errors to users
+        // Log network errors silently; no visual banner on this page
         (function(){
-            const banner = document.createElement('div');
-            banner.id = 'networkErrorBanner';
-            banner.style.cssText = 'position:fixed;top:12px;left:50%;transform:translateX(-50%);background:#ff4d4f;color:#fff;padding:10px 16px;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,0.2);z-index:99999;display:none;font-weight:600;font-family:Inter, sans-serif;';
-            document.addEventListener('DOMContentLoaded', ()=> document.body.appendChild(banner));
-            window._showNetworkError = (msg = 'Network error: Failed to fetch. Some features may be unavailable.') => {
-                try { banner.textContent = msg; banner.style.display = 'block'; setTimeout(()=>{ banner.style.display = 'none'; }, 8000); } catch(_){}
+            window._showNetworkError = (msg = 'Network error detected') => {
+                try { console.warn(String(msg)); } catch(_) {}
             };
         })();
 
