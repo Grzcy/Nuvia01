@@ -10,8 +10,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <script>window.__oauth_worker_origin = 'https://nuvia-share-worker.king-grazzy.workers.dev';</script>
     <style>
         * {
             margin: 0;
@@ -1079,26 +1077,6 @@
                 Sign In
             </button>
 
-            <div class="divider"><span>Or continue with</span></div>
-            <div class="oauth-section">
-                <button type="button" id="googleSignInBtn" class="oauth-btn google" aria-label="Continue with Google">
-                    <span class="oauth-icon" aria-hidden="true">
-                        <svg width="18" height="18" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
-                            <path fill="#EA4335" d="M24 9.5c3.64 0 6.9 1.26 9.48 3.72l7.1-7.1C35.93 2.35 30.44 0 24 0 14.62 0 6.51 5.54 2.56 13.61l8.66 6.72C13.2 14.44 18.13 9.5 24 9.5z"/>
-                            <path fill="#34A853" d="M46.5 24.5c0-1.64-.16-3.22-.46-4.74H24v9.02h12.7c-.55 2.98-2.18 5.5-4.66 7.2l7.12 5.53C43.67 37.1 46.5 31.3 46.5 24.5z"/>
-                            <path fill="#4A90E2" d="M13.22 28.49a14.5 14.5 0 010-8.98l-8.66-6.72A24 24 0 000 24c0 3.9.93 7.58 2.56 10.85l10.66-6.36z"/>
-                            <path fill="#FBBC05" d="M24 48c6.48 0 11.93-2.13 15.9-5.79l-7.12-5.53c-2 1.35-4.58 2.14-8.78 2.14-5.86 0-10.79-4.94-12.78-11.15L2.56 34.85C6.51 42.46 14.62 48 24 48z"/>
-                        </svg>
-                    </span>
-                    <span>Continue with Google</span>
-                </button>
-                <button type="button" id="githubSignInBtn" class="oauth-btn" aria-label="Continue with GitHub">
-                    <span class="oauth-icon" aria-hidden="true">
-                        <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" focusable="false" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.01.08-2.11 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.91.08 2.11.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.19 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
-                    </span>
-                    <span>Continue with GitHub</span>
-                </button>
-            </div>
 
             <div class="signup-link">
                 <span id="signup-link-text">Don't have an account? <a href="#" onclick="goToSignup()">Sign up here</a></span>
@@ -2634,19 +2612,7 @@
             const resendBtn = document.getElementById('resendVerifyEmailBtn'); if (resendBtn) resendBtn.addEventListener('click', resendVerificationEmail);
             const applyBtn = document.getElementById('applyVerifyCodeBtn'); if (applyBtn) applyBtn.addEventListener('click', applyCodeFromInput);
             const manualInput = document.getElementById('manualVerifyInput'); if (manualInput) manualInput.addEventListener('keydown', (e)=>{ if (e.key === 'Enter'){ e.preventDefault(); applyCodeFromInput(); } });
-            const googleBtn = document.getElementById('googleSignInBtn'); if (googleBtn) googleBtn.addEventListener('click', startGoogleSignIn);
-            const githubBtn = document.getElementById('githubSignInBtn'); if (githubBtn) githubBtn.addEventListener('click', startGithubSignIn);
 
-            // Probe GitHub handler availability (do not disable button; decide on click)
-            (async ()=>{
-                try{
-                    const controller = new AbortController();
-                    const timeout = setTimeout(()=>controller.abort(), 3000);
-                    await fetch('https://jchat-1.firebaseapp.com/__/auth/handler', { mode: 'no-cors', signal: controller.signal });
-                    clearTimeout(timeout);
-                    window.__github_handler_ok = true;
-                }catch(e){ window.__github_handler_ok = false; }
-            })();
             try { const url = new URL(window.location.href); const section = url.searchParams.get('section') || ''; if (section === 'verify_email') { const e = (auth.currentUser && auth.currentUser.email) || localStorage.getItem('unverified_email') || ''; showUnverifiedBanner(e); } } catch(_){ }
             try { const cached = localStorage.getItem('unverified_email'); if (cached) showUnverifiedBanner(cached); } catch(_){ }
 
