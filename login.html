@@ -1865,11 +1865,11 @@
             // Disable form
             document.getElementById('loginForm').style.pointerEvents = 'none';
 
-            // Auto-hide loader after 30 seconds as failsafe
+            // Auto-hide loader after 60 seconds as failsafe
             window.loaderTimeout = setTimeout(() => {
                 hideSmartLoader();
                 showErrorModal('Request took too long. Please try again.');
-            }, 30000);
+            }, 60000);
         }
 
         function hideSmartLoader() {
@@ -2613,6 +2613,19 @@
             const manualInput = document.getElementById('manualVerifyInput'); if (manualInput) manualInput.addEventListener('keydown', (e)=>{ if (e.key === 'Enter'){ e.preventDefault(); applyCodeFromInput(); } });
             const googleBtn = document.getElementById('googleSignInBtn'); if (googleBtn) googleBtn.addEventListener('click', startGoogleSignIn);
             const githubBtn = document.getElementById('githubSignInBtn'); if (githubBtn) githubBtn.addEventListener('click', startGithubSignIn);
+
+            // Disable GitHub if Firebase handler is unreachable
+            (async ()=>{
+                try{
+                    const controller = new AbortController();
+                    const timeout = setTimeout(()=>controller.abort(), 3000);
+                    await fetch('https://jchat-1.firebaseapp.com/__/auth/handler', { mode: 'no-cors', signal: controller.signal });
+                    clearTimeout(timeout);
+                }catch(e){
+                    const btn = document.getElementById('githubSignInBtn');
+                    if (btn){ btn.disabled = true; btn.title = 'GitHub sign-in temporarily unavailable'; btn.style.opacity = '0.6'; }
+                }
+            })();
             try { const url = new URL(window.location.href); const section = url.searchParams.get('section') || ''; if (section === 'verify_email') { const e = (auth.currentUser && auth.currentUser.email) || localStorage.getItem('unverified_email') || ''; showUnverifiedBanner(e); } } catch(_){ }
             try { const cached = localStorage.getItem('unverified_email'); if (cached) showUnverifiedBanner(cached); } catch(_){ }
 
