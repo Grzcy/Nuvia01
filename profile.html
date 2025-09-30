@@ -28,7 +28,8 @@
     <link rel="dns-prefetch" href="//fonts.googleapis.com">
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" onload="this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" /></noscript>
     <!-- Font Awesome for icons (non-blocking preload) -->
     <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" onload="this.rel='stylesheet'" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /></noscript>
@@ -5125,6 +5126,19 @@
   @media (max-width:768px){.profile-avatar-badge{width:26px;height:26px}.profile-avatar-badge i{font-size:14px}.profile-avatar-badge.verified{right:8px;bottom:8px}.profile-avatar-anchor{margin-top:-80px}}
 </style>
 <style id="nuvia-brand-style">.logo span,.brand-link span{background:linear-gradient(90deg,var(--pink),#ffd400);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}.logo{background-image:linear-gradient(90deg,var(--pink),#ffd400) !important;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}</style><script src="assets/js/lazy-images.js" defer></script>
+    <link rel="modulepreload" href="./assets/js/avatar-utils.js">
+    <style>
+      .profile-section,
+      .unlocked-rewards-section,
+      .recent-activity-section,
+      .customization-section,
+      .help-support-section,
+      .premium-features-section,
+      .user-info-section {
+        content-visibility: auto;
+        contain-intrinsic-size: 800px 1000px;
+      }
+    </style>
 </head>
 <body class="theme-dark-mode">
     <!-- Nuvia Pink & Blue Glowing Loader -->
@@ -5938,12 +5952,18 @@
         </div>
     </div>
     <script type="module">
-        // Import Firebase modules (Updated to v11.8.0 - Latest Stable)
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, updateProfile, updateEmail, reauthenticateWithCredential, EmailAuthProvider, updatePassword, signOut, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
-        import { getFirestore, initializeFirestore, enableNetwork, disableNetwork, doc, getDoc, updateDoc, setDoc, deleteDoc, collection, query, where, getDocs, runTransaction, writeBatch, serverTimestamp, orderBy, addDoc, arrayUnion, documentId, onSnapshot, enableMultiTabIndexedDbPersistence, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js";
-        import { Timestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+        // Import Firebase modules (dynamically after first paint for performance)
+        await new Promise(r => (window.requestIdleCallback ? requestIdleCallback(() => r()) : setTimeout(r, 0)));
+        const [appMod, authMod, firestoreMod, storageMod] = await Promise.all([
+          import("https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js"),
+          import("https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js"),
+          import("https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js"),
+          import("https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js")
+        ]);
+        const { initializeApp } = appMod;
+        const { getAuth, onAuthStateChanged, updateProfile, updateEmail, reauthenticateWithCredential, EmailAuthProvider, updatePassword, signOut, signInWithCustomToken, signInAnonymously } = authMod;
+        const { getFirestore, initializeFirestore, enableNetwork, disableNetwork, doc, getDoc, updateDoc, setDoc, deleteDoc, collection, query, where, getDocs, runTransaction, writeBatch, serverTimestamp, orderBy, addDoc, arrayUnion, documentId, onSnapshot, enableMultiTabIndexedDbPersistence, enableIndexedDbPersistence, Timestamp } = firestoreMod;
+        const { getStorage, ref, uploadBytes, getDownloadURL } = storageMod;
 import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verification-utils.js';
 
         // --- Firebase & Canvas Environment Configuration ---
@@ -10492,29 +10512,6 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
   if (overlay) overlay.addEventListener('click', (e)=>{ if(e.target===overlay) close(); });
   document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && overlay && overlay.classList.contains('show')) close(); });
 })();
-</script>
-<script type="module">
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
-import { getFirestore, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
-const APP_ID = 'jchat_1_0_0';
-function startPagePresence(){
-  try{
-    onAuthStateChanged(getAuth(), (user) => {
-      if (!user || !user.uid) return;
-      const db = getFirestore();
-      const userDoc = doc(db, 'artifacts', APP_ID, 'public', 'data', 'users', user.uid);
-      const post = () => setDoc(userDoc, { online: navigator.onLine, lastActive: serverTimestamp(), currentPage: window.location.pathname }, { merge: true }).catch(()=>{});
-      post();
-      const tid = setInterval(post, 15000);
-      const debounced = () => post();
-      window.addEventListener('online', debounced);
-      window.addEventListener('offline', debounced);
-      document.addEventListener('visibilitychange', debounced);
-      window.addEventListener('beforeunload', () => { try{ post(); } catch(_){} });
-    });
-  }catch(e){console.error('JCHAT_ERROR startPagePresence', e);}
-}
-startPagePresence();
 </script>
 <script type="module" src="nuvia-global-call-service.js" defer></script>
 </body>
