@@ -1690,7 +1690,7 @@
                     try { showUnverifiedBanner(user.email || email); } catch(_) {}
                     // Send verification email, then sign out to prevent access until verified
                     try { await sendEmailVerification(user, { url: `${window.location.origin}/login.html?mode=verifyEmail`, handleCodeInApp: true }); } catch(_) {}
-                    showCustomModal('info', 'Verify your email', 'We sent a verification link to your email. Open it to finish signup.');
+                    showCustomModal('info', 'Verify your email', 'We sent a verification email. Copy the confirmation link or code, paste it into the box here, and tap "Verify code" to finish.');
                     try { await signOut(auth); } catch(_) {}
                     return;
                 }
