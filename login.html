@@ -2503,6 +2503,7 @@
 
         async function startGithubSignIn(){
             try{
+                if (window.__github_handler_ok === false){ showErrorModal('GitHub sign-in is temporarily unavailable. Please try Google or email/password.'); return; }
                 showSmartLoader('Continue with GitHub', 'Opening GitHub sign-in...');
                 try { await setPersistence(auth, browserLocalPersistence); } catch(_){ }
                 const provider = new GithubAuthProvider();
@@ -2614,17 +2615,15 @@
             const googleBtn = document.getElementById('googleSignInBtn'); if (googleBtn) googleBtn.addEventListener('click', startGoogleSignIn);
             const githubBtn = document.getElementById('githubSignInBtn'); if (githubBtn) githubBtn.addEventListener('click', startGithubSignIn);
 
-            // Disable GitHub if Firebase handler is unreachable
+            // Probe GitHub handler availability (do not disable button; decide on click)
             (async ()=>{
                 try{
                     const controller = new AbortController();
                     const timeout = setTimeout(()=>controller.abort(), 3000);
                     await fetch('https://jchat-1.firebaseapp.com/__/auth/handler', { mode: 'no-cors', signal: controller.signal });
                     clearTimeout(timeout);
-                }catch(e){
-                    const btn = document.getElementById('githubSignInBtn');
-                    if (btn){ btn.disabled = true; btn.title = 'GitHub sign-in temporarily unavailable'; btn.style.opacity = '0.6'; }
-                }
+                    window.__github_handler_ok = true;
+                }catch(e){ window.__github_handler_ok = false; }
             })();
             try { const url = new URL(window.location.href); const section = url.searchParams.get('section') || ''; if (section === 'verify_email') { const e = (auth.currentUser && auth.currentUser.email) || localStorage.getItem('unverified_email') || ''; showUnverifiedBanner(e); } } catch(_){ }
             try { const cached = localStorage.getItem('unverified_email'); if (cached) showUnverifiedBanner(cached); } catch(_){ }
