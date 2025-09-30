@@ -1977,7 +1977,7 @@
                 await sendEmailVerification(u);
                 try { await signOut(auth); } catch(_) {}
                 hideSmartLoader();
-                showSuccessModal('Verification email sent. Check your inbox.');
+                showSuccessModal('Verification email sent. Copy the link or code from that email, paste it here, and tap "Verify code".');
             }catch(e){
                 hideSmartLoader();
                 showCustomModal('error','Failed to send', (e && e.message) || 'Please try again.');
