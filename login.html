@@ -1670,8 +1670,10 @@
                     hideSmartLoader();
                     try { localStorage.setItem('unverified_email', user.email || email); } catch(_) {}
                     try { showUnverifiedBanner(user.email || email); } catch(_) {}
+                    // Send verification email, then sign out to prevent access until verified
                     try { await sendEmailVerification(user); } catch(_) {}
                     showCustomModal('info', 'Verify your email', 'We sent a verification link to your email. Open it to finish signup.');
+                    try { await signOut(auth); } catch(_) {}
                     return;
                 }
 
@@ -1926,11 +1928,32 @@
         }
 
         async function resendVerificationEmail(){
-            const u = auth.currentUser;
-            if (!u) { showCustomModal('error','Sign in required','Please sign in and try again.'); return; }
+            let u = auth.currentUser;
             showSmartLoader('Sending email','Resending verification email...');
-            try { await sendEmailVerification(u); hideSmartLoader(); showSuccessModal('Verification email sent. Check your inbox.'); }
-            catch(e){ hideSmartLoader(); showCustomModal('error','Failed to send', e?.message || 'Please try again.'); }
+            try{
+                if (!u) {
+                    // Attempt a temporary sign-in using entered credentials to send the email, then sign out
+                    const emailEl = document.getElementById('email');
+                    const pwdEl = document.getElementById('password');
+                    const em = (emailEl && emailEl.value || '').trim();
+                    const pw = (pwdEl && pwdEl.value) || '';
+                    if (!em || !pw || !isValidEmail(em)) {
+                        hideSmartLoader();
+                        showCustomModal('info','Sign in required','Enter your email and password, then tap Resend again.');
+                        return;
+                    }
+                    try { await setPersistence(auth, browserSessionPersistence); } catch(_) {}
+                    const cred = await signInWithEmailAndPassword(auth, em, pw);
+                    u = cred.user;
+                }
+                await sendEmailVerification(u);
+                try { await signOut(auth); } catch(_) {}
+                hideSmartLoader();
+                showSuccessModal('Verification email sent. Check your inbox.');
+            }catch(e){
+                hideSmartLoader();
+                showCustomModal('error','Failed to send', (e && e.message) || 'Please try again.');
+            }
         }
         function showUnverifiedBanner(email){
             const b = document.getElementById('verifyEmailBanner'); const addr = document.getElementById('verifyEmailAddress');
@@ -2051,8 +2074,10 @@
                 showSmartLoader('Welcome Back!', 'Taking you to your account...');
                 setTimeout(() => { window.location.href = 'index.html'; }, 1000);
             } else {
+                // Show banner and immediately sign out to block access until verified
                 try { localStorage.setItem('unverified_email', user.email || ''); } catch(_) {}
                 try { showUnverifiedBanner(user.email || ''); } catch(_) {}
+                try { await signOut(auth); } catch(_) {}
             }
         });
 
