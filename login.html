@@ -2487,25 +2487,25 @@
                 if (__gisInitialized && window.google && google.accounts && google.accounts.id){
                     try{ google.accounts.id.prompt(); return; }catch(_){ }
                 }
-                const provider = new GoogleAuthProvider();
-                provider.setCustomParameters({ prompt: 'select_account' });
-                try{
-                    const res = await signInWithPopup(auth, provider);
-                    hideSmartLoader();
-                    await handleGoogleAuthResult(res);
-                }catch(err){
-                    if (err && (err.code === 'auth/popup-blocked' || err.code === 'auth/popup-closed-by-user' || err.code === 'auth/operation-not-supported-in-this-environment')){
-                        try{ await signInWithRedirect(auth, provider); return; }catch(rdErr){ hideSmartLoader(); handleGoogleError(rdErr); }
-                    } else { hideSmartLoader(); handleGoogleError(err); }
-                }
+                hideSmartLoader();
+                showErrorModal('Google sign-in is unavailable. Please try again.');
             }catch(e){ hideSmartLoader(); handleGoogleError(e); }
         }
 
         async function startGithubSignIn(){
             try{
-                if (window.__github_handler_ok === false){ showErrorModal('GitHub sign-in is temporarily unavailable. Please try Google or email/password.'); return; }
                 showSmartLoader('Continue with GitHub', 'Opening GitHub sign-in...');
                 try { await setPersistence(auth, browserLocalPersistence); } catch(_){ }
+                const base = (window.__oauth_worker_origin || '').replace(/\/$/, '');
+                if (base) {
+                    const redirectUrl = location.origin + location.pathname + (location.search || '');
+                    const st = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+                    try { sessionStorage.setItem('gh_oauth_state', st); } catch(_){ }
+                    const url = `${base}/auth/github/start?redirect=${encodeURIComponent(redirectUrl)}&state=${encodeURIComponent(st)}`;
+                    window.location.href = url;
+                    return;
+                }
+                if (window.__github_handler_ok === false){ hideSmartLoader(); showErrorModal('GitHub sign-in is temporarily unavailable.'); return; }
                 const provider = new GithubAuthProvider();
                 provider.setCustomParameters({ allow_signup: 'true' });
                 try{
@@ -2564,6 +2564,27 @@
                 const res = await getRedirectResult(auth);
                 if (res && res.user) { await handleGoogleAuthResult(res); }
             }catch(e){ /* ignore if no pending redirect */ }
+        })();
+
+        // Handle GitHub OAuth callback via Worker: gh_token in URL hash
+        (async ()=>{
+            try{
+                const rawHash = (location.hash || '').replace(/^#/, '');
+                if (!rawHash) return;
+                const hs = new URLSearchParams(rawHash);
+                const token = hs.get('gh_token');
+                if (!token) return;
+                hs.delete('gh_token');
+                const rest = hs.toString();
+                const newUrl = location.pathname + (location.search || '') + (rest ? '#' + rest : '');
+                try { history.replaceState(null, '', newUrl); } catch(_){ location.hash = rest; }
+                try { await setPersistence(auth, browserLocalPersistence); } catch(_){ }
+                try{
+                    const cred = GithubAuthProvider.credential(token);
+                    const res = await signInWithCredential(auth, cred);
+                    await handleGithubAuthResult(res);
+                }catch(err){ handleGithubError(err); }
+            }catch(_){}
         })();
 
 
