@@ -1994,13 +1994,16 @@
                 if (!code){ showCustomModal('info','Verification code required','Paste the full link or the code from your email.'); return; }
                 showSmartLoader('Verifying email','Applying verification code...');
                 try{
+                    await checkActionCode(auth, code);
                     await applyActionCode(auth, code);
                     hideSmartLoader();
                     try { localStorage.removeItem('unverified_email'); } catch(_){ }
                     showSuccessModal('Your email has been verified! You can now sign in.', ()=>{ window.location.href = 'login.html'; });
                 }catch(e){
                     hideSmartLoader();
-                    showCustomModal('error','Verification failed', (e && e.message) || 'The code is invalid or expired. Resend the email and try again.');
+                    const msg = (e && e.message) || '';
+                    const friendly = /EXPIRED|INVALID_OOB_CODE|invalid/i.test(msg) ? 'The code is invalid or expired. Resend the email and try again.' : 'Verification failed. Please try again.';
+                    showCustomModal('error','Verification failed', friendly);
                 }
             }catch(_){}
         }
