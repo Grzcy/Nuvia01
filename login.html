@@ -958,9 +958,11 @@
 .verify-banner.show { display: block; }
 .verify-banner-title { font-weight: 700; margin-bottom: 6px; }
 .verify-banner-message { font-size: 14px; color: var(--text-light); margin-bottom: 10px; }
-.verify-banner-actions { display: flex; gap: 8px; }
+.verify-banner-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .verify-resend-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--button-background); color: #fff; border: 2px solid rgba(255,255,255,0.85); padding: 10px 14px; border-radius: 999px; font-weight: 700; cursor: pointer; }
 .verify-resend-btn:hover { filter: brightness(1.05); }
+.verify-code-input { flex: 1 1 100%; max-width: 100%; padding: 10px 12px; border: 1px solid var(--border-light); border-radius: var(--radius); background: var(--input-background); color: var(--white); }
+@media (min-width: 480px) { .verify-code-input { flex: 1 1 auto; min-width: 220px; } }
 </style>
 </head>
 <body>
@@ -980,6 +982,8 @@
                 <div class="verify-banner-message">We sent a verification link to <span id="verifyEmailAddress">your email</span>. Check your inbox and spam folder.</div>
                 <div class="verify-banner-actions">
                     <button type="button" id="resendVerifyEmailBtn" class="verify-resend-btn"><i class="fas fa-paper-plane"></i> Resend verification email</button>
+                    <input type="text" id="manualVerifyInput" class="verify-code-input" placeholder="Paste verification code or link here">
+                    <button type="button" id="applyVerifyCodeBtn" class="verify-resend-btn"><i class="fas fa-check"></i> Verify code</button>
                 </div>
             </div>
             <div class="error-message" id="errorMessage" role="alert" aria-live="assertive" aria-atomic="true" aria-hidden="true" tabindex="-1">
@@ -1612,7 +1616,7 @@
                 // Referral rewards (inviter: +20 gas/+5 JCoin, new user: +20 gas/+10 JCoin)
                 await processReferralReward(user.uid);
 
-                try { await sendEmailVerification(user); } catch(_) {}
+                try { await sendEmailVerification(user, { url: `${window.location.origin}/login.html?mode=verifyEmail`, handleCodeInApp: true }); } catch(_) {}
                 hideSmartLoader();
                 try { localStorage.setItem('unverified_email', user.email || email); } catch(_) {}
                 showSuccessModal('Account created! We sent a verification link to your email. Please verify to continue.', () => { try{ showUnverifiedBanner(user.email || email); }catch(_){} });
@@ -1671,7 +1675,7 @@
                     try { localStorage.setItem('unverified_email', user.email || email); } catch(_) {}
                     try { showUnverifiedBanner(user.email || email); } catch(_) {}
                     // Send verification email, then sign out to prevent access until verified
-                    try { await sendEmailVerification(user); } catch(_) {}
+                    try { await sendEmailVerification(user, { url: `${window.location.origin}/login.html?mode=verifyEmail`, handleCodeInApp: true }); } catch(_) {}
                     showCustomModal('info', 'Verify your email', 'We sent a verification link to your email. Open it to finish signup.');
                     try { await signOut(auth); } catch(_) {}
                     return;
@@ -1971,6 +1975,35 @@
             b.classList.add('show');
         }
         function hideUnverifiedBanner(){ const b = document.getElementById('verifyEmailBanner'); if (b) b.classList.remove('show'); }
+
+        function extractOobCodeFromText(text){
+            try{
+                const raw = (text || '').trim();
+                if(!raw) return null;
+                try { const u = new URL(raw); const code = u.searchParams.get('oobCode'); if (code) return code; } catch(_) {}
+                if (/^[A-Za-z0-9_-]{20,}$/.test(raw)) return raw;
+                return null;
+            }catch(_){ return null; }
+        }
+
+        async function applyCodeFromInput(){
+            try{
+                const input = document.getElementById('manualVerifyInput');
+                const v = (input && input.value) || '';
+                const code = extractOobCodeFromText(v);
+                if (!code){ showCustomModal('info','Verification code required','Paste the full link or the code from your email.'); return; }
+                showSmartLoader('Verifying email','Applying verification code...');
+                try{
+                    await applyActionCode(auth, code);
+                    hideSmartLoader();
+                    try { localStorage.removeItem('unverified_email'); } catch(_){ }
+                    showSuccessModal('Your email has been verified! You can now sign in.', ()=>{ window.location.href = 'login.html'; });
+                }catch(e){
+                    hideSmartLoader();
+                    showCustomModal('error','Verification failed', (e && e.message) || 'The code is invalid or expired. Resend the email and try again.');
+                }
+            }catch(_){}
+        }
 
         async function showSavePasswordPrompt(email, password, next){
             try{
@@ -2380,6 +2413,8 @@
             // Add smart validation
             addSmartValidation();
             const resendBtn = document.getElementById('resendVerifyEmailBtn'); if (resendBtn) resendBtn.addEventListener('click', resendVerificationEmail);
+            const applyBtn = document.getElementById('applyVerifyCodeBtn'); if (applyBtn) applyBtn.addEventListener('click', applyCodeFromInput);
+            const manualInput = document.getElementById('manualVerifyInput'); if (manualInput) manualInput.addEventListener('keydown', (e)=>{ if (e.key === 'Enter'){ e.preventDefault(); applyCodeFromInput(); } });
             try { const url = new URL(window.location.href); const section = url.searchParams.get('section') || ''; if (section === 'verify_email') { const e = (auth.currentUser && auth.currentUser.email) || localStorage.getItem('unverified_email') || ''; showUnverifiedBanner(e); } } catch(_){ }
             try { const cached = localStorage.getItem('unverified_email'); if (cached) showUnverifiedBanner(cached); } catch(_){ }
 
