@@ -2383,6 +2383,7 @@
                     if (mode === 'verifyEmail' && oob){
                         showSmartLoader('Verifying email', 'Completing verification...');
                         try {
+                            await checkActionCode(auth, oob);
                             await applyActionCode(auth, oob);
                             hideSmartLoader();
                             try { localStorage.removeItem('unverified_email'); } catch(_){ }
@@ -2393,7 +2394,9 @@
                             });
                         } catch (err) {
                             hideSmartLoader();
-                            showCustomModal('error', 'Verification Failed', 'This verification link is invalid or expired. Please sign in and use "Resend verification email".');
+                            const msg = (err && err.message) || '';
+                            const friendly = /EXPIRED|INVALID_OOB_CODE|invalid/i.test(msg) ? 'This verification link is invalid or expired. Please resend a new verification email.' : 'Verification failed. Please try again.';
+                            showCustomModal('error', 'Verification Failed', friendly);
                         }
                         return;
                     }
