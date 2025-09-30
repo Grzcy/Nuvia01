@@ -1,33 +1,14 @@
-Nuvia - Modern Social Chat Platform 🚀
+# JCHAT
 
-A sleek, modern social chat platform with engaging community features, levels, and virtual currency.
+JCHAT is a full-featured chat application with private and group messaging, user profiles, coins, badges, and admin controls. It also supports premium features like themes and subscriptions.  
 
-✨ Features
+## Features
+- Private and group chats  
+- User profiles and badges  
+- Coins system for in-app currency  
+- Admin dashboards and content moderation  
+- Premium themes and subscriptions  
+- Deployable on Netlify or other web hosts
 
-🌟 Core Functionality
-
-· Real-time Chat & Messaging 💬
-· Social Profile System 👤 with levels and achievements
-· JCoins Virtual Economy 💰 with earning and spending mechanics
-· Community Engagement 👥 with posts, reactions, and comments
-
-🎨 Premium Experience
-
-· Multiple Beautiful Themes 🎭 (Dark, Light, Sunset, Ocean, Forest, and more!)
-· Customizable Interface 🛠 with personalization options
-· Ad-Free Experience 🚫 for premium users
-· Exclusive Premium Features ✨ for subscribers
-
-📱 User Experience
-
-· Responsive Design 📱 that works on all devices
-· Progressive Web App ⚡ with offline capabilities
-· Fast Loading 🚀 with optimized performance
-· Intuitive Navigation 🧭 with sidebar menu
-
-🔒 Security & Privacy
-
-· Secure Authentication 🔐
-· Privacy-First Approach 🛡️
-· Content Moderation 🧹 with reporting system
-· Data Encryption 🔒 for sensitive information
+## Assets
+- Shared assets live under `/assets`.

@@ -1,1 +1,1767 @@
-<!doctype html><meta charset="utf-8"><title>Redirecting…</title><link rel="canonical" href="/chat.html"><meta http-equiv="refresh" content="0; url=/chat.html"><script>location.replace('/chat.html'+location.search+location.hash);</script><p>Redirecting to <a href="/chat.html">/chat.html</a>…</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Nuvia - Chat</title>
+  <meta property="og:title" content="Nuvia - Chat">
+  <meta property="og:description" content="Private messages with friends on Nuvia.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://nuvia.app/chat.html">
+  <meta property="og:site_name" content="Nuvia">
+  <meta property="og:image" content="https://cdn.builder.io/api/v1/image/assets%2Faaaa97254b5c4256a69bb9a7bf91885c%2F9ed0b590d93440a085bb243bd84ed163?format=png&width=1200">
+  <meta property="og:image:alt" content="Nuvia logo">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Nuvia - Chat">
+  <meta name="twitter:description" content="Private messages with friends on Nuvia.">
+  <meta name="twitter:image" content="https://cdn.builder.io/api/v1/image/assets%2Faaaa97254b5c4256a69bb9a7bf91885c%2F9ed0b590d93440a085bb243bd84ed163?format=png&width=1200">
+  <link rel="canonical" href="https://nuvia.app/chat.html" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="prefetch" href="/index.html" />
+  <link rel="prerender" href="/index.html" />
+  <script type="speculationrules">{"prerender":[{"source":"list","urls":["/index.html"]}],"prefetch":[{"source":"list","urls":["/index.html"]}]}</script>
+  <meta name="theme-color" content="#1a1a2e" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://firebaseio.com" crossorigin />
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" onload="this.rel='stylesheet'" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /></noscript>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" defer crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="/assets/js/share-utils.js" defer></script>
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box}
+    :root{
+      --pink:#ff2e92;--blue:#00d5ff;--glass-black:rgba(10,10,10,.75);--glass-blue:rgba(0,213,255,.15);--radius:20px;--transition:.3s ease;
+      --white:#fff;--text-light:rgba(255,255,255,.7);--background-main:rgba(10,10,10,.75);
+      --background-gradient-1:#00d5ff;--background-gradient-2:#ff2e92;--card-background:linear-gradient(145deg,rgba(255,255,255,.03),rgba(255,255,255,.01));
+      --header-background:linear-gradient(135deg,rgba(10,10,10,.85),rgba(10,10,10,.75));--border-light:rgba(255,255,255,.05);
+      --input-background:rgba(255,255,255,.05);--button-background:linear-gradient(90deg,var(--blue),var(--pink));--button-shadow:0 4px 15px var(--blue),0 4px 15px var(--pink);
+      --background-color-primary:#1a1a2e;--background-color-secondary:#0f0f1f;--header-background-color:#2a2a4a;--footer-background-color:#2a2a4a;--content-background-color:#20203a;--card-background-color:#2a2a4a;--text-color-primary:#e0e0e0;--text-color-secondary:#b0b0d0;--status-online:#2ecc71;--status-offline:#6c757d;--status-away:#FFC107;--delete-button-color:#dc3545;--warning-color:#ffc107;--accent-color:#00d5ff;--accent-color-dark:#00aaff;--border-color:#3a3a5a;--theme-gold:#ffd700
+    }
+    body{min-height:100vh;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background-color:var(--background-main);background-image:radial-gradient(circle at top left,var(--background-gradient-1),transparent 100px),radial-gradient(circle at bottom right,var(--background-gradient-2),transparent 150px);color:var(--white)}
+    header{position:fixed;top:0;left:0;right:0;z-index:20;background:var(--header-background);border-bottom:1px solid var(--border-light);backdrop-filter:saturate(140%) blur(6px);height:55px;display:flex;align-items:center;justify-content:center}
+    .header-content-wrapper{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:10px 16px;width:100%}
+    .logo{font-family:Poppins,sans-serif;font-weight:800;letter-spacing:-.03em;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;font-size:1.8rem;text-decoration:none}
+    #sidebarToggleFab{width:32px;height:32px;border-radius:50%;border:0;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(45deg,var(--blue),var(--pink));color:var(--white);cursor:pointer;transition:transform .2s ease;box-shadow:0 4px 15px rgba(0,213,255,.3),0 4px 15px rgba(255,46,146,.3)}
+    #sidebarToggleFab:hover{transform:scale(1.1)}
+
+    #sidebarNav{position:fixed;top:0;left:0;height:100%;width:clamp(220px,60vw,340px);background:var(--header-background);border-right:1px solid var(--border-light);box-shadow:6px 0 24px rgba(0,0,0,.35);transform:translateX(-100%);transition:transform .32s cubic-bezier(.22,.61,.36,1);z-index:90;overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-gutter:stable both-edges}
+    #sidebarNav.sidebar-visible{transform:translateX(0)}
+    #sidebarNav .sidebar-header{position:sticky;top:0;background:var(--header-background);display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border-light);z-index:1}
+    .sidebar-title{font-family:Poppins,sans-serif;font-weight:800;letter-spacing:-.02em;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+    #sidebarCloseBtn{background:transparent;border:0;color:var(--white);width:32px;height:32px;border-radius:8px;cursor:pointer}
+    #sidebarCloseBtn:hover{background-color:rgba(255,255,255,.1)}
+    .sidebar-links{display:flex;flex-direction:column;padding:8px}
+    .sidebar-nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;text-decoration:none;color:var(--white);transition:background-color .2s ease}
+    .sidebar-nav-item:hover{background-color:rgba(255,255,255,.08)}
+    .sidebar-nav-item.active{background-color:rgba(0,213,255,.15)}
+    .sidebar-nav-item i{font-size:1.2rem;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+    .sidebar-nav-item span{background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+    .sidebar-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);backdrop-filter:blur(4px);opacity:0;visibility:hidden;transition:opacity .25s ease;z-index:85}
+    .sidebar-backdrop.show{opacity:1;visibility:visible}
+
+    main{max-width:1200px;margin:0 auto;padding:18px;padding-top:73px}
+
+    .chat-layout{display:grid;gap:14px;min-height:calc(100dvh - 110px);grid-template-columns:1fr}
+    @media (min-width:860px){.chat-layout{grid-template-columns:340px 1fr}}
+    @media (min-width:1080px){.chat-layout{grid-template-columns:380px 1fr}}
+
+    .panel{background:var(--card-background);border:1px solid var(--glass-blue);backdrop-filter:blur(10px) saturate(180%);border-radius:16px;box-shadow:0 8px 25px rgba(0,0,0,.3)}
+
+    .conversations-panel{display:flex;flex-direction:column;height:calc(100dvh - 120px);min-height:60vh}
+    .list-toolbar{display:flex;align-items:center;gap:8px;padding:10px;border-bottom:1px solid var(--border-light)}
+    .search-input{flex:1 1 auto;padding:10px 12px;border-radius:12px;border:1px solid var(--border-light);background:var(--input-background);color:var(--white);outline:none}
+    .conversation-list{display:flex;flex-direction:column;gap:10px;padding:10px;flex:1 1 auto;overflow:auto}
+    .conversation-item{display:flex;gap:12px;align-items:center;padding:14px;border-radius:12px;border:1px solid var(--border-light);background:rgba(255,255,255,.03);cursor:pointer}
+    .conversation-item:hover{background:rgba(255,255,255,.08)}
+    .conv-avatar{width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--blue)}
+    .conv-title{margin:0;font-weight:700;font-size:1.1rem}
+    .conv-sub{margin:0;color:var(--text-light);font-size:.92rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+    .conv-last-seen{margin-left:6px;color:var(--text-light);font-size:.75rem;opacity:.85}
+    .conversation-item.unread{border-color:rgba(0,213,255,.6);background:rgba(0,213,255,.12)}
+    .conversation-header-row{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+    .conversation-header-row .conv-title{flex:1 1 auto}
+    .conversation-badge{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.15);color:var(--white);font-size:1.1rem;animation:softGlow 1.8s ease-in-out infinite}
+    .conversation-badge i{font-size:1.1rem}
+
+    .presence-wrapper{position:relative;display:inline-block}
+    .presence-dot{position:absolute;bottom:2px;right:2px;width:12px;height:12px;border-radius:50%;background:var(--status-offline);border:2px solid rgba(10,10,10,.85)}
+    .presence-dot.online{background:var(--status-online);box-shadow:0 0 0 0 rgba(46,204,113,.6);animation:softGlow 1.8s ease-in-out infinite}
+    .presence-dot.online::after{content:'';position:absolute;inset:-4px;border-radius:50%;box-shadow:0 0 0 0 rgba(46,204,113,.25);animation:softRing 1.8s ease-out infinite}
+    @keyframes pulseRing{0%{transform:scale(.9);opacity:.8}70%{transform:scale(1.3);opacity:0}100%{opacity:0}}
+    .presence-pill{margin-left:8px;padding:2px 8px;border-radius:999px;border:1px solid var(--border-light);font-size:.75rem;color:var(--text-light);background:rgba(255,255,255,.06)}
+    .presence-pill.online{color:#fff;background:rgba(46,204,113,.2);border-color:rgba(46,204,113,.35)}
+    .presence-pill.typing{color:#fff;background:rgba(0,213,255,.2);border-color:rgba(0,213,255,.35)}
+    .typing-dots{display:inline-flex;align-items:center;gap:2px;margin-left:4px}
+    .typing-dots span{width:4px;height:4px;background:currentColor;border-radius:50%;opacity:.6;animation:dotFade 1.2s infinite}
+    .typing-dots span:nth-child(2){animation-delay:.2s}
+    .typing-dots span:nth-child(3){animation-delay:.4s}
+    @keyframes dotFade{0%,60%,100%{transform:translateY(0);opacity:.6}30%{transform:translateY(-3px);opacity:1}}
+
+    .messages-panel{display:none;flex-direction:column;height:calc(100dvh - 120px);min-height:60vh}
+    body.show-chat .messages-panel{display:flex}
+    body.show-chat .conversations-panel{display:none}
+    @media (min-width:860px){body.show-chat .messages-panel{display:flex} body.show-chat .conversations-panel{display:flex}}
+    .chat-header{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid var(--border-light)}
+    .chat-title{font-family:Poppins,sans-serif;font-weight:800;margin:0}
+    .chat-scroll{flex:1 1 auto;overflow:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+    .bubble-row{display:flex;gap:8px;align-items:flex-end;position:relative}
+    .bubble-row.mine{justify-content:flex-end}
+    .bubble{max-width:70%;padding:10px 12px;border-radius:14px;border:1px solid var(--border-light);background:rgba(255,255,255,.06);color:var(--white)}
+    .bubble.mine{background:linear-gradient(90deg,var(--blue),var(--pink));color:#fff;border-color:transparent}
+    .bubble-meta{margin-top:4px;color:var(--text-light);font-size:.75rem}
+    .composer{display:flex;align-items:center;gap:8px;padding:10px;border-top:1px solid var(--border-light)}
+    .composer-input{flex:1 1 auto;min-height:44px;padding:10px 12px;border-radius:12px;border:1px solid var(--border-light);background:var(--input-background);color:var(--white);outline:none;resize:none;max-height:180px}
+    .icon-button{width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border-light);background:transparent;color:var(--white);cursor:pointer;transition:transform .2s ease,background-color .2s ease}
+    .icon-button:hover{transform:scale(1.05);background-color:rgba(255,255,255,.06)}
+    .send-btn{background:var(--button-background);box-shadow:var(--button-shadow);border:0;width:auto;padding:10px 14px;border-radius:12px}
+
+    .action-btn{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border-light);background:transparent;color:var(--white);cursor:pointer;margin-left:6px;opacity:.65;transition:opacity .2s ease}
+    .action-btn:hover,.action-btn:focus{opacity:1}
+
+    .empty-state{padding:18px;margin:10px;border-radius:12px;border:1px dashed var(--border-light);color:var(--text-light);text-align:center}
+
+    .notification-icon-wrapper{position:relative;margin-right:15px}
+    .notification-icon-wrapper a{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.06));border:2px solid rgba(255,255,255,.25);backdrop-filter:blur(15px);transition:all .3s ease;position:relative;overflow:hidden;color:inherit;text-decoration:none}
+    .notification-icon-wrapper i{font-size:1.2rem;color:#ffffff;text-shadow:0 0 10px rgba(255,215,0,.8),0 0 15px rgba(255,142,83,.6)}
+    .notification-badge{position:absolute;top:-8px;right:-8px;background:linear-gradient(135deg,#ff4757,#ff3742);color:#ffffff;border-radius:50%;padding:3px 7px;font-size:.75rem;font-weight:900;min-width:20px;height:20px;text-align:center;box-shadow:0 2px 8px rgba(255,71,87,.6),0 0 0 2px #ffffff,0 0 0 3px rgba(255,71,87,.3);display:flex;align-items:center;justify-content:center;animation:pulse-notification 2s infinite;z-index:2;line-height:1}
+    .header-user-controls{display:flex;align-items:center;gap:10px}
+    .is-hidden{display:none!important}
+    .conversation-details{flex:1 1 auto;min-width:0}
+    .chat-partner-avatar{display:none}
+    .chat-partner-icon{font-size:40px;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;display:block;line-height:1}
+    .chat-presence{display:inline-flex;align-items:center;gap:4px}
+    .message-box{position:fixed;top:20px;right:20px;background:var(--card-background);border:1px solid var(--border-light);border-radius:12px;padding:12px 14px;display:none;opacity:0;transition:opacity .25s ease;box-shadow:0 8px 25px rgba(0,0,0,.3);z-index:1000}
+    .message-box.show{display:flex;opacity:1;align-items:center;gap:10px}
+    .message-box.success{background-image:linear-gradient(45deg,var(--pink),var(--blue));color:#fff;border:none}
+    .message-box.error{background:rgba(220,53,69,.85);color:#fff;border:none}
+    .message-box.warning{background:rgba(255,193,7,.85);color:#1a1a2e;border:none}
+    .message-box.info{background:rgba(0,213,255,.2);color:#fff}
+    .message-box.loading-pulse{animation:pulseNotice 1.4s ease-in-out infinite}
+    @keyframes pulse-notification{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+    @keyframes pulseNotice{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
+    @keyframes heartbeatPulse{0%,100%{transform:scale(1)}40%{transform:scale(1.12)}60%{transform:scale(1.05)}}
+    @keyframes softGlow{0%,100%{box-shadow:0 0 0 0 rgba(46,204,113,.45);transform:scale(1)}50%{box-shadow:0 0 8px 4px rgba(46,204,113,.75);transform:scale(1)}}
+    @keyframes softRing{0%{transform:scale(.9);opacity:.35}60%{transform:scale(1.35);opacity:0}100%{opacity:0}}
+
+    #backToListBtn{display:none}
+    body.show-chat #backToListBtn{display:inline-flex}
+
+    #sidebarNav::-webkit-scrollbar{width:8px}
+    #sidebarNav::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--blue),var(--pink));border-radius:6px}
+    #sidebarNav::-webkit-scrollbar-track{background:transparent}
+    .chat-scroll::-webkit-scrollbar{width:10px}
+    .chat-scroll::-webkit-scrollbar-thumb{background:linear-gradient(180deg,var(--blue),var(--pink));border-radius:6px}
+    .chat-scroll::-webkit-scrollbar-track{background:transparent}
+
+    .image-viewer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:2000;padding:20px}
+    .image-viewer-overlay.show{display:flex}
+    .image-viewer-overlay img{width:auto;height:auto;max-width:98vw;max-height:96vh;object-fit:contain;border-radius:16px;border:1px solid var(--border-light);box-shadow:0 8px 25px rgba(0,0,0,.5);background:var(--card-background)}
+    .image-viewer-close{position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border-light);background:rgba(255,255,255,.06);color:var(--white);cursor:pointer}
+    .image-viewer-close:hover{background:rgba(255,255,255,.12)}
+    .start-hidden{display:none}
+  /* Call overlay styles */
+    #callOverlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:2000;background:rgba(0,0,0,.75);backdrop-filter:blur(6px)}
+    #callOverlay.active{display:flex}
+    #callOverlay .video-streams{position:relative;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;width:min(1100px,96vw);height:min(640px,70vh);background:var(--card-background);border:1px solid var(--border-light);border-radius:16px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,.45);margin-bottom:12px}
+    #remoteVideo{width:100%;height:100%;object-fit:cover;display:block;background:#000}
+    /* Hide local preview by default (we send stream out but don't show local preview on screen) */
+    #localVideo{display:none!important;position:absolute;right:12px;bottom:12px;width:0;height:0;min-width:0;min-height:0;border-radius:10px;border:1px solid var(--border-light);opacity:0}
+
+    /* Bottom controls inside the video container: status + actions */
+    .video-bottom-controls{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:12px;background:linear-gradient(180deg,rgba(0,0,0,0),rgba(0,0,0,0.35));}
+    .video-bottom-controls .call-status{margin:0;color:var(--white);text-align:center}
+    .video-bottom-controls .call-status .call-status-icon{font-size:1.6rem}
+    .video-bottom-controls .call-actions{display:flex;gap:12px;justify-content:center;align-items:center}
+    .video-bottom-controls .call-actions button{width:56px;height:56px;border-radius:50%;border:1px solid var(--border-light);background:rgba(255,255,255,.06);color:var(--white);cursor:pointer}
+    .call-banner{display:flex;align-items:center;gap:12px;padding:12px 16px;color:var(--white);}
+    .call-banner .caller-avatar{width:56px;height:56px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,0.12)}
+    .call-banner .caller-avatar img{width:100%;height:100%;object-fit:cover}
+    .call-banner .caller-name{font-size:1.1rem}
+
+    /* For voice calls, hide the remote video element but keep the video container and bottom controls visible */
+    #callOverlay.voice-call #remoteVideo{display:none}
+    #callOverlay.voice-call .video-bottom-controls{display:flex}
+    #callOverlay.voice-call .video-streams{background:linear-gradient(180deg,#2b0b3a,#18051e)}
+    @media (max-width:720px){
+      #callOverlay .video-streams{width:calc(100vw - 24px);height:calc(52vh);}
+      #remoteVideo{object-fit:cover}
+    }
+    #callOverlay .call-status{text-align:center;color:var(--white);margin-bottom:10px}
+    #callOverlay .call-status-icon{font-size:3rem;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+    #callOverlay .call-status-text{margin:6px 0;font-weight:800;font-family:Poppins,sans-serif}
+    #callOverlay .call-timer{font-weight:700;opacity:.85}
+    #callOverlay .call-actions{display:flex;gap:10px;justify-content:center}
+    #callOverlay .call-actions button{width:56px;height:56px;border-radius:50%;border:1px solid var(--border-light);background:rgba(255,255,255,.1);color:var(--white);cursor:pointer}
+    #callOverlay .call-actions .accept-call-btn{background:linear-gradient(135deg,#2ed573,#1dd1a1);border:0}
+    #callOverlay .call-actions .decline-call-btn,#callOverlay .call-actions .end-call-btn,#callOverlay .call-actions .cancel-call-btn{background:linear-gradient(135deg,#ff4757,#ff3838);border:0}
+    #callOverlay .call-actions .toggle-mute-btn.active,#callOverlay .call-actions .toggle-video-btn.active{background:rgba(255,255,255,.25)}
+    .chat-call-actions{display:inline-flex;gap:8px;margin-left:auto}
+
+    /* Voice note styles */
+    .record-btn{background:linear-gradient(90deg,var(--blue),var(--pink));border:0;color:#fff}
+    .recording-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid var(--border-light);background:rgba(255,255,255,.08);color:var(--white)}
+    .recording-chip .rec-dot{width:10px;height:10px;border-radius:50%;background:#ff4757;box-shadow:0 0 0 0 rgba(255,71,87,.7);animation:pulseRec 1.6s infinite}
+    @keyframes pulseRec{0%{transform:scale(.9);box-shadow:0 0 0 0 rgba(255,71,87,.7)}70%{transform:scale(1);box-shadow:0 0 0 10px rgba(255,71,87,0)}100%{transform:scale(.9);box-shadow:0 0 0 0 rgba(255,71,87,0)}}
+    .voice-bubble{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;border:1px solid var(--border-light);background:rgba(255,255,255,.06);color:var(--white);max-width:80%}
+    .mine .voice-bubble{background:linear-gradient(90deg,var(--blue),var(--pink));border-color:transparent;color:#fff}
+    .voice-play{width:36px;height:36px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.15);border:1px solid var(--border-light);cursor:pointer}
+    .mine .voice-play{background:rgba(255,255,255,.25)}
+    .voice-timeline{position:relative;flex:1 1 auto;height:4px;border-radius:4px;background:rgba(255,255,255,.25);overflow:hidden}
+    .voice-progress{position:absolute;left:0;top:0;bottom:0;width:0;background:#fff}
+    .voice-duration{font-size:.8rem;opacity:.9;min-width:46px;text-align:right}
+
+    /* Call overlay visual tweak to closer match provided UI */
+    #callOverlay.active{background:linear-gradient(180deg,rgba(96,51,141,.85),rgba(27,10,48,.9))}
+    #callOverlay .call-actions button{backdrop-filter:blur(6px)}
+    /* Floating Back-to-Home button */
+    .home-back-fab{position:fixed;top:12px;left:12px;width:40px;height:40px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(45deg,var(--blue),var(--pink));color:var(--white);border:0;cursor:pointer;text-decoration:none;z-index:120;box-shadow:0 4px 15px rgba(0,213,255,.3),0 4px 15px rgba(255,46,146,.3);transition:transform .2s ease}
+    .home-back-fab:hover{transform:scale(1.08)}
+    .home-back-fab:focus{outline:2px solid var(--accent-color);outline-offset:2px}
+    .home-back-fab i{font-size:1rem}
+  </style>
+
+  <script>
+    (async function(){
+      async function injectSharedThemes(){
+        try{
+          if (document.getElementById('shared-theme-styles')) return;
+          let css = null;
+          try { css = sessionStorage.getItem('shared_theme_css') || null; } catch(_){ css=null; }
+          if (!css){
+            const res = await fetch('index.html', { credentials: 'same-origin' });
+            if (res.ok) {
+              const html = await res.text();
+              const matches = html.match(/body\.(?:theme|premium-theme)-[a-z0-9-\s\S]*?\{[\s\S]*?\}/gi) || [];
+              css = matches.join('\n\n');
+              try { sessionStorage.setItem('shared_theme_css', css); } catch(_){ }
+            }
+          }
+          if (css){ const style = document.createElement('style'); style.id='shared-theme-styles'; style.textContent=css; document.head.appendChild(style); }
+        }catch(_){ }
+      }
+      function applySavedTheme(){
+        try{
+          const body = document.body;
+          const saved = localStorage.getItem('jchat-theme') || localStorage.getItem('nuvia-theme') || 'theme-dark-mode';
+          [...body.classList].filter(c => c.startsWith('theme-') || c.startsWith('premium-theme-')).forEach(c => body.classList.remove(c));
+          body.classList.add(saved);
+        }catch(_){ }
+      }
+      try { if (!localStorage.getItem('jchat-theme')) localStorage.setItem('jchat-theme', 'theme-dark-mode'); } catch(_){ }
+      await injectSharedThemes();
+      applySavedTheme();
+      window.addEventListener('storage', (e)=>{ if (e.key==='jchat-theme' || e.key==='nuvia-theme') applySavedTheme(); });
+    })();
+  </script>
+</head>
+<body class="theme-dark-mode">
+
+  <a href="/index.html" class="home-back-fab" aria-label="Back to Home"><i class="fas fa-arrow-left"></i></a>
+  <style>
+    .home-back-fab{display:inline-flex}
+    .home-back-fab::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid rgba(255,255,255,.15);box-shadow:0 0 12px rgba(0,213,255,.35),0 0 12px rgba(255,46,146,.35);pointer-events:none}
+  </style>
+  <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+  <aside id="sidebarNav" class="sidebar-hidden" role="navigation" aria-label="Main Navigation">
+    <div class="sidebar-header">
+      <span class="sidebar-title">Nuvia Menu</span>
+      <button id="sidebarCloseBtn" aria-label="Close Menu"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="sidebar-links">
+      <a href="/index.html" class="sidebar-nav-item"><i class="fas fa-home"></i><span>Home</span></a>
+      <a href="/explore.html" class="sidebar-nav-item"><i class="fas fa-hashtag"></i><span>Explore</span></a>
+      <a href="/profile.html" class="sidebar-nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+      <a href="/chat.html" class="sidebar-nav-item active" id="chatLink"><i class="fas fa-comment-dots"></i><span>Chat</span></a>
+      <a href="/find_friends.html" class="sidebar-nav-item" id="findFriendsLink"><i class="fas fa-users"></i><span>Users</span></a>
+      <a href="/friends.html" class="sidebar-nav-item" id="friendsLink"><i class="fas fa-user-friends"></i><span>Friends</span></a>
+      <a href="/groups.html" class="sidebar-nav-item" id="groupsLink"><i class="fas fa-layer-group"></i><span>Groups</span></a>
+      <a href="/leaderboard.html" class="sidebar-nav-item" id="leaderboardLink"><i class="fas fa-trophy"></i><span>Leaderboard</span></a>
+      <a href="#" id="sidebarThemeLink" class="sidebar-nav-item"><i class="fas fa-palette"></i><span>Appearance</span></a>
+      <a href="/settings.html" class="sidebar-nav-item"><i class="fas fa-cog"></i><span>Settings</span></a>
+      <a href="/about_us.html" class="sidebar-nav-item"><i class="fas fa-globe"></i><span>About Us</span></a>
+      <a href="/solution_center.html" class="sidebar-nav-item"><i class="fas fa-question-circle"></i><span>Solution Center</span></a>
+      <a href="/community_guidelines.html" class="sidebar-nav-item"><i class="fas fa-exclamation-triangle"></i><span>Community Guidelines</span></a>
+      <a href="/login.html" class="sidebar-nav-item"><i class="fas fa-sign-in-alt"></i><span>Login</span></a>
+    </div>
+  </aside>
+
+  <main>
+    <div class="chat-layout">
+      <section class="panel conversations-panel" aria-label="Conversations">
+        <div class="list-toolbar">
+          <input id="convSearch" class="search-input" type="search" placeholder="Search chats" aria-label="Search chats" />
+          <button id="newChatBtn" class="icon-button" title="New chat" aria-label="New chat"><i class="fas fa-user-plus"></i></button>
+        </div>
+        <div id="conversationsList" class="conversation-list"></div>
+        <div id="convEmpty" class="empty-state is-hidden">No conversations yet.</div>
+      </section>
+
+      <section class="panel messages-panel" aria-label="Messages">
+        <div class="chat-header">
+          <button id="backToListBtn" class="icon-button" type="button" aria-label="Back to friends"><i class="fas fa-arrow-left"></i></button>
+          <button id="backHomeBtn" class="icon-button" type="button" aria-label="Back to home" title="Home"><i class="fas fa-home"></i></button>
+          <img id="chatPartnerAvatar" alt="Partner avatar" class="conv-avatar chat-partner-avatar">
+          <i id="chatPartnerIcon" class="fas fa-user-circle chat-partner-icon"></i>
+          <div>
+            <h3 id="chatTitle" class="chat-title"></h3>
+          </div>
+          <div class="chat-call-actions">
+            <button id="audioCallBtn" class="icon-button" title="Voice call" aria-label="Voice call"><i class="fas fa-phone"></i></button>
+            <button id="videoCallBtn" class="icon-button" title="Video call" aria-label="Video call"><i class="fas fa-video"></i></button>
+          </div>
+          <span id="chatPresence" class="presence-pill chat-presence is-hidden" aria-live="polite" aria-atomic="true"></span>
+          <span id="chatLastSeen" class="presence-pill is-hidden" aria-live="polite"></span>
+        </div>
+        <div id="messagesScroll" class="chat-scroll"></div>
+        <div class="composer">
+          <button id="recordBtn" class="icon-button record-btn" aria-label="Record voice note" title="Record voice note"><i class="fas fa-microphone"></i></button>
+          <div id="recordingChip" class="recording-chip start-hidden" aria-live="polite" aria-atomic="true">
+            <span class="rec-dot" aria-hidden="true"></span>
+            <span id="recordTimer" class="rec-timer">00:00</span>
+          </div>
+          <textarea id="messageInput" class="composer-input" rows="1" placeholder="Type a message" aria-label="Type a message"></textarea>
+          <button id="sendBtn" class="send-btn" aria-label="Send"><i class="fas fa-paper-plane"></i></button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div id="messageBox" class="message-box" role="status" aria-live="polite"></div>
+
+  <div id="imageViewer" class="image-viewer-overlay" aria-hidden="true" role="dialog" aria-modal="true">
+    <button id="imageViewerClose" class="image-viewer-close" aria-label="Close image"><i class="fas fa-times"></i></button>
+    <img id="imageViewerImg" alt="">
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signInAnonymously, signOut } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
+    import { getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, serverTimestamp, onSnapshot, query, where, orderBy, limit, deleteDoc } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+    import { registerSession } from './assets/js/session-manager.js';
+    import { getCloudinaryImageUrl, displayProfilePicture } from './assets/js/avatar-utils.js';
+
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+      apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+      authDomain: "jchat-1.firebaseapp.com",
+      databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+      projectId: "jchat-1",
+      storageBucket: "jchat-1.firebasestorage.app",
+      messagingSenderId: "328479683167",
+      appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
+      measurementId: "G-S6Z9GG0R9P"
+    };
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    try { window.__nuviaAppId = appId; } catch (_) {}
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const conversationsList = document.getElementById('conversationsList');
+    const convEmpty = document.getElementById('convEmpty');
+    const convSearch = document.getElementById('convSearch');
+    const newChatBtn = document.getElementById('newChatBtn');
+
+    const messagesScroll = document.getElementById('messagesScroll');
+    const chatTitle = document.getElementById('chatTitle');
+    const chatPartnerAvatar = document.getElementById('chatPartnerAvatar');
+    const chatPartnerIcon = document.getElementById('chatPartnerIcon');
+    const backToListBtn = document.getElementById('backToListBtn');
+    const chatPresence = document.getElementById('chatPresence');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const recordBtn = document.getElementById('recordBtn');
+    const recordingChip = document.getElementById('recordingChip');
+    const recordTimerEl = document.getElementById('recordTimer');
+
+    const imageViewer = document.getElementById('imageViewer');
+    const imageViewerImg = document.getElementById('imageViewerImg');
+    const imageViewerClose = document.getElementById('imageViewerClose');
+
+    // Header controls (notifications, profile, logout)
+    const headerControls = document.querySelector('.header-user-controls');
+    function buildHeaderUI(user){
+      // If legacy container exists, render the legacy header UI
+      if (headerControls){
+        headerControls.innerHTML = `
+          <div class="notification-icon-wrapper">
+            <a href="/notifications.html" aria-label="Notifications">
+              <i class="fas fa-bell"></i>
+              <span class="notification-badge" id="notificationCount">0</span>
+            </a>
+          </div>
+          <a href="/profile.html" id="profileLink" aria-label="Profile">
+            <img id="headerProfilePic" src="" alt="User Profile Picture">
+            <i id="headerAvatarIcon" class="fas fa-user-circle"></i>
+          </a>
+          <button id="logoutButton" aria-label="Logout" disabled>
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        `;
+        const headerProfilePic = document.getElementById('headerProfilePic');
+        const headerAvatarIcon = document.getElementById('headerAvatarIcon');
+        const headerLogoutButton = document.getElementById('logoutButton');
+        const profileLink = document.getElementById('profileLink');
+        if (user){
+          const usernameInitial = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
+          displayProfilePicture(headerProfilePic, headerAvatarIcon, user.photoURL || null, usernameInitial, 'w_70,h_70,c_fill,g_face,r_max');
+          if (profileLink) profileLink.href = `/profile.html?userId=${user.uid}`;
+          if (headerLogoutButton){
+            headerLogoutButton.disabled = false;
+            headerLogoutButton.addEventListener('click', async ()=>{
+              try{ await signOut(auth); window.location.href = '/login.html'; }catch(_){ }
+            });
+          }
+        }
+        return;
+      }
+      // Fallback: update existing index header elements directly
+      try{
+        const headerProfilePic = document.getElementById('headerProfilePic');
+        const headerAvatarIcon = document.getElementById('headerAvatarIcon');
+        const profileLink = document.getElementById('profileLink');
+        if (user){
+          const usernameInitial = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
+          displayProfilePicture(headerProfilePic, headerAvatarIcon, user.photoURL || null, usernameInitial, 'w_70,h_70,c_fill,g_face,r_max');
+          if (profileLink) profileLink.href = `/profile.html?userId=${user.uid}`;
+        }
+      }catch(_){ }
+    }
+
+    function fetchNotificationCount(userId){
+      try{
+        const c = collection(db, 'artifacts', appId, 'users', userId, 'notifications');
+        const q = query(c, where('read','==', false));
+        onSnapshot(q, (snap)=>{
+          const el = document.getElementById('notificationCount');
+          if (!el) return;
+          const n = snap.size;
+          if (n>0){ el.textContent = String(n); el.style.display = 'flex'; }
+          else { el.style.display = 'none'; }
+        }, ()=>{ const el = document.getElementById('notificationCount'); if (el) el.style.display='none'; });
+      }catch(_){ }
+    }
+
+    function closeImageViewer(){ try{ if(imageViewer){ imageViewer.classList.remove('show'); imageViewer.setAttribute('aria-hidden','true'); } if(imageViewerImg){ imageViewerImg.removeAttribute('src'); } document.body.style.overflow=''; }catch(_){}}
+    function openImageViewer(src, altText){ try{ if(!src || !imageViewer || !imageViewerImg) return; imageViewerImg.src=src; imageViewerImg.alt=altText||'Profile picture'; imageViewer.classList.add('show'); imageViewer.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }catch(_){}}
+
+    imageViewerClose?.addEventListener('click', closeImageViewer);
+    imageViewer?.addEventListener('click', (e)=>{ if(e.target===imageViewer) closeImageViewer(); });
+    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && imageViewer?.classList.contains('show')) closeImageViewer(); });
+
+    chatPartnerAvatar?.addEventListener('click', ()=>{ const src = chatPartnerAvatar.getAttribute('data-fullsrc') || chatPartnerAvatar.getAttribute('src'); if(src){ openImageViewer(src, chatTitle?.textContent||'Profile picture'); } });
+
+    const typingStates = new Map();
+    const typingUnsubs = new Map();
+    let partnerTypingUnsub = null;
+    let isPartnerTyping = false;
+    let typingStopTimer = null;
+
+    let partnerLastActiveMs = 0;
+    let lastSeenTimer = null;
+
+    let currentUser = null;
+    let currentThreadId = null;
+    let currentPartnerId = null;
+    let messagesUnsub = null;
+    let partnerPresenceUnsub = null;
+    let allThreads = [];
+    const presenceUnsubs = new Map();
+    const threadMetaUnsubs = new Map();
+    const READ_STORAGE_KEY = 'nuvia_chat_reads';
+    let readState = {};
+
+    const PRESENCE_STALE_MS = 45000;
+    function tsToMs(ts){ try{ if(!ts) return 0; if(typeof ts.toMillis === 'function') return ts.toMillis(); if(typeof ts === 'number') return ts; if(ts.seconds) return ts.seconds*1000; const d = new Date(ts); const ms = d.getTime(); return isFinite(ms)? ms : 0; }catch(_){ return 0; } }
+    function isActiveFromData(data){ try{ const online = Boolean(data && data.online); const last = tsToMs(data && data.lastActive); if(!online) return false; if(!last) return false; return (Date.now() - last) <= PRESENCE_STALE_MS; }catch(_){ return false; } }
+
+    function escapeHtml(value){
+      if(value === null || value === undefined) return '';
+      return value.toString().replace(/[&<>"']/g, (char)=>{
+        switch(char){
+          case '&': return '&amp;';
+          case '<': return '&lt;';
+          case '>': return '&gt;';
+          case '"': return '&quot;';
+          case "'": return '&#39;';
+          default: return char;
+        }
+      });
+    }
+
+    function getQueryParam(k){ try{ return new URL(window.location.href).searchParams.get(k); }catch(_){ return null; } }
+    function makeThreadId(a, b){ const x=(a||'').toString(); const y=(b||'').toString(); return x<y?`${x}_${y}`:`${y}_${x}`; }
+
+    async function fetchUserProfile(uid){
+      try{
+        const snap = await getDoc(doc(db,'artifacts',appId,'public','data','users',uid));
+        if(!snap.exists()) return { uid, username: uid.slice(0,6), profilePicId: null, online:false, lastActive:null };
+        const d = snap.data();
+        return { uid, username: d.username || (d.displayName||uid.slice(0,6)), profilePicId: d.profilePicId || d.avatarId || null, online:Boolean(d.online), lastActive:d.lastActive||null };
+      }catch(_){ return { uid, username: uid.slice(0,6), profilePicId: null, online:false, lastActive:null }; }
+    }
+
+    function setConvEmptyVisible(show){ if (!convEmpty) return; convEmpty.classList.toggle('is-hidden', !show); }
+
+    function renderConversationItem(t, filter=''){
+      const partnerId = (t.participants||[]).find(p=>p!==currentUser?.uid) || '';
+      const el = document.createElement('div');
+      const name = t.partner?.username || partnerId.slice(0,6);
+      const safeName = escapeHtml(name);
+      const initial = (name||'U').charAt(0).toUpperCase();
+      const avatar = t.partner?.profilePicId ? getCloudinaryImageUrl(t.partner.profilePicId,'w_90,h_90,c_fill,g_face,r_max') : '';
+      const fullAvatar = t.partner?.profilePicId ? getCloudinaryImageUrl(t.partner.profilePicId,'f_auto,q_auto') : (avatar || '');
+      const presenceId = `presence-dot-${partnerId}`;
+      const lastTextRaw = t.lastMessage?.text ? t.lastMessage.text : '';
+      const isTyping = Boolean(typingStates.get(t.id));
+      const safeLastText = isTyping ? 'Typing…' : escapeHtml(lastTextRaw);
+      const lastMessageTimestamp = tsToMs(t.lastMessage?.ts || t.lastMessage?.createdAt || t.updatedAt);
+      const isUnread = Boolean(t.lastMessage && t.lastMessage.senderId && t.lastMessage.senderId !== currentUser?.uid && lastMessageTimestamp > getThreadReadTimestamp(t.id));
+      const active = isActiveFromData(t.partner);
+      const lastActiveMs = tsToMs(t.partner?.lastActive);
+      const showLastSeen = !active && !isTyping && lastActiveMs;
+      const lastSeenHtml = showLastSeen ? ` <span class=\"conv-last-seen\">• Last seen ${formatTimeAgo(lastActiveMs)}</span>` : '';
+      const badgeHtml = isUnread ? `<span class=\"conversation-badge\" role=\"status\" aria-live=\"polite\" aria-label=\"New unread message\"><i class=\"fas fa-envelope\"></i></span>` : '';
+      el.className = 'conversation-item' + (isUnread ? ' unread' : '');
+      el.setAttribute('data-id', t.id);
+      el.setAttribute('data-unread', isUnread ? 'true' : 'false');
+      el.innerHTML = `
+        <div class="presence-wrapper">
+          ${avatar?`<img class=\"conv-avatar\" src=\"${avatar}\" data-fullsrc=\"${fullAvatar}\" alt=\"${safeName}\">`:`<img class=\"conv-avatar\" alt=\"${safeName}\" src=\"https://placehold.co/44x44/CCCCCC/000000?text=${encodeURIComponent(initial)}\">`}
+          <span class="presence-dot ${active ? 'online' : ''}" id="${presenceId}" aria-hidden="true"></span>
+        </div>
+        <div class="conversation-details">
+          <div class="conversation-header-row">
+            <p class="conv-title">${safeName}</p>
+            ${badgeHtml}
+          </div>
+          <p class="conv-sub${isTyping ? ' typing' : ''}">${safeLastText}${isTyping ? ' <span class=\"typing-dots\"><span></span><span></span><span></span></span>' : ''}${lastSeenHtml}</p>
+        </div>
+      `;
+      const av = el.querySelector('.conv-avatar');
+      if(av){ av.addEventListener('click', (e)=>{ e.stopPropagation(); const src = av.getAttribute('data-fullsrc') || av.getAttribute('src'); if(src){ openImageViewer(src, safeName); } }); }
+      el.addEventListener('click', ()=> { try{ document.body.classList.add('show-chat'); }catch(_){}; openThread(t.id, partnerId); });
+      if(filter){ const q=filter.toLowerCase(); const matches=name.toLowerCase().includes(q)||lastTextRaw.toLowerCase().includes(q); el.style.display=matches?'':'none'; }
+      return el;
+    }
+
+    function clearPresenceListeners(){ presenceUnsubs.forEach(u=>{ try{ u(); }catch(_){} }); presenceUnsubs.clear(); }
+    function clearThreadMetaListeners(){ threadMetaUnsubs.forEach(u=>{ try{ u(); }catch(_){} }); threadMetaUnsubs.clear(); }
+    function clearTypingListeners(){ typingUnsubs.forEach(u=>{ try{ u(); }catch(_){} }); typingUnsubs.clear(); typingStates.clear(); }
+
+    function loadReadState(uid){
+      if(!uid) return {};
+      try{
+        const raw = localStorage.getItem(READ_STORAGE_KEY);
+        if(!raw) return {};
+        const parsed = JSON.parse(raw);
+        if(!parsed || typeof parsed !== 'object') return {};
+        const userState = parsed[uid];
+        if(!userState || typeof userState !== 'object') return {};
+        return userState;
+      }catch(_){ return {}; }
+    }
+
+    function persistReadState(uid){
+      if(!uid) return;
+      try{
+        const raw = localStorage.getItem(READ_STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        parsed[uid] = readState;
+        localStorage.setItem(READ_STORAGE_KEY, JSON.stringify(parsed));
+      }catch(_){ }
+    }
+
+    function getThreadReadTimestamp(threadId){
+      if(!threadId) return 0;
+      const value = readState?.[threadId];
+      return Number(value) || 0;
+    }
+
+    function setThreadReadTimestamp(threadId, timestamp){
+      if(!threadId) return false;
+      const nextValue = timestamp || Date.now();
+      const currentValue = getThreadReadTimestamp(threadId);
+      if(currentValue >= nextValue) return false;
+      readState[threadId] = nextValue;
+      persistReadState(currentUser?.uid);
+      return true;
+    }
+
+    function markThreadAsRead(threadId, timestamp){
+      const updated = setThreadReadTimestamp(threadId, tsToMs(timestamp) || Date.now());
+      if(updated){ renderConversationsList(convSearch.value || ''); }
+    }
+
+    function renderConversationsList(filterTerm=''){
+      const filterValue = (filterTerm || '').trim();
+      conversationsList.innerHTML = '';
+      allThreads.sort((a,b)=> (tsToMs(b.updatedAt) - tsToMs(a.updatedAt)) || (a.partner?.username||'').localeCompare(b.partner?.username||''));
+      allThreads.forEach(t => conversationsList.appendChild(renderConversationItem(t, filterValue)));
+      setConvEmptyVisible(!allThreads.length);
+    }
+
+    async function loadConversations(){
+      if(!currentUser) return;
+      conversationsList.innerHTML = '';
+      clearPresenceListeners();
+      clearThreadMetaListeners();
+      clearTypingListeners();
+      let f1Snap = null, f2Snap = null;
+      try{ f1Snap = await getDocs(query(collection(db,'artifacts',appId,'public','data','friends'), where('user1Id','==', currentUser.uid))); }catch(_){ f1Snap = { docs: [] }; }
+      try{ f2Snap = await getDocs(query(collection(db,'artifacts',appId,'public','data','friends'), where('user2Id','==', currentUser.uid))); }catch(_){ f2Snap = { docs: [] }; }
+      const friendIds = new Set();
+      (f1Snap.docs||[]).forEach(d=>{ const v=d.data(); if(v&&v.user2Id) friendIds.add(v.user2Id); });
+      (f2Snap.docs||[]).forEach(d=>{ const v=d.data(); if(v&&v.user1Id) friendIds.add(v.user1Id); });
+      const items = await Promise.all(Array.from(friendIds).map(async (uid)=>{
+        const partner = await fetchUserProfile(uid);
+        const id = makeThreadId(currentUser.uid, uid);
+        let last = null, updated = null;
+        try{ const td = await getDoc(doc(db,'artifacts',appId,'public','data','dm_threads', id)); if(td.exists()){ const data = td.data(); last = data.lastMessage || null; updated = data.updatedAt || null; } }catch(_){ }
+        return { id, participants:[currentUser.uid, uid], partner, lastMessage:last, updatedAt:updated };
+      }));
+      items.sort((a,b)=> ((b.updatedAt?.toMillis?.()||0)-(a.updatedAt?.toMillis?.()||0)) || (a.partner?.username||'').localeCompare(b.partner?.username||''));
+      allThreads = items;
+      renderConversationsList(convSearch.value || '');
+
+      items.forEach(t=>{
+        const partnerId = (t.participants||[]).find(p=>p!==currentUser?.uid) || '';
+        if(partnerId){
+          const ref = doc(db,'artifacts',appId,'public','data','users',partnerId);
+          try{
+            const unsub = onSnapshot(ref, (snap)=>{
+              const data = snap.exists()? snap.data() : null;
+              const dot = document.getElementById(`presence-dot-${partnerId}`);
+              const active = isActiveFromData(data);
+              if(dot){ if(active){ dot.classList.add('online'); } else { dot.classList.remove('online'); } }
+              try{
+                const idx = allThreads.findIndex(entry=>entry.id===t.id);
+                if(idx>=0){
+                  allThreads[idx] = { ...allThreads[idx], partner: { ...(allThreads[idx].partner||{}), online: Boolean(data&&data.online), lastActive: data?data.lastActive:null } };
+                  renderConversationsList(convSearch.value || '');
+                }
+              }catch(_){}
+            },()=>{});
+            presenceUnsubs.set(partnerId, unsub);
+          }catch(_){ }
+        }
+        const threadRef = doc(db,'artifacts',appId,'public','data','dm_threads', t.id);
+        try{
+          const typingDocRef = doc(db,'artifacts',appId,'public','data','dm_threads', t.id, 'typing', partnerId);
+          try{
+            const unsubTyping = onSnapshot(typingDocRef, (snap)=>{
+              const data = snap.exists()? snap.data() : null;
+              const fresh = data && data.active && (Date.now() - tsToMs(data.updatedAt)) <= 6000;
+              if(fresh){ typingStates.set(t.id, true); } else { typingStates.delete(t.id); }
+              renderConversationsList(convSearch.value || '');
+            }, ()=>{});
+            typingUnsubs.set(t.id, unsubTyping);
+          }catch(_){ }
+          const unsubscribeThread = onSnapshot(threadRef, (snap)=>{
+            if(!snap.exists()) return;
+            const data = snap.data() || {};
+            const idx = allThreads.findIndex(entry=>entry.id===t.id);
+            if(idx>=0){
+              allThreads[idx] = {
+                ...allThreads[idx],
+                lastMessage: data.lastMessage || allThreads[idx].lastMessage,
+                updatedAt: data.updatedAt || allThreads[idx].updatedAt
+              };
+              renderConversationsList(convSearch.value || '');
+            }
+          },()=>{});
+          threadMetaUnsubs.set(t.id, unsubscribeThread);
+        }catch(_){ }
+      });
+    }
+
+    function scrollToBottom(){ try{ messagesScroll.scrollTop = messagesScroll.scrollHeight + 200; }catch(_){ } }
+
+    function renderMessage(m){
+      const mine = m.senderId === currentUser.uid;
+      const row = document.createElement('div');
+      row.className = 'bubble-row' + (mine ? ' mine' : '');
+      if (m.type === 'audio' && (m.audioBase64 || m.fileUrl)){
+        const bubble = document.createElement('div');
+        bubble.className = 'voice-bubble' + (mine ? ' mine' : '');
+        const play = document.createElement('button');
+        play.className = 'voice-play';
+        play.setAttribute('data-id', m.id);
+        play.setAttribute('aria-label','Play voice note');
+        play.innerHTML = '<i class="fas fa-play"></i>';
+        const timeline = document.createElement('div');
+        timeline.className = 'voice-timeline';
+        const prog = document.createElement('div');
+        prog.className = 'voice-progress';
+        timeline.appendChild(prog);
+        const dur = document.createElement('span');
+        dur.className = 'voice-duration';
+        const seconds = Math.max(1, Math.round(Number(m.durationSec)||0));
+        const mStr = String(Math.floor(seconds/60)).padStart(2,'0');
+        const sStr = String(seconds%60).padStart(2,'0');
+        dur.textContent = `${mStr}:${sStr}`;
+        bubble.appendChild(play);
+        bubble.appendChild(timeline);
+        bubble.appendChild(dur);
+        row.appendChild(bubble);
+        row.dataset.audioSrc = m.fileUrl || m.audioBase64 || '';
+        row.dataset.mime = m.mimeType || 'audio/webm';
+      } else {
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble' + (mine ? ' mine' : '');
+        bubble.textContent = m.deleted ? 'Message deleted' : (m.text || '');
+        row.appendChild(bubble);
+      }
+      if (mine && !m.deleted) {
+        const del = document.createElement('button');
+        del.className = 'action-btn delete-msg';
+        del.setAttribute('data-id', m.id);
+        del.setAttribute('title', 'Delete');
+        del.innerHTML = '<i class="fas fa-trash"></i>';
+        row.appendChild(del);
+      }
+      messagesScroll.appendChild(row);
+    }
+
+    function formatTimeAgo(ms){
+      const t = Number(ms)||0; if(!t) return 'just now';
+      const diff = Date.now() - t; if(diff < 0) return 'just now';
+      const s = Math.floor(diff/1000);
+      if(s < 60) return 'just now';
+      const m = Math.floor(s/60);
+      if(m < 60) return m + ' minute' + (m===1?'':'s') + ' ago';
+      const h = Math.floor(m/60);
+      if(h < 24) return h + ' hour' + (h===1?'':'s') + ' ago';
+      const d = Math.floor(h/24);
+      if(d < 7) return d + ' day' + (d===1?'':'s') + ' ago';
+      const dt = new Date(t);
+      return dt.toLocaleString();
+    }
+
+    function renderChatHeaderPresence(state){
+      if(!chatPresence) return;
+      const lastSeenEl = document.getElementById('chatLastSeen');
+      const hideLastSeen = ()=>{ try{ if(lastSeenEl){ lastSeenEl.classList.add('is-hidden'); lastSeenEl.textContent=''; } if(lastSeenTimer){ clearInterval(lastSeenTimer); lastSeenTimer=null; } }catch(_){} };
+      chatPresence.classList.remove('is-hidden');
+      if(isPartnerTyping){
+        chatPresence.textContent = 'Typing…';
+        chatPresence.classList.add('typing');
+        chatPresence.classList.remove('online');
+        hideLastSeen();
+      }else if(state === null || typeof state === 'undefined'){
+        chatPresence.classList.add('is-hidden');
+        chatPresence.classList.remove('online');
+        chatPresence.classList.remove('typing');
+        chatPresence.textContent = '';
+        hideLastSeen();
+      }else if(state){
+        chatPresence.textContent = 'Online';
+        chatPresence.classList.add('online');
+        chatPresence.classList.remove('typing');
+        hideLastSeen();
+      }else{
+        chatPresence.textContent = 'Offline';
+        chatPresence.classList.remove('online');
+        chatPresence.classList.remove('typing');
+        if(lastSeenEl){
+          lastSeenEl.classList.remove('is-hidden');
+          lastSeenEl.textContent = 'Last seen ' + formatTimeAgo(partnerLastActiveMs);
+        }
+        try{ if(lastSeenTimer) clearInterval(lastSeenTimer); }catch(_){}
+        lastSeenTimer = setInterval(()=>{
+          const el = document.getElementById('chatLastSeen');
+          if(el && !el.classList.contains('is-hidden') && partnerLastActiveMs){ el.textContent = 'Last seen ' + formatTimeAgo(partnerLastActiveMs); }
+        }, 60000);
+      }
+    }
+    function setChatPresence(state){ renderChatHeaderPresence(state); }
+
+    async function openThread(threadId, partnerId){
+      if(messagesUnsub){ try{ messagesUnsub(); }catch(_){} messagesUnsub = null; }
+      if(partnerPresenceUnsub){ try{ partnerPresenceUnsub(); }catch(_){} partnerPresenceUnsub = null; }
+      if(partnerTypingUnsub){ try{ partnerTypingUnsub(); }catch(_){} partnerTypingUnsub = null; }
+      if(chatPresence){ chatPresence.classList.add('is-hidden'); chatPresence.textContent=''; chatPresence.classList.remove('online'); chatPresence.classList.remove('typing'); }
+      try{ if(lastSeenTimer){ clearInterval(lastSeenTimer); lastSeenTimer=null; } }catch(_){}
+      partnerLastActiveMs = 0;
+      currentThreadId = threadId; currentPartnerId = partnerId; try{ window.__currentPartnerId = partnerId; }catch(_){ } markThreadAsRead(threadId, Date.now()); partnerLastActiveMs = 0;
+      // Ensure incoming call listener is active for this partner while viewing thread
+      try{ if (typeof window.startIncomingListenerForCurrentChat === 'function'){ window.startIncomingListenerForCurrentChat(partnerId); } }catch(_){ }
+      const partner = partnerId ? await fetchUserProfile(partnerId) : null;
+      chatTitle.textContent = partner?.username || 'Chat';
+      partnerLastActiveMs = partner && partner.lastActive ? tsToMs(partner.lastActive) : 0;
+      displayProfilePicture(chatPartnerAvatar, chatPartnerIcon, partner?.profilePicId || null, (partner?.username||'U').charAt(0).toUpperCase(), 'w_90,h_90,c_fill,g_face,r_max');
+      try{ if(partner?.profilePicId){ chatPartnerAvatar?.setAttribute('data-fullsrc', getCloudinaryImageUrl(partner.profilePicId,'f_auto,q_auto')); } }catch(_){}
+      setChatPresence(partner ? isActiveFromData(partner) : null);
+      try{
+        const pref = doc(db,'artifacts',appId,'public','data','users', partnerId);
+        partnerPresenceUnsub = onSnapshot(pref, (snap)=>{ const data = snap.exists()? snap.data() : null; partnerLastActiveMs = data && data.lastActive ? tsToMs(data.lastActive) : partnerLastActiveMs; renderChatHeaderPresence(isActiveFromData(data)); }, ()=>{});
+      }catch(_){ }
+      try{
+        const typingDocRef = doc(db,'artifacts',appId,'public','data','dm_threads', threadId, 'typing', partnerId);
+        partnerTypingUnsub = onSnapshot(typingDocRef, (snap)=>{
+          const data = snap.exists()? snap.data(): null;
+          const fresh = data && data.active && (Date.now() - tsToMs(data.updatedAt)) <= 6000;
+          isPartnerTyping = !!fresh;
+          renderChatHeaderPresence(partner ? isActiveFromData(partner) : null);
+        }, ()=>{});
+      }catch(_){ }
+
+      messagesScroll.innerHTML = '';
+      const col = collection(db,'artifacts',appId,'public','data','dm_threads', threadId, 'messages');
+      const qMsgs = query(col, orderBy('createdAt','asc'), limit(200));
+      messagesUnsub = onSnapshot(qMsgs, (snap)=>{
+        messagesScroll.innerHTML = '';
+        let latestCreatedAt = null;
+        snap.docs.forEach(d=>{
+          const data = d.data();
+          renderMessage({ id:d.id, ...data });
+          if(data && data.createdAt){ latestCreatedAt = data.createdAt; }
+        });
+        scrollToBottom();
+        if(snap.docs.length === 0){ markThreadAsRead(threadId, Date.now()); }
+        else if(latestCreatedAt){ markThreadAsRead(threadId, latestCreatedAt); }
+        else { markThreadAsRead(threadId, Date.now()); }
+      });
+      try{ messageInput?.focus(); }catch(_){ }
+    }
+
+    async function ensureThreadWith(partnerId){
+      const threadId = makeThreadId(currentUser.uid, partnerId);
+      const ref = doc(db,'artifacts',appId,'public','data','dm_threads', threadId);
+      const snap = await getDoc(ref);
+      if(!snap.exists()){
+        await setDoc(ref, { participants:[currentUser.uid, partnerId], createdAt: serverTimestamp(), updatedAt: serverTimestamp(), lastMessage:null });
+      }
+      return threadId;
+    }
+
+    async function sendMessage(text){
+      if(!currentThreadId || !text.trim()) return;
+      const col = collection(db,'artifacts',appId,'public','data','dm_threads', currentThreadId, 'messages');
+      try{ await setDoc(doc(db,'artifacts',appId,'public','data','dm_threads', currentThreadId), { participants:[currentUser.uid, currentPartnerId], createdAt: serverTimestamp() }, { merge: true }); }catch(_){ }
+      await addDoc(col, { text: text.trim(), senderId: currentUser.uid, createdAt: serverTimestamp(), type: 'text' });
+      const ref = doc(db,'artifacts',appId,'public','data','dm_threads', currentThreadId);
+      await updateDoc(ref, { updatedAt: serverTimestamp(), lastMessage: { text: text.trim(), senderId: currentUser.uid, ts: serverTimestamp() } });
+      try{ const idx = allThreads.findIndex(t=>t.id===currentThreadId); if(idx>=0){ allThreads[idx].lastMessage = { text: text.trim(), senderId: currentUser.uid }; } const q=(convSearch.value||'').trim(); conversationsList.innerHTML=''; allThreads.forEach(t=> conversationsList.appendChild(renderConversationItem(t, q))); }catch(_){ }
+    }
+
+    async function recomputeThreadLastMessage(){
+      try{
+        const col = collection(db,'artifacts',appId,'public','data','dm_threads', currentThreadId, 'messages');
+        const snap = await getDocs(query(col, orderBy('createdAt','desc'), limit(20)));
+        let last = null;
+        for (const d of snap.docs){ const v=d.data(); if(!v.deleted && v.text && v.text.trim()){ last = { text: v.text, senderId: v.senderId||null, ts: v.createdAt||serverTimestamp() }; break; } }
+        const ref = doc(db,'artifacts',appId,'public','data','dm_threads', currentThreadId);
+        await updateDoc(ref, { lastMessage: last || null, updatedAt: serverTimestamp() });
+      }catch(_){ }
+    }
+
+    async function deleteMessageById(messageId){
+      try{
+        const mref = doc(db,'artifacts',appId,'public','data','dm_threads', currentThreadId, 'messages', messageId);
+        try{ await deleteDoc(mref); }
+        catch(e){ try{ await updateDoc(mref, { text:'Message deleted', deleted:true, type:'deleted', updatedAt: serverTimestamp() }); }catch(err){ throw err; } }
+        await recomputeThreadLastMessage();
+      }catch(e){ console.error('delete message failed', e); }
+    }
+
+    convSearch.addEventListener('input', ()=>{ const q=(convSearch.value||'').trim(); conversationsList.innerHTML=''; allThreads.forEach(t=> conversationsList.appendChild(renderConversationItem(t, q))); });
+
+    newChatBtn.addEventListener('click', ()=>{ window.location.href = '/find_friends.html'; });
+
+    async function tryOpenFromQuery(){ const pid=getQueryParam('partnerId'); if(!pid || !currentUser) return; try{ const tid=await ensureThreadWith(pid); await loadConversations(); await openThread(tid, pid); try{ document.body.classList.add('show-chat'); }catch(_){ } }catch(_){ } }
+
+    onAuthStateChanged(auth, async (user) => { if (user) { buildHeaderUI(user); fetchNotificationCount(user.uid); } else { if (headerControls) headerControls.innerHTML = ''; }
+      try{ if(!user){ await signInAnonymously(auth); return; } currentUser = user; try { localStorage.setItem('nuvia_auth_status','authenticated'); } catch(_){ } registerSession(auth, db, appId).catch(()=>{}); await loadConversations(); await tryOpenFromQuery(); }catch(e){ console.error(e); }
+    });
+
+    backToListBtn?.addEventListener('click', ()=>{
+      try{ document.body.classList.remove('show-chat'); }catch(_){ }
+      try{
+        currentPartnerId = null;
+        window.__currentPartnerId = null;
+        window.stopIncomingCallListeners?.();
+        window.startGlobalIncomingListener?.(); // restart global listener
+      }catch(_){ }
+    });
+
+    function autoResize(){ try{ messageInput.style.height=''; messageInput.style.height = Math.min(180, Math.max(44, messageInput.scrollHeight)) + 'px'; }catch(_){}}
+    messageInput?.addEventListener('input', ()=>{ autoResize(); notifyTyping(); });
+    messageInput?.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); const txt=(messageInput.value||''); sendMessage(txt).then(()=>{ messageInput.value=''; autoResize(); scrollToBottom(); }); } });
+    sendBtn?.addEventListener('click', ()=>{ const txt=(messageInput.value||''); sendMessage(txt).then(()=>{ messageInput.value=''; autoResize(); scrollToBottom(); }); });
+
+    // Voice note recording
+    let mediaRecorder = null; let recChunks=[]; let recStart=0; let recTimer=null; let recStream=null; let recAudioCtx=null; let recAnalyser=null; let recSource=null;
+
+    function updateRecTimer(){
+      const elapsed = Math.max(0, Math.floor((Date.now()-recStart)/1000));
+      const m = String(Math.floor(elapsed/60)).padStart(2,'0'); const s = String(elapsed%60).padStart(2,'0');
+      if (recordTimerEl) recordTimerEl.textContent = `${m}:${s}`;
+    }
+
+    async function startRecording(){
+      if (mediaRecorder) return;
+      try{
+        recStream = await navigator.mediaDevices.getUserMedia({ audio:true });
+        mediaRecorder = new MediaRecorder(recStream, { mimeType: (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm') });
+        recChunks = []; recStart = Date.now();
+        mediaRecorder.ondataavailable = (e)=>{ if(e.data && e.data.size) recChunks.push(e.data); };
+        mediaRecorder.onstop = handleRecordingComplete;
+        mediaRecorder.start();
+        if (recordingChip) recordingChip.style.display='inline-flex';
+        updateRecTimer();
+        clearInterval(recTimer); recTimer = setInterval(updateRecTimer, 500);
+      }catch(e){ console.error('recording failed', e); }
+    }
+
+    function stopRecording(){ try{ mediaRecorder && mediaRecorder.state!=='inactive' && mediaRecorder.stop(); }catch(_){} }
+
+    async function handleRecordingComplete(){
+      clearInterval(recTimer); if (recordingChip) recordingChip.style.display='none';
+      const durationSec = Math.max(1, Math.round((Date.now()-recStart)/1000));
+      const blob = new Blob(recChunks, { type: (mediaRecorder && mediaRecorder.mimeType) || 'audio/webm' });
+      try{ recStream && recStream.getTracks().forEach(t=>t.stop()); }catch(_){ }
+      mediaRecorder = null; recStream=null;
+      const base64 = await blobToBase64(blob);
+      await sendAudioMessage(base64, blob.type||'audio/webm', durationSec);
+    }
+
+    function blobToBase64(blob){
+      return new Promise((resolve, reject)=>{ const fr = new FileReader(); fr.onload=()=> resolve(String(fr.result)); fr.onerror=reject; fr.readAsDataURL(blob); });
+    }
+
+    async function sendAudioMessage(dataUrl, mime, durationSec){
+      if(!currentThreadId || !dataUrl) return;
+      const col = collection(db,'artifacts',appId,'public','data','dm_threads', currentThreadId, 'messages');
+      try{ await setDoc(doc(db,'artifacts',appId,'public','data','dm_threads', currentThreadId), { participants:[currentUser.uid, currentPartnerId], createdAt: serverTimestamp() }, { merge: true }); }catch(_){ }
+      await addDoc(col, { type:'audio', audioBase64:dataUrl, mimeType:mime||'audio/webm', durationSec, senderId: currentUser.uid, createdAt: serverTimestamp() });
+      const ref = doc(db,'artifacts',appId,'public','data','dm_threads', currentThreadId);
+      await updateDoc(ref, { updatedAt: serverTimestamp(), lastMessage: { text: 'Voice message', senderId: currentUser.uid, ts: serverTimestamp() } });
+      scrollToBottom();
+    }
+
+    if (recordBtn){
+      recordBtn.addEventListener('click', ()=>{ if (mediaRecorder) stopRecording(); else startRecording(); });
+    }
+
+    // Playback handler for voice notes
+    let currentAudio = null; let currentRow = null; let playInterval=null;
+    function stopCurrentAudio(){ if(currentAudio){ try{ currentAudio.pause(); }catch(_){} } currentAudio=null; if(playInterval){ clearInterval(playInterval); playInterval=null; } if(currentRow){ const btn=currentRow.querySelector('.voice-play i'); if(btn) btn.className='fas fa-play'; const prog=currentRow.querySelector('.voice-progress'); if(prog) prog.style.width='0%'; currentRow=null; } }
+
+    messagesScroll.addEventListener('click', (e)=>{
+      const btn = e.target.closest && e.target.closest('.voice-play');
+      if(!btn) return;
+      const row = btn.closest('.bubble-row'); if(!row) return;
+      if (currentRow && row!==currentRow) stopCurrentAudio();
+      const icon = btn.querySelector('i');
+      if (currentAudio && !currentAudio.paused){ stopCurrentAudio(); return; }
+      const src = row.dataset.audioSrc; const mime = row.dataset.mime || 'audio/webm';
+      if(!src) return;
+      currentAudio = new Audio(src);
+      currentRow = row;
+      icon.className='fas fa-pause';
+      const prog = row.querySelector('.voice-progress');
+      currentAudio.addEventListener('ended', ()=> stopCurrentAudio());
+      currentAudio.play().then(()=>{
+        playInterval = setInterval(()=>{
+          if(!currentAudio || !prog) return; const pct = (currentAudio.currentTime / Math.max(1,currentAudio.duration)) * 100; prog.style.width = pct + '%';
+        }, 200);
+      }).catch(()=>{ stopCurrentAudio(); });
+    });
+
+    function scheduleStopTyping(){ if(typingStopTimer){ clearTimeout(typingStopTimer); } typingStopTimer = setTimeout(()=>{ try{ if(currentThreadId && currentUser){ const ref=doc(db,'artifacts',appId,'public','data','dm_threads', currentThreadId, 'typing', currentUser.uid); setDoc(ref,{ active:false, updatedAt: serverTimestamp() },{ merge:true }).catch(()=>{}); } }catch(_){} }, 4000); }
+    async function notifyTyping(){ try{ if(!currentThreadId || !currentUser) return; const ref = doc(db,'artifacts',appId,'public','data','dm_threads', currentThreadId, 'typing', currentUser.uid); await setDoc(ref, { active:true, updatedAt: serverTimestamp() }, { merge:true }); scheduleStopTyping(); }catch(_){} }
+
+    messagesScroll.addEventListener('click', async (e)=>{
+      const btn = e.target.closest && e.target.closest('.delete-msg');
+      if(!btn) return;
+      const id = btn.getAttribute('data-id');
+      if(!id) return;
+      const ok = await (window.openConfirmDialog && window.openConfirmDialog('Delete this message?','This action cannot be undone.'));
+      if(!ok) return;
+      deleteMessageById(id).catch(()=>{});
+    });
+
+    const sidebarNav = document.getElementById('sidebarNav');
+    const sidebarToggleFab = document.getElementById('sidebarToggleFab');
+    const sidebarCloseBtn = document.getElementById('sidebarCloseBtn');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+    function openSidebar(){ document.body.classList.add('sidebar-open'); sidebarNav.classList.add('sidebar-visible'); sidebarNav.classList.remove('sidebar-hidden'); sidebarBackdrop.classList.add('show'); }
+    function closeSidebar(){ document.body.classList.remove('sidebar-open'); sidebarNav.classList.remove('sidebar-visible'); sidebarNav.classList.add('sidebar-hidden'); sidebarBackdrop.classList.remove('show'); }
+    function toggleSidebar(){ if (sidebarNav.classList.contains('sidebar-visible')) closeSidebar(); else openSidebar(); }
+    sidebarToggleFab?.addEventListener('click',(e)=>{ e.preventDefault(); toggleSidebar(); });
+    sidebarCloseBtn?.addEventListener('click',(e)=>{ e.preventDefault(); closeSidebar(); });
+    sidebarBackdrop?.addEventListener('click', closeSidebar);
+    document.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeSidebar(); });
+  </script>
+
+  <script type="module">
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js';
+    import { getFirestore, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js';
+    const APP_ID = (typeof window !== 'undefined' && window.__nuviaAppId) ? window.__nuviaAppId : (typeof __app_id !== 'undefined' ? __app_id : 'default-app-id');
+    function startPagePresence(){
+      try{
+        const authInstance = getAuth();
+        const firestore = getFirestore(authInstance.app);
+        let cleanupCallbacks = [];
+        onAuthStateChanged(authInstance, (user) => {
+          cleanupCallbacks.forEach(fn => { try{ fn(); } catch(_){} });
+          cleanupCallbacks = [];
+          if (!user || !user.uid) return;
+          const userDoc = doc(firestore, 'artifacts', APP_ID, 'public', 'data', 'users', user.uid);
+          const computeOnline = () => navigator.onLine && document.visibilityState === 'visible';
+          const post = () => setDoc(userDoc, { online: computeOnline(), lastActive: serverTimestamp(), currentPage: window.location.pathname }, { merge: true }).catch(()=>{});
+          post();
+          const intervalId = window.setInterval(post, 15000);
+          cleanupCallbacks.push(() => clearInterval(intervalId));
+          const debounced = () => post();
+          ['online','offline'].forEach(evt => {
+            window.addEventListener(evt, debounced);
+            cleanupCallbacks.push(() => window.removeEventListener(evt, debounced));
+          });
+          document.addEventListener('visibilitychange', debounced);
+          cleanupCallbacks.push(() => document.removeEventListener('visibilitychange', debounced));
+          const beforeUnloadHandler = () => { try{ post(); } catch(_){} };
+          window.addEventListener('beforeunload', beforeUnloadHandler);
+          cleanupCallbacks.push(() => window.removeEventListener('beforeunload', beforeUnloadHandler));
+        });
+      }catch(e){console.error('JCHAT_ERROR startPagePresence', e);} }
+    startPagePresence();
+  </script>
+
+  <!-- Call Overlay -->
+  <div id="callOverlay" role="dialog" aria-modal="true" aria-labelledby="callStatusText">
+    <div class="video-streams">
+      <video id="remoteVideo" autoplay playsinline></video>
+      <audio id="remoteAudio" autoplay playsinline></audio>
+      <video id="localVideo" autoplay playsinline muted></video>
+      <div class="call-banner" id="callBanner">
+        <div class="caller-avatar"><img id="callBannerAvatar" alt="Caller"/></div>
+        <div class="caller-name" id="callBannerName">Caller</div>
+      </div>
+      <div class="video-bottom-controls">
+        <div class="call-status">
+          <i id="callStatusIcon" class="fas fa-phone call-status-icon"></i>
+          <h2 id="callStatusText" class="call-status-text">Preparing call…</h2>
+          <div id="callTimer" class="call-timer start-hidden">00:00</div>
+        </div>
+        <div class="call-actions" id="callActions">
+          <button id="acceptCallBtn" class="accept-call-btn start-hidden" aria-label="Accept Call"><i class="fas fa-phone"></i></button>
+          <button id="declineCallBtn" class="decline-call-btn start-hidden" aria-label="Decline Call"><i class="fas fa-phone-slash"></i></button>
+          <button id="cancelCallBtn" class="end-call-btn start-hidden" aria-label="Cancel Call"><i class="fas fa-phone-slash"></i></button>
+          <button id="toggleMuteBtn" class="toggle-mute-btn start-hidden" title="Mute/Unmute" aria-label="Toggle Mute"><i class="fas fa-microphone"></i></button>
+          <button id="toggleVideoBtn" class="toggle-video-btn start-hidden" title="Turn Video On/Off" aria-label="Toggle Video"><i class="fas fa-video"></i></button>
+          <button id="endCallBtn" class="end-call-btn start-hidden" aria-label="End Call"><i class="fas fa-phone-slash"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, setDoc, doc, getDoc, onSnapshot, updateDoc, serverTimestamp, query, where, arrayUnion } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+
+    try{ window.__nuviaHasCallUI = true; }catch(_){ }
+    const appId = (typeof window !== 'undefined' && window.__nuviaAppId) ? window.__nuviaAppId : (typeof __app_id !== 'undefined' ? __app_id : 'default-app-id');
+    const auth = getAuth();
+    const db = getFirestore();
+
+    const audioCallBtn = document.getElementById('audioCallBtn');
+    const videoCallBtn = document.getElementById('videoCallBtn');
+    const callOverlay = document.getElementById('callOverlay');
+    const callStatusIcon = document.getElementById('callStatusIcon');
+    const callStatusText = document.getElementById('callStatusText');
+    const callTimerDisplay = document.getElementById('callTimer');
+    const acceptCallBtn = document.getElementById('acceptCallBtn');
+    const declineCallBtn = document.getElementById('declineCallBtn');
+    const cancelCallBtn = document.getElementById('cancelCallBtn');
+    const endCallBtn = document.getElementById('endCallBtn');
+    const toggleMuteBtn = document.getElementById('toggleMuteBtn');
+    const toggleVideoBtn = document.getElementById('toggleVideoBtn');
+    const localVideo = document.getElementById('localVideo');
+    const remoteVideo = document.getElementById('remoteVideo');
+    const remoteAudio = document.getElementById('remoteAudio');
+
+    let localStream = null;
+    let remoteStream = null;
+    let peerConnection = null;
+    let callRef = null;
+    let callState = 'idle';
+    let isIncomingCall = false;
+    let currentCallType = null;
+    let callDuration = 0;
+    let callDurationInterval = null;
+    let callTimeoutId = null;
+    let isMuted = false;
+    let isVideoOff = false;
+    let currentUser = null;
+
+    function makeThreadId(a, b){ try{ const x=String(a||''); const y=String(b||''); return x<y?`${x}_${y}`:`${y}_${x}`; }catch(_){ return `${a||''}_${b||''}`; } }
+    function formatDuration(sec){ const s=Math.max(0,Math.floor(Number(sec)||0)); const m=Math.floor(s/60).toString().padStart(2,'0'); const r=(s%60).toString().padStart(2,'0'); return `${m}:${r}`; }
+
+    async function postCallSummaryOnce(callId, callData, reason){
+      try{
+        if(!callData) return;
+        const callerId = callData.callerId, receiverId = callData.receiverId;
+        if(!callerId || !receiverId) return;
+        const threadId = makeThreadId(callerId, receiverId);
+        const callType = (callData.callType === 'video') ? 'Video' : 'Voice';
+        let durationSec = callDuration>0 ? callDuration : 0;
+        try{
+          const connectedAt = callData.connectedAt && (callData.connectedAt.toMillis? callData.connectedAt.toMillis(): (callData.connectedAt.seconds? callData.connectedAt.seconds*1000: 0));
+          const endedAt = callData.endedAt && (callData.endedAt.toMillis? callData.endedAt.toMillis(): (callData.endedAt.seconds? callData.endedAt.seconds*1000: 0));
+          if(!durationSec && connectedAt && endedAt){ durationSec = Math.max(0, Math.floor((endedAt - connectedAt)/1000)); }
+        }catch(_){ }
+        let text = '';
+        const r = String(reason||callData.status||'').toLowerCase();
+        if (r === 'declined') text = `${callType} call declined`;
+        else if (r === 'cancelled') text = `${callType} call cancelled`;
+        else if (r === 'no-answer') text = `Missed ${callType.toLowerCase()} call`;
+        else if (r === 'busy') text = `${callType} call busy`;
+        else if (durationSec>0) text = `${callType} call ended — ${formatDuration(durationSec)}`;
+        else text = `${callType} call ended`;
+        await setDoc(doc(db,'artifacts',appId,'public','data','dm_threads', threadId), { participants:[callerId, receiverId], createdAt: serverTimestamp() }, { merge:true });
+        await setDoc(doc(db,'artifacts',appId,'public','data','dm_threads', threadId, 'messages', `call_${callId}`), { type:'text', text, senderId: currentUser && currentUser.uid ? currentUser.uid : (callerId||receiverId), createdAt: serverTimestamp(), meta:{ callId, callType: callData.callType||'voice', reason: r, durationSec: Math.max(0, durationSec) } }, { merge:true });
+        await updateDoc(doc(db,'artifacts',appId,'public','data','dm_threads', threadId), { updatedAt: serverTimestamp(), lastMessage: { text, senderId: currentUser && currentUser.uid ? currentUser.uid : (callerId||receiverId), ts: serverTimestamp() } });
+        try{
+          const users = [callerId, receiverId];
+          for (const uid of users){
+            await setDoc(doc(db, 'artifacts', appId, 'users', uid, 'notifications', `call_${callId}_${uid}`), { type:'call_summary', text, callId, callType: callData.callType||'voice', durationSec: Math.max(0, durationSec), read: false, createdAt: serverTimestamp() }, { merge:true });
+          }
+        }catch(_){ }
+      }catch(e){ console.error('postCallSummaryOnce error', e); }
+    }
+
+    // Incoming call listener unsubs
+    let incomingListenerUnsub = null; // listener scoped to current partner
+    let incomingGlobalUnsub = null; // listener for any incoming calls when no partner selected
+    let perCallUnsub = null;
+
+    function stopIncomingCallListeners(){
+      try{ if (perCallUnsub){ perCallUnsub(); perCallUnsub = null; } }catch(_){ }
+      try{ if (incomingListenerUnsub){ incomingListenerUnsub(); incomingListenerUnsub = null; } }catch(_){ }
+      try{ if (incomingGlobalUnsub){ incomingGlobalUnsub(); incomingGlobalUnsub = null; } }catch(_){ }
+    }
+
+    // Outgoing caller tone
+    const callerToneUrl = 'https://cdn.builder.io/o/assets%2Ffc8049673cdb4f1597f82a1bce1a2e4f%2F4245609d0c1a49b28b335ff394a24919?alt=media&token=63f139b2-8b3a-406c-90f2-2e4137b337bb&apiKey=fc8049673cdb4f1597f82a1bce1a2e4f';
+    let callerTone = null;
+    function playCallerTone(){ try{ if(!callerTone){ callerTone = new Audio(callerToneUrl); callerTone.loop = true; callerTone.preload = 'auto'; } callerTone.currentTime = 0; callerTone.play().catch(()=>{}); }catch(_){} }
+    function stopCallerTone(){ try{ if(callerTone){ callerTone.pause(); callerTone.currentTime = 0; } }catch(_){} }
+
+    // Incoming ringing tone
+    const ringToneUrl = 'https://cdn.builder.io/o/assets%2Ffc8049673cdb4f1597f82a1bce1a2e4f%2Ffbb458d4209b4838bc22e09868e15ea5?alt=media&token=00dd6cb7-8ba0-4025-a326-01e76a2a5df8&apiKey=fc8049673cdb4f1597f82a1bce1a2e4f';
+    let ringTone = null;
+    function playRingTone(){ try{ if(!ringTone){ ringTone = new Audio(ringToneUrl); ringTone.loop = true; ringTone.preload = 'auto'; } ringTone.currentTime = 0; ringTone.play().catch(()=>{}); }catch(_){} }
+    function stopRingTone(){ try{ if(ringTone){ ringTone.pause(); ringTone.currentTime = 0; } }catch(_){} }
+
+    function ensureRemoteAudioPlaying(){
+      try{
+        if(!remoteAudio) return;
+        remoteAudio.muted = false;
+        remoteAudio.volume = 1.0;
+        const tryPlay = ()=>{ try{ remoteAudio.play().catch(()=>{}); }catch(_){} };
+        try{ remoteAudio.addEventListener('canplay', tryPlay, { once: true }); }catch(_){ }
+        tryPlay();
+      }catch(_){ }
+    }
+
+    const iceServers = { iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' },
+      { urls: 'stun:stun2.l.google.com:19302' },
+      { urls: 'stun:stun3.l.google.com:19302' },
+      { urls: 'stun:stun4.l.google.com:19302' }
+    ]};
+
+    function createPeerConnection(){
+      const pc = new RTCPeerConnection(iceServers);
+      pc.onicecandidate = (event) => {
+        if (event.candidate && callRef) {
+          const cand = JSON.parse(JSON.stringify(event.candidate));
+          if (isIncomingCall) {
+            updateDoc(callRef, { receiverCandidates: arrayUnion(cand) }).catch(()=>{});
+          } else {
+            updateDoc(callRef, { callerCandidates: arrayUnion(cand) }).catch(()=>{});
+          }
+        }
+      };
+      pc.ontrack = (event) => {
+        try{
+          const stream = (event.streams && event.streams[0]) ? event.streams[0] : null;
+          // If the incoming stream has video tracks, attach to remoteVideo. Otherwise attach audio to remoteAudio.
+          if (stream) {
+            const hasVideo = stream.getVideoTracks && stream.getVideoTracks().length > 0;
+            const hasAudio = stream.getAudioTracks && stream.getAudioTracks().length > 0;
+            if (hasVideo) {
+              remoteVideo.srcObject = stream;
+              remoteVideo.style.display = 'block';
+              // ensure remoteAudio is not playing same stream
+              try{ remoteAudio.srcObject = null; }catch(_){ }
+              remoteStream = stream;
+            } else if (hasAudio) {
+              // attach to audio element for audio-only calls
+              try{ remoteAudio.srcObject = stream; ensureRemoteAudioPlaying(); }catch(_){ }
+              remoteStream = stream;
+              // hide remoteVideo for audio-only calls
+              try{ remoteVideo.style.display = 'none'; }catch(_){ }
+            } else {
+              // no tracks, fallback to old behavior
+              remoteVideo.srcObject = stream;
+              remoteVideo.style.display = 'block';
+              remoteStream = stream;
+            }
+          } else {
+            // event.track-based handling
+            if (!remoteStream){ remoteStream = new MediaStream(); }
+            remoteStream.addTrack(event.track);
+            const hasVideo = remoteStream.getVideoTracks().length>0;
+            if (hasVideo){ remoteVideo.srcObject = remoteStream; remoteVideo.style.display = 'block'; }
+            else { remoteAudio.srcObject = remoteStream; ensureRemoteAudioPlaying(); try{ remoteVideo.style.display = 'none'; }catch(_){ } }
+          }
+        }catch(e){ console.error('ontrack error', e); }
+      };
+      return pc;
+    }
+
+    function resetOverlay(){
+      callOverlay.classList.remove('active','voice-call','video-call');
+      callStatusIcon.style.animation = 'none';
+      callTimerDisplay.textContent = '00:00';
+      callTimerDisplay.style.display = 'none';
+      acceptCallBtn.style.display = 'none';
+      declineCallBtn.style.display = 'none';
+      if (typeof cancelCallBtn !== 'undefined' && cancelCallBtn) cancelCallBtn.style.display = 'none';
+      endCallBtn.style.display = 'none';
+      toggleMuteBtn.style.display = 'none';
+      toggleVideoBtn.style.display = 'none';
+      localVideo.style.display = 'none';
+      remoteVideo.style.display = 'none';
+      try{ if (remoteAudio){ remoteAudio.pause(); remoteAudio.srcObject = null; } }catch(_){ }
+      try{ const cb = document.getElementById('callBanner'); if(cb) cb.style.display = 'none'; }catch(_){ }
+    }
+
+    async function endCall(updateFirestore = true){
+      console.log('END_CALL invoked, updateFirestore=', updateFirestore);
+      clearInterval(callDurationInterval);
+      clearTimeout(callTimeoutId);
+      stopCallerTone();
+      stopRingTone();
+      // Unsubscribe listeners and clean up snapshots
+      stopIncomingCallListeners();
+      if (peerConnection){ try{ peerConnection.close(); }catch(_){} peerConnection=null; }
+      if (localStream){ try{ localStream.getTracks().forEach(t=>t.stop()); }catch(_){} localStream=null; }
+      if (remoteStream){ try{ remoteStream.getTracks().forEach(t=>t.stop()); }catch(_){} remoteStream=null; }
+      localVideo.srcObject = null;
+      remoteVideo.srcObject = null;
+      if (updateFirestore && callRef){
+        try{ await updateDoc(callRef, { status: 'ended', lastActivity: serverTimestamp() }); }catch(_){ }
+        // try to clear inCall flags for both participants
+        try{
+          const callDoc = await getDoc(callRef).catch(()=>null);
+          const cdata = callDoc && callDoc.exists()? callDoc.data() : null;
+          const a = cdata && cdata.callerId ? cdata.callerId : null;
+          const b = cdata && cdata.receiverId ? cdata.receiverId : null;
+          if (a){ try{ await updateDoc(doc(db,'artifacts',appId,'public','data','users', a), { inCall:false }); }catch(_){ } }
+          if (b){ try{ await updateDoc(doc(db,'artifacts',appId,'public','data','users', b), { inCall:false }); }catch(_){ } }
+        }catch(_){ }
+      }
+      try{ if (currentUser){ await updateDoc(doc(db,'artifacts',appId,'public','data','users', currentUser.uid), { inCall:false }); } }catch(_){ }
+      callRef = null;
+      callState = 'idle';
+      isIncomingCall = false;
+      callDuration = 0;
+      resetOverlay();
+      // Restart incoming call listeners so the user can receive new calls after this one ends
+      try{
+        const pid = (typeof window !== 'undefined' && (window.__currentPartnerId || (new URL(location.href).searchParams.get('partnerId')||''))) || '';
+        const inChat = (typeof document !== 'undefined' && document.body && document.body.classList && document.body.classList.contains('show-chat'));
+        if (pid && inChat && typeof window.startIncomingListenerForCurrentChat === 'function') {
+          window.startIncomingListenerForCurrentChat(pid);
+        } else if (typeof window.startGlobalIncomingListener === 'function') {
+          window.startGlobalIncomingListener();
+        }
+      }catch(_){ }
+    }
+
+    function updateTimer(){
+      callDuration++;
+      const m = Math.floor(callDuration/60).toString().padStart(2,'0');
+      const s = (callDuration%60).toString().padStart(2,'0');
+      callTimerDisplay.textContent = `${m}:${s}`;
+    }
+
+    function setOverlayFor(type, text){
+      callOverlay.classList.add('active');
+      callOverlay.classList.remove('voice-call','video-call');
+      callOverlay.classList.add(type==='voice'?'voice-call':'video-call');
+      callStatusIcon.className = `fas fa-${type==='voice'?'phone':'video'} call-status-icon`;
+      callStatusText.textContent = text || '';
+      try{ const cb = document.getElementById('callBanner'); if(cb) cb.style.display = 'flex'; }catch(_){ }
+    }
+
+    async function startOutgoingCall(callType){
+      if (!currentUser) return;
+      const partnerId = window.__currentPartnerId || (new URL(location.href).searchParams.get('partnerId')||'');
+      if (!partnerId) return;
+      try{
+        currentCallType = callType;
+        callState = 'calling';
+        isIncomingCall = false;
+        setOverlayFor(callType, `Calling…`);
+        const profileSnap = await getDoc(doc(db,'artifacts',appId,'public','data','users', partnerId)).catch(()=>null);
+        const partnerName = profileSnap && profileSnap.exists()? (profileSnap.data().username || 'User') : 'User';
+        callStatusText.textContent = `Calling ${partnerName}…`;
+        try{ const bannerName = document.getElementById('callBannerName'); const bannerAvatar = document.getElementById('callBannerAvatar'); if(bannerName) bannerName.textContent = partnerName; if(bannerAvatar) bannerAvatar.src = profileSnap && profileSnap.exists() && (profileSnap.data().photoURL || profileSnap.data().profilePicId) ? (profileSnap.data().photoURL || profileSnap.data().profilePicId) : `https://placehold.co/56x56/000/fff?text=${String(partnerName).charAt(0).toUpperCase()}`; }catch(_){ }
+        playCallerTone();
+        if (cancelCallBtn) cancelCallBtn.style.display = 'block';
+        acceptCallBtn.style.display = 'none';
+        declineCallBtn.style.display = 'none';
+        endCallBtn.style.display = 'none';
+        toggleMuteBtn.style.display = 'none';
+        toggleVideoBtn.style.display = 'none';
+
+        try{ await updateDoc(doc(db,'artifacts',appId,'public','data','users', currentUser.uid), { inCall:true }); }catch(_){ }
+
+        peerConnection = createPeerConnection();
+        localStream = await navigator.mediaDevices.getUserMedia({ audio:true, video: callType==='video' });
+        localVideo.srcObject = localStream; // attach local stream for sending only (no local preview)
+        // do not display local preview in small overlay; keep it hidden
+        try{ localVideo.style.display = 'none'; }catch(_){ }
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+        const callsCol = collection(db,'artifacts',appId,'public','data','calls');
+        // include caller metadata to help receivers show banner without extra lookups
+        let callerMeta = {};
+        try{
+          const myProfile = await getDoc(doc(db,'artifacts',appId,'public','data','users', currentUser.uid)).catch(()=>null);
+          if (myProfile && myProfile.exists()){
+            const md = myProfile.data();
+            callerMeta.callerUsername = md.username || md.displayName || null;
+            callerMeta.callerDisplayName = md.displayName || md.username || null;
+            callerMeta.callerAvatar = md.photoURL || md.profilePicId || null;
+          }
+        }catch(_){ }
+        callRef = await addDoc(callsCol, Object.assign({
+          callerId: currentUser.uid,
+          receiverId: partnerId,
+          callType: callType,
+          status: 'ringing',
+          createdAt: serverTimestamp(),
+          lastActivity: serverTimestamp(),
+          callerCandidates: [],
+          receiverCandidates: []
+        }, callerMeta));
+        console.log('Outgoing call created', callRef.id, { callerId: currentUser.uid, receiverId: partnerId, callType, callerMeta });
+
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        await updateDoc(callRef, { offer: { type: offer.type, sdp: offer.sdp } });
+
+        try{ if (perCallUnsub){ perCallUnsub(); perCallUnsub = null; } }catch(_){ }
+        perCallUnsub = onSnapshot(callRef, async (docSnap)=>{
+          if (!docSnap.exists()) { await endCall(false); return; }
+          const data = docSnap.data();
+          if (data.status === 'declined' || data.status === 'busy' || data.status === 'no-answer') { try{ const snap=await getDoc(callRef).catch(()=>null); const cdata=snap&&snap.exists()? snap.data(): null; await postCallSummaryOnce(callRef.id, cdata||{ callerId: currentUser?.uid, receiverId: (window.__currentPartnerId||null), callType: currentCallType, status: data.status }, data.status); }catch(_){ } await endCall(false); return; }
+          if (data.answer && !peerConnection.currentRemoteDescription){
+            try{
+              stopCallerTone();
+              await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+              callState = 'connected';
+              callStatusText.textContent = `Call connected`;
+              callTimerDisplay.style.display = 'block';
+        try{ ensureRemoteAudioPlaying(); }catch(_){ }
+              if (cancelCallBtn) cancelCallBtn.style.display = 'none';
+              endCallBtn.style.display = 'block';
+              toggleMuteBtn.style.display = 'block';
+              toggleVideoBtn.style.display = (callType==='video') ? 'block' : 'none';
+              clearInterval(callDurationInterval);
+              callDurationInterval = setInterval(updateTimer, 1000);
+              try{ await updateDoc(callRef, { connectedAt: serverTimestamp(), lastActivity: serverTimestamp() }); }catch(_){ }
+            }catch(_){}
+          }
+          if (Array.isArray(data.receiverCandidates) && data.receiverCandidates.length){
+            for (const c of data.receiverCandidates){
+              try{ await peerConnection.addIceCandidate(new RTCIceCandidate(c)); }catch(_){}
+            }
+            try{ await updateDoc(callRef, { receiverCandidates: [] }); }catch(_){}
+          }
+          if (data.status === 'ended' && callState !== 'idle'){ try{ const snap=await getDoc(callRef).catch(()=>null); const cdata=snap&&snap.exists()? snap.data(): null; await postCallSummaryOnce(callRef.id, cdata||{ callerId: currentUser?.uid, receiverId: (window.__currentPartnerId||null), callType: currentCallType, status: 'ended' }, 'ended'); }catch(_){ } await endCall(false); }
+        });
+
+        callTimeoutId = setTimeout(async ()=>{
+          if (callState === 'calling'){
+            try{ await updateDoc(callRef, { status:'no-answer', lastActivity: serverTimestamp() }); }catch(_){}
+            try{ const snap=await getDoc(callRef).catch(()=>null); const cdata=snap&&snap.exists()? snap.data(): null; await postCallSummaryOnce(callRef.id, cdata||{ callerId: currentUser?.uid, receiverId: (window.__currentPartnerId||null), callType: currentCallType, status: 'no-answer' }, 'no-answer'); }catch(_){ }
+            await endCall(false);
+          }
+        }, 20000);
+
+      }catch(e){
+        await endCall(false);
+      }
+    }
+
+    async function acceptIncomingCall(){
+      if (!callRef || callState!=='ringing') return;
+      try{
+        stopCallerTone();
+        stopRingTone();
+        callState = 'connected';
+        callTimerDisplay.style.display = 'block';
+        try{ ensureRemoteAudioPlaying(); }catch(_){ }
+        acceptCallBtn.style.display = 'none';
+        declineCallBtn.style.display = 'none';
+        if (cancelCallBtn) cancelCallBtn.style.display = 'none';
+        endCallBtn.style.display = 'block';
+        toggleMuteBtn.style.display = 'block';
+        toggleVideoBtn.style.display = (currentCallType==='video') ? 'block' : 'none';
+        clearInterval(callDurationInterval);
+        callDurationInterval = setInterval(updateTimer, 1000);
+
+        localStream = await navigator.mediaDevices.getUserMedia({ audio:true, video: currentCallType==='video' });
+        localVideo.srcObject = localStream; // don't show preview locally
+        try{ localVideo.style.display='none'; }catch(_){ }
+
+        try{ await updateDoc(doc(db,'artifacts',appId,'public','data','users', currentUser.uid), { inCall:true }); }catch(_){ }
+
+        peerConnection = createPeerConnection();
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+        const callDoc = await getDoc(callRef);
+        const callData = callDoc.data();
+
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(callData.offer));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        await updateDoc(callRef, { status:'accepted', answer: { type: answer.type, sdp: answer.sdp }, lastActivity: serverTimestamp(), connectedAt: serverTimestamp() });
+
+        if (Array.isArray(callData.callerCandidates) && callData.callerCandidates.length){
+          for (const c of callData.callerCandidates){ try{ await peerConnection.addIceCandidate(new RTCIceCandidate(c)); }catch(_){ } }
+          try{ await updateDoc(callRef, { callerCandidates: [] }); }catch(_){}
+        }
+
+        try{ if (perCallUnsub){ perCallUnsub(); perCallUnsub = null; } }catch(_){ }
+        perCallUnsub = onSnapshot(callRef, async (docSnap)=>{
+          if (!docSnap.exists()) { await endCall(false); return; }
+          const data = docSnap.data();
+          if (Array.isArray(data.callerCandidates) && data.callerCandidates.length){
+            for (const c of data.callerCandidates){ try{ await peerConnection.addIceCandidate(new RTCIceCandidate(c)); }catch(_){ } }
+            try{ await updateDoc(callRef, { callerCandidates: [] }); }catch(_){}
+          }
+          if (data.status === 'ended' && callState !== 'idle'){ try{ const snap=await getDoc(callRef).catch(()=>null); const cdata=snap&&snap.exists()? snap.data(): null; await postCallSummaryOnce(callRef.id, cdata||{ callerId: currentUser?.uid, receiverId: (window.__currentPartnerId||null), callType: currentCallType, status: 'ended' }, 'ended'); }catch(_){ } await endCall(false); }
+        });
+
+      }catch(e){
+        await endCall(true);
+      }
+    }
+
+    async function terminateCall(reason){
+      try{
+        console.log('terminateCall called, reason=', reason, 'callRef=', callRef && callRef.id);
+        stopCallerTone();
+        stopRingTone();
+        if (callRef){
+          try{
+            // read call doc to know participants
+            const callDoc = await getDoc(callRef).catch(()=>null);
+            const callData = callDoc && callDoc.exists() ? callDoc.data() : null;
+            const callerId = callData && callData.callerId ? callData.callerId : null;
+            const receiverId = callData && callData.receiverId ? callData.receiverId : null;
+            await updateDoc(callRef, { status: reason || 'ended', lastActivity: serverTimestamp(), endedBy: currentUser? currentUser.uid : null, endedAt: serverTimestamp() });
+            try{ await postCallSummaryOnce(callRef.id, { ...(callData||{}), callerId, receiverId }, reason||'ended'); }catch(_){ }
+            // ensure both users have inCall=false
+            if (callerId){ try{ await updateDoc(doc(db,'artifacts',appId,'public','data','users', callerId), { inCall:false }); }catch(_){ } }
+            if (receiverId){ try{ await updateDoc(doc(db,'artifacts',appId,'public','data','users', receiverId), { inCall:false }); }catch(_){ } }
+          }catch(e){ console.error('terminateCall updateDoc failed', e); }
+        }
+      }catch(e){ console.error('terminateCall error', e); }
+      try{ await endCall(false); }catch(_){ }
+    }
+
+    function declineIncomingCall(){
+      if (!callRef) return;
+      // Stop ringing locally and signal decline to other side
+      stopRingTone();
+      terminateCall('declined');
+    }
+
+    function toggleMute(){
+      if (localStream){
+        localStream.getAudioTracks().forEach(t => { t.enabled = !t.enabled; isMuted = !t.enabled; });
+        toggleMuteBtn.classList.toggle('active', isMuted);
+        const i = toggleMuteBtn.querySelector('i'); if (i) i.className = isMuted ? 'fas fa-microphone-slash' : 'fas fa-microphone';
+      }
+    }
+
+    function toggleVideo(){
+      if (localStream){
+        localStream.getVideoTracks().forEach(t => { t.enabled = !t.enabled; isVideoOff = !t.enabled; /* keep local preview hidden */ });
+        toggleVideoBtn.classList.toggle('active', isVideoOff);
+        const i = toggleVideoBtn.querySelector('i'); if (i) i.className = isVideoOff ? 'fas fa-video-slash' : 'fas fa-video';
+      }
+    }
+
+    function startIncomingListenerForCurrentChat(partnerId){
+      try{
+        console.log('startIncomingListenerForCurrentChat', partnerId);
+        if (!partnerId || !currentUser) return;
+        // Clear existing incoming listener
+        try{ if (incomingListenerUnsub){ incomingListenerUnsub(); incomingListenerUnsub = null; } }catch(_){ }
+        try{ if (incomingGlobalUnsub){ incomingGlobalUnsub(); incomingGlobalUnsub = null; } }catch(_){ }
+        const callsCol = collection(db,'artifacts',appId,'public','data','calls');
+        const q = query(callsCol, where('receiverId','==', currentUser.uid), where('status','==','ringing'), where('callerId','==', partnerId));
+        incomingListenerUnsub = onSnapshot(q, async (snap)=>{
+          try{
+            if (snap.empty) return;
+            const d = snap.docs[0];
+            if (!d) return;
+            // If already handling this callRef, ignore
+            if (callRef && callRef.id === d.id && callState === 'ringing') return;
+            // Unsubscribe any previous per-call listener
+            try{ if (perCallUnsub){ perCallUnsub(); perCallUnsub = null; } }catch(_){ }
+            callRef = d.ref;
+            isIncomingCall = true;
+            callState = 'ringing';
+            currentCallType = (d.data().callType === 'video') ? 'video' : 'voice';
+            console.log('Partner-specific incoming call detected', d.id, { callType: d.data().callType, callerId: d.data().callerId, receiverId: d.data().receiverId, status: d.data().status });
+            setOverlayFor(currentCallType, `Incoming ${currentCallType} call…`);
+            // populate banner with caller info if available
+            try{ const bannerName = document.getElementById('callBannerName'); const bannerAvatar = document.getElementById('callBannerAvatar'); const callerName = d.data().callerUsername || d.data().callerDisplayName || d.data().callerName || 'Caller'; if(bannerName) bannerName.textContent = callerName; if(bannerAvatar) bannerAvatar.src = d.data().callerAvatar || `https://placehold.co/56x56/000/fff?text=${String(callerName).charAt(0).toUpperCase()}`; }catch(_){ }
+            try{ if (!d.data().callerAvatar && d.data().callerId){ getDoc(doc(db,'artifacts',appId,'public','data','users', d.data().callerId)).then(snap=>{ if (snap && snap.exists()){ const md = snap.data(); try{ const bannerAvatar = document.getElementById('callBannerAvatar'); if(bannerAvatar) bannerAvatar.src = md.photoURL || md.profilePicId || bannerAvatar.src; const bannerName = document.getElementById('callBannerName'); if(bannerName) bannerName.textContent = md.displayName || md.username || bannerName.textContent; }catch(_){ } } }).catch(()=>{}); } }catch(_){ }
+            playRingTone();
+            acceptCallBtn.style.display = 'block';
+            declineCallBtn.style.display = 'block';
+            if (cancelCallBtn) cancelCallBtn.style.display = 'none';
+            endCallBtn.style.display = 'none';
+            toggleMuteBtn.style.display = 'none';
+            toggleVideoBtn.style.display = 'none';
+
+            // Stop ringing when call status changes or call is removed
+            perCallUnsub = onSnapshot(callRef, async (docSnap)=>{
+              try{
+                if (!docSnap.exists()) { stopRingTone(); endCall(false); return; }
+                const data = docSnap.data();
+                if (data.status && data.status !== 'ringing' && callState === 'ringing'){
+                  stopRingTone();
+                }
+                // If call was ended/declined/cancelled while we are listening, end locally
+                if (data.status && ['ended','declined','cancelled','no-answer','busy'].includes(data.status)){
+                  stopRingTone();
+                  endCall(false);
+                }
+              }catch(e){ console.error('perCallOnSnapshot error', e); }
+            });
+
+          }catch(e){ console.error('incoming listener error', e); }
+        }, (err) => { console.error('incoming listener onSnapshot error', err); });
+      }catch(e){ console.error('startIncomingListenerForCurrentChat failed', e); }
+    }
+
+    if (audioCallBtn) audioCallBtn.addEventListener('click', ()=> startOutgoingCall('voice'));
+    if (videoCallBtn) videoCallBtn.addEventListener('click', ()=> startOutgoingCall('video'));
+    if (acceptCallBtn) acceptCallBtn.addEventListener('click', acceptIncomingCall);
+    if (declineCallBtn) declineCallBtn.addEventListener('click', declineIncomingCall);
+    if (cancelCallBtn) cancelCallBtn.addEventListener('click', ()=> terminateCall('cancelled'));
+    if (endCallBtn) endCallBtn.addEventListener('click', ()=> terminateCall('ended'));
+    if (toggleMuteBtn) toggleMuteBtn.addEventListener('click', toggleMute);
+    if (toggleVideoBtn) toggleVideoBtn.addEventListener('click', toggleVideo);
+
+    function startGlobalIncomingListener(){
+      try{
+        if (!currentUser) return;
+        try{ if (incomingGlobalUnsub){ incomingGlobalUnsub(); incomingGlobalUnsub = null; } }catch(_){ }
+        const callsCol = collection(db,'artifacts',appId,'public','data','calls');
+        const q = query(callsCol, where('receiverId','==', currentUser.uid), where('status','==','ringing'));
+        incomingGlobalUnsub = onSnapshot(q, (snap)=>{
+          try{
+            if (snap.empty) return;
+            // If multiple calls, pick the first one not already handled
+            for (const d of snap.docs){
+              const data = d.data();
+              if (!d) continue;
+              // Ignore if already handling same call
+              if (callRef && callRef.id === d.id) continue;
+              console.log('Global incoming call detected', d.id, { callType: data.callType, callerId: data.callerId, receiverId: data.receiverId, status: data.status });
+              // If we have a partner-specific listener for this caller, allow that to handle
+              const callerId = data.callerId;
+              const pid = window.__currentPartnerId || (new URL(location.href).searchParams.get('partnerId')||'');
+              if (pid && pid === callerId){
+                // let partner-specific handle it
+                console.log('Global listener: skipping because partner-specific listener exists for caller', callerId);
+                continue;
+              }
+              // Otherwise show overlay for incoming call
+              // Unsubscribe any previous per-call listener
+              try{ if (perCallUnsub){ perCallUnsub(); perCallUnsub = null; } }catch(_){ }
+              callRef = d.ref;
+              isIncomingCall = true;
+              callState = 'ringing';
+              currentCallType = (data.callType === 'video') ? 'video' : 'voice';
+              setOverlayFor(currentCallType, `Incoming ${currentCallType} call…`);
+              // populate banner
+              try{ const bannerName = document.getElementById('callBannerName'); const bannerAvatar = document.getElementById('callBannerAvatar'); const callerName = data.callerUsername || data.callerDisplayName || data.callerName || 'Caller'; if(bannerName) bannerName.textContent = callerName; if(bannerAvatar) bannerAvatar.src = data.callerAvatar || `https://placehold.co/56x56/000/fff?text=${String(callerName).charAt(0).toUpperCase()}`; }catch(_){ }
+              // if avatar missing, try fetching caller user doc
+              try{
+                if (!data.callerAvatar && data.callerId){
+                  getDoc(doc(db,'artifacts',appId,'public','data','users', data.callerId)).then(snap=>{ if (snap && snap.exists()){ const md = snap.data(); try{ const bannerAvatar = document.getElementById('callBannerAvatar'); if(bannerAvatar) bannerAvatar.src = md.photoURL || md.profilePicId || bannerAvatar.src; const bannerName = document.getElementById('callBannerName'); if(bannerName) bannerName.textContent = md.displayName || md.username || bannerName.textContent; }catch(_){ } } }).catch(()=>{});
+                }
+              }catch(_){ }
+              playRingTone();
+              acceptCallBtn.style.display = 'block';
+              declineCallBtn.style.display = 'block';
+              if (cancelCallBtn) cancelCallBtn.style.display = 'none';
+              endCallBtn.style.display = 'none';
+              toggleMuteBtn.style.display = 'none';
+              toggleVideoBtn.style.display = 'none';
+
+              perCallUnsub = onSnapshot(callRef, async (docSnap)=>{
+                try{
+                  if (!docSnap.exists()) { stopRingTone(); endCall(false); return; }
+                  const data2 = docSnap.data();
+                  if (data2.status && data2.status !== 'ringing' && callState === 'ringing'){
+                    stopRingTone();
+                  }
+                  if (data2.status && ['ended','declined','cancelled','no-answer','busy'].includes(data2.status)){
+                    stopRingTone();
+                    try{ const snap=docSnap; const cdata=snap&&snap.exists()? snap.data(): null; await postCallSummaryOnce(callRef.id, cdata||{ callerId: cdata?.callerId, receiverId: cdata?.receiverId, callType: currentCallType, status: data2.status }, data2.status); }catch(_){ }
+                    endCall(false);
+                  }
+                }catch(e){ console.error('perCallOnSnapshot error', e); }
+              });
+
+              break; // handle only first
+            }
+          }catch(e){ console.error('incomingGlobal listener error', e); }
+        }, (err)=>{ console.error('incomingGlobal onSnapshot error', err); });
+      }catch(e){ console.error('startGlobalIncomingListener failed', e); }
+    }
+
+    onAuthStateChanged(auth, (user)=>{
+      currentUser = user || null;
+      const urlPid = (new URL(location.href).searchParams.get('partnerId')||'');
+      const pid = (document.body.classList && document.body.classList.contains('show-chat')) ? (window.__currentPartnerId || urlPid) : '';
+      // Prefer partner-specific listener if partnerId present (user is actively viewing that chat), otherwise start global listener
+      try{ if (incomingListenerUnsub){ incomingListenerUnsub(); incomingListenerUnsub = null; } }catch(_){ }
+      try{ if (incomingGlobalUnsub){ incomingGlobalUnsub(); incomingGlobalUnsub = null; } }catch(_){ }
+      if (user){
+        if (pid) startIncomingListenerForCurrentChat(pid);
+        else startGlobalIncomingListener();
+      }
+      console.log('Call module auth state changed. user=', user && user.uid, 'pid=', pid, 'urlPid=', urlPid);
+    });
+
+    // Expose the function so other scripts (openThread) can attach the listener when a thread is opened
+    try{
+      window.startIncomingListenerForCurrentChat = startIncomingListenerForCurrentChat;
+      window.startGlobalIncomingListener = startGlobalIncomingListener;
+      window.stopIncomingCallListeners = stopIncomingCallListeners;
+    }catch(_){ }
+  </script>
+
+    <script>
+    (function(){
+      try{
+        const btn=document.querySelector('.home-back-fab');
+        if(btn){
+          btn.addEventListener('click',function(e){
+            e.preventDefault();
+            try{
+              const ref=document.referrer?new URL(document.referrer, location.href):null;
+              if(ref && /\/index\.html$/.test(ref.pathname)) { history.back(); return; }
+            }catch(_){ }
+            window.location.replace('/index.html');
+          });
+        }
+      }catch(_){ }
+    })();
+  </script>
+  <script>
+    (function(){
+      function goHome(){
+        try{
+          const ref=document.referrer?new URL(document.referrer, location.href):null;
+          if(ref && /\/index\.html$/.test(ref.pathname)) { history.back(); return; }
+        }catch(_){ }
+        window.location.replace('/index.html');
+      }
+      try{
+        const fab=document.querySelector('.home-back-fab');
+        if(fab){ fab.addEventListener('click', function(e){ e.preventDefault(); goHome(); }); }
+        const headerBtn=document.getElementById('backHomeBtn');
+        if(headerBtn){ headerBtn.addEventListener('click', function(e){ e.preventDefault(); goHome(); }); }
+      }catch(_){ }
+    })();
+  </script>
+  <!-- Confirm Deletion Modal -->
+  <div id="confirmModal" class="confirm-overlay" aria-hidden="true">
+    <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+      <div class="confirm-icon" aria-hidden="true"><i class="fas fa-trash"></i></div>
+      <h2 id="confirmTitle" class="confirm-title">Delete this message?</h2>
+      <p id="confirmText" class="confirm-text">This action cannot be undone.</p>
+      <div class="confirm-actions">
+        <button id="confirmCancelBtn" class="confirm-btn cancel-btn" aria-label="Cancel">Cancel</button>
+        <button id="confirmOkBtn" class="confirm-btn danger-btn" aria-label="Delete">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .confirm-overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);z-index:3000}
+    .confirm-overlay.show{display:flex}
+    .confirm-dialog{width:min(420px,92vw);background:var(--card-background);border:1px solid var(--border-light);border-radius:16px;box-shadow:0 12px 30px rgba(0,0,0,.45);padding:18px;text-align:center}
+    .confirm-icon{width:56px;height:56px;margin:0 auto 10px auto;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.06));border:2px solid rgba(255,255,255,.25);color:#fff}
+    .confirm-icon i{font-size:1.2rem;background-image:linear-gradient(90deg,var(--blue),var(--pink));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}
+    .confirm-title{font-family:Poppins,sans-serif;font-weight:800;margin:8px 0}
+    .confirm-text{color:var(--text-light);margin:8px 0 16px 0}
+    .confirm-actions{display:flex;gap:10px;justify-content:flex-end}
+    .confirm-btn{min-width:100px;height:40px;border-radius:12px;border:1px solid var(--border-light);background:rgba(255,255,255,.06);color:var(--white);cursor:pointer}
+    .confirm-btn:hover{background:rgba(255,255,255,.12)}
+    .danger-btn{background:var(--button-background);border:0;box-shadow:var(--button-shadow)}
+    .cancel-btn{background:transparent}
+  </style>
+
+  <script>
+    (function(){
+      const overlay = document.getElementById('confirmModal');
+      const titleEl = document.getElementById('confirmTitle');
+      const textEl = document.getElementById('confirmText');
+      const okBtn = document.getElementById('confirmOkBtn');
+      const cancelBtn = document.getElementById('confirmCancelBtn');
+      let resolver = null;
+
+      function close(result){
+        try{ overlay.classList.remove('show'); overlay.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }catch(_){}
+        if (resolver){ const r = resolver; resolver = null; r(!!result); }
+        try{ okBtn.blur(); cancelBtn.blur(); }catch(_){}
+      }
+
+      function onKey(e){ if(e.key==='Escape'){ e.preventDefault(); close(false); } }
+      function onBackdrop(e){ if(e.target === overlay){ close(false); } }
+
+      window.openConfirmDialog = function(title, text){
+        try{ titleEl.textContent = title || 'Are you sure?'; textEl.textContent = text || ''; }catch(_){}
+        try{ overlay.classList.add('show'); overlay.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; }catch(_){}
+        return new Promise((resolve)=>{
+          resolver = resolve;
+          const okHandler = ()=> close(true);
+          const cancelHandler = ()=> close(false);
+          okBtn.addEventListener('click', okHandler, { once:true });
+          cancelBtn.addEventListener('click', cancelHandler, { once:true });
+          overlay.addEventListener('click', onBackdrop, { once:true });
+          document.addEventListener('keydown', onKey, { once:true });
+          setTimeout(()=>{ try{ okBtn.focus(); }catch(_){} }, 0);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>

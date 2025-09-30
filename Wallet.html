@@ -1,1 +1,386 @@
-<!doctype html><meta charset="utf-8"><title>Redirecting…</title><link rel="canonical" href="/wallet.html"><meta http-equiv="refresh" content="0; url=/wallet.html"><script>location.replace('/wallet.html'+location.search+location.hash);</script><p>Redirecting to <a href="/wallet.html">/wallet.html</a>…</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Nuvia - Wallet</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+  <style>
+    :root {
+      --pink: #ff2e92;
+      --blue: #00d5ff;
+      --glass-black: rgba(10, 10, 10, .75);
+      --glass-blue: rgba(0, 213, 255, .15);
+      --radius: 20px;
+      --transition: .3s ease;
+      --white: #fff;
+      --text-light: rgba(255, 255, 255, .7);
+      --background-main: rgba(10, 10, 10, .75);
+      --card-background: linear-gradient(145deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01));
+      --header-background: linear-gradient(135deg, rgba(10, 10, 10, .85), rgba(10, 10, 10, .75));
+      --border-light: rgba(255, 255, 255, .05);
+      --input-background: rgba(255, 255, 255, 0.05);
+      --button-background: linear-gradient(90deg, var(--blue), var(--pink));
+      --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --muted: rgba(255,255,255,0.6);
+      --panel: rgba(255,255,255,0.04);
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      margin: 0; padding: 0;
+      background-color: #1a1a2e; color: var(--white);
+      display: flex; flex-direction: column; align-items: center;
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    }
+    header.wallet-header {
+      position: sticky; top: 0; z-index: 20;
+      width: 100%; max-width: 860px;
+      background: var(--header-background);
+      border-bottom: 1px solid var(--border-light);
+      height: 56px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 14px;
+    }
+    .header-title { font-weight: 800; letter-spacing: .02em; }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .icon-btn { width: 36px; height: 36px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border-light); background: var(--panel); color: var(--white); cursor: pointer; }
+
+    main.wallet-screen { width: 100%; max-width: 860px; padding: 14px; }
+
+    .balance-card {
+      background: linear-gradient(135deg, rgba(0,213,255,.20), rgba(255,46,146,.15));
+      border: 1px solid var(--border-light);
+      border-radius: 18px; padding: 16px; position: relative; overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    }
+    .balance-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+    .balance-amount { font-size: 32px; font-weight: 900; letter-spacing: .02em; }
+    .balance-sub { color: var(--text-light); font-size: 14px; }
+    .rate-row { display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+    .rate-badge { background: rgba(255,255,255,0.08); border: 1px solid var(--border-light); border-radius: 999px; padding: 6px 10px; font-weight: 700; font-size: 12px; }
+    .status-chip { border-radius: 999px; padding: 6px 10px; font-weight: 800; font-size: 12px; }
+    .status-unlocked { background: rgba(34,197,94,.15); border: 1px solid rgba(34,197,94,.4); color: #bbf7d0; }
+    .status-locked { background: rgba(245,158,11,.15); border: 1px solid rgba(245,158,11,.4); color: #fde68a; }
+
+    .actions-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
+    .action-btn { background: var(--card-background); border: 1px solid var(--border-light); border-radius: 14px; padding: 12px 8px; text-align: center; text-decoration: none; color: var(--white); font-weight: 700; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .action-btn i { font-size: 18px; }
+    .action-btn:focus, .icon-btn:focus { outline: 2px solid var(--blue); outline-offset: 2px; }
+    .action-btn.disabled { opacity: .55; pointer-events: none; }
+
+    .locked-banner { margin-top: 12px; padding: 12px; background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.35); color: #fde68a; border-radius: 12px; display: none; }
+    .locked-banner .banner-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .banner-actions { display: flex; gap: 8px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border-light); background: var(--button-background); color: #fff; font-weight: 800; text-decoration: none; cursor: pointer; box-shadow: var(--button-shadow); }
+    .btn.secondary { background: rgba(255,255,255,0.06); box-shadow: none; }
+
+    .section-title { margin: 18px 2px 10px; font-size: 14px; color: var(--muted); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+
+    .filters { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip { background: rgba(255,255,255,0.08); border: 1px solid var(--border-light); color: var(--white); padding: 6px 10px; border-radius: 999px; font-weight: 700; font-size: 12px; cursor: pointer; }
+    .chip.active { background: linear-gradient(90deg, var(--blue), var(--pink)); border-color: transparent; }
+
+    .tx-list { margin-top: 10px; display: grid; gap: 8px; }
+    .tx-item { display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 10px; padding: 12px; border-radius: 14px; background: var(--card-background); border: 1px solid var(--border-light); }
+    .tx-icon { width: 40px; height: 40px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.06); }
+    .tx-meta { display: flex; flex-direction: column; gap: 2px; }
+    .tx-title { font-weight: 800; }
+    .tx-sub { font-size: 12px; color: var(--muted); }
+    .tx-amount { font-weight: 900; }
+    .amt-credit { color: #86efac; }
+    .amt-debit { color: #fca5a5; }
+
+    .empty-state { margin: 16px 0; text-align: center; color: var(--muted); }
+    .hidden { display: none !important; }
+
+    /* Modal */
+    .modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); z-index: 50; }
+    .modal.active { display: flex; }
+    .modal-card { width: 100%; max-width: 520px; background: var(--card-background); border: 1px solid var(--border-light); border-radius: 16px; padding: 14px; }
+    .modal-hd { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .modal-title { font-weight: 900; }
+    .modal-ft { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+
+    @media (max-width: 600px) {
+      .actions-grid { grid-template-columns: repeat(4, 1fr); }
+      .balance-amount { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="wallet-header" role="banner">
+    <button class="icon-btn" aria-label="Back" onclick="history.back()"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
+    <div class="header-title">Wallet</div>
+    <a class="icon-btn" href="/index.html" aria-label="Home"><i class="fa-solid fa-house" aria-hidden="true"></i></a>
+  </header>
+
+  <main class="wallet-screen" role="main">
+    <section class="balance-card" aria-label="Wallet balance">
+      <div class="balance-row">
+        <div>
+          <div class="balance-amount" id="balanceNaira">₦0</div>
+          <div class="balance-sub"><span id="balanceJcoin">0</span> JCoins</div>
+        </div>
+        <div class="status-chip status-locked" id="walletStatusChip">Locked</div>
+      </div>
+      <div class="rate-row">
+        <div class="rate-badge"><i class="fa-solid fa-chart-line" aria-hidden="true"></i> Rate: ₦<span id="jcoinRate">0.000</span>/J</div>
+        <div class="rate-badge" id="conversionBadge">0 JCoins → ₦0.00</div>
+      </div>
+      <div class="actions-grid" aria-label="Wallet quick actions">
+        <button id="addMoneyBtn" class="action-btn" type="button"><i class="fa-solid fa-plus"></i><span>Add Money</span></button>
+        <a id="buyJcoinBtn" class="action-btn" href="/premium_subscriptions.html"><i class="fa-solid fa-store"></i><span>Buy JCoins</span></a>
+        <a id="historyBtn" class="action-btn" href="#txSection"><i class="fa-solid fa-clock-rotate-left"></i><span>History</span></a>
+        <a id="securityBtn" class="action-btn" href="/wallet-security.js" download><i class="fa-solid fa-shield"></i><span>Security</span></a>
+      </div>
+      <div class="locked-banner" id="lockedBanner" role="region" aria-live="polite">
+        <div class="banner-row">
+          <div><i class="fa-solid fa-lock" aria-hidden="true"></i> Your wallet is locked. Pay 5,000 JCoins ($10) to unlock.</div>
+          <div class="banner-actions">
+            <a class="btn secondary" href="/unlock-wallet.html"><i class="fa-solid fa-receipt"></i> Submit Proof</a>
+            <button class="btn" id="showUnlockModalBtn" type="button"><i class="fa-solid fa-money-bill-transfer"></i> Pay Now</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section aria-label="Recent transactions">
+      <div class="section-title" id="txSection">Recent Transactions</div>
+      <div class="filters" role="tablist" aria-label="Filters">
+        <button class="chip active" data-filter="all" role="tab" aria-selected="true">All</button>
+        <button class="chip" data-filter="in" role="tab" aria-selected="false">Money In</button>
+        <button class="chip" data-filter="out" role="tab" aria-selected="false">Money Out</button>
+      </div>
+      <div id="txList" class="tx-list" aria-live="polite"></div>
+      <div id="txEmpty" class="empty-state hidden">No transactions yet.</div>
+    </section>
+  </main>
+
+  <!-- Unlock modal -->
+  <div class="modal" id="unlockModal" role="dialog" aria-modal="true" aria-labelledby="unlockTitle">
+    <div class="modal-card">
+      <div class="modal-hd">
+        <h3 class="modal-title" id="unlockTitle"><i class="fa-solid fa-unlock-keyhole"></i> Unlock Wallet — 5,000 JCoins ($10)</h3>
+        <button class="icon-btn" id="closeUnlockModal" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <p class="balance-sub">Transfer ₦5,000 to one of the bank accounts below, then submit your receipt. Unlock is processed after verification.</p>
+      <div id="bankDetailsContainer"></div>
+      <div class="modal-ft">
+        <a class="btn secondary" href="/unlock-wallet.html"><i class="fa-solid fa-receipt"></i> Submit Receipt</a>
+        <a class="btn" href="/developer.html"><i class="fa-solid fa-headset"></i> Contact Developer</a>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection, query, onSnapshot, orderBy } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+
+    const firebaseConfig = typeof window.__firebase_config !== 'undefined' ? JSON.parse(window.__firebase_config) : {
+      apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+      authDomain: "jchat-1.firebaseapp.com",
+      databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+      projectId: "jchat-1",
+      storageBucket: "jchat-1.firebasestorage.app",
+      messagingSenderId: "328479683167",
+      appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
+      measurementId: "G-S6Z9GG0R9P"
+    };
+    const appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'default-app-id';
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Real-time system settings rate listener (keeps Rate badge synced with profile/index)
+    let settingsUnsub = null;
+    try {
+      const __settingsRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'system_settings');
+      settingsUnsub = onSnapshot(__settingsRef, (snap) => {
+        if (snap.exists()) {
+          currentSystemSettings = Object.assign({}, currentSystemSettings, snap.data());
+          updateRateUI();
+        }
+      });
+    } catch(_) {}
+
+    const balanceNaira = document.getElementById('balanceNaira');
+    const balanceJcoin = document.getElementById('balanceJcoin');
+    const walletStatusChip = document.getElementById('walletStatusChip');
+    const conversionBadge = document.getElementById('conversionBadge');
+    const lockedBanner = document.getElementById('lockedBanner');
+    const txList = document.getElementById('txList');
+    const txEmpty = document.getElementById('txEmpty');
+    const chips = Array.from(document.querySelectorAll('.chip[data-filter]'));
+
+    const addMoneyBtn = document.getElementById('addMoneyBtn');
+    const showUnlockModalBtn = document.getElementById('showUnlockModalBtn');
+    const unlockModal = document.getElementById('unlockModal');
+    const closeUnlockModal = document.getElementById('closeUnlockModal');
+
+    let currentUser = null;
+    let currentProfile = null;
+    let currentSystemSettings = { jcoinNairaRate: 7.5 };
+    let txUnsub = null;
+    let activeFilter = 'all';
+
+    function fmtNaira(n){ try{ return new Intl.NumberFormat('en-NG', { style:'currency', currency:'NGN', maximumFractionDigits: 2 }).format(Number(n||0)); }catch(_){ return `₦${Number(n||0).toLocaleString(undefined,{maximumFractionDigits:2})}`; } }
+    function fmtDate(ts){ try{ return new Date(ts).toLocaleString(); }catch(_){ return 'N/A'; } }
+
+    function parseQuery(){ const p = new URLSearchParams(location.search); return Object.fromEntries(p.entries()); }
+
+    async function fetchSystemSettings(){
+      try {
+        const ref = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'system_settings');
+        const snap = await getDoc(ref);
+        if (snap.exists()) currentSystemSettings = Object.assign({}, currentSystemSettings, snap.data());
+      } catch(_) { /* ignore */ }
+      updateRateUI();
+    }
+
+    function updateRateUI(){
+      const rate = Number(currentSystemSettings?.jcoinNairaRate || 7.5);
+      const j = Number(currentProfile?.jCoins || 0);
+      const rateEl = document.getElementById('jcoinRate');
+      // Display total-at-rate as requested: total JCoins * 0.005
+      const totalAtRate = (j * 0.005).toFixed(2);
+      if (rateEl) rateEl.textContent = totalAtRate;
+      conversionBadge.textContent = `${j.toLocaleString()} JCoins → ${fmtNaira(j * rate)}`;
+    }
+
+    function updateHeaderUI(){
+      const rate = Number(currentSystemSettings?.jcoinNairaRate || 0.0005);
+      const j = Number(currentProfile?.jCoins || 0);
+      balanceJcoin.textContent = j.toLocaleString();
+      balanceNaira.textContent = fmtNaira(j * rate);
+      const unlocked = !!currentProfile?.walletUnlocked;
+      walletStatusChip.textContent = unlocked ? 'Unlocked' : 'Locked';
+      walletStatusChip.classList.toggle('status-unlocked', unlocked);
+      walletStatusChip.classList.toggle('status-locked', !unlocked);
+      lockedBanner.style.display = unlocked ? 'none' : 'block';
+      addMoneyBtn.classList.toggle('disabled', unlocked);
+      updateRateUI();
+    }
+
+    function txIconAndTitle(type){
+      const t = (type||'').toLowerCase();
+      if (t.includes('unlock')) return { icon:'fa-lock-open', title:'Wallet Unlock' };
+      if (t.includes('p2p_transfer_in') || t==='credit') return { icon:'fa-arrow-down', title:'Incoming Transfer' };
+      if (t.includes('p2p_transfer_out')) return { icon:'fa-arrow-up', title:'Outgoing Transfer' };
+      if (t.includes('shop') || t.includes('purchase')) return { icon:'fa-cart-shopping', title:'Shop Purchase' };
+      if (t.includes('admin_adjustment')) return { icon:'fa-screwdriver-wrench', title:'Admin Adjustment' };
+      if (t.includes('reward') || t.includes('bonus')) return { icon:'fa-gift', title:'Reward' };
+      return { icon:'fa-receipt', title: (type||'Transaction') };
+    }
+
+    function isCredit(tx){
+      const t = (tx.type||'').toLowerCase();
+      if (t.includes('p2p_transfer_in') || t==='credit' || t.includes('unlock') || t.includes('reward') || t.includes('adjustment')) return true;
+      return Number(tx.amount||0) > 0;
+    }
+
+    function renderTxList(items){
+      txList.innerHTML = '';
+      if (!items.length){ txEmpty.style.display = 'block'; return; }
+      txEmpty.style.display = 'none';
+      const frag = document.createDocumentFragment();
+      items.forEach(d => {
+        const { icon, title } = txIconAndTitle(d.type);
+        const amt = Number(d.amount||0);
+        const credit = isCredit(d);
+        const el = document.createElement('div'); el.className = 'tx-item';
+        const iconBox = document.createElement('div'); iconBox.className = 'tx-icon'; iconBox.innerHTML = `<i class="fa-solid ${icon}"></i>`;
+        const meta = document.createElement('div'); meta.className = 'tx-meta';
+        const h = document.createElement('div'); h.className = 'tx-title'; h.textContent = title;
+        const s = document.createElement('div'); s.className = 'tx-sub'; s.textContent = `${d.description || ''}`.trim() || fmtDate(d.timestamp?.toDate?.() || d.timestamp);
+        meta.appendChild(h); meta.appendChild(s);
+        const amount = document.createElement('div'); amount.className = `tx-amount ${credit ? 'amt-credit':'amt-debit'}`; amount.textContent = `${credit?'+':'-'}${fmtNaira(Math.abs(amt))}`;
+        el.appendChild(iconBox); el.appendChild(meta); el.appendChild(amount);
+        frag.appendChild(el);
+      });
+      txList.appendChild(frag);
+    }
+
+    function applyFilter(all){
+      if (activeFilter === 'all') return all;
+      if (activeFilter === 'in') return all.filter(isCredit);
+      return all.filter(tx => !isCredit(tx));
+    }
+
+    function bindFilters(){
+      chips.forEach(c => c.addEventListener('click', ()=>{
+        chips.forEach(x=>{ x.classList.toggle('active', x===c); x.setAttribute('aria-selected', x===c ? 'true':'false'); });
+        activeFilter = c.dataset.filter;
+        if (window.__allTx) renderTxList(applyFilter(window.__allTx));
+      }));
+    }
+
+    function openUnlockModal(){ unlockModal.classList.add('active'); }
+    function closeUnlock(){ unlockModal.classList.remove('active'); }
+
+    function handleUnlockActions(){
+      showUnlockModalBtn?.addEventListener('click', ()=>{ window.location.href = '/developer.html'; });
+      closeUnlockModal?.addEventListener('click', closeUnlock);
+      document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeUnlock(); });
+      const q = parseQuery(); if (q.unlock === '1') openUnlockModal();
+    }
+
+    onAuthStateChanged(auth, async (user) => {
+      currentUser = user || null;
+      await fetchSystemSettings();
+      if (!currentUser){
+        currentProfile = { jCoins: 0, walletUnlocked: false };
+        updateHeaderUI();
+        renderTxList([]);
+        return;
+      }
+      try {
+        const profileRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profiles', 'user_profile');
+        const snap = await getDoc(profileRef);
+        currentProfile = snap.exists() ? snap.data() : { jCoins: 0, walletUnlocked: false };
+        updateHeaderUI();
+        // Realtime profile listener to mirror index/profile balance & recalc conversion
+        try { if (window.__walletProfileUnsub) { window.__walletProfileUnsub(); window.__walletProfileUnsub = null; } } catch(_) {}
+        try {
+          window.__walletProfileUnsub = onSnapshot(profileRef, (psnap) => {
+            if (psnap.exists()) {
+              currentProfile = psnap.data();
+              updateHeaderUI();
+            }
+          });
+        } catch(_) {}
+      } catch(_) { currentProfile = { jCoins: 0, walletUnlocked: false }; updateHeaderUI(); }
+
+      try {
+        if (txUnsub) txUnsub();
+        const txRef = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'transactions');
+        const q = query(txRef, orderBy('timestamp','desc'));
+        txUnsub = onSnapshot(q, (snapshot) => {
+          const list = [];
+          snapshot.forEach(d => list.push(Object.assign({ id: d.id }, d.data())));
+          window.__allTx = list;
+          renderTxList(applyFilter(list));
+        });
+      } catch(_) { renderTxList([]); }
+    });
+
+    bindFilters();
+    handleUnlockActions();
+
+    addMoneyBtn?.addEventListener('click', () => {
+      const unlocked = !!currentProfile?.walletUnlocked;
+      if (unlocked) return;
+      openUnlockModal();
+    });
+
+    // Keep best-effort sync with index.html updates
+    window.addEventListener('storage', (e)=>{ if(e.key==='nuvia-theme'){} });
+  </script>
+  <script src="./bank-details.js" defer onload="window.renderBankDetails && window.renderBankDetails('bankDetailsContainer',{layout:'chips'})"></script>
+</body>
+</html>
