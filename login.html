@@ -952,6 +952,16 @@
 }
 .login-container.signup-mode .login-btn:hover { filter: brightness(1.02); }
 </style>
+<style>
+/* Verify email banner */
+.verify-banner { display: none; border: 1px solid var(--border-light); border-radius: var(--radius); background: var(--card-background); padding: 12px 14px; margin-bottom: 16px; color: var(--white); }
+.verify-banner.show { display: block; }
+.verify-banner-title { font-weight: 700; margin-bottom: 6px; }
+.verify-banner-message { font-size: 14px; color: var(--text-light); margin-bottom: 10px; }
+.verify-banner-actions { display: flex; gap: 8px; }
+.verify-resend-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--button-background); color: #fff; border: 2px solid rgba(255,255,255,0.85); padding: 10px 14px; border-radius: 999px; font-weight: 700; cursor: pointer; }
+.verify-resend-btn:hover { filter: brightness(1.05); }
+</style>
 </head>
 <body>
     <!-- Floating Particles -->
@@ -965,6 +975,13 @@
         </div>
         
         <form class="login-form" id="loginForm" role="form" aria-labelledby="loginHeading" aria-describedby="errorMessage">
+            <div id="verifyEmailBanner" class="verify-banner" role="region" aria-live="polite" aria-atomic="true">
+                <div class="verify-banner-title"><i class="fas fa-envelope-open-text"></i> Verify your email</div>
+                <div class="verify-banner-message">We sent a verification link to <span id="verifyEmailAddress">your email</span>. Check your inbox and spam folder.</div>
+                <div class="verify-banner-actions">
+                    <button type="button" id="resendVerifyEmailBtn" class="verify-resend-btn"><i class="fas fa-paper-plane"></i> Resend verification email</button>
+                </div>
+            </div>
             <div class="error-message" id="errorMessage" role="alert" aria-live="assertive" aria-atomic="true" aria-hidden="true" tabindex="-1">
                 Invalid email or password. Please try again.
             </div>
@@ -1595,9 +1612,10 @@
                 // Referral rewards (inviter: +20 gas/+5 JCoin, new user: +20 gas/+10 JCoin)
                 await processReferralReward(user.uid);
 
-                // Skip email verification; allow immediate access
+                try { await sendEmailVerification(user); } catch(_) {}
                 hideSmartLoader();
-                showSuccessModal('Account created! You are now signed in.', () => { window.location.href = 'index.html'; });
+                try { localStorage.setItem('unverified_email', user.email || email); } catch(_) {}
+                showSuccessModal('Account created! We sent a verification link to your email. Please verify to continue.', () => { try{ showUnverifiedBanner(user.email || email); }catch(_){} });
                 
             } catch (error) {
                 hideSmartLoader();
@@ -1648,7 +1666,14 @@
                 await setPersistence(auth, browserLocalPersistence);
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
-
+                if (!user.emailVerified) {
+                    hideSmartLoader();
+                    try { localStorage.setItem('unverified_email', user.email || email); } catch(_) {}
+                    try { showUnverifiedBanner(user.email || email); } catch(_) {}
+                    try { await sendEmailVerification(user); } catch(_) {}
+                    showCustomModal('info', 'Verify your email', 'We sent a verification link to your email. Open it to finish signup.');
+                    return;
+                }
 
                 // Update last login
                 await saveUserData(user, 'email');
@@ -1900,6 +1925,20 @@
             showCustomModal('error', 'Authentication Error', message);
         }
 
+        async function resendVerificationEmail(){
+            const u = auth.currentUser;
+            if (!u) { showCustomModal('error','Sign in required','Please sign in and try again.'); return; }
+            showSmartLoader('Sending email','Resending verification email...');
+            try { await sendEmailVerification(u); hideSmartLoader(); showSuccessModal('Verification email sent. Check your inbox.'); }
+            catch(e){ hideSmartLoader(); showCustomModal('error','Failed to send', e?.message || 'Please try again.'); }
+        }
+        function showUnverifiedBanner(email){
+            const b = document.getElementById('verifyEmailBanner'); const addr = document.getElementById('verifyEmailAddress');
+            if (!b) return; if (addr) addr.textContent = email || 'your email';
+            b.classList.add('show');
+        }
+        function hideUnverifiedBanner(){ const b = document.getElementById('verifyEmailBanner'); if (b) b.classList.remove('show'); }
+
         async function showSavePasswordPrompt(email, password, next){
             try{
                 const modal = document.getElementById('customModal');
@@ -2008,9 +2047,13 @@
         // Check authentication state with enhanced loading
         onAuthStateChanged(auth, async (user) => {
             if (!user) return;
-            console.log('User authenticated:', user.email);
-            showSmartLoader('Welcome Back!', 'Taking you to your account...');
-            setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+            if (user.emailVerified) {
+                showSmartLoader('Welcome Back!', 'Taking you to your account...');
+                setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+            } else {
+                try { localStorage.setItem('unverified_email', user.email || ''); } catch(_) {}
+                try { showUnverifiedBanner(user.email || ''); } catch(_) {}
+            }
         });
 
         // Username availability checking (robust, case-insensitive check against stored usernames)
@@ -2301,6 +2344,9 @@
             
             // Add smart validation
             addSmartValidation();
+            const resendBtn = document.getElementById('resendVerifyEmailBtn'); if (resendBtn) resendBtn.addEventListener('click', resendVerificationEmail);
+            try { const url = new URL(window.location.href); const section = url.searchParams.get('section') || ''; if (section === 'verify_email') { const e = (auth.currentUser && auth.currentUser.email) || localStorage.getItem('unverified_email') || ''; showUnverifiedBanner(e); } } catch(_){ }
+            try { const cached = localStorage.getItem('unverified_email'); if (cached) showUnverifiedBanner(cached); } catch(_){ }
 
             // Password strength live updates
             const pwdInput = document.getElementById('password');
