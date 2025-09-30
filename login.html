@@ -2526,6 +2526,7 @@
             const resendBtn = document.getElementById('resendVerifyEmailBtn'); if (resendBtn) resendBtn.addEventListener('click', resendVerificationEmail);
             const applyBtn = document.getElementById('applyVerifyCodeBtn'); if (applyBtn) applyBtn.addEventListener('click', applyCodeFromInput);
             const manualInput = document.getElementById('manualVerifyInput'); if (manualInput) manualInput.addEventListener('keydown', (e)=>{ if (e.key === 'Enter'){ e.preventDefault(); applyCodeFromInput(); } });
+            const googleBtn = document.getElementById('googleSignInBtn'); if (googleBtn) googleBtn.addEventListener('click', startGoogleSignIn);
             try { const url = new URL(window.location.href); const section = url.searchParams.get('section') || ''; if (section === 'verify_email') { const e = (auth.currentUser && auth.currentUser.email) || localStorage.getItem('unverified_email') || ''; showUnverifiedBanner(e); } } catch(_){ }
             try { const cached = localStorage.getItem('unverified_email'); if (cached) showUnverifiedBanner(cached); } catch(_){ }
 
