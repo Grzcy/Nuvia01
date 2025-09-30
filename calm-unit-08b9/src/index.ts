@@ -8,6 +8,9 @@ import { neon } from '@neondatabase/serverless';
 export interface Env {
   MY_WORKFLOW: any;
   DATABASE_URL: string;
+  GITHUB_CLIENT_ID: string;
+  GITHUB_CLIENT_SECRET: string;
+  GITHUB_STATE_SECRET: string;
 }
 
 // Static config (mirrors client config already public in repo)
@@ -460,10 +463,97 @@ function oembedJson({ origin, url, title, thumbnail_url, html }: { origin: strin
   });
 }
 
+function b64urlFromBytes(bytes: ArrayBuffer | Uint8Array) {
+  const bin = Array.from(new Uint8Array(bytes)).map(b => String.fromCharCode(b)).join('');
+  return btoa(bin).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+}
+async function hmacSha256(key: string, data: string): Promise<string> {
+  const enc = new TextEncoder();
+  const k = await crypto.subtle.importKey('raw', enc.encode(key), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', k, enc.encode(data));
+  return b64urlFromBytes(sig);
+}
+function b64urlEncodeString(s: string) {
+  return btoa(unescape(encodeURIComponent(s))).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+}
+function b64urlDecodeString(s: string) {
+  try { return decodeURIComponent(escape(atob(s.replace(/-/g, '+').replace(/_/g, '/')))); } catch { return ''; }
+}
+async function packState(redirect: string, secret: string) {
+  const payload = JSON.stringify({ t: Date.now(), r: redirect });
+  const sig = await hmacSha256(secret, 'v1.' + payload);
+  return b64urlEncodeString(payload) + '.' + sig;
+}
+async function unpackState(state: string, secret: string): Promise<{ r: string } | null> {
+  const idx = state.indexOf('.');
+  if (idx < 0) return null;
+  const pay = state.slice(0, idx);
+  const mac = state.slice(idx + 1);
+  const payloadStr = b64urlDecodeString(pay);
+  if (!payloadStr) return null;
+  const expected = await hmacSha256(secret, 'v1.' + payloadStr);
+  if (expected !== mac) return null;
+  try {
+    const obj = JSON.parse(payloadStr);
+    if (!obj || typeof obj.r !== 'string') return null;
+    // Optional: 10 minute expiry
+    if (typeof obj.t === 'number' && Date.now() - obj.t > 10 * 60 * 1000) return null;
+    return { r: obj.r };
+  } catch {
+    return null;
+  }
+}
+
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url);
     const origin = `${url.protocol}//${url.host}`;
+
+    // GitHub OAuth start
+    if (url.pathname === '/auth/github/start') {
+      if (req.method === 'OPTIONS') return new Response(null, { headers: cors() });
+      const redirectBack = url.searchParams.get('redirect') || origin + '/login.html';
+      const state = await packState(redirectBack, env.GITHUB_STATE_SECRET);
+      const callback = `${origin}/auth/github/callback`;
+      const authUrl = new URL('https://github.com/login/oauth/authorize');
+      authUrl.searchParams.set('client_id', env.GITHUB_CLIENT_ID);
+      authUrl.searchParams.set('redirect_uri', callback);
+      authUrl.searchParams.set('scope', 'read:user user:email');
+      authUrl.searchParams.set('state', state);
+      authUrl.searchParams.set('allow_signup', 'true');
+      return new Response(null, { status: 302, headers: { Location: authUrl.toString(), ...cors() } });
+    }
+
+    // GitHub OAuth callback
+    if (url.pathname === '/auth/github/callback') {
+      const code = url.searchParams.get('code') || '';
+      const state = url.searchParams.get('state') || '';
+      const unpacked = await unpackState(state, env.GITHUB_STATE_SECRET);
+      const back = unpacked?.r || origin + '/login.html';
+      if (!code || !unpacked) {
+        return new Response(null, { status: 302, headers: { Location: back + '#error=github_oauth_state', ...cors() } });
+      }
+      const tokenRes = await fetch('https://github.com/login/oauth/access_token', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'accept': 'application/json' },
+        body: JSON.stringify({
+          client_id: env.GITHUB_CLIENT_ID,
+          client_secret: env.GITHUB_CLIENT_SECRET,
+          code,
+          redirect_uri: `${origin}/auth/github/callback`
+        })
+      });
+      if (!tokenRes.ok) {
+        return new Response(null, { status: 302, headers: { Location: back + '#error=github_oauth_exchange', ...cors() } });
+      }
+      const tokenJson: any = await tokenRes.json();
+      const access = tokenJson.access_token || '';
+      if (!access) {
+        return new Response(null, { status: 302, headers: { Location: back + '#error=github_oauth_no_token', ...cors() } });
+      }
+      // Redirect back with token in hash for client to finalize via Firebase signInWithCredential
+      return new Response(null, { status: 302, headers: { Location: back + '#gh_token=' + encodeURIComponent(access), ...cors() } });
+    }
 
     // API router
     if (url.pathname.startsWith('/api/')) {
