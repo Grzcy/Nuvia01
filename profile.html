@@ -3615,12 +3615,12 @@
             right: -400px; /* Start hidden off-screen */
             transform: translateY(-50%);
             width: 380px;
-            background: linear-gradient(135deg, 
-                rgba(76, 175, 80, 0.98), 
-                rgba(139, 195, 74, 0.98), 
+            background: linear-gradient(135deg,
+                rgba(76, 175, 80, 0.98),
+                rgba(139, 195, 74, 0.98),
                 rgba(76, 175, 80, 0.98));
             border-radius: 20px 0 0 20px;
-            box-shadow: 
+            box-shadow:
                 -10px 0 30px rgba(76, 175, 80, 0.3),
                 -5px 0 15px rgba(139, 195, 74, 0.2),
                 inset 1px 0 0 rgba(255, 255, 255, 0.2);
@@ -3630,16 +3630,25 @@
             z-index: 99999;
             transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
         }
 
         .smart-success-panel.show {
             right: 0;
             transform: translateY(-50%) scale(1);
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
         }
 
         .smart-success-panel.hide {
             right: -400px;
             transform: translateY(-50%) scale(0.95);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
         }
 
         .smart-success-panel::before {
