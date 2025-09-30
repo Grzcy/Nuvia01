@@ -5259,7 +5259,7 @@
         <div class="content-wrapper">
                             <div class="profile-section">
                 <div id="profileCoverWrapper" class="profile-cover">
-                    <img id="profileCoverImg" alt="Cover" style="width:100%;height:100%;object-fit:cover;display:none;">
+                    <img id="profileCoverImg" alt="Cover" style="width:100%;height:100%;object-fit:contain;display:none;">
                     <input type="file" id="profileCoverUploadInput" accept="image/*" style="display:none;">
                     <label for="profileCoverUploadInput" id="editCoverOverlay" style="position:absolute;right:10px;bottom:10px;background:rgba(0,0,0,0.5);padding:6px 10px;border-radius:8px;cursor:pointer;display:none;"><i class="fas fa-camera"></i> Edit Cover</label>
                 </div>
@@ -6450,43 +6450,14 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
                 // New: Auto-crop (center-crop) cover to 16:5 and upload immediately
                 async function autoCropAndUploadCover(file) {
                     try {
-                        const dataUrl = await new Promise((resolve, reject) => {
-                            const reader = new FileReader();
-                            reader.onload = () => resolve(reader.result);
-                            reader.onerror = reject;
-                            reader.readAsDataURL(file);
-                        });
-                        const img = new Image();
-                        await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = dataUrl; });
-                        const targetW = 1600, targetH = 500; // 16:5
-                        const srcW = img.naturalWidth, srcH = img.naturalHeight;
-                        const srcAspect = srcW / srcH, outAspect = targetW / targetH;
-                        let drawW, drawH;
-                        if (srcAspect > outAspect) { // too wide
-                            drawH = targetH;
-                            drawW = Math.round(drawH * srcAspect);
-                        } else { // too tall
-                            drawW = targetW;
-                            drawH = Math.round(drawW / srcAspect);
-                        }
-                        const canvas = document.createElement('canvas');
-                        canvas.width = targetW; canvas.height = targetH;
-                        const ctx = canvas.getContext('2d');
-                        const dx = Math.round((targetW - drawW) / 2);
-                        const dy = Math.round((targetH - drawH) / 2);
-                        ctx.drawImage(img, dx, dy, drawW, drawH);
-                        const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.9));
-                        if (!blob) throw new Error('Auto-crop failed');
-                        const url = await uploadMediaToCloudinary(blob);
+                        const url = await uploadMediaToCloudinary(file);
                         if (!url) throw new Error('Upload failed');
-                        const coverUrl = getCloudinaryImageUrl(url, `w_${targetW},h_${targetH},c_fill,q_auto`);
+                        const coverUrl = getCloudinaryImageUrl(url, 'f_auto,q_auto');
                         const previewEl = document.getElementById('profileCoverImg');
-                        if (previewEl) { previewEl.src = coverUrl; previewEl.style.display = 'block'; }
+                        if (previewEl) { previewEl.src = coverUrl; previewEl.style.display = 'block'; previewEl.style.objectFit = 'contain'; }
                         if (currentUser && displayedUserId === currentUser.uid) {
                             await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profiles', 'user_profile'), { coverPicId: url, updatedAt: serverTimestamp() });
                             await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.uid), { coverPicId: url, updatedAt: serverTimestamp() });
-                            
-                            // Update profile completion after changing cover picture
                             if (currentUserProfileData) {
                                 currentUserProfileData.coverPicId = url;
                                 calculateAndUpdateProfileCompletion(currentUserProfileData);
@@ -9047,7 +9018,7 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
 
                     // Cover image display (respect visibility if added later)
                     if (profileCoverImg && displayedUserProfileData.coverPicId) {
-                        profileCoverImg.src = getCloudinaryImageUrl(displayedUserProfileData.coverPicId, 'w_1600,h_400,c_fill,q_auto');
+                        profileCoverImg.src = getCloudinaryImageUrl(displayedUserProfileData.coverPicId, 'f_auto,q_auto');
                         profileCoverImg.style.display = 'block';
                     }
                     if (editCoverOverlay) {
