@@ -1294,10 +1294,21 @@
                 <div id="all-posts" class="tab-content">
                     <h2>All Posts</h2>
                     <p style="color: var(--text-color-secondary);">Real-time view of all posts on the feed. Use actions to view, flag or remove content.</p>
+                    <div class="moderation-toolbar">
+                        <label style="margin-right:12px;"><input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this.checked)"> Select All</label>
+                        <button class="button secondary" id="bulkFlagBtn" onclick="bulkFlagSelected()">Bulk Flag</button>
+                        <button class="button danger" id="bulkDeleteBtn" onclick="bulkDeleteSelected()">Bulk Delete</button>
+                        <button class="button" id="exportSelectedBtn" onclick="exportSelectedPostsCSV()">Export Selected CSV</button>
+                        <div style="display:inline-block; margin-left:12px">
+                            <button class="button" onclick="exportReportedContentCSV()">Export Reports CSV</button>
+                            <button class="button" onclick="exportModerationLogsCSV()">Export Logs CSV</button>
+                        </div>
+                    </div>
                     <div class="moderation-table-container">
                         <table class="moderation-table">
                             <thead>
                                 <tr>
+                                    <th style="width:36px"><input type="checkbox" id="headerSelectAll" onchange="toggleSelectAll(this.checked)"></th>
                                     <th>Post ID</th>
                                     <th>Author</th>
                                     <th>Excerpt</th>
@@ -1959,6 +1970,7 @@
                         const created = formatTimestamp(post.createdAt || post.timestamp || null);
                         // Build initial row with moderation placeholder
                         row.innerHTML = `
+                            <td><input type="checkbox" class="row-select-checkbox" data-post-id="${postId}" onchange="toggleRowSelection('${postId}', this.checked)"></td>
                             <td class="mono">${postId}</td>
                             <td><a href="/profile.html?userId=${post.authorId}" style="color: var(--accent-color);">${post.authorUsername || post.authorId}</a></td>
                             <td class="moderation-item-content">${excerpt(post.content || '')}</td>
@@ -1993,11 +2005,166 @@
                                 } else {
                                     modCell.innerHTML = `<span class="status-badge success">OK</span>`;
                                 }
+
+                                // Image hashing and duplicate detection
+                                if (post.mediaUrl) {
+                                    try {
+                                        const hash = await computeImageHash(post.mediaUrl);
+                                        if (hash) {
+                                            // store hash for future comparisons
+                                            try { await setDoc(doc(db, 'artifacts', appId, 'media_hashes', postId), { hash, postId }); } catch(_){}
+                                            // fetch existing hashes and compare
+                                            const hashesSnap = await getDocs(collection(db, 'artifacts', appId, 'media_hashes'));
+                                            let similar = null;
+                                            hashesSnap.forEach(hs => { const d = hs.data(); if (d.postId === postId || !d.hash) return; const dist = hammingDistance(hash, d.hash); if (dist <= 8) { similar = { postId: d.postId, distance: dist }; } });
+                                            if (similar) {
+                                                modCell.innerHTML = `<span class="status-badge warning" title="Similar media to post ${similar.postId} (h=${similar.distance})">Similar Media</span>`;
+                                            }
+                                        }
+                                    } catch(imgErr){ console.warn('image hash failed', imgErr); }
+                                }
+
                             } catch (e) { console.error('analysis error', e); }
                         })();
                     });
                 }, (err) => { console.error('Posts listener error:', err); showMessageBox('Failed to listen to posts.', 'error'); });
             } catch (e) { console.warn('Real-time posts listener not available', e); const tbody = document.getElementById('postsTableBody'); if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="no-data-message">No posts to display.</td></tr>'; }
+        }
+
+                // --- Bulk selection and actions ---
+        window.selectedPostIds = new Set();
+        function toggleSelectAll(checked) {
+            document.querySelectorAll('.row-select-checkbox').forEach(cb => { cb.checked = !!checked; const id = cb.dataset.postId; if (id) { if (checked) window.selectedPostIds.add(id); else window.selectedPostIds.delete(id); } });
+            try { document.getElementById('headerSelectAll').checked = !!checked; } catch(_){}
+        }
+        function toggleRowSelection(postId, checked) {
+            if (checked) window.selectedPostIds.add(postId); else window.selectedPostIds.delete(postId);
+            const all = document.querySelectorAll('.row-select-checkbox'); const selected = document.querySelectorAll('.row-select-checkbox:checked');
+            try { document.getElementById('selectAllCheckbox').checked = (all.length === selected.length && all.length>0); document.getElementById('headerSelectAll').checked = (all.length === selected.length && all.length>0); } catch(_){}
+        }
+        function getSelectedPostIds() { return Array.from(window.selectedPostIds || []); }
+
+        async function bulkFlagSelected() {
+            const ids = getSelectedPostIds(); if (!ids.length) { showMessageBox('No posts selected.', 'warning'); return; }
+            for (const id of ids) { try { await handleFlagPost(id); } catch(e){ console.error('bulk flag error', e);} }
+            showMessageBox(`Flagged ${ids.length} posts.`, 'success');
+        }
+
+        async function backupAndDeletePost(postId) {
+            try {
+                const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId);
+                const snap = await getDoc(postRef);
+                if (!snap.exists()) return false;
+                const data = snap.data();
+                const trashRef = doc(db, 'artifacts', appId, 'admin_trash', 'posts', postId);
+                await setDoc(trashRef, { ...data, restored: false, removedAt: serverTimestamp(), removedBy: currentUser ? currentUser.uid : 'system' });
+                await deleteDoc(postRef);
+                await logAdminAction(currentUser ? currentUser.uid : 'system', 'backup_and_delete_post', { postId });
+                // store for undo
+                window.lastDeleted = window.lastDeleted || [];
+                window.lastDeleted.push({ postId, trashRefPath: `artifacts/${appId}/admin_trash/posts/${postId}` });
+                showUndoBanner(postId);
+                return true;
+            } catch (e) { console.error('backupAndDeletePost', e); return false; }
+        }
+
+        async function bulkDeleteSelected() {
+            const ids = getSelectedPostIds(); if (!ids.length) { showMessageBox('No posts selected.', 'warning'); return; }
+            for (const id of ids) { try { await backupAndDeletePost(id); } catch(e){ console.error('bulk delete error', e);} }
+            showMessageBox(`Deleted ${ids.length} posts (soft). You can undo from the banner.`, 'success');
+        }
+
+        function showUndoBanner(postId) {
+            let banner = document.getElementById('undoBanner');
+            if (!banner) {
+                banner = document.createElement('div'); banner.id = 'undoBanner'; banner.style.position='fixed'; banner.style.right='18px'; banner.style.bottom='18px'; banner.style.zIndex=99999; banner.style.background='rgba(0,0,0,0.8)'; banner.style.color='#fff'; banner.style.padding='12px'; banner.style.borderRadius='8px'; document.body.appendChild(banner);
+            }
+            banner.innerHTML = `Deleted post ${postId}. <button class="button" onclick="undoRestorePost('${postId}')">Undo</button>`;
+            setTimeout(()=>{ try{ if (banner) banner.remove(); }catch(_){} }, 20000);
+        }
+
+        async function undoRestorePost(postId) {
+            try {
+                const trashRef = doc(db, 'artifacts', appId, 'admin_trash', 'posts', postId);
+                const snap = await getDoc(trashRef);
+                if (!snap.exists()) { showMessageBox('No backup found to restore.', 'error'); return; }
+                const data = snap.data();
+                const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId);
+                await setDoc(postRef, data);
+                await deleteDoc(trashRef);
+                await logAdminAction(currentUser ? currentUser.uid : 'system', 'undo_restore_post', { postId });
+                showMessageBox('Post restored successfully.', 'success');
+                const banner = document.getElementById('undoBanner'); if (banner) banner.remove();
+            } catch (e) { console.error('undoRestorePost', e); showMessageBox('Failed to restore post.', 'error'); }
+        }
+
+        // --- CSV Export helpers ---
+        function toCSV(rows) {
+            const esc = (v) => '"' + String(v === null || v === undefined ? '' : v).replace(/"/g, '""') + '"';
+            return rows.map(r => r.map(esc).join(',')).join('\n');
+        }
+        function downloadCSV(filename, headerRow, dataRows) {
+            const csv = [headerRow, ...dataRows].map(r => r.join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = filename; a.style.display='none'; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 1000);
+        }
+
+        async function exportReportedContentCSV() {
+            try {
+                const rows = [];
+                const reportsRef = collection(db, 'artifacts', appId, 'reported_content');
+                const snap = await getDocs(reportsRef);
+                const header = ['reportId','postId','reportedByUid','reportedByUsername','reason','status','timestamp','details'];
+                snap.forEach(docSnap => { const d = docSnap.data(); rows.push([docSnap.id, d.postId, d.reportedByUid, d.reportedByUsername, d.reason, d.status, d.timestamp ? (d.timestamp.toDate ? d.timestamp.toDate().toISOString() : d.timestamp) : '', JSON.stringify(d.details || {})]); });
+                if (!rows.length) { showMessageBox('No reports to export.', 'info'); return; }
+                downloadCSV('reported_content.csv', header, rows);
+            } catch (e) { console.error('exportReportedContentCSV', e); showMessageBox('Export failed.', 'error'); }
+        }
+
+        async function exportModerationLogsCSV() {
+            try {
+                const rows = [];
+                const logsRef = collection(db, 'artifacts', appId, 'admin_logs');
+                const snap = await getDocs(query(logsRef, orderBy('timestamp','desc')));
+                const header = ['logId','adminUid','actionType','details','timestamp'];
+                snap.forEach(docSnap => { const d = docSnap.data(); rows.push([docSnap.id, d.adminUid, d.actionType, JSON.stringify(d.details||{}), d.timestamp ? (d.timestamp.toDate ? d.timestamp.toDate().toISOString() : d.timestamp) : '']); });
+                if (!rows.length) { showMessageBox('No logs to export.', 'info'); return; }
+                downloadCSV('moderation_logs.csv', header, rows);
+            } catch (e) { console.error('exportModerationLogsCSV', e); showMessageBox('Export failed.', 'error'); }
+        }
+
+        async function exportSelectedPostsCSV() {
+            try {
+                const ids = getSelectedPostIds(); if (!ids.length) { showMessageBox('No posts selected.', 'warning'); return; }
+                const rows = [];
+                const header = ['postId','authorId','authorUsername','content','mediaUrl','visibility','createdAt'];
+                for (const id of ids) {
+                    try { const snap = await getDoc(doc(db, 'artifacts', appId, 'public', 'data', 'posts', id)); if (snap.exists()) { const d = snap.data(); rows.push([id, d.authorId, d.authorUsername, (d.content||'').replace(/\n/g,' '), d.mediaUrl||'', d.visibility||'', d.createdAt ? (d.createdAt.toDate ? d.createdAt.toDate().toISOString() : d.createdAt) : '']); } } catch(e){ console.error('export post', e); }
+                }
+                if (!rows.length) { showMessageBox('No posts found to export.', 'info'); return; }
+                downloadCSV('selected_posts.csv', header, rows);
+            } catch (e) { console.error('exportSelectedPostsCSV', e); showMessageBox('Export failed.', 'error'); }
+        }
+
+        // --- Image hashing helpers (aHash 16x16) ---
+        function hammingDistance(a,b) { if (!a||!b||a.length!==b.length) return Infinity; let d=0; for(let i=0;i<a.length;i++) if(a[i]!==b[i]) d++; return d; }
+        async function computeImageHash(url) {
+            return new Promise((resolve, reject) => {
+                try {
+                    const img = new Image(); img.crossOrigin = 'anonymous'; img.src = url + (url.indexOf('?')>-1? '&' : '?') + 'cachebust=' + Date.now();
+                    img.onload = function() {
+                        try {
+                            const size = 16;
+                            const canvas = document.createElement('canvas'); canvas.width = size; canvas.height = size; const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, size, size);
+                            const data = ctx.getImageData(0,0,size,size).data; const vals = [];
+                            for (let i=0;i<data.length;i+=4) { const r=data[i], g=data[i+1], b=data[i+2]; const lum = 0.2126*r+0.7152*g+0.0722*b; vals.push(lum); }
+                            const avg = vals.reduce((s,v)=>s+v,0)/vals.length; const bits = vals.map(v => v>avg ? '1':'0').join(''); resolve(bits);
+                        } catch (e) { reject(e); }
+                    };
+                    img.onerror = function(err){ reject(err || new Error('Image load error')); };
+                } catch(e){ reject(e); }
+            });
         }
 
         // --- Event Listeners ---
