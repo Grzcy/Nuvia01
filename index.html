@@ -5781,6 +5781,8 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         }
         // Respect offline status to avoid fetch errors in instrumented environments
         try { if (!navigator.onLine) { disableNetwork(db).catch(()=>{}); } } catch(_) {}
+
+        // Probe Firestore connectivity and retry with exponential backoff when SDK reports backend issues.
         (function(){
           let banner;
           function ensureBanner(){ if(banner) return banner; banner = document.getElementById('offlineBanner'); if(!banner){ banner = document.createElement('div'); banner.id='offlineBanner'; banner.setAttribute('role','status'); banner.style.cssText='position:fixed;top:0;left:0;right:0;background:linear-gradient(90deg, var(--pink), var(--blue));color:#fff;text-align:center;padding:6px 10px;font-weight:700;z-index:2000;display:none;'; banner.textContent='You are offline. Some features are limited.'; document.body.appendChild(banner);} return banner; }
@@ -5789,6 +5791,45 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
           window.addEventListener('offline', ()=>{ try{ disableNetwork(db).catch(()=>{});}catch(_){} showOffline(); });
           window.addEventListener('online', ()=>{ try{ enableNetwork(db).catch(()=>{});}catch(_){} hideOffline(); try{ if (typeof fetchSystemSettings==='function') fetchSystemSettings().catch(()=>{}); if (typeof checkGlobalAnnouncements==='function') checkGlobalAnnouncements().catch(()=>{});}catch(_){} });
           if(!navigator.onLine) showOffline();
+
+          // Firestore connectivity probe: periodically attempts a lightweight read to confirm backend availability.
+          (function startFirestoreProbe(){
+            let attempts = 0;
+            let stopped = false;
+            const maxDelay = 60000; // 1 minute
+            async function probe(){
+              if (stopped) return;
+              try {
+                // Use a very small read to detect reachability. The 'meta/ping' path is non-destructive and may not exist.
+                const pingDocRef = doc(db, 'artifacts', appId, 'public', 'meta', 'ping');
+                await getDoc(pingDocRef);
+                // If successful, ensure network is enabled and reset attempts counter.
+                try { await enableNetwork(db); } catch(_){}
+                attempts = 0;
+                // console log for diagnostics
+                console.log('Nuvia_DEBUG: Firestore backend reachable');
+              } catch (err) {
+                const msg = String(err && (err.message || err)).toLowerCase();
+                const isBackendErr = msg.includes('could not reach cloud firestore backend') || msg.includes('deadline-exceeded') || msg.includes('networkerror') || msg.includes('failed to fetch');
+                if (isBackendErr) {
+                  console.warn('Nuvia_WARN: Firestore backend not reachable (probe). Will retry.', err);
+                  // Show user-facing banner advising limited functionality
+                  try { showOffline(); } catch(_){}
+                  // Exponential backoff retry
+                  attempts = Math.min(attempts + 1, 10);
+                  const delay = Math.min(maxDelay, 500 * Math.pow(2, attempts));
+                  setTimeout(probe, delay);
+                } else {
+                  // Non-network error - log for investigation
+                  console.error('Nuvia_ERROR: Firestore probe failed with unexpected error:', err);
+                }
+              }
+            }
+            // Start probing after a short delay, and whenever the client goes back online
+            setTimeout(probe, 1500);
+            window.addEventListener('online', () => { attempts = 0; setTimeout(probe, 500); });
+          })();
+
         })();
         // If a user is already signed in (session persisted), mark as authenticated early to prevent guest UI flashes.
         try {
