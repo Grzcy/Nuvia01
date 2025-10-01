@@ -1062,6 +1062,11 @@
                             <option value="resolved">Resolved</option>
                             <option value="dismissed">Dismissed</option>
                         </select>
+                        <label style="display:flex;align-items:center;gap:8px;margin-left:8px"><input type="checkbox" id="selectAllReports"> Select All</label>
+                        <button id="bulkResolveBtn" class="modal-button status-button" style="margin-left:8px;">Bulk Resolve</button>
+                        <button id="bulkDismissBtn" class="modal-button status-button" style="margin-left:8px;">Bulk Dismiss</button>
+                        <button id="bulkDeleteContentBtn" class="modal-button confirm" style="margin-left:8px;">Bulk Delete Content</button>
+                        <button id="exportCsvBtn" class="modal-button" style="margin-left:8px;">Export CSV</button>
                     </div>
 
                     <ul id="reportsList" class="reports-list">
