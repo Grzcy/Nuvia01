@@ -1952,11 +1952,13 @@
                         const postId = docSnap.id;
                         const row = document.createElement('tr');
                         const created = formatTimestamp(post.createdAt || post.timestamp || null);
+                        // Build initial row with moderation placeholder
                         row.innerHTML = `
                             <td class="mono">${postId}</td>
                             <td><a href="/profile.html?userId=${post.authorId}" style="color: var(--accent-color);">${post.authorUsername || post.authorId}</a></td>
                             <td class="moderation-item-content">${excerpt(post.content || '')}</td>
                             <td><span class="status-badge">${post.visibility || 'public'}</span></td>
+                            <td class="moderation-cell" data-post-id="${postId}"><span class="status-badge neutral">—</span></td>
                             <td>${created}</td>
                             <td class="action-buttons-cell">
                                 <button class="button" onclick="handleViewPost('${postId}')">View</button>
@@ -1965,6 +1967,29 @@
                             </td>
                         `;
                         tbody.appendChild(row);
+
+                        // Run analysis and auto-flag if needed (async, don't block UI)
+                        (async() => {
+                            try {
+                                const analysis = analyzePostForModeration(post);
+                                const modCell = row.querySelector('.moderation-cell');
+                                if (analysis && analysis.score) {
+                                    if (analysis.score >= (window.moderationSettings?.ai_threshold || 80)) {
+                                        modCell.innerHTML = `<span class="status-badge danger" title="Auto-flagged (score: ${analysis.score})">Auto-Flagged</span>`;
+                                        const didFlag = await autoFlagPostIfNeeded(postId, post, analysis);
+                                        if (didFlag) { modCell.innerHTML = `<span class="status-badge danger" title="Auto-flagged and reported (score: ${analysis.score})">Reported</span>`; }
+                                    } else if (analysis.score >= 50) {
+                                        modCell.innerHTML = `<span class="status-badge warning" title="Suspicious (score: ${analysis.score})">Suspicious</span>`;
+                                    } else if (analysis.matchedKeywords && analysis.matchedKeywords.length) {
+                                        modCell.innerHTML = `<span class="status-badge warning" title="Matched keywords: ${analysis.matchedKeywords.join(', ')}">Keyword</span>`;
+                                    } else {
+                                        modCell.innerHTML = `<span class="status-badge success">OK</span>`;
+                                    }
+                                } else {
+                                    modCell.innerHTML = `<span class="status-badge success">OK</span>`;
+                                }
+                            } catch (e) { console.error('analysis error', e); }
+                        })();
                     });
                 }, (err) => { console.error('Posts listener error:', err); showMessageBox('Failed to listen to posts.', 'error'); });
             } catch (e) { console.warn('Real-time posts listener not available', e); const tbody = document.getElementById('postsTableBody'); if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="no-data-message">No posts to display.</td></tr>'; }
