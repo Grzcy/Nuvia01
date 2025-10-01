@@ -1328,6 +1328,37 @@
                     </div>
                 </div>
 
+                <div id="trash" class="tab-content">
+                    <h2>Trash (Soft-deleted Posts)</h2>
+                    <p style="color: var(--text-color-secondary);">Posts deleted by admins are backed up here. You can restore or permanently purge entries.</p>
+                    <div class="moderation-toolbar">
+                        <label style="margin-right:12px;"><input type="checkbox" id="trashSelectAllCheckbox" onchange="toggleTrashSelectAll(this.checked)"> Select All</label>
+                        <button class="button" onclick="bulkRestoreTrash()">Bulk Restore</button>
+                        <button class="button danger" onclick="bulkPurgeTrash()">Bulk Purge</button>
+                        <button class="button" onclick="loadAdminTrash(true)">Refresh</button>
+                    </div>
+                    <div class="moderation-table-container">
+                        <table class="moderation-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:36px"></th>
+                                    <th>Post ID</th>
+                                    <th>Author</th>
+                                    <th>Excerpt</th>
+                                    <th>Deleted By</th>
+                                    <th>Deleted At</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trashTableBody">
+                                <tr>
+                                    <td colspan="7" class="no-data-message">Trash is empty.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <div id="settings" class="tab-content">
                     <h2>Moderation Settings</h2>
                     <p style="color: var(--text-color-secondary);">Configure automated moderation rules and thresholds.</p>
