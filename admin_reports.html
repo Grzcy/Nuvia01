@@ -1477,6 +1477,42 @@
             reportDetailModal.style.display = 'flex';
         }
 
+        /* === MEDIA VIEWER FUNCTIONS === */
+        const mediaPreviewContainer = document.getElementById('mediaPreviewContainer');
+        const mediaDownloadBtn = document.getElementById('mediaDownloadBtn');
+        const mediaCloseBtn = document.getElementById('mediaCloseBtn');
+        function openMediaViewer(url, type){
+            if(!mediaPreviewContainer) return;
+            mediaPreviewContainer.innerHTML = '';
+            if(type === 'image'){
+                const img = document.createElement('img'); img.src = url; img.style.maxWidth='100%'; img.style.maxHeight='80vh'; img.style.borderRadius='8px'; mediaPreviewContainer.appendChild(img);
+            } else {
+                const vid = document.createElement('video'); vid.src = url; vid.controls = true; vid.style.maxWidth='100%'; vid.style.maxHeight='80vh'; vid.style.borderRadius='8px'; mediaPreviewContainer.appendChild(vid);
+            }
+            mediaDownloadBtn.href = url; mediaViewerModal.style.display = 'flex';
+        }
+        if(mediaCloseBtn) mediaCloseBtn.addEventListener('click', ()=> mediaViewerModal.style.display = 'none');
+
+        /* === BULK ACTIONS & CSV EXPORT === */
+        function getSelectedReportIds(){ return Array.from(document.querySelectorAll('.report-item input.row-select')).filter(cb=>cb.checked).map(cb=>cb.closest('.report-item').dataset.reportId); }
+        async function bulkUpdateReports(status){ const ids = getSelectedReportIds(); if(!ids.length){ showMessageBox('No reports selected.', 'warning'); return; } try{ const batchPromises = ids.map(id => updateReportStatus(id, status)); await Promise.all(batchPromises); await logAdminAction(currentUser.uid, 'bulk_update_reports', { ids, status }); showMessageBox('Bulk update completed.', 'success'); }catch(e){ console.error('bulk update', e); showMessageBox('Bulk update failed.', 'error'); } }
+        async function bulkDeleteContent(){ const ids = getSelectedReportIds(); if(!ids.length){ showMessageBox('No reports selected.', 'warning'); return; } if(!confirm('Delete content for selected reports?')) return; for(const id of ids){ const r = allReports.find(x=>x.id===id); if(r){ await deleteReportedContent(r); } } await logAdminAction(currentUser.uid, 'bulk_delete_reported_content', { ids }); showMessageBox('Bulk delete completed.', 'success'); }
+        function exportReportsCsv(){ const filterValue = reportFilterSelect.value; let rows = allReports.slice(); if(filterValue !== 'all') rows = rows.filter(r=> r.status.toLowerCase().replace(' ','-') === filterValue); if(!rows.length){ showMessageBox('No reports to export.', 'info'); return; } const header = ['id','category','status','reporterId','reportedUserId','description','timestamp','adminNote']; const csv = [header.join(',')]; rows.forEach(r=>{ const ts = r.timestamp ? (r.timestamp.toDate ? r.timestamp.toDate().toISOString() : r.timestamp) : ''; const line = [r.id, (r.reportCategory||'').replace(/\"/g,'""'), r.status, r.reporterId||'', r.reportedUserId||'', (r.description||'').replace(/\"/g,'""'), ts, (r.adminNote||'').replace(/\"/g,'""')].map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(','); csv.push(line); }); const blob = new Blob([csv.join('\n')], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `reports_export_${Date.now()}.csv`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+
+        /* === ARCHIVE & UNDO HELPERS === */
+        async function archiveAndDeletePost(postId){ try{ const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId); const snap = await getDoc(postRef); if(!snap.exists()) return null; const data = snap.data(); const archiveRef = doc(db, 'artifacts', appId, 'public', 'data', 'archived_posts', postId); await setDoc(archiveRef, { ...data, archivedBy: currentUser.uid, archivedAt: serverTimestamp(), originalId: postId }); await deleteDoc(postRef); window.__last_archived = { type:'post', id:postId }; showUndoToast(`Post ${postId.substring(0,8)} deleted.`, async ()=> await restoreArchivedPost(postId)); return data; }catch(e){ console.error('archiveAndDeletePost', e); throw e; } }
+        async function restoreArchivedPost(postId){ try{ const archiveRef = doc(db, 'artifacts', appId, 'public', 'data', 'archived_posts', postId); const archSnap = await getDoc(archiveRef); if(!archSnap.exists()){ showMessageBox('No archived data found.', 'error'); return; } const data = archSnap.data(); const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId); await setDoc(postRef, data); await deleteDoc(archiveRef); await logAdminAction(currentUser.uid, 'restore_post', { postId }); showMessageBox('Post restored.', 'success'); }catch(e){ console.error('restoreArchivedPost', e); showMessageBox('Failed to restore post.', 'error'); } }
+        function showUndoToast(message, undoCb){ showMessageBox(message + ' <button id="undoActionBtn" style="margin-left:12px;padding:6px 10px;border-radius:6px;font-weight:700;">Undo</button>', 'info', 10000); setTimeout(()=>{ const btn = document.getElementById('undoActionBtn'); if(btn) btn.addEventListener('click', ()=>{ try{ undoCb(); }catch(e){ console.error(e); } }); }, 50); }
+
+        // Wire header buttons
+        document.addEventListener('DOMContentLoaded', ()=>{
+            const selectAll = document.getElementById('selectAllReports'); if(selectAll){ selectAll.addEventListener('change', ()=>{ document.querySelectorAll('.report-item input.row-select').forEach(cb=>cb.checked = selectAll.checked); }); }
+            const bulkResolve = document.getElementById('bulkResolveBtn'); if(bulkResolve) bulkResolve.addEventListener('click', ()=> bulkUpdateReports('Resolved'));
+            const bulkDismiss = document.getElementById('bulkDismissBtn'); if(bulkDismiss) bulkDismiss.addEventListener('click', ()=> bulkUpdateReports('Dismissed'));
+            const bulkDelete = document.getElementById('bulkDeleteContentBtn'); if(bulkDelete) bulkDelete.addEventListener('click', bulkDeleteContent);
+            const exportBtn = document.getElementById('exportCsvBtn'); if(exportBtn) exportBtn.addEventListener('click', exportReportsCsv);
+        });
+
         /**
          * Updates the status of a report in Firestore.
          */
