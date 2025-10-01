@@ -5666,7 +5666,18 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 };
             }catch(e){ console.warn('fetch-retry-wrap failed', e); }
         })();
-        window.addEventListener('error', (ev)=>{ console.error('Global error caught:', ev.error || ev.message, ev); });
+        window.addEventListener('error', (ev)=>{
+            try {
+                const err = ev && (ev.error || ev.message || '');
+                const msg = String(err && (err.message || err)).toLowerCase();
+                if (msg.includes('internal assertion failed') || msg.includes('unexpected state') || (err && err.stack && err.stack.includes('@firebase/firestore'))) {
+                    console.warn('Nuvia_WARN: Suppressed Firestore internal error event:', err);
+                    return;
+                }
+            } catch(_){}
+            console.error('Global error caught:', ev.error || ev.message, ev);
+        });
+        // Basic early unhandled rejection logger (suppressed later for network/firestore errors)
         window.addEventListener('unhandledrejection', (ev)=>{ console.error('Unhandled rejection:', ev.reason); });
 
         // Import Firebase modules (Updated to v11.8.0 - Latest Stable)
@@ -5714,7 +5725,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 el.innerHTML = `
                     <div class="offline-banner-inner">
                         <span class="offline-icon"><i class="fas fa-wifi"></i></span>
-                        <span class="offline-text">No internet connection. We’ll reconnect when you���re back online.</span>
+                        <span class="offline-text">No internet connection. We���ll reconnect when you���re back online.</span>
                     </div>`;
                 document.body.appendChild(el);
             }
@@ -5928,7 +5939,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             'AU': { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
             'IN': { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
             'JP': { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
-            'KR': { code: 'KRW', symbol: '₩', name: 'South Korean Won' },
+            'KR': { code: 'KRW', symbol: '���', name: 'South Korean Won' },
             'BR': { code: 'BRL', symbol: 'R$', name: 'Brazilian Real' },
             'MX': { code: 'MXN', symbol: '$', name: 'Mexican Peso' },
             'NG': { code: 'NGN', symbol: '₦', name: 'Nigerian Naira' }
