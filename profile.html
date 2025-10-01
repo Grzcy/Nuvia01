@@ -8983,7 +8983,10 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
             // Hide all action buttons initially
             if (claimDailyBonusButton) claimDailyBonusButton.style.display = 'none'; // NEW: Hide claim daily bonus button
             if (dailyBonusCountdown) dailyBonusCountdown.style.display = 'none'; // NEW: Hide daily bonus countdown
-            if (reportUserButton) reportUserButton.style.display = 'none'; // NEW: Hide report user button
+            if (reportUserButton) {
+                reportUserButton.style.display = 'none'; // NEW: Hide report user button
+                try { reportUserButton.disabled = true; reportUserButton.setAttribute('aria-disabled','true'); reportUserButton.style.opacity = '0.5'; reportUserButton.style.cursor = 'default'; } catch(_){}
+            }
             // Hide inline edit fields and account settings by default
             const localProfileDetailsSection = displayNameInput ? displayNameInput.closest('.profile-details-section') : null; // Null check for displayNameInput
             if (localProfileDetailsSection) {
@@ -9465,7 +9468,10 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
                         if (dailyBonusCountdown) dailyBonusCountdown.style.display = 'none'; // Hide daily bonus countdown for others
                         
                         // Show Report User Button
-                        if (reportUserButton) reportUserButton.style.display = 'inline-flex';
+                        if (reportUserButton) {
+                            reportUserButton.style.display = 'inline-flex';
+                            try { reportUserButton.disabled = false; reportUserButton.removeAttribute('aria-disabled'); reportUserButton.style.opacity = '1'; reportUserButton.style.cursor = 'pointer'; reportUserButton.tabIndex = 0; } catch(_){}
+                        }
 
                         // Hide inline edit fields and account settings
                         const profileDetailsSection = displayNameInput ? displayNameInput.closest('.profile-details-section') : null; // Null check
@@ -9504,7 +9510,10 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
 
                         if (claimDailyBonusButton) claimDailyBonusButton.style.display = 'none'; // Hide daily bonus button
                         if (dailyBonusCountdown) dailyBonusCountdown.style.display = 'none'; // Hide daily bonus countdown
-                        if (reportUserButton) reportUserButton.style.display = 'none'; // Hide report user button
+                        if (reportUserButton) {
+                            reportUserButton.style.display = 'none'; // Hide report user button
+                            try { reportUserButton.disabled = true; reportUserButton.setAttribute('aria-disabled','true'); reportUserButton.style.opacity = '0.5'; reportUserButton.style.cursor = 'default'; } catch(_){}
+                        }
                         // Hide inline edit fields and account settings
                         const profileDetailsSection = displayNameInput ? displayNameInput.closest('.profile-details-section') : null; // Null check
                         if (profileDetailsSection) {
