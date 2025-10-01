@@ -2241,6 +2241,16 @@
                 // Activate the clicked tab button and its corresponding content
                 button.classList.add('active');
                 document.getElementById(button.dataset.tab).classList.add('active');
+                // Load data for specific tabs when activated
+                try {
+                    if (button.dataset.tab === 'all-posts') {
+                        // ensure posts listener is active
+                        listenForAllPosts();
+                    }
+                    if (button.dataset.tab === 'trash') {
+                        loadAdminTrash();
+                    }
+                } catch (_) {}
             });
         });
 
