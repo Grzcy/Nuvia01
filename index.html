@@ -9847,6 +9847,7 @@ const lex = inspirationLexicon[type];
          * @param {string} commentText - The content of the comment.
          */
         async function addComment(postId, commentText) {
+            let wasFirstComment = false;
             const replyingTo = (addComment.replyContext && addComment.replyContext.postId===postId) ? addComment.replyContext.commentId : null;
             if (!isAuthReady || !currentUser || !currentUserProfileData) {
                 showMessageBox("You must be logged in to comment.", 'error');
@@ -9890,6 +9891,8 @@ const lex = inspirationLexicon[type];
                     }
 
                     const pData = postDoc.data();
+                    // Determine if this will be the first comment on the post
+                    wasFirstComment = (postDoc.data().commentsCount || 0) === 0;
                     postOwnerId = pData.authorId || null;
                     postOwnerName = pData.username || null;
 
