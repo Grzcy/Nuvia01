@@ -1908,6 +1908,23 @@
                         </div>
                         <p id="noRewardsMessage" style="display: none;">No pending activity rewards at the moment.</p>
 
+                        <!-- Content Moderation -->
+                        <h3>Content Moderation</h3>
+                        <div class="input-group">
+                            <label for="adminPostIdInput">Post ID (or leave empty to view recent posts):</label>
+                            <input type="text" id="adminPostIdInput" placeholder="Enter post ID to lookup" />
+                            <div style="margin-top:8px; display:flex; gap:8px;">
+                                <button id="fetchPostBtn" class="admin-button secondary"><span class="button-text">Fetch Post</span></button>
+                                <button id="refreshRecentPostsBtn" class="admin-button"><span class="button-text">Refresh Recent Posts</span></button>
+                            </div>
+                        </div>
+                        <div id="adminPostDetails" style="margin-top:12px; display:none; border:1px solid var(--border-light); padding:12px; border-radius:8px; background:var(--card-background);">
+                            <!-- Post details will be rendered here -->
+                        </div>
+                        <div id="recentPostsList" style="margin-top:12px; display:grid; gap:8px;">
+                            <!-- Recent posts will be listed here -->
+                        </div>
+
                         <!-- New: Reported Content & Users Section -->
                         <h3>Reported Content & Users</h3>
                         <div class="reports-table-container">
