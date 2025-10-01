@@ -8219,7 +8219,7 @@ async function checkAndStartDailyBonusTimer() {
          * @param {string} type - 'success', 'error', 'info', 'warning', or 'loading'.
          * @param {boolean} isPersistent - If true, the message box will not auto-hide.
          */
-        function showMessageBox(message, type, isPersistent = false) {
+        function showMessageBox(message, type, isPersistent = false, durationMs = 3000) {
             if (!messageBox) {
                 messageBox = document.getElementById('messageBox');
                 if (!messageBox) {
