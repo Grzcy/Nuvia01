@@ -15361,6 +15361,43 @@ startPagePresence();
 </script>
 
 <script>(function(){ try{ const dl=document.getElementById('mediaViewerDownload'); if(dl && !dl.__dpHooked){ dl.__dpHooked=true; dl.addEventListener('click', function(e){ try{ const href = dl.getAttribute('href') || dl.href; if(!href) return; e.preventDefault(); const fn = dl.getAttribute('download') || (href.split('/').pop()||'download'); if (typeof openDownloadPanel === 'function'){ openDownloadPanel({ url: href, filename: fn, title: 'Downloading', message: 'Your download will start automatically.' }); } else { const a=document.createElement('a'); a.href=href; a.download=fn; document.body.appendChild(a); a.click(); setTimeout(()=>{ try{ a.remove(); }catch(_){ } }, 0); } }catch(_){ } }); } }catch(_){ } })();</script>
+<script>
+(function(){
+  // Inject a minimal SVG sprite for common icons used by the success UI
+  const spriteId = '__inline_svg_icons_global';
+  if (!document.getElementById(spriteId)){
+    const sprite = `\n<svg id="${spriteId}" xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true" focusable="false">\n  <symbol id="icon-circle-check" viewBox="0 0 24 24">\n    <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-1 14.2l-3.5-3.5 1.4-1.4L11 13.4l5.1-5.1 1.4 1.4L11 16.2z" fill="currentColor"/>\n  </symbol>\n  <symbol id="icon-copy" viewBox="0 0 24 24">\n    <path d="M16 1H4a1 1 0 0 0-1 1v12h2V3h11V1zM20 5H8a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1zm-1 14H9V7h10v12z" fill="currentColor"/>\n  </symbol>\n</svg>\n`;
+    try{ document.body.insertAdjacentHTML('afterbegin', sprite); }catch(e){ const d=document.createElement('div'); d.innerHTML = sprite; document.body.insertBefore(d, document.body.firstChild); }
+  }
+
+  function replaceIcon(iEl, symbol){
+    try{
+      const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.setAttribute('class','inline-icon');
+      svg.setAttribute('width','1em'); svg.setAttribute('height','1em');
+      svg.setAttribute('viewBox','0 0 24 24');
+      svg.setAttribute('aria-hidden','true'); svg.setAttribute('focusable','false');
+      const use = document.createElementNS('http://www.w3.org/2000/svg','use');
+      use.setAttribute('href', symbol);
+      use.setAttributeNS('http://www.w3.org/1999/xlink','xlink:href', symbol);
+      svg.appendChild(use);
+      iEl.replaceWith(svg);
+    }catch(e){}
+  }
+
+  function scanAndReplace(){
+    try{
+      // circle-check icons
+      document.querySelectorAll('i.fa-circle-check, i.fa-solid.fa-circle-check, i.fas.fa-circle-check, i.fa-circle-check').forEach(i=> replaceIcon(i,'#icon-circle-check'));
+      // copy icons
+      document.querySelectorAll('i.fa-copy, i.fas.fa-copy, i.fa-regular.fa-copy').forEach(i=> replaceIcon(i,'#icon-copy'));
+      // smart success header close: keep existing
+    }catch(e){ /* ignore */ }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scanAndReplace); else scanAndReplace();
+})();
+</script>
 </body>
 </html>
 <!-- test update -->
