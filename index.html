@@ -5747,10 +5747,19 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         // Suppress unhandled fetch rejections (e.g., network/CORS) to avoid noisy global errors
         window.addEventListener('unhandledrejection', (event) => {
             try {
-                const msg = String(event.reason && (event.reason.message || event.reason)).toLowerCase();
+                const reason = event.reason || {};
+                const msg = String(reason && (reason.message || reason)).toLowerCase();
+                // Suppress noisy network errors
                 if (msg.includes('failed to fetch') || msg.includes('networkerror') || msg.includes('load failed') || msg.includes('client is offline') || msg.includes('could not reach cloud firestore backend') || msg.includes('deadline-exceeded')) {
                     event.preventDefault();
                     console.warn('Nuvia_WARN: Suppressed network fetch rejection:', event.reason);
+                    return;
+                }
+                // Suppress known transient Firestore internal assertion failures coming from SDK watch streams
+                if (msg.includes('internal assertion failed') || msg.includes('unexpected state') || (reason && reason.stack && reason.stack.includes('@firebase/firestore'))) {
+                    event.preventDefault();
+                    console.warn('Nuvia_WARN: Suppressed Firestore internal assertion (non-actionable):', event.reason);
+                    return;
                 }
             } catch (_) {}
         });
