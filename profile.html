@@ -31,7 +31,7 @@
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" onload="this.rel='stylesheet'" />
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" /></noscript>
     <!-- Font Awesome for icons (non-blocking preload) -->
-    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" onload="this.rel='stylesheet'" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /></noscript>
     <!-- Audio support for success notifications -->
 
@@ -7538,14 +7538,14 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
                 const div = document.createElement('div');
                 div.className = `notification-item ${notification.type}`;
                 div.innerHTML = `
-                    <i class="fas ${this.getNotificationIcon(notification.type)} notification-icon"></i>
+                    <i class="fa-solid ${this.getNotificationIcon(notification.type)} notification-icon"></i>
                     <div class="notification-content">
                         <div class="notification-title">${notification.title}</div>
                         <div class="notification-message">${notification.message}</div>
                         <div class="notification-time">${this.formatTime(notification.timestamp)}</div>
                     </div>
                     <button class="clear-notifications-btn" onclick="profileNotifications.removeNotification(${notification.id})">
-                        <i class="fas fa-times"></i>
+                        <i class="fa-solid fa-xmark"></i>
                     </button>
                 `;
                 return div;
@@ -7553,10 +7553,10 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
 
             getNotificationIcon(type) {
                 const icons = {
-                    'info': 'fa-info-circle',
-                    'warning': 'fa-exclamation-triangle',
+                    'info': 'fa-circle-info',
+                    'warning': 'fa-triangle-exclamation',
                     'success': 'fa-circle-check',
-                    'error': 'fa-times-circle'
+                    'error': 'fa-circle-xmark'
                 };
                 return icons[type] || 'fa-bell';
             }
