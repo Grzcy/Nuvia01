@@ -2126,7 +2126,7 @@
         }
         function closeApkModal(){ try{ const m = document.getElementById('apkDownloadModal'); if (m) m.style.display = 'none'; }catch(_){} }
 
-        async function resendVerificationEmail{
+        async function resendVerificationEmail() {
             let u = auth.currentUser;
             showSmartLoader('Sending email','Resending verification email...');
             try{
