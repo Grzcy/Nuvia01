@@ -13176,11 +13176,7 @@ async function fetchAndDisplayPosts() {
                     const csv = toCsv(rows);
                     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
                     const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `nuvia-posts-${Date.now()}.csv`;
-                    a.click();
-                    URL.revokeObjectURL(url);
+                    openDownloadPanel({ url, filename: `nuvia-posts-${Date.now()}.csv`, title: 'Downloading CSV', message: 'Your CSV export will start automatically.' });
                     showMessageBox('CSV downloaded.', 'success');
                 } catch (e) {
                     console.error(e);
@@ -13202,11 +13198,7 @@ async function fetchAndDisplayPosts() {
                     })), null, 2);
                     const blob = new Blob([json], { type: 'application/json' });
                     const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `nuvia-posts-${Date.now()}.json`;
-                    a.click();
-                    URL.revokeObjectURL(url);
+                    openDownloadPanel({ url, filename: `nuvia-posts-${Date.now()}.json`, title: 'Downloading JSON', message: 'Your JSON export will start automatically.' });
                     showMessageBox('JSON downloaded.', 'success');
                 } catch (e) {
                     console.error(e);
@@ -14936,6 +14928,60 @@ async function fetchAndDisplayPosts() {
     <a id="mediaViewerDownload" class="media-viewer-download" download>Download</a>
   </div>
 </div>
+<!-- Download Panel Modal -->
+<div class="modal-overlay" id="downloadPanelModal" role="dialog" aria-modal="true" aria-labelledby="downloadPanelTitle" style="display:none;">
+  <div class="modal-content download-panel">
+    <h3 id="downloadPanelTitle">Downloading</h3>
+    <p id="downloadPanelMessage">Your download will start automatically. If it doesn't, click "Download now".</p>
+    <div class="download-progress" aria-hidden="true"><span class="bar"></span></div>
+    <div class="button-group">
+      <button class="modal-button save-button" id="downloadNowBtn" type="button">Download now</button>
+      <button class="modal-button cancel-button" id="downloadCloseBtn" type="button">Close</button>
+    </div>
+  </div>
+</div>
+<style>
+.download-panel{ max-width:400px; }
+.download-progress{ height:6px; background: rgba(255,255,255,0.1); border-radius:999px; overflow:hidden; margin:12px 0 20px; }
+.download-progress .bar{ display:block; height:100%; width:40%; background: linear-gradient(135deg, var(--pink), var(--blue)); animation: dpBar 1.2s linear infinite; border-radius:inherit; }
+@keyframes dpBar{ 0%{ transform: translateX(-100%);} 100%{ transform: translateX(250%);} }
+</style>
+<script>
+(function(){
+  const modal = document.getElementById('downloadPanelModal');
+  const titleEl = document.getElementById('downloadPanelTitle');
+  const msgEl = document.getElementById('downloadPanelMessage');
+  const nowBtn = document.getElementById('downloadNowBtn');
+  const closeBtn = document.getElementById('downloadCloseBtn');
+  let currentUrl = '', currentFilename = '';
+  let revokeAfter = false;
+  function start(url, filename){
+    try{
+      const a = document.createElement('a');
+      a.href = url;
+      if (filename) a.download = filename;
+      a.rel = 'noopener';
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(()=>{ try{ a.remove(); if (revokeAfter && url && url.startsWith('blob:')) URL.revokeObjectURL(url); }catch(_){} }, 0);
+    }catch(_){ }
+  }
+  window.openDownloadPanel = function(opts){
+    try{
+      const o = opts||{}; currentUrl = o.url||''; currentFilename = o.filename||''; revokeAfter = currentUrl && currentUrl.startsWith('blob:');
+      if (titleEl) titleEl.textContent = o.title || 'Downloading';
+      if (msgEl) msgEl.textContent = o.message || 'Your download will start automatically. If it doesn\'t, click "Download now".';
+      if (modal){ modal.style.display='flex'; modal.classList.add('active'); setTimeout(()=> start(currentUrl, currentFilename), 350); }
+    }catch(_){ start(opts && opts.url, opts && opts.filename); }
+  };
+  function close(){ if(modal){ modal.classList.remove('active'); modal.style.display='none'; } }
+  if (nowBtn) nowBtn.addEventListener('click', (e)=>{ e.preventDefault(); start(currentUrl, currentFilename); });
+  if (closeBtn) closeBtn.addEventListener('click', (e)=>{ e.preventDefault(); close(); });
+  if (modal) modal.addEventListener('click', (e)=>{ if(e.target===modal) close(); });
+  document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') close(); });
+})();
+</script>
 <style>
 .media-viewer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:2000}
 .media-viewer-overlay.show{display:flex}
@@ -15314,6 +15360,7 @@ startPagePresence();
   let tries=0; const authRetry=setInterval(()=>{ try{ if(currentUser || ++tries>10){ clearInterval(authRetry); return; } const u=getAuth().currentUser; if(u){ currentUser=u; startOnce(); } }catch(_){ } }, 800);
 </script>
 
+<script>(function(){ try{ const dl=document.getElementById('mediaViewerDownload'); if(dl && !dl.__dpHooked){ dl.__dpHooked=true; dl.addEventListener('click', function(e){ try{ const href = dl.getAttribute('href') || dl.href; if(!href) return; e.preventDefault(); const fn = dl.getAttribute('download') || (href.split('/').pop()||'download'); if (typeof openDownloadPanel === 'function'){ openDownloadPanel({ url: href, filename: fn, title: 'Downloading', message: 'Your download will start automatically.' }); } else { const a=document.createElement('a'); a.href=href; a.download=fn; document.body.appendChild(a); a.click(); setTimeout(()=>{ try{ a.remove(); }catch(_){ } }, 0); } }catch(_){ } }); } }catch(_){ } })();</script>
 </body>
 </html>
 <!-- test update -->
