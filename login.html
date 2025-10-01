@@ -1948,6 +1948,7 @@
             // Re-enable form
             document.getElementById('loginForm').style.pointerEvents = 'auto';
         }
+        try { window.hideLoader = hideSmartLoader; } catch(_){ }
 
         // Show loading state
         function showLoading(message) {
