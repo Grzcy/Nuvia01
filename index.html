@@ -7246,7 +7246,7 @@ const simpleCategoryTemplates = {
         const quoteTemplates = {
             motivational: { openers:["Keep going","Start small","Believe in yourself","Stay consistent","Trust the process"], bridges:["�������"," because ",": ",", and ","; "], endings:["every step counts.","tomorrow thanks you for today's effort.","progress loves momentum.","you're closer than you think.","discipline builds destiny."] },
             peaceful: { openers:["Breathe","Slow down","Be gentle","Find quiet","Let go"], bridges:["—"," and ",", then "," as ",": "], endings:["clarity will meet you.","peace finds its way in.","the heart softens.","the mind untangles.","you return to yourself."] },
-            funny: { openers:["Reminder","Breaking news","Pro tip","True story","PSA"], bridges:[": "," — "," ���� ",": "], endings:["motivation will arrive after snacks.","I'm on a seafood diet������I see food and I code.","sleep is a patch we never apply.","tomorrow is just today with a wig.","coffee is my personality driver."] },
+            funny: { openers:["Reminder","Breaking news","Pro tip","True story","PSA"], bridges:[": "," — "," ���� ",": "], endings:["motivation will arrive after snacks.","I'm on a seafood diet����I see food and I code.","sleep is a patch we never apply.","tomorrow is just today with a wig.","coffee is my personality driver."] },
             wisdom: { openers:["Growth","Curiosity","Patience","Listening","Kindness"], bridges:[" reveals that "," teaches that "," reminds us "," shows that ",": "], endings:["there's more to learn than to prove.","small habits shape great outcomes.","the quietest lessons echo the longest.","consistency outlives talent.","clarity follows attention."] },
             love: { openers:["Love","Compassion","Care","Gratitude","Warmth"], bridges:[" grows where "," lives when "," begins when "," multiplies when ",": "], endings:["we show up for each other.","we choose patience.","we listen before we speak.","small gestures carry big meaning.","we forgive and rebuild."] }
         };
@@ -9181,7 +9181,7 @@ async function checkAndStartDailyBonusTimer() {
                 const extras = {
                     motivational: [
                         "Break this into small, doable steps you can start today, and keep a simple checklist to track your momentum.",
-                        "If you feel unsure, begin with a two‑minute action that moves you forward and build from there.",
+                        "If you feel unsure, begin with a two���minute action that moves you forward and build from there.",
                         "Celebrate tiny wins and write down one thing you learned; that reflection turns effort into growth.",
                         "When doubts appear, return to your reason for starting and take the next kind, practical step.",
                     ],
@@ -10418,6 +10418,11 @@ const lex = inspirationLexicon[type];
                         </button>
                         <button class="add-to-highlights-button" data-post-id="${postId}" ${!isAuthReady ? 'disabled' : ''} aria-label="Add to Highlights">
                             <i class="fas fa-bookmark"></i> Add to Highlights
+                        </button>
+                        ` : ''}
+                        ${currentUser && currentUser.uid === ADMIN_UID ? `
+                        <button class="admin-takedown-button btn btn-danger" data-post-id="${postId}" data-author-id="${post.authorId}" aria-label="Take down Post">
+                            <i class="fas fa-gavel"></i> Take Down
                         </button>
                         ` : ''}
                         <a class="report-post-link" href="/Report.html?reportedUserId=${encodeURIComponent(postId)}&reportedAuthorId=${encodeURIComponent(post.authorId)}&type=post" aria-label="Report Post">
