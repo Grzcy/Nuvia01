@@ -10398,7 +10398,13 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
             if (claimDailyBonusButton) claimDailyBonusButton.addEventListener('click', claimDailyBonus);
 
             // NEW: Report User button and modal listeners
-            if (reportUserButton) reportUserButton.addEventListener('click', showReportUserModal);
+            if (reportUserButton) {
+                try { reportUserButton.style.cursor = 'pointer'; reportUserButton.style.zIndex = '1000'; } catch(_){}
+                reportUserButton.addEventListener('click', (e) => {
+                    console.log('Nuvia_DEBUG: reportUserButton clicked', { displayedUserId, currentUser });
+                    try { showReportUserModal(e); } catch (err) { console.error('Nuvia_ERROR: showReportUserModal failed', err); }
+                });
+            }
             if (cancelReportButton) cancelReportButton.addEventListener('click', hideReportUserModal);
             if (submitReportButton) submitReportButton.addEventListener('click', submitReport);
 
