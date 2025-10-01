@@ -1210,6 +1210,7 @@
                     <button class="tab-button active" data-tab="reported-content">Reported Content</button>
                     <button class="tab-button" data-tab="user-violations">User Violations</button>
                     <button class="tab-button" data-tab="moderation-logs">Moderation Logs</button>
+                    <button class="tab-button" data-tab="all-posts">All Posts</button>
                     <button class="tab-button" data-tab="settings">Moderation Settings</button>
                 </div>
 
@@ -1407,7 +1408,7 @@
         // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, addDoc, serverTimestamp, deleteDoc, updateDoc, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         // --- Firebase & Canvas Environment Configuration ---
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
