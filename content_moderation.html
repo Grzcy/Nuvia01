@@ -2052,13 +2052,32 @@
             // await logAdminAction(currentUser.uid, 'review_content_report', { reportId });
         }
 
-        function handleRemove(reportId) {
+        async function handleRemove(reportId) {
             showMessageBox(`Removing content for report: ${reportId}`, 'warning', 0, true);
-            // Implement logic to delete content, mark report as rejected, possibly issue a user violation
-            // Example:
-            // await db.collection('artifacts').doc(appId).collection('reported_content').doc(reportId).delete(); // Or update content status
-            // await logAdminAction(currentUser.uid, 'remove_content', { reportId, reason: 'Violated TOS' });
-            setTimeout(() => showMessageBox('Content removed.', 'success'), 1500); // Simulate action
+            try {
+                // Try to remove a post document with this id, fallback to marking as removed
+                const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', reportId);
+                try {
+                    await deleteDoc(postRef);
+                    await logAdminAction(currentUser.uid, 'delete_post', { postId: reportId });
+                } catch (delErr) {
+                    try {
+                        await updateDoc(postRef, { status: 'removed', removedBy: currentUser.uid, removedAt: serverTimestamp() });
+                        await logAdminAction(currentUser.uid, 'soft_delete_post', { postId: reportId });
+                    } catch (uErr) {
+                        console.error('Failed to delete or mark post removed:', uErr);
+                        // As a last resort, remove the report entry if it exists
+                        try {
+                            const reportRef = doc(db, 'artifacts', appId, 'reported_content', reportId);
+                            await deleteDoc(reportRef);
+                        } catch (_) {}
+                    }
+                }
+                showMessageBox('Content removed.', 'success');
+            } catch (error) {
+                console.error('Error removing content:', error);
+                showMessageBox('Failed to remove content.', 'error');
+            }
         }
 
         function viewUserHistory(userId) {
