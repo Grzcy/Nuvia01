@@ -7246,7 +7246,7 @@ const simpleCategoryTemplates = {
         const quoteTemplates = {
             motivational: { openers:["Keep going","Start small","Believe in yourself","Stay consistent","Trust the process"], bridges:["�������"," because ",": ",", and ","; "], endings:["every step counts.","tomorrow thanks you for today's effort.","progress loves momentum.","you're closer than you think.","discipline builds destiny."] },
             peaceful: { openers:["Breathe","Slow down","Be gentle","Find quiet","Let go"], bridges:["—"," and ",", then "," as ",": "], endings:["clarity will meet you.","peace finds its way in.","the heart softens.","the mind untangles.","you return to yourself."] },
-            funny: { openers:["Reminder","Breaking news","Pro tip","True story","PSA"], bridges:[": "," — "," ���� ",": "], endings:["motivation will arrive after snacks.","I'm on a seafood diet����I see food and I code.","sleep is a patch we never apply.","tomorrow is just today with a wig.","coffee is my personality driver."] },
+            funny: { openers:["Reminder","Breaking news","Pro tip","True story","PSA"], bridges:[": "," — "," ���� ",": "], endings:["motivation will arrive after snacks.","I'm on a seafood diet������I see food and I code.","sleep is a patch we never apply.","tomorrow is just today with a wig.","coffee is my personality driver."] },
             wisdom: { openers:["Growth","Curiosity","Patience","Listening","Kindness"], bridges:[" reveals that "," teaches that "," reminds us "," shows that ",": "], endings:["there's more to learn than to prove.","small habits shape great outcomes.","the quietest lessons echo the longest.","consistency outlives talent.","clarity follows attention."] },
             love: { openers:["Love","Compassion","Care","Gratitude","Warmth"], bridges:[" grows where "," lives when "," begins when "," multiplies when ",": "], endings:["we show up for each other.","we choose patience.","we listen before we speak.","small gestures carry big meaning.","we forgive and rebuild."] }
         };
@@ -10909,7 +10909,7 @@ async function fetchAndDisplayPosts() {
                 const button = event.target.closest('.post-options-button');
                 const postId = button.dataset.postId;
                 const dropdown = document.getElementById(`dropdown-${postId}`);
-                const hasManageItems = !!dropdown?.querySelector('.edit-post-button, .delete-post-button, .share-post-button, .add-to-highlights-button');
+                const hasManageItems = !!dropdown?.querySelector('.edit-post-button, .delete-post-button, .share-post-button, .add-to-highlights-button, .admin-takedown-button');
                 if (hasManageItems) {
                     if (!isAuthReady) { showMessageBox("Please log in to manage posts.", 'error'); return; }
                     if (!currentSystemSettings.enablePostCreation && currentUser.uid !== ADMIN_UID) { showMessageBox("Post management is currently disabled by administrators.", 'warning'); return; }
@@ -10929,6 +10929,20 @@ async function fetchAndDisplayPosts() {
                 const isOwner = (currentUser && button.dataset.authorId === currentUser.uid);
                 if (delBtn && isOwner) delBtn.style.display = '';
                 event.stopPropagation(); // Prevent document click from closing it immediately.
+            }
+            // Handle Admin Take Down Button
+            else if (event.target.closest('.admin-takedown-button')) {
+                const btn = event.target.closest('.admin-takedown-button');
+                if (!isAuthReady || !currentUser || currentUser.uid !== ADMIN_UID) { showMessageBox('Unauthorized. Only admins can take down posts.', 'error'); return; }
+                const postId = btn.dataset.postId;
+                const authorId = btn.dataset.authorId;
+                (async ()=>{
+                    try {
+                        await deletePost(postId, authorId);
+                        const dropdown = document.getElementById(`dropdown-${postId}`);
+                        if (dropdown) dropdown.classList.remove('active');
+                    } catch(e) { console.error(e); showMessageBox('Failed to take down post.', 'error'); }
+                })();
             }
             // Handle Edit Post Button
             else if (event.target.closest('.delete-post-button')) {
