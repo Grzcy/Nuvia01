@@ -921,6 +921,7 @@
                     <div class="form-group">
                         <label for="reportedUserId">User/Post/Message ID or Link (Optional)</label>
                         <input type="text" id="reportedUserId" name="reportedUserId" placeholder="Paste a link or ID here..." />
+                        <input type="hidden" id="reportedAuthorId" name="reportedAuthorId" value="" />
                     </div>
 
                     <div class="form-group">
@@ -1364,7 +1365,9 @@
 
 
         // Prefill reported ID from URL params if present
-        (function prefillFromUrl(){ try{ const params = new URLSearchParams(window.location.search); const rid = params.get('reportedUserId') || params.get('id') || params.get('reportedId'); const author = params.get('reportedAuthorId') || params.get('reportedAuthor'); if (rid) { try { document.getElementById('reportedUserId').value = decodeURIComponent(rid); } catch(_){} } if (author) { try { const el = document.getElementById('reportedUserId'); if (el && !el.value) el.value = decodeURIComponent(author); } catch(_){} } }catch(e){ console.warn('Prefill from URL failed', e); } })();
+        (function prefillFromUrl(){ try{ const params = new URLSearchParams(window.location.search); const rid = params.get('reportedUserId') || params.get('id') || params.get('reportedId'); const author = params.get('reportedAuthorId') || params.get('reportedAuthor'); if (rid) { try { document.getElementById('reportedUserId').value = decodeURIComponent(rid); } catch(_){} } if (author) { try { const elAuthor = document.getElementById('reportedAuthorId'); if (elAuthor) elAuthor.value = decodeURIComponent(author); // Keep reportedUserId visible for convenience, only set if empty
+                const elVisible = document.getElementById('reportedUserId'); if (elVisible && !elVisible.value) elVisible.value = decodeURIComponent(author);
+            } catch(_){} } }catch(e){ console.warn('Prefill from URL failed', e); } })();
 
         // --- Authentication State Listener ---
         onAuthStateChanged(auth, async (user) => {
@@ -1439,7 +1442,7 @@
 
                 // Add report to Firestore
                 const reportsCollectionRef = collection(db, "artifacts", appId, "public", "data", "reports");
-                await addDoc(reportsCollectionRef, {
+                const reportDocRef = await addDoc(reportsCollectionRef, {
                     reporterId: currentUser.uid,
                     reportedUserId: reportedUserId || null,
                     reportCategory: category,
@@ -1448,6 +1451,42 @@
                     status: 'Received',
                     timestamp: serverTimestamp()
                 });
+
+                // Notify the reported author (if provided) by creating a notification document in their notifications collection
+                try {
+                    const reportedAuthorId = (document.getElementById('reportedAuthorId') && document.getElementById('reportedAuthorId').value) ? document.getElementById('reportedAuthorId').value.trim() : null;
+                    if (reportedAuthorId && reportedAuthorId !== currentUser.uid) {
+                        // Build notification payload with full report details for Android client to display
+                        const notificationsCollectionRef = collection(db, "artifacts", appId, "users", reportedAuthorId, "notifications");
+                        // Attempt to fetch reporter's public username for context
+                        let reporterUsername = (currentUser.displayName) ? currentUser.displayName : null;
+                        try {
+                            const publicReporterRef = doc(db, "artifacts", appId, "public", "data", "users", currentUser.uid);
+                            const publicSnap = await getDoc(publicReporterRef);
+                            if (publicSnap.exists()) reporterUsername = publicSnap.data().username || reporterUsername;
+                        } catch(_){}
+
+                        const notificationPayload = {
+                            type: 'report',
+                            message: `Your content received a report: ${category}`,
+                            senderId: currentUser.uid,
+                            senderUsername: reporterUsername || 'A user',
+                            reportId: reportDocRef.id,
+                            reportDetails: {
+                                category: category,
+                                description: description,
+                                mediaUrls: mediaUrls,
+                                reportedVisibleId: reportedUserId || null
+                            },
+                            read: false,
+                            timestamp: serverTimestamp()
+                        };
+
+                        await addDoc(notificationsCollectionRef, notificationPayload);
+                    }
+                } catch (notifyErr) {
+                    console.error('Error creating report notification for author:', notifyErr);
+                }
 
                 showCustomModal('Report Submitted', 'Thank you! Your report has been submitted successfully and will be reviewed by our team.');
                 reportForm.reset();
