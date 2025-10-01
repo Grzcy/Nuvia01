@@ -1455,9 +1455,23 @@
                 // Notify the reported author (if provided) by creating a notification document in their notifications collection
                 try {
                     const reportedAuthorId = (document.getElementById('reportedAuthorId') && document.getElementById('reportedAuthorId').value) ? document.getElementById('reportedAuthorId').value.trim() : null;
-                    if (reportedAuthorId && reportedAuthorId !== currentUser.uid) {
+                    // Resolve the final author ID to notify. Prefer reportedAuthorId, otherwise attempt to derive from reportedUserId (e.g., when it's a post id).
+                    let finalAuthorId = reportedAuthorId || null;
+                    if (!finalAuthorId && reportedUserId) {
+                        try {
+                            // Try treating reportedUserId as a post id and fetch post to get its author
+                            const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', reportedUserId);
+                            const postSnap = await getDoc(postRef);
+                            if (postSnap.exists()) {
+                                const pd = postSnap.data();
+                                finalAuthorId = pd.authorId || pd.userId || null;
+                            }
+                        } catch(_){}
+                    }
+
+                    if (finalAuthorId && finalAuthorId !== currentUser.uid) {
                         // Build notification payload with full report details for Android client to display
-                        const notificationsCollectionRef = collection(db, "artifacts", appId, "users", reportedAuthorId, "notifications");
+                        const notificationsCollectionRef = collection(db, "artifacts", appId, "users", finalAuthorId, "notifications");
                         // Attempt to fetch reporter's public username for context
                         let reporterUsername = (currentUser.displayName) ? currentUser.displayName : null;
                         try {
