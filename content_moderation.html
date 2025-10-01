@@ -394,15 +394,35 @@
       const type = (report.contentType || report.type || '').toLowerCase();
       if (type === 'post' && report.contentId){
         const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', report.contentId);
-        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', report.id), { status: 'content_deleted', resolvedAt: serverTimestamp(), resolvedBy: currentUser.uid });
-        await (await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js')).deleteDoc(postRef);
-        return;
+        try{
+          const snap = await getDoc(postRef);
+          if (snap.exists()){
+            const data = snap.data();
+            const archiveRef = doc(db, 'artifacts', appId, 'public', 'data', 'archived_posts', report.contentId);
+            await setDoc(archiveRef, { ...data, archivedBy: currentUser.uid, archivedAt: serverTimestamp(), originalId: report.contentId });
+            await deleteDoc(postRef);
+            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', report.id), { status: 'content_deleted', resolvedAt: serverTimestamp(), resolvedBy: currentUser.uid });
+            window.__last_archived = { type:'post', id: report.contentId };
+            showUndoToast('Post deleted.', async ()=>{ const aRef = doc(db, 'artifacts', appId, 'public', 'data', 'archived_posts', report.contentId); const aSnap = await getDoc(aRef); if(aSnap.exists()){ await setDoc(postRef, aSnap.data()); await deleteDoc(aRef); showMessageBox('Post restored.', 'success'); } });
+          }
+          return;
+        }catch(e){ console.error('deleteReportedContent(post)', e); throw e; }
       }
       if (type === 'message' && report.contentId && report.chatRoomId){
         const msgRef = doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', report.chatRoomId, 'messages', report.contentId);
-        await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', report.id), { status: 'content_deleted', resolvedAt: serverTimestamp(), resolvedBy: currentUser.uid });
-        await (await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js')).deleteDoc(msgRef);
-        return;
+        try{
+          const snap = await getDoc(msgRef);
+          if (snap.exists()){
+            const data = snap.data();
+            const archiveRef = doc(db, 'artifacts', appId, 'public', 'data', 'archived_messages', report.contentId);
+            await setDoc(archiveRef, { ...data, archivedBy: currentUser.uid, archivedAt: serverTimestamp(), originalId: report.contentId, chatRoomId: report.chatRoomId });
+            await deleteDoc(msgRef);
+            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', report.id), { status: 'content_deleted', resolvedAt: serverTimestamp(), resolvedBy: currentUser.uid });
+            window.__last_archived = { type:'message', id: report.contentId, chatRoomId: report.chatRoomId };
+            showUndoToast('Message deleted.', async ()=>{ const aRef = doc(db, 'artifacts', appId, 'public', 'data', 'archived_messages', report.contentId); const aSnap = await getDoc(aRef); if(aSnap.exists()){ const d = aSnap.data(); const restoreRef = doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', d.chatRoomId, 'messages', report.contentId); await setDoc(restoreRef, d); await deleteDoc(aRef); showMessageBox('Message restored.', 'success'); } });
+          }
+          return;
+        }catch(e){ console.error('deleteReportedContent(message)', e); throw e; }
       }
       throw new Error('Unsupported content type or missing IDs');
     }
