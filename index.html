@@ -9181,7 +9181,7 @@ async function checkAndStartDailyBonusTimer() {
                 const extras = {
                     motivational: [
                         "Break this into small, doable steps you can start today, and keep a simple checklist to track your momentum.",
-                        "If you feel unsure, begin with a two���minute action that moves you forward and build from there.",
+                        "If you feel unsure, begin with a two‑minute action that moves you forward and build from there.",
                         "Celebrate tiny wins and write down one thing you learned; that reflection turns effort into growth.",
                         "When doubts appear, return to your reason for starting and take the next kind, practical step.",
                     ],
@@ -10348,6 +10348,18 @@ const lex = inspirationLexicon[type];
             const postRef = doc(db, "artifacts", appId, "public", "data", "posts", postId);
 
             try {
+                // Archive post before deletion so it can be restored if needed
+                try {
+                    const postSnap = await getDoc(postRef);
+                    if (postSnap.exists()) {
+                        const postData = postSnap.data();
+                        const archiveRef = doc(db, "artifacts", appId, "public", "data", "archived_posts", postId);
+                        await setDoc(archiveRef, { ...postData, archivedBy: currentUser.uid, archivedAt: serverTimestamp(), originalId: postId });
+                    }
+                } catch (archErr) {
+                    console.warn('Failed to archive post before deletion', archErr);
+                }
+
                 await runTransaction(db, async (transaction) => {
                     transaction.delete(postRef); // Delete the post document.
                 });
@@ -10363,6 +10375,11 @@ const lex = inspirationLexicon[type];
                     null,
                     postId
                 );
+
+                // Allow quick undo by restoring archived post
+                window.__last_archived = { type: 'post', id: postId };
+                showMessageBox(`Post deleted. <button id="undoDeleteBtn" style="margin-left:12px;padding:6px 10px;border-radius:6px;font-weight:700;">Undo</button>`, 'success', 10000);
+                setTimeout(()=>{ const btn = document.getElementById('undoDeleteBtn'); if(btn){ btn.addEventListener('click', async ()=>{ try{ const archiveRef = doc(db, "artifacts", appId, "public", "data", "archived_posts", postId); const arch = await getDoc(archiveRef); if(arch.exists()){ await setDoc(postRef, arch.data()); await deleteDoc(archiveRef); await logAdminAction(currentUser.uid, 'restore_post', { postId }); showMessageBox('Post restored.', 'success'); } }catch(e){ console.error('Undo restore failed', e); showMessageBox('Failed to restore post.', 'error'); } }); } }, 50);
 
                 showMessageBox("Post deleted successfully!", 'success');
                 playNotificationSound('success');
