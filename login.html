@@ -1841,7 +1841,7 @@
                     }
                 } catch (netErr) {
                     console.warn('Network check failed:', netErr);
-                    errorMessage = 'Network error: Unable to reach authentication server. Check your internet connection or browser extensions (adblockers/proxies) and try again.';
+                    errorMessage = "Wrong password, please you can't sign in to Nuvia with incorrect password, please check your password and try again.";
                     showErrorModal(errorMessage);
                     return;
                 }
@@ -1889,7 +1889,7 @@
                             errorMessage = 'Too many failed attempts. Please try again later, or reset your password.';
                             break;
                         case 'auth/network-request-failed':
-                            errorMessage = 'Network issue: we could not reach the authentication server. Check your internet, VPN/proxy, or ad blocker and try again.';
+                            errorMessage = "Wrong password, please you can't sign in to Nuvia with incorrect password, please check your password and try again.";
                             break;
                         default:
                             // Keep generic message
