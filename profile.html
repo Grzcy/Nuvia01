@@ -9715,16 +9715,16 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
                     if (initialAuthToken) {
                         await signInWithCustomToken(auth, initialAuthToken);
                         console.log("JCHAT_DEBUG: Signed in with custom token.");
+                        // onAuthStateChanged will be triggered again with the new user
                     } else {
-                        await signInAnonymously(auth);
-                        console.log("JCHAT_DEBUG: Signed in anonymously.");
+                        // DO NOT auto sign-in anonymously on the profile page. Keep visitors unauthenticated so
+                        // actions that require authentication (like reporting) remain hidden. This prevents
+                        // visitors from seeing or interacting with authenticated-only buttons.
+                        console.log("JCHAT_DEBUG: No initial auth token; staying as guest (no anonymous sign-in).");
                     }
-                    // onAuthStateChanged will be triggered again with the new user
                 } catch (error) {
-                    console.error("JCHAT_ERROR: Error during anonymous sign-in or custom token sign-in:", error);
-                    if (!auth.currentUser) {
-                        window.location.href = '/login.html';
-                    }
+                    console.error("JCHAT_ERROR: Error during custom token sign-in:", error);
+                    // Don't force navigation to login here; leave the page as guest view
                 }
                 isAuthReady = false;
                 if (logoutButtonAccount) logoutButtonAccount.disabled = true; // Account settings logout button, null check
