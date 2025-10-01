@@ -70,7 +70,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
     <!-- Font Awesome for icons -->
-    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" onload="this.rel='stylesheet'" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"></noscript>
     <style>
       /* Rendering hints to speed up first paint by skipping offscreen rendering */
@@ -4797,7 +4797,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                             <p style="margin-top:8px;color:var(--text-light);">Under the hood, Nuvia blends procedural quote generation, on-device caching, and server-side moderation. Our architecture prioritizes:</p>
                             <ul style="margin:8px 0 12px 18px;color:var(--text-light);">
                                 <li><strong>Deterministic inspiration</strong> — time-seeded algorithms deliver consistent, non-repetitive daily prompts.</li>
-                                <li><strong>Scripture indexing</strong> �������� fast chapter and verse lookup with offline resume and reading progress persistence.</li>
+                                <li><strong>Scripture indexing</strong> ������ fast chapter and verse lookup with offline resume and reading progress persistence.</li>
                                 <li><strong>Privacy-first profiles</strong> �� local-first defaults with optional cloud sync for registered users.</li>
                                 <li><strong>Content safety</strong> ��� layered moderation combining heuristics and community signals.</li>
                             </ul>
@@ -8217,7 +8217,7 @@ async function checkAndStartDailyBonusTimer() {
             }
 
             // Set inner HTML with icon and text elements.
-            messageBox.innerHTML = `<i id=\"messageBoxIcon\"></i><span id=\"messageBoxText\"></span><button id=\"messageBoxClose\" aria-label=\"Close\" style=\"margin-left:8px;border:none;background:transparent;color:inherit;cursor:pointer;\"><i class=\"fas fa-times\"></i></button>`;
+            messageBox.innerHTML = `<i id=\"messageBoxIcon\"></i><span id=\"messageBoxText\"></span><button id=\"messageBoxClose\" aria-label=\"Close\" style=\"margin-left:8px;border:none;background:transparent;color:inherit;cursor:pointer;\"><i class=\"fas fa-solid fa-xmark\"></i></button>`;
             const messageBoxIcon = document.getElementById('messageBoxIcon');
             const messageBoxText = document.getElementById('messageBoxText');
 
@@ -8229,15 +8229,15 @@ async function checkAndStartDailyBonusTimer() {
             if (messageBoxIcon) {
                 messageBoxIcon.className = ''; // Clear existing classes.
                 if (type === 'success') {
-                    messageBoxIcon.classList.add('fas', 'fa-check-circle');
+                    messageBoxIcon.classList.add('fas', 'fa-solid', 'fa-circle-check');
                 } else if (type === 'error') {
-                    messageBoxIcon.classList.add('fas', 'fa-times-circle');
+                    messageBoxIcon.classList.add('fas', 'fa-solid', 'fa-circle-xmark');
                 } else if (type === 'info') {
-                    messageBoxIcon.classList.add('fas', 'fa-info-circle');
+                    messageBoxIcon.classList.add('fas', 'fa-solid', 'fa-circle-info');
                 } else if (type === 'warning') {
-                    messageBoxIcon.classList.add('fas', 'fa-exclamation-triangle');
+                    messageBoxIcon.classList.add('fas', 'fa-solid', 'fa-triangle-exclamation');
                 } else if (type === 'loading') {
-                    messageBoxIcon.classList.add('fas', 'fa-spinner', 'fa-spin'); // Spinner for loading.
+                    messageBoxIcon.classList.add('fas', 'fa-solid', 'fa-spinner', 'fa-spin');
                 }
             }
 
