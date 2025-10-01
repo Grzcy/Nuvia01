@@ -1897,37 +1897,37 @@
          * Listens for real-time updates to moderation logs and populates the table.
          */
         function listenForModerationLogs() {
-            // This is a placeholder for actual data fetching from your backend/Firestore
-            // Example:
-            // const logsRef = collection(db, "artifacts", appId, "admin_logs");
-            // const q = query(logsRef, orderBy("timestamp", "desc"), limit(50)); // Get last 50 logs
-            // onSnapshot(q, (snapshot) => {
-            //     moderationLogsTableBody.innerHTML = ''; // Clear existing rows
-            //     if (snapshot.empty) {
-            //         moderationLogsTableBody.innerHTML = '<tr><td colspan="5" class="no-data-message">No moderation logs to display.</td></tr>';
-            //         return;
-            //     }
-            //     snapshot.forEach(doc => {
-            //         const log = doc.data();
-            //         const timestamp = log.timestamp ? new Date(log.timestamp.toDate()).toLocaleString() : 'N/A';
-            //         const row = `
-            //             <tr>
-            //                 <td class="log-timestamp">${timestamp}</td>
-            //                 <td><a href="/profile.html?userId=${log.adminUid}" style="color: var(--accent-color);">${log.adminUsername || 'Moderator'}</a></td>
-            //                 <td class="log-action-type">${log.actionType}</td>
-            //                 <td>${log.targetId || 'N/A'}</td>
-            //                 <td class="log-details">${log.details ? JSON.stringify(log.details) : 'No details'}</td>
-            //             </tr>
-            //         `;
-            //         moderationLogsTableBody.insertAdjacentHTML('beforeend', row);
-            //     });
-            // }, (error) => {
-            //     console.error("Error listening to moderation logs:", error);
-            //     showMessageBox("Failed to load moderation logs.", 'error');
-            // });
-
-            // Default to 'no data' message until actual implementation
-            moderationLogsTableBody.innerHTML = '<tr><td colspan="5" class="no-data-message">No moderation logs to display.</td></tr>';
+            try {
+                const logsRef = collection(db, "artifacts", appId, "admin_logs");
+                const q = query(logsRef, orderBy("timestamp", "desc"), limit(50));
+                onSnapshot(q, (snapshot) => {
+                    moderationLogsTableBody.innerHTML = '';
+                    if (snapshot.empty) {
+                        moderationLogsTableBody.innerHTML = '<tr><td colspan="5" class="no-data-message">No moderation logs to display.</td></tr>';
+                        return;
+                    }
+                    snapshot.forEach(docSnap => {
+                        const log = docSnap.data();
+                        const timestamp = log.timestamp ? new Date(log.timestamp.toDate()).toLocaleString() : 'N/A';
+                        const row = `
+                            <tr>
+                                <td class="log-timestamp">${timestamp}</td>
+                                <td><a href="/profile.html?userId=${log.adminUid}" style="color: var(--accent-color);">${log.adminUsername || 'Moderator'}</a></td>
+                                <td class="log-action-type">${log.actionType}</td>
+                                <td>${log.targetId || 'N/A'}</td>
+                                <td class="log-details">${log.details ? JSON.stringify(log.details) : 'No details'}</td>
+                            </tr>
+                        `;
+                        moderationLogsTableBody.insertAdjacentHTML('beforeend', row);
+                    });
+                }, (error) => {
+                    console.error("Error listening to moderation logs:", error);
+                    moderationLogsTableBody.innerHTML = '<tr><td colspan="5" class="no-data-message">No moderation logs to display.</td></tr>';
+                });
+            } catch (e) {
+                console.warn('Realtime moderation logs not available, falling back to empty state.', e);
+                moderationLogsTableBody.innerHTML = '<tr><td colspan="5" class="no-data-message">No moderation logs to display.</td></tr>';
+            }
         }
 
         // --- Event Listeners ---
