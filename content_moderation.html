@@ -1792,6 +1792,8 @@
 
                 if (docSnap.exists()) {
                     const settings = docSnap.data();
+                    // Cache settings for runtime moderation
+                    window.moderationSettings = settings;
                     document.getElementById('keyword_filter_enable').checked = settings.keyword_filter_enable || false;
                     document.getElementById('blacklisted_keywords').value = settings.blacklisted_keywords ? settings.blacklisted_keywords.join(', ') : '';
                     document.getElementById('ai_moderation_enable').checked = settings.ai_moderation_enable || false;
@@ -1802,6 +1804,7 @@
                     document.getElementById('strike3_action').value = settings.strike3_action || 'temp_ban';
                     document.getElementById('strike5_action').value = settings.strike5_action || 'perm_ban';
                 } else {
+                    window.moderationSettings = null;
                     console.log("No moderation settings found in Firestore. Using default form values.");
                 }
             } catch (error) {
