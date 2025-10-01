@@ -1234,7 +1234,7 @@
         const db = getFirestore(app);
 
         // --- ADMIN UID ---
-        const ADMIN_UID = 'RJZ8xhsjEsdKBGFYveWO0Rsq1Zz1'; // The specific UID for the administrator
+        const ADMIN_UID = (typeof window !== 'undefined' && window.ADMIN_UID) ? window.ADMIN_UID : 'RJZ8xhsjEsdKBGFYveWO0Rsq1Zz1'; // The specific UID for the administrator (respects global override)
 
         // --- DOM Elements ---
         const headerProfilePic = document.getElementById('headerProfilePic');
