@@ -1160,9 +1160,12 @@
       .smart-progress{height:8px;background:rgba(255,255,255,0.12);border-radius:999px;overflow:hidden;margin:14px 0 6px;}
       .smart-progress-bar{display:block;height:100%;width:0;background:linear-gradient(90deg, var(--pink), var(--blue));transition:width 300ms ease;border-radius:inherit;}
       .smart-percent{font-family:'Inter',sans-serif;font-size:12px;color:var(--text-light);opacity:.85;}
+      .smart-loader-logo{width:80px;height:80px;object-fit:contain;display:block;margin:0 auto 14px;filter:drop-shadow(0 0 12px var(--pink)) drop-shadow(0 0 12px var(--blue));border-radius:12px;}
+      @media (max-width:600px){.smart-loader-logo{width:64px;height:64px;margin-bottom:12px;}}
     </style>
     <div class="smart-loader" id="smartLoader" aria-hidden="true">
         <div class="loader-content" role="dialog" aria-label="Loading">
+            <img class="smart-loader-logo" src="https://cdn.builder.io/api/v1/image/assets%2F7ddc96086aa641d6b4ecb6f09d6fc11e%2Fe6f0e17448b846b9bf70db2e0b4fd230?format=webp&width=800" alt="Nuvia logo" loading="eager" decoding="async">
             <div class="gemini-spinner" aria-hidden="true"></div>
             <div class="loader-text" id="loaderText">Processing...</div>
             <div class="loader-subtext" id="loaderSubtext">Please wait while we authenticate you</div>
