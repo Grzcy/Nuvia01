@@ -10629,7 +10629,7 @@ async function fetchAndDisplayPosts() {
             // Detach previous listeners to prevent memory leaks and duplicate updates.
             unsubscribeListeners.forEach(unsubscribe => {
                 if (typeof unsubscribe === 'function') {
-                    unsubscribe();
+                    try { unsubscribe(); } catch(e) { console.warn('Nuvia_WARN: Error while detaching Firestore listener:', e); }
                 }
             });
             unsubscribeListeners = []; // Clear the array of unsubscribe functions.
@@ -12399,7 +12399,7 @@ async function fetchAndDisplayPosts() {
             // Detach all Firestore listeners before the page unloads.
             unsubscribeListeners.forEach(unsubscribe => {
                 if (typeof unsubscribe === 'function') {
-                    unsubscribe();
+                    try { unsubscribe(); } catch(e) { console.warn('Nuvia_WARN: Error while detaching Firestore listener during unload:', e); }
                 }
             });
             unsubscribeListeners = []; // Clear the array.
