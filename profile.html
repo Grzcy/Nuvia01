@@ -10402,7 +10402,18 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
                 try { reportUserButton.style.cursor = 'pointer'; reportUserButton.style.zIndex = '1000'; } catch(_){}
                 reportUserButton.addEventListener('click', (e) => {
                     console.log('Nuvia_DEBUG: reportUserButton clicked', { displayedUserId, currentUser });
-                    try { showReportUserModal(e); } catch (err) { console.error('Nuvia_ERROR: showReportUserModal failed', err); }
+                    try {
+                        if (!currentUser) {
+                            // Redirect to login when not authenticated
+                            showEnhancedSmartSuccess('Please log in to report users.', 'error');
+                            setTimeout(() => { window.location.href = '/login.html'; }, 800);
+                            return;
+                        }
+                        // Navigate to central reports page with prefilled params (Report.html handles prefill)
+                        const username = (displayedUserProfileData && displayedUserProfileData.username) ? displayedUserProfileData.username : '';
+                        const params = new URLSearchParams({ reportedUserId: displayedUserId || '', reportedAuthorId: username || '', type: 'user' });
+                        window.location.href = '/report.html?' + params.toString();
+                    } catch (err) { console.error('Nuvia_ERROR: navigate to report page failed', err); }
                 });
             }
             if (cancelReportButton) cancelReportButton.addEventListener('click', hideReportUserModal);
