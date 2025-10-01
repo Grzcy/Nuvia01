@@ -8500,12 +8500,18 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
          * Shows the report user modal for the displayed user.
          */
         function showReportUserModal() {
-            if (!currentUser || displayedUserId === currentUser.uid) {
-                console.warn("You cannot report yourself.");
+            if (!currentUser) {
+                try { showEnhancedSmartSuccess('Please log in to report users.', 'error'); } catch(_) { /* fallback */ }
+                setTimeout(() => { window.location.href = '/login.html'; }, 900);
+                return;
+            }
+            if (displayedUserId === currentUser.uid) {
+                try { showEnhancedSmartSuccess('You cannot report yourself.', 'warning'); } catch(_) { /* fallback */ }
                 return;
             }
             if (!displayedUserProfileData) {
                 console.error("Could not load user data to report.");
+                try { showEnhancedSmartSuccess('Unable to load user data for reporting.', 'error'); } catch(_) {}
                 return;
             }
             if (reportUserModal) reportUserModal.classList.add('active');
