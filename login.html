@@ -1803,7 +1803,6 @@
                 }
 
                 // Apply tiered throttle only for wrong-credential errors
-                const code = (error && error.code) || '';
                 const msg = (error && error.message) || '';
                 const wrong = code === 'auth/wrong-password' || /INVALID_PASSWORD|INVALID_LOGIN_CREDENTIALS|invalid[_\s-]*credential/i.test(msg);
                 if (wrong) {
