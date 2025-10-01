@@ -1286,6 +1286,30 @@
                     </div>
                 </div>
 
+                <div id="all-posts" class="tab-content">
+                    <h2>All Posts</h2>
+                    <p style="color: var(--text-color-secondary);">Real-time view of all posts on the feed. Use actions to view, flag or remove content.</p>
+                    <div class="moderation-table-container">
+                        <table class="moderation-table">
+                            <thead>
+                                <tr>
+                                    <th>Post ID</th>
+                                    <th>Author</th>
+                                    <th>Excerpt</th>
+                                    <th>Visibility</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="postsTableBody">
+                                <tr>
+                                    <td colspan="6" class="no-data-message">No posts to display.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <div id="settings" class="tab-content">
                     <h2>Moderation Settings</h2>
                     <p style="color: var(--text-color-secondary);">Configure automated moderation rules and thresholds.</p>
