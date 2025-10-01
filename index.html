@@ -5590,6 +5590,8 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             };
             if (wait > 0) setTimeout(doHide, wait); else doHide();
         }
+        try { window.hideLoader = hideLoader; window.showLoader = showLoader; } catch(_){ }
+        try { window.addEventListener('nuvia:fetch:error', function(){ try{ hideLoader(); }catch(_){ } }); } catch(_){ }
 
         function setLoaderTimeout() {
             clearTimeout(loaderTimeout);
