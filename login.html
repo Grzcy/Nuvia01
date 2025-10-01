@@ -1118,10 +1118,15 @@
                     transition: transform 0.18s ease, filter 0.18s ease;
                 }
                 .apk-download-link:hover { transform: translateY(-2px); filter: brightness(1.04); }
+                .apk-download-container { text-align: center; margin-top: 12px; }
+                .apk-panel { padding-top: 28px; }
+                .apk-progress { height: 6px; background: #f3f4f6; border-radius: 999px; overflow: hidden; margin: 12px 0 20px; }
+                .apk-progress-bar { display: block; height: 100%; width: 40%; background: linear-gradient(135deg, #ec4899 0%, #4f46e5 100%); animation: apkBar 1.2s linear infinite; border-radius: inherit; }
+                @keyframes apkBar { 0% { transform: translateX(-100%);} 100% { transform: translateX(250%);} }
             </style>
 
-            <div class="download-apk" style="text-align:center; margin-top:12px;">
-                <a id="downloadApkBtn" href="https://www.mediafire.com/file/sb2i2dtiksebbkg/Nuvia.apk/file" class="apk-download-link" target="_blank" rel="noopener noreferrer" aria-label="Download Nuvia APK">Download Nuvia APK</a>
+            <div class="apk-download-container">
+                <a id="downloadApkBtn" href="https://cdn.builder.io/o/assets%2Fe31045e1ed6a4b62bf8c3bdf9b813be8%2F35437802d15d4c2a943abac97dff31a5?alt=media&token=bd75c002-3803-41c3-aaaf-2cd460179a8d&apiKey=e31045e1ed6a4b62bf8c3bdf9b813be8" class="apk-download-link" target="_blank" rel="noopener noreferrer" aria-label="Download Nuvia APK">Download Nuvia APK</a>
             </div>
 
         </form>
@@ -1163,6 +1168,20 @@
             <div class="modal-buttons">
                 <button class="modal-btn secondary" onclick="closeResetModal()">Cancel</button>
                 <button class="modal-btn primary" onclick="sendResetEmail()">Send Reset Link</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- APK Download Modal -->
+    <div class="custom-modal" id="apkDownloadModal">
+        <div class="modal-content apk-panel">
+            <div class="modal-icon info">⬇</div>
+            <div class="modal-title">Downloading Nuvia</div>
+            <div class="modal-message" id="apkModalMessage">Your download will start automatically. If it doesn't, click "Download now".</div>
+            <div class="apk-progress" aria-hidden="true"><span class="apk-progress-bar"></span></div>
+            <div class="modal-buttons">
+                <button class="modal-btn primary" id="apkDownloadNowBtn" type="button">Download now</button>
+                <button class="modal-btn secondary" id="apkCloseBtn" type="button">Close</button>
             </div>
         </div>
     </div>
@@ -2083,7 +2102,31 @@
             }
         }
 
-        async function resendVerificationEmail(){
+        // APK Download helpers
+        const APK_URL = 'https://cdn.builder.io/o/assets%2Fe31045e1ed6a4b62bf8c3bdf9b813be8%2F35437802d15d4c2a943abac97dff31a5?alt=media&token=bd75c002-3803-41c3-aaaf-2cd460179a8d&apiKey=e31045e1ed6a4b62bf8c3bdf9b813be8';
+        function openApkDownloadPanel(){
+            try{
+                const modal = document.getElementById('apkDownloadModal');
+                const msg = document.getElementById('apkModalMessage');
+                if (msg) msg.textContent = 'Your download will start automatically. If it doesn\'t, click "Download now".';
+                if (modal) { modal.style.display = 'flex'; setTimeout(startApkDownload, 350); }
+            }catch(_){ startApkDownload(); }
+        }
+        function startApkDownload(){
+            try{
+                const a = document.createElement('a');
+                a.href = APK_URL;
+                a.download = 'Nuvia.apk';
+                a.rel = 'noopener';
+                a.target = '_blank';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(()=>{ try{ a.remove(); }catch(_){} }, 0);
+            }catch(_){ }
+        }
+        function closeApkModal(){ try{ const m = document.getElementById('apkDownloadModal'); if (m) m.style.display = 'none'; }catch(_){} }
+
+        async function resendVerificationEmail{
             let u = auth.currentUser;
             showSmartLoader('Sending email','Resending verification email...');
             try{
@@ -2742,6 +2785,14 @@
             // Performance optimization - preload resources
             preloadResources();
 
+            // APK download interactions
+            const apkBtn = document.getElementById('downloadApkBtn');
+            if (apkBtn) apkBtn.addEventListener('click', (e)=>{ e.preventDefault(); openApkDownloadPanel(); });
+            const apkNow = document.getElementById('apkDownloadNowBtn');
+            if (apkNow) apkNow.addEventListener('click', (e)=>{ e.preventDefault(); startApkDownload(); });
+            const apkClose = document.getElementById('apkCloseBtn');
+            if (apkClose) apkClose.addEventListener('click', (e)=>{ e.preventDefault(); closeApkModal(); });
+
 
             
             // Create floating particles
@@ -2816,6 +2867,8 @@
                         closeModal();
                     } else if (e.target.id === 'resetPasswordModal') {
                         closeResetModal();
+                    } else if (e.target.id === 'apkDownloadModal') {
+                        closeApkModal();
                     }
                 }
             });
@@ -2825,6 +2878,7 @@
                 if (e.key === 'Escape') {
                     closeModal();
                     closeResetModal();
+                    closeApkModal();
                 }
                 if (e.key === 'Enter' && e.ctrlKey) {
                     const form = document.getElementById('loginForm');
