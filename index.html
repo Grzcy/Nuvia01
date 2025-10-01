@@ -8290,7 +8290,7 @@ async function checkAndStartDailyBonusTimer() {
                         messageBox.removeEventListener('transitionend', handler);
                         messageBox.classList.remove('loading-pulse');
                     }, { once: true });
-                }, 3000);
+                }, Math.max(0, Number(durationMs)||3000));
             }
         }
         function hideMessageBox(){
