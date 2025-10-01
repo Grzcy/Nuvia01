@@ -1731,9 +1731,18 @@
                 const isWrong = code === 'auth/wrong-password' || /INVALID_PASSWORD|INVALID_LOGIN_CREDENTIALS|invalid[_\s-]*credential/i.test(rawMsg);
                 const isNotFound = code === 'auth/user-not-found' || /EMAIL_NOT_FOUND/i.test(rawMsg);
                 if (isWrong) {
-                    errorMessage = 'Incorrect password. Please check your password and try again, or use "Forgot password" to reset it.';
                     try { applyThrottleFailure(); } catch(_) {}
-                    showErrorModal(errorMessage);
+                    const state = getThrottleState();
+                    if (state && state.lockUntil && Date.now() < state.lockUntil) {
+                        const ms = state.lockUntil - Date.now();
+                        errorMessage = `Too many failed attempts. Locked for ${formatDuration(ms)}. Try again later or reset your password.`;
+                        showCustomModal('error', 'Account temporarily locked', errorMessage);
+                    } else {
+                        const remaining = (state && typeof state.remaining === 'number') ? state.remaining : 0;
+                        const plural = remaining === 1 ? '' : 's';
+                        errorMessage = `Incorrect password. ${remaining} attempt${plural} left before a temporary lock. You can also use "Forgot password" to reset it.`;
+                        showCustomModal('error', 'Incorrect password', errorMessage);
+                    }
                     return;
                 }
                 // Only do network diagnostics if not a known auth error
@@ -1794,7 +1803,7 @@
                             errorMessage = 'Too many failed attempts. Please try again later, or reset your password.';
                             break;
                         case 'auth/network-request-failed':
-                            errorMessage = 'Network error. Please check your internet connection and try again.';
+                            errorMessage = 'Network issue: we could not reach the authentication server. Check your internet, VPN/proxy, or ad blocker and try again.';
                             break;
                         default:
                             // Keep generic message
@@ -2021,7 +2030,14 @@
 
         // Enhanced show error with custom modal
         function showErrorModal(message) {
-            showCustomModal('error', 'Authentication Error', message);
+            let title = 'Authentication Error';
+            try {
+                const m = String(message || '');
+                if (/network/i.test(m)) title = 'Network issue';
+                else if (/incorrect password|wrong password/i.test(m)) title = 'Incorrect password';
+                else if (/locked|too many failed/i.test(m)) title = 'Account temporarily locked';
+            } catch(_) {}
+            showCustomModal('error', title, message);
         }
 
         async function resendVerificationEmail(){
