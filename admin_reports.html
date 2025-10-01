@@ -1404,11 +1404,16 @@
                 li.className = 'report-item';
                 li.dataset.reportId = report.id;
                 li.innerHTML = `
-                    <h3><i class="fas fa-flag"></i> ${report.reportCategory}</h3>
-                    <span class="status ${statusClass}">${report.status}</span>
-                    <p><strong><i class="fas fa-user"></i> Reporter:</strong> <span class="clickable-id">${report.reporterId}</span></p>
-                    <p><strong><i class="fas fa-user-slash"></i> Reported:</strong> <span class="clickable-id">${report.reportedUserId || 'N/A'}</span></p>
-                    <span class="date"><i class="fas fa-clock"></i> Submitted: ${timestamp}</span>
+                  <div style="display:flex;align-items:flex-start;gap:12px;">
+                    <input type="checkbox" class="row-select" aria-label="Select report">
+                    <div style="flex:1;">
+                      <h3><i class="fas fa-flag"></i> ${report.reportCategory}</h3>
+                      <span class="status ${statusClass}">${report.status}</span>
+                      <p><strong><i class="fas fa-user"></i> Reporter:</strong> <span class="clickable-id">${report.reporterId}</span></p>
+                      <p><strong><i class="fas fa-user-slash"></i> Reported:</strong> <span class="clickable-id">${report.reportedUserId || 'N/A'}</span></p>
+                      <span class="date"><i class="fas fa-clock"></i> Submitted: ${timestamp}</span>
+                    </div>
+                  </div>
                 `;
                 reportsList.appendChild(li);
 
