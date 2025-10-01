@@ -1186,6 +1186,17 @@
         </div>
     </div>
 
+    <!-- Fallback globals to prevent inline onclick errors if module fails to load -->
+    <script>
+        // Provide minimal fallback for goToSignup so clicking the signup link doesn't throw when module fails
+        if (!window.goToSignup) {
+            window.goToSignup = function() {
+                try { if (typeof showErrorModal === 'function') { showErrorModal('Signup is temporarily unavailable. Please try again later.'); return; } } catch(_){}
+                try { alert('Signup is temporarily unavailable. Please try again later.'); } catch(_){}
+            };
+        }
+    </script>
+
     <!-- Firebase SDK -->
     <script type="module">
         // Import Firebase modules
