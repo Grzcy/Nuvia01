@@ -1158,7 +1158,7 @@
     <div class="custom-modal" id="resetPasswordModal">
         <div class="modal-content">
             <div class="modal-icon info">
-                🔑
+                ��
             </div>
             <div class="modal-title">Reset Password</div>
             <div class="modal-message">Enter your email address and we'll send you a link to reset your password.</div>
@@ -1519,6 +1519,28 @@
                         didCreditNew = true;
                     });
 
+                    if (didCreditNew) {
+                        try {
+                            const newUserTxCol = collection(db, 'artifacts', appId, 'users', newUserId, 'transactions');
+                            await addDoc(newUserTxCol, {
+                                type: 'referral_new_user_bonus',
+                                jCoins: 10,
+                                gas: 20,
+                                timestamp: serverTimestamp(),
+                                description: `Referral bonus for joining via ${inviterId}`
+                            });
+                            const newUserNotifCol = collection(db, 'artifacts', appId, 'users', newUserId, 'notifications');
+                            await addDoc(newUserNotifCol, {
+                                type: 'system',
+                                subtype: 'referral_reward',
+                                message: 'You earned 10 JCoins and 20 Gas for joining with a referral!',
+                                read: false,
+                                timestamp: serverTimestamp(),
+                                targetUrl: '/Wallet.html'
+                            });
+                        } catch(_) { /* ignore */ }
+                    }
+
                     // Reflect NEW USER in public summary (best-effort)
                     try { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', newUserId), { jCoins: increment(10), totalGasEarned: increment(20), updatedAt: serverTimestamp() }); } catch(_){ }
 
@@ -1552,11 +1574,42 @@
                                 relatedEntityId: newUserId,
                                 notes: `Referral from ${newUserId}. Auto-approve to credit inviter.`
                             });
+                            try {
+                                await addDoc(collection(db, 'artifacts', appId, 'users', inviterId, 'notifications'), {
+                                    type: 'system',
+                                    subtype: 'referral_reward_pending',
+                                    message: 'Your referral bonus is pending approval. You will receive 5 JCoins and 20 Gas once approved.',
+                                    read: false,
+                                    timestamp: serverTimestamp(),
+                                    targetUrl: '/notifications.html'
+                                });
+                            } catch(_) { /* ignore */ }
                         } catch(_){ /* ignore */ }
                     }
 
                     // Reflect INVITER in public summary if directly credited
-                    if (inviterCredited) { try { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', inviterId), { jCoins: increment(5), totalGasEarned: increment(20), updatedAt: serverTimestamp() }); } catch(_){ } }
+                    if (inviterCredited) {
+                        try { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', inviterId), { jCoins: increment(5), totalGasEarned: increment(20), updatedAt: serverTimestamp() }); } catch(_){ }
+                        try {
+                            const invTxCol = collection(db, 'artifacts', appId, 'users', inviterId, 'transactions');
+                            await addDoc(invTxCol, {
+                                type: 'referral_inviter_bonus',
+                                jCoins: 5,
+                                gas: 20,
+                                timestamp: serverTimestamp(),
+                                description: `Referral bonus from ${newUserId}`
+                            });
+                            const invNotifCol = collection(db, 'artifacts', appId, 'users', inviterId, 'notifications');
+                            await addDoc(invNotifCol, {
+                                type: 'system',
+                                subtype: 'referral_reward',
+                                message: 'Your referral joined. You earned 5 JCoins and 20 Gas.',
+                                read: false,
+                                timestamp: serverTimestamp(),
+                                targetUrl: '/Wallet.html'
+                            });
+                        } catch(_) { /* ignore */ }
+                    }
 
                 }catch(e){ console.warn('Referral reward failed or skipped:', e?.message || e); }
             }
