@@ -1002,7 +1002,7 @@
                 <div class="desc" id="attemptsBannerText">Please try again.</div>
             </div>
             <div class="error-message" id="errorMessage" role="alert" aria-live="assertive" aria-atomic="true" aria-hidden="true" tabindex="-1">
-                Invalid email or password. Please try again.
+                Wrong password, please you can't sign in to Nuvia with incorrect password, please check your password and try again.
             </div>
 
             <!-- Signup-only fields -->
@@ -1808,7 +1808,7 @@
 
             } catch (error) {
                 hideSmartLoader();
-                let errorMessage = 'Invalid email or password.';
+                let errorMessage = "Wrong password, please you can't sign in to Nuvia with incorrect password, please check your password and try again.";
                 const code = (error && error.code) || '';
                 const rawMsg = (error && (error.message || '')).toString();
                 const textBlob = [
@@ -1874,7 +1874,7 @@
                             } catch (_) {}
                             break;
                         case 'auth/wrong-password':
-                            errorMessage = 'Incorrect password. Please check your password and try again, or use "Forgot password" to reset it.';
+                            errorMessage = "Wrong password, please you can't sign in to Nuvia with incorrect password, please check your password and try again.";
                             break;
                         case 'auth/invalid-email':
                             errorMessage = 'Please enter a valid email address.';
