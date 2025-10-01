@@ -1389,20 +1389,22 @@
         (function(){
             const btn = document.getElementById('passwordToggle');
             const input = document.getElementById('password');
-            const icon = document.getElementById('passwordToggleIcon');
             if (!btn || !input) return;
             let holdActive = false;
+            function setIconState(){
+                try{ if (typeof window.updatePasswordToggleSvg === 'function') window.updatePasswordToggleSvg(); }catch(_){}
+            }
             function pressDown(){
                 if (input.type === 'password') {
                     input.type = 'text';
                     holdActive = true;
-                    if (icon) { icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash'); }
+                    setIconState();
                 }
             }
             function pressUp(){
                 if (holdActive && btn.getAttribute('aria-pressed') !== 'true') {
                     input.type = 'password';
-                    if (icon) { icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye'); }
+                    setIconState();
                 }
                 holdActive = false;
             }
@@ -1410,6 +1412,28 @@
             btn.addEventListener('touchstart', pressDown, { passive: true });
             ['mouseup','mouseleave','touchend','touchcancel','blur'].forEach(ev => btn.addEventListener(ev, pressUp));
         })();
+
+        // Global helper used by SVG replacer to ensure eye icon reflects current visibility state
+        window.updatePasswordToggleSvg = function(){
+            try{
+                const icon = document.getElementById('passwordToggleIcon');
+                const input = document.getElementById('password');
+                if(!icon || !input) return;
+                // if icon is an SVG with a <use>, update the href; otherwise leave classes as-is
+                if(icon.tagName && icon.tagName.toLowerCase() === 'svg'){
+                    const use = icon.querySelector('use');
+                    if(!use) return;
+                    const target = input.type === 'password' ? '#icon-eye' : '#icon-eye-slash';
+                    use.setAttribute('href', target);
+                    use.setAttributeNS('http://www.w3.org/1999/xlink','xlink:href', target);
+                } else {
+                    // Fallback: toggle classes for font-icons
+                    try{
+                        if (input.type === 'password') { icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye'); } else { icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash'); }
+                    }catch(e){}
+                }
+            }catch(e){}
+        };
 
 
 
