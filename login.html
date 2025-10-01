@@ -965,6 +965,15 @@
 .verify-banner-hint { font-size: 0.82rem; color: var(--text-light); margin-top: 8px; line-height: 1.5; }
 @media (min-width: 480px) { .verify-code-input { flex: 1 1 auto; min-width: 220px; } }
 </style>
+<style>
+/* Attempts/lockout responsive banner */
+.attempts-banner { display:none; border:1px solid var(--border-light); border-radius: var(--radius); background: var(--card-background); padding: 12px 14px; margin: 10px 0; color: var(--white); }
+.attempts-banner.show { display:block; }
+.attempts-banner .title { font-weight: 800; margin: 0 0 6px 0; }
+.attempts-banner .desc { font-size: 0.92rem; color: var(--text-light); }
+.attempts-banner.error { border-color: rgba(239,68,68,0.35); }
+.attempts-banner.warn { border-color: rgba(234,179,8,0.35); }
+</style>
 </head>
 <body>
     <!-- Floating Particles -->
@@ -987,6 +996,10 @@
                     <button type="button" id="applyVerifyCodeBtn" class="verify-resend-btn"><i class="fas fa-check"></i> Verify code</button>
                 </div>
                 <p class="verify-banner-hint" id="verifyBannerHint">Open your email, copy the confirmation link or code, paste it here, and press "Verify code" to confirm your account.</p>
+            </div>
+            <div id="attemptsBanner" class="attempts-banner" role="status" aria-live="polite" aria-atomic="true" style="display:none">
+                <div class="title">Sign-in protection</div>
+                <div class="desc" id="attemptsBannerText">Please try again.</div>
             </div>
             <div class="error-message" id="errorMessage" role="alert" aria-live="assertive" aria-atomic="true" aria-hidden="true" tabindex="-1">
                 Invalid email or password. Please try again.
@@ -1392,14 +1405,15 @@
             const password = document.getElementById('password').value;
             const isSignupMode = document.querySelector('.login-container').classList.contains('signup-mode');
 
-            try {
-                const cd = parseInt(localStorage.getItem('login_cooldown_until') || '0', 10);
-                if (cd && Date.now() < cd) {
-                    const secs = Math.ceil((cd - Date.now()) / 1000);
-                    showErrorModal(`Too many attempts. Try again in ${secs}s.`);
-                    return;
-                }
-            } catch(_) {}
+            // Throttle check (tiered attempts with increasing cooldowns)
+            const throttle = getThrottleState();
+            if (throttle.lockUntil && Date.now() < throttle.lockUntil) {
+                const ms = throttle.lockUntil - Date.now();
+                showAttemptsStatus('warn', `Locked due to failed attempts. Try again in ${formatDuration(ms)}. Attempts when unlocked: ${throttle.remaining}.`);
+                return;
+            } else if (throttle.remaining < getBaseAttempts(throttle.stage)) {
+                showAttemptsStatus('info', `${throttle.remaining} attempt${throttle.remaining===1?'':'s'} left in this window.`);
+            }
 
             // Basic validation
             if (!email || !password) {
@@ -1697,7 +1711,7 @@
 
                 // Update last login
                 await saveUserData(user, 'email');
-                try { localStorage.removeItem('login_failed_attempts'); localStorage.removeItem('login_cooldown_until'); } catch(_) {}
+                try { localStorage.removeItem('login_failed_attempts'); localStorage.removeItem('login_cooldown_until'); localStorage.removeItem('login_throttle_state'); } catch(_) {}
 
                 hideSmartLoader();
                 try {
@@ -1788,20 +1802,75 @@
                     }
                 }
 
-                try {
-                    const kA = 'login_failed_attempts';
-                    const kC = 'login_cooldown_until';
-                    let a = parseInt(localStorage.getItem(kA) || '0', 10) + 1;
-                    localStorage.setItem(kA, String(a));
-                    if (a >= 5) {
-                        const until = Date.now() + 60000;
-                        localStorage.setItem(kC, String(until));
-                        localStorage.setItem(kA, '0');
-                    }
-                } catch(_) {}
-
+                // Apply tiered throttle only for wrong-credential errors
+                const code = (error && error.code) || '';
+                const msg = (error && error.message) || '';
+                const wrong = code === 'auth/wrong-password' || /INVALID_PASSWORD|INVALID_LOGIN_CREDENTIALS|invalid[_\s-]*credential/i.test(msg);
+                if (wrong) {
+                    applyThrottleFailure();
+                }
                 showErrorModal(errorMessage);
             }
+        }
+
+        // Tiered throttle state helpers
+        function getThrottleState(){
+            try{ const raw = localStorage.getItem('login_throttle_state'); if(raw){ const s = JSON.parse(raw); return { stage: Math.max(0, s.stage|0), remaining: Math.max(0, s.remaining|0), lockUntil: s.lockUntil|0 }; } }catch(_){ }
+            return { stage: 0, remaining: 6, lockUntil: 0 };
+        }
+        function saveThrottleState(s){ try{ localStorage.setItem('login_throttle_state', JSON.stringify(s)); }catch(_){ } }
+        function getBaseAttempts(stage){ return Math.max(1, 6 - Math.min(5, stage|0)); }
+        function formatDuration(ms){
+            const sec = Math.max(0, Math.ceil(ms/1000));
+            if (sec < 60) return sec + 's';
+            const m = Math.floor(sec/60); const s = sec%60;
+            if (m < 60) return m + 'm' + (s?(' ' + s + 's'):'');
+            const h = Math.floor(m/60); const rm = m%60;
+            return h + 'h' + (rm?(' ' + rm + 'm'):'');
+        }
+        function showAttemptsStatus(kind, text){
+            try{
+                const b = document.getElementById('attemptsBanner'); const t = document.getElementById('attemptsBannerText');
+                if (!b || !t) return;
+                b.classList.remove('error','warn','info'); b.classList.add(kind||'info');
+                t.textContent = text;
+                b.style.display = 'block'; b.classList.add('show');
+            }catch(_){ }
+        }
+        function hideAttemptsStatus(){ try{ const b = document.getElementById('attemptsBanner'); if(b){ b.style.display='none'; b.classList.remove('show'); } }catch(_){ }
+        }
+        function scheduleCountdown(){
+            try{
+                const st = getThrottleState(); if (!st.lockUntil || Date.now()>=st.lockUntil) return;
+                const id = setInterval(()=>{
+                    const s = getThrottleState();
+                    if (!s.lockUntil || Date.now()>=s.lockUntil){ clearInterval(id); hideAttemptsStatus(); return; }
+                    const ms = s.lockUntil - Date.now();
+                    showAttemptsStatus('warn', `Locked due to failed attempts. Try again in ${formatDuration(ms)}. Attempts when unlocked: ${s.remaining}.`);
+                }, 1000);
+            }catch(_){ }
+        }
+        function applyThrottleFailure(){
+            const state = getThrottleState();
+            if (state.lockUntil && Date.now() < state.lockUntil) { scheduleCountdown(); return; }
+            if (typeof state.remaining !== 'number' || state.remaining <= 0){ state.remaining = getBaseAttempts(state.stage); }
+            state.remaining = Math.max(0, (state.remaining|0) - 1);
+            if (state.remaining > 0){
+                saveThrottleState(state);
+                showAttemptsStatus('error', `Incorrect password. ${state.remaining} attempt${state.remaining===1?'':'s'} left.`);
+                return;
+            }
+            // Start lock and advance stage
+            state.stage = Math.min(5, (state.stage|0) + 1);
+            const hours = Math.min(6, state.stage); // stage1->1h, stage2->2h, ..., stage5->5h; after last, we’ll use 6h loop below
+            const base = getBaseAttempts(state.stage);
+            state.remaining = base;
+            const ms = (hours || 1) * 60 * 60 * 1000;
+            const until = Date.now() + ms;
+            state.lockUntil = until;
+            saveThrottleState(state);
+            showAttemptsStatus('warn', `Too many failed attempts. Locked for ${hours}h. After unlock, you will have ${base} attempt${base===1?'':'s'}.`);
+            scheduleCountdown();
         }
 
         // Email validation
