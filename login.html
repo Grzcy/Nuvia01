@@ -1794,7 +1794,7 @@
 
                 // Update last login
                 await saveUserData(user, 'email');
-                try { localStorage.removeItem('login_failed_attempts'); localStorage.removeItem('login_cooldown_until'); localStorage.removeItem('login_throttle_state'); } catch(_) {}
+                try { deleteCookie('login_failed_attempts'); deleteCookie('login_cooldown_until'); deleteCookie('login_throttle_state'); } catch(_) {}
 
                 hideSmartLoader();
                 try {
@@ -1916,11 +1916,15 @@
         }
 
         // Tiered throttle state helpers
+        function setCookie(name, value, days){ try{ let expires = ''; if (typeof days === 'number'){ const d = new Date(); d.setTime(d.getTime() + (days*24*60*60*1000)); expires = '; expires=' + d.toUTCString(); } document.cookie = name + '=' + encodeURIComponent(value) + expires + '; path=/'; }catch(_){ } }
+        function getCookie(name){ try{ const m = document.cookie.split('; ').find(r => r.indexOf(name + '=') === 0); if(!m) return null; return decodeURIComponent(m.split('=')[1] || ''); }catch(_){ return null; } }
+        function deleteCookie(name){ try{ document.cookie = name + '=; Max-Age=0; path=/'; }catch(_){ } }
+
         function getThrottleState(){
-            try{ const raw = localStorage.getItem('login_throttle_state'); if(raw){ const s = JSON.parse(raw); return { stage: Math.max(0, s.stage|0), remaining: Math.max(0, s.remaining|0), lockUntil: s.lockUntil|0 }; } }catch(_){ }
+            try{ const raw = getCookie('login_throttle_state'); if(raw){ const s = JSON.parse(raw); return { stage: Math.max(0, s.stage|0), remaining: Math.max(0, s.remaining|0), lockUntil: s.lockUntil|0 }; } }catch(_){ }
             return { stage: 0, remaining: 6, lockUntil: 0 };
         }
-        function saveThrottleState(s){ try{ localStorage.setItem('login_throttle_state', JSON.stringify(s)); }catch(_){ } }
+        function saveThrottleState(s){ try{ setCookie('login_throttle_state', JSON.stringify(s), 7); }catch(_){ } }
         function getBaseAttempts(stage){ return Math.max(1, 6 - Math.min(5, stage|0)); }
         function formatDuration(ms){
             const sec = Math.max(0, Math.ceil(ms/1000));
