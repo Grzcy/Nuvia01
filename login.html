@@ -3078,6 +3078,7 @@
       const orig = window.togglePassword;
       function updateSvgIcon(){
         try{
+          if (typeof window.updatePasswordToggleSvg === 'function') { window.updatePasswordToggleSvg(); return; }
           const icon = document.getElementById('passwordToggleIcon');
           const input = document.getElementById('password');
           if(!icon || !input) return;
@@ -3090,9 +3091,9 @@
       }
       window.togglePassword = function(){
         try{ if (typeof orig === 'function') orig(); }catch(e){}
-        updateSvgIcon();
+        try{ if (typeof window.updatePasswordToggleSvg === 'function') window.updatePasswordToggleSvg(); else updateSvgIcon(); }catch(e){}
       };
-      document.addEventListener('DOMContentLoaded', updateSvgIcon);
+      document.addEventListener('DOMContentLoaded', function(){ try{ if (typeof window.updatePasswordToggleSvg === 'function') window.updatePasswordToggleSvg(); else updateSvgIcon(); }catch(e){} });
     })();
     </script>
 </body>
