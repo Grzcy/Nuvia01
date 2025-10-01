@@ -2151,6 +2151,97 @@
             return text.length > maxLength ? text.slice(0, maxLength - 1) + '\u2026' : text;
         }
 
+        // Simple rule-based moderation analyzer (runs client-side)
+        function analyzePostForModeration(post) {
+            const settings = window.moderationSettings || {};
+            const text = (post.content || '').toLowerCase();
+            const keywords = (settings.blacklisted_keywords && Array.isArray(settings.blacklisted_keywords)) ? settings.blacklisted_keywords.map(k=>k.toLowerCase()) : [];
+            let score = 0;
+            const reasons = [];
+            const matched = [];
+
+            // Keyword filtering
+            if (settings.keyword_filter_enable) {
+                for (const kw of keywords) {
+                    if (!kw) continue;
+                    const re = new RegExp('\\b' + kw.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\$&') + '\\b','i');
+                    if (re.test(text)) {
+                        matched.push(kw);
+                        score += 40; // each match is significant
+                        reasons.push(`keyword:${kw}`);
+                    }
+                }
+            }
+
+            // Basic profanity pattern (small list) — adjust as needed
+            const profanity = ['damn','shit','fuck','bitch','asshole','nigger','cunt'];
+            for (const p of profanity) {
+                if (text.indexOf(p) !== -1) {
+                    score += 30;
+                    reasons.push('profanity');
+                }
+            }
+
+            // If post contains links with suspicious domains
+            const urlRe = /https?:\/\/[\w\-\.]+\.[a-z]{2,6}(?:\/[^\s]*)?/i;
+            if (urlRe.test(post.content || '')) {
+                score += 5;
+                reasons.push('contains_link');
+            }
+
+            // Media type heuristics: filenames containing adult or explicit hints
+            if (post.mediaUrl && /porn|xxx|adult|sex/i.test(post.mediaUrl)) {
+                score += 50;
+                reasons.push('media_explicit');
+            }
+
+            // Normalize score to 0-100
+            if (score > 100) score = 100;
+
+            // AI moderation toggle (client-side heuristic placeholder)
+            if (settings.ai_moderation_enable) {
+                // Simulate an AI score by weighing length and keywords
+                const aiScore = Math.min(100, Math.round((text.split(' ').length / 50) * 20) + score);
+                score = Math.max(score, aiScore);
+            }
+
+            return { score, reasons: Array.from(new Set(reasons)), matchedKeywords: matched };
+        }
+
+        async function hasPendingReport(postId) {
+            try {
+                const rRef = collection(db, 'artifacts', appId, 'reported_content');
+                const q = query(rRef, where('postId', '==', postId));
+                const snap = await getDocs(q);
+                return !snap.empty;
+            } catch (e) { console.error('hasPendingReport error', e); return false; }
+        }
+
+        async function autoFlagPostIfNeeded(postId, post, analysis) {
+            try {
+                const settings = window.moderationSettings || {};
+                const threshold = parseInt(settings.ai_threshold || 80, 10) || 80;
+                if (!settings.keyword_filter_enable && !settings.ai_moderation_enable) return false;
+                if (analysis.score < threshold) return false;
+                // Avoid duplicates
+                const exists = await hasPendingReport(postId);
+                if (exists) return false;
+                const reportsRef = collection(db, 'artifacts', appId, 'reported_content');
+                await addDoc(reportsRef, {
+                    postId,
+                    reportedByUid: currentUser ? currentUser.uid : 'system',
+                    reportedByUsername: currentUser ? (currentUser.displayName || currentUser.email || 'Moderator') : 'system',
+                    reason: 'auto_moderation',
+                    details: { score: analysis.score, reasons: analysis.reasons, matchedKeywords: analysis.matchedKeywords },
+                    status: 'pending',
+                    contentPreview: post.content ? post.content.slice(0, 400) : null,
+                    timestamp: serverTimestamp()
+                });
+                await logAdminAction(currentUser ? currentUser.uid : 'system', 'auto_flag_post', { postId, score: analysis.score });
+                return true;
+            } catch (e) { console.error('autoFlagPostIfNeeded error', e); return false; }
+        }
+
         // View post in a modal (loads latest post doc)
         async function handleViewPost(postId) {
             try {
