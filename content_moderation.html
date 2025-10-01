@@ -2130,6 +2130,103 @@
             } catch (e) { console.error('undoRestorePost', e); showMessageBox('Failed to restore post.', 'error'); }
         }
 
+        // --- Admin Trash: real-time loader and actions ---
+        window.trashSelectedIds = new Set();
+        window.unsubscribeTrashListener = null;
+        function toggleTrashSelectAll(checked) {
+            document.querySelectorAll('.trash-row-select').forEach(cb => { cb.checked = !!checked; const id = cb.dataset.postId; if (id) { if (checked) window.trashSelectedIds.add(id); else window.trashSelectedIds.delete(id); } });
+            try { document.getElementById('trashSelectAllCheckbox').checked = !!checked; } catch(_){}
+        }
+        function toggleTrashRowSelection(postId, checked) {
+            if (checked) window.trashSelectedIds.add(postId); else window.trashSelectedIds.delete(postId);
+            const all = document.querySelectorAll('.trash-row-select'); const selected = document.querySelectorAll('.trash-row-select:checked');
+            try { document.getElementById('trashSelectAllCheckbox').checked = (all.length === selected.length && all.length>0); } catch(_){}
+        }
+
+        function getTrashSelectedIds() { return Array.from(window.trashSelectedIds || []); }
+
+        function detachTrashListener() {
+            try { if (window.unsubscribeTrashListener) { window.unsubscribeTrashListener(); window.unsubscribeTrashListener = null; } } catch(_){}
+        }
+
+        function formatTimestampSimple(ts) { try { return ts && ts.toDate ? ts.toDate().toLocaleString() : (ts ? new Date(ts).toLocaleString() : 'N/A'); } catch(e){ return 'N/A'; } }
+
+        async function loadAdminTrash(forceRefresh = false) {
+            try {
+                if (window.unsubscribeTrashListener && !forceRefresh) return; // already listening
+                const tbody = document.getElementById('trashTableBody'); if (!tbody) return;
+                const trashRef = collection(db, 'artifacts', appId, 'admin_trash', 'posts');
+                const q = query(trashRef, orderBy('removedAt', 'desc'));
+                detachTrashListener();
+                window.unsubscribeTrashListener = onSnapshot(q, (snapshot) => {
+                    tbody.innerHTML = '';
+                    if (snapshot.empty) { tbody.innerHTML = '<tr><td colspan="7" class="no-data-message">Trash is empty.</td></tr>'; return; }
+                    snapshot.forEach(docSnap => {
+                        const d = docSnap.data(); const id = docSnap.id;
+                        const row = document.createElement('tr');
+                        const deletedAt = formatTimestampSimple(d.removedAt || d.updatedAt || d.removedAtTimestamp || null);
+                        const excerptText = (d.content || '').slice(0, 200);
+                        row.innerHTML = `
+                            <td><input type="checkbox" class="trash-row-select" data-post-id="${id}" onchange="toggleTrashRowSelection('${id}', this.checked)"></td>
+                            <td class="mono">${id}</td>
+                            <td><a href="/profile.html?userId=${d.authorId}" style="color: var(--accent-color);">${d.authorUsername || d.authorId || 'Unknown'}</a></td>
+                            <td class="moderation-item-content">${excerptText}</td>
+                            <td>${d.removedBy || d.removedByUid || 'system'}</td>
+                            <td>${deletedAt}</td>
+                            <td class="action-buttons-cell">
+                                <button class="button" onclick="restoreFromTrash('${id}')">Restore</button>
+                                <button class="button danger" onclick="purgeTrashPost('${id}')">Permanently Delete</button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }, (err) => { console.error('trash listener error', err); tbody.innerHTML = '<tr><td colspan="7" class="no-data-message">Failed to load trash.</td></tr>'; });
+            } catch (e) { console.error('loadAdminTrash', e); const tbody = document.getElementById('trashTableBody'); if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="no-data-message">Failed to load trash.</td></tr>'; }
+        }
+
+        async function restoreFromTrash(trashPostId) {
+            try {
+                const trashRef = doc(db, 'artifacts', appId, 'admin_trash', 'posts', trashPostId);
+                const snap = await getDoc(trashRef);
+                if (!snap.exists()) { showMessageBox('Item not found in trash.', 'error'); return; }
+                const data = snap.data();
+                const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', trashPostId);
+                await setDoc(postRef, data);
+                await deleteDoc(trashRef);
+                await logAdminAction(currentUser ? currentUser.uid : 'system', 'restore_post', { postId: trashPostId });
+                showMessageBox('Post restored.', 'success');
+                // refresh table
+                loadAdminTrash(true);
+            } catch (e) { console.error('restoreFromTrash', e); showMessageBox('Failed to restore post.', 'error'); }
+        }
+
+        async function purgeTrashPost(trashPostId) {
+            try {
+                if (!confirm('Permanently delete this post? This action cannot be undone.')) return;
+                const trashRef = doc(db, 'artifacts', appId, 'admin_trash', 'posts', trashPostId);
+                await deleteDoc(trashRef);
+                await logAdminAction(currentUser ? currentUser.uid : 'system', 'purge_trash_post', { postId: trashPostId });
+                showMessageBox('Post permanently deleted from trash.', 'success');
+                loadAdminTrash(true);
+            } catch (e) { console.error('purgeTrashPost', e); showMessageBox('Failed to purge post.', 'error'); }
+        }
+
+        async function bulkRestoreTrash() {
+            const ids = getTrashSelectedIds(); if (!ids.length) { showMessageBox('No items selected.', 'warning'); return; }
+            for (const id of ids) { try { await restoreFromTrash(id); } catch(e){ console.error('bulk restore', e); } }
+            showMessageBox(`Restored ${ids.length} items.`, 'success');
+            window.trashSelectedIds.clear();
+        }
+
+        async function bulkPurgeTrash() {
+            const ids = getTrashSelectedIds(); if (!ids.length) { showMessageBox('No items selected.', 'warning'); return; }
+            if (!confirm(`Permanently delete ${ids.length} items? This cannot be undone.`)) return;
+            for (const id of ids) { try { await deleteDoc(doc(db, 'artifacts', appId, 'admin_trash', 'posts', id)); await logAdminAction(currentUser ? currentUser.uid : 'system', 'bulk_purge_trash_post', { postId: id }); } catch(e){ console.error('bulk purge', e); } }
+            showMessageBox(`Permanently deleted ${ids.length} items.`, 'success');
+            window.trashSelectedIds.clear();
+            loadAdminTrash(true);
+        }
+
         // --- CSV Export helpers ---
         function toCSV(rows) {
             const esc = (v) => '"' + String(v === null || v === undefined ? '' : v).replace(/"/g, '""') + '"';
