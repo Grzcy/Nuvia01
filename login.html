@@ -1758,8 +1758,15 @@
                 let errorMessage = 'Invalid email or password.';
                 const code = (error && error.code) || '';
                 const rawMsg = (error && (error.message || '')).toString();
-                const textBlob = [code || '', rawMsg || '', (error && error.stack) || '', (() => { try { return JSON.stringify((error && error.customData) || {}); } catch(_) { return ''; } })()].join(' ');
-                const isWrong = code === 'auth/wrong-password' || /INVALID_PASSWORD|INVALID_LOGIN_CREDENTIALS|invalid[_\s-]*credential/i.test(textBlob);
+                const textBlob = [
+                    code || '',
+                    rawMsg || '',
+                    (error && error.name) || '',
+                    (error && error.stack) || '',
+                    (()=>{ try{ return JSON.stringify(error || {}); }catch(_){ return ''; } })(),
+                    (() => { try { return JSON.stringify((error && error.customData) || {}); } catch(_) { return ''; } })()
+                ].join(' ');
+                const isWrong = /auth\/wrong-password|INVALID_PASSWORD|INVALID_LOGIN_CREDENTIALS|invalid[_\s-]*credential|wrong\s*password/i.test(textBlob);
                 const isNotFound = code === 'auth/user-not-found' || /EMAIL_NOT_FOUND/i.test(rawMsg);
                 if (isWrong) {
                     try { applyThrottleFailure(); } catch(_) {}
@@ -1839,9 +1846,17 @@
 
                 // Apply tiered throttle only for wrong-credential errors
                 const msg = (error && error.message) || '';
-                const wrong = code === 'auth/wrong-password' || /INVALID_PASSWORD|INVALID_LOGIN_CREDENTIALS|invalid[_\s-]*credential/i.test(msg);
+                const blob = [code||'', msg||'', (()=>{ try{ return JSON.stringify(error||{});}catch(_){ return ''; } })()].join(' ');
+                const wrong = /auth\/wrong-password|INVALID_PASSWORD|INVALID_LOGIN_CREDENTIALS|invalid[_\s-]*credential|wrong\s*password/i.test(blob);
                 if (wrong) {
-                    applyThrottleFailure();
+                    try { applyThrottleFailure(); } catch(_) {}
+                    const st = getThrottleState();
+                    if (st && st.lockUntil && Date.now() < st.lockUntil) {
+                        showWrongPasswordModal(true);
+                    } else {
+                        showWrongPasswordModal(false);
+                    }
+                    return;
                 }
                 showErrorModal(errorMessage);
             }
