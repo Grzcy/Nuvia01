@@ -1615,7 +1615,7 @@
                                 <div class="input-group">
                                     <label for="announcementPrioritySelect">Priority:</label>
                                     <select id="announcementPrioritySelect">
-                                        <option value="auto">🤖 Smart (recommended)</option>
+                                        <option value="auto">�� Smart (recommended)</option>
                                         <option value="low">🟢 Low</option>
                                         <option value="medium">🟡 Medium</option>
                                         <option value="high">🔴 High</option>
@@ -2243,6 +2243,104 @@ import { renderVerifiedBadge } from './assets/js/verification-utils.js';
                 toggleButtonLoading(verifyUserButton, false);
             }
         }
+
+        // -------- Content Moderation Helpers (Admin Only) --------
+        const adminPostIdInput = document.getElementById('adminPostIdInput');
+        const fetchPostBtn = document.getElementById('fetchPostBtn');
+        const refreshRecentPostsBtn = document.getElementById('refreshRecentPostsBtn');
+        const adminPostDetails = document.getElementById('adminPostDetails');
+        const recentPostsList = document.getElementById('recentPostsList');
+
+        async function renderPostCardForAdmin(postData, postId) {
+            const container = document.createElement('div');
+            container.className = 'admin-post-card';
+            container.style.border = '1px solid var(--border-light)';
+            container.style.padding = '10px';
+            container.style.borderRadius = '8px';
+            container.style.background = 'var(--card-background)';
+            const author = postData.username || 'Anonymous';
+            const createdAt = postData.createdAt ? (postData.createdAt.toDate ? postData.createdAt.toDate().toLocaleString() : new Date(postData.createdAt).toLocaleString()) : 'N/A';
+            container.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                    <div style="flex:1;">
+                        <div style="font-weight:700;">${escapeHtml(author)} <small style=\"color:var(--text-light)\">(${escapeHtml(postData.authorId || 'N/A')})</small></div>
+                        <div style="color:var(--text-light); margin-top:6px;">${escapeHtml(postData.content || '')}</div>
+                        <div style="color:var(--text-light); margin-top:6px; font-size:12px;">ID: <code>${escapeHtml(postId)}</code> • ${escapeHtml(createdAt)}</div>
+                    </div>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <button class="admin-button danger" data-post-id="${postId}" style="white-space:nowrap;">Take Down</button>
+                    </div>
+                </div>
+            `;
+            const btn = container.querySelector('button.admin-button.danger');
+            if (btn) btn.addEventListener('click', ()=> takeDownPost(postId));
+            return container;
+        }
+
+        // Escaping helper
+        function escapeHtml(text){ if(!text && text!==0) return ''; return String(text).replace(/[&<>"']/g, function(m){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]); }); }
+
+        // Fetch a single post by ID and render details
+        async function fetchPostById(){
+            if (!currentUser || currentUser.uid !== ADMIN_UID) { showMessageBox('Unauthorized. Only admin can moderate content.', 'error'); return; }
+            const id = (adminPostIdInput && adminPostIdInput.value || '').trim();
+            if (!id) { showMessageBox('Enter a post ID or refresh recent posts.', 'warning'); return; }
+            adminPostDetails.style.display = 'block';
+            adminPostDetails.innerHTML = '<em>Loading post...</em>';
+            try{
+                const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', id);
+                const snap = await getDoc(postRef);
+                if (!snap.exists()) { adminPostDetails.innerHTML = '<div style="color:var(--text-light);">Post not found.</div>'; return; }
+                const data = snap.data();
+                const card = await renderPostCardForAdmin(data, id);
+                adminPostDetails.innerHTML = '';
+                adminPostDetails.appendChild(card);
+            }catch(e){ console.error(e); adminPostDetails.innerHTML = '<div style="color:var(--text-light);">Failed to load post.</div>'; }
+        }
+
+        // Load recent posts (latest N) and render list
+        async function loadRecentPosts(limitAmt = 30){
+            if (!currentUser || currentUser.uid !== ADMIN_UID) return;
+            recentPostsList.innerHTML = '<em>Loading recent posts...</em>';
+            try{
+                const postsRef = collection(db, 'artifacts', appId, 'public', 'data', 'posts');
+                const q = query(postsRef, orderBy('createdAt','desc'));
+                const snap = await getDocs(q);
+                recentPostsList.innerHTML = '';
+                let count = 0;
+                for (const d of snap.docs){
+                    if (count++ >= limitAmt) break;
+                    const data = d.data();
+                    const card = await renderPostCardForAdmin(data, d.id);
+                    recentPostsList.appendChild(card);
+                }
+                if (count === 0) recentPostsList.innerHTML = '<div style="color:var(--text-light);">No posts found.</div>';
+            }catch(e){ console.error(e); recentPostsList.innerHTML = '<div style="color:var(--text-light);">Failed to load recent posts.</div>'; }
+        }
+
+        async function takeDownPost(postId){
+            if (!currentUser || currentUser.uid !== ADMIN_UID) { showMessageBox('Unauthorized. Only admin can take down posts.', 'error'); return; }
+            const confirmed = await showConfirmationModal('Take Down Post', 'Are you sure you want to take down this post? This will delete it from the public feed.');
+            if (!confirmed) return;
+            showMessageBox('Taking down post...', 'loading', true);
+            try{
+                const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', postId);
+                await runTransaction(db, async (tx)=>{ const snap = await tx.get(postRef); if(!snap.exists()) throw new Error('Post not found'); tx.delete(postRef); });
+                // Log admin action
+                try{ await addDoc(collection(db, 'artifacts', appId, 'public', 'logs', 'admin_actions'), { action: 'take_down_post', postId, performedBy: currentUser.uid, performedAt: serverTimestamp() }); }catch(_){ }
+                showMessageBox('Post taken down successfully.', 'success');
+                // Remove from UI
+                const el = recentPostsList.querySelector(`[data-post-id="${postId}"]`);
+                if (el) el.remove();
+                if (adminPostDetails && adminPostDetails.querySelector('code') && adminPostDetails.querySelector('code').textContent === postId) adminPostDetails.innerHTML = '<div style="color:var(--text-light);">Post was taken down.</div>';
+            }catch(e){ console.error(e); showMessageBox('Failed to take down post: '+(e.message||e), 'error'); }
+        }
+
+        // Wire up buttons
+        if (fetchPostBtn) fetchPostBtn.addEventListener('click', fetchPostById);
+        if (refreshRecentPostsBtn) refreshRecentPostsBtn.addEventListener('click', ()=> loadRecentPosts(30));
+        // Auto-load recent posts for admin when page ready
+        document.addEventListener('DOMContentLoaded', ()=>{ try{ if (currentUser && currentUser.uid === ADMIN_UID) loadRecentPosts(30); }catch(_){} });
         async function unverifyLookedUpUser() {
             if (!currentUser || currentUser.uid !== ADMIN_UID) { showMessageBox('Access denied.', 'error'); return; }
             if (!lookedUpUserId) { showMessageBox('Lookup a user first.', 'warning'); return; }
