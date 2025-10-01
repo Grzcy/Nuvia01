@@ -2200,7 +2200,7 @@ import { renderVerifiedBadge } from './assets/js/verification-utils.js';
         });
 
         // --- ADMIN UID ---
-        const ADMIN_UID = 'RJZ8xhsjEsdKBGFYveWO0Rsq1Zz1'; // Your admin UID
+        const ADMIN_UID = (typeof window !== 'undefined' && window.ADMIN_UID) ? window.ADMIN_UID : 'RJZ8xhsjEsdKBGFYveWO0Rsq1Zz1'; // Respects global override
 
         // --- DOM Elements ---
         const headerProfilePic = document.getElementById('headerProfilePic');
