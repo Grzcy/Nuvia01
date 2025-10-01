@@ -4618,6 +4618,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 pct = Math.min(60, pct + 1);
                 bar.style.width = pct + '%';
                 track.setAttribute('aria-valuenow', String(pct));
+                if (pctEl) pctEl.textContent = pct + '%';
                 if (pct >= 60){ clearInterval(progressTick); progressTick = null; }
               }catch(_){}
             }, 100);
