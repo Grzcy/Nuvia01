@@ -1735,14 +1735,9 @@
                     try { applyThrottleFailure(); } catch(_) {}
                     const state = getThrottleState();
                     if (state && state.lockUntil && Date.now() < state.lockUntil) {
-                        const ms = state.lockUntil - Date.now();
-                        errorMessage = `Too many failed attempts. Locked for ${formatDuration(ms)}. Try again later or reset your password.`;
-                        showCustomModal('error', 'Account temporarily locked', errorMessage);
+                        showWrongPasswordModal(true);
                     } else {
-                        const remaining = (state && typeof state.remaining === 'number') ? state.remaining : 0;
-                        const plural = remaining === 1 ? '' : 's';
-                        errorMessage = `Incorrect password. ${remaining} attempt${plural} left before a temporary lock. You can also use "Forgot password" to reset it.`;
-                        showCustomModal('error', 'Incorrect password', errorMessage);
+                        showWrongPasswordModal(false);
                     }
                     return;
                 }
@@ -2039,6 +2034,53 @@
                 else if (/locked|too many failed/i.test(m)) title = 'Account temporarily locked';
             } catch(_) {}
             showCustomModal('error', title, message);
+        }
+
+        function showWrongPasswordModal(isLocked){
+            try{
+                const state = getThrottleState();
+                const modal = document.getElementById('customModal');
+                const primaryBtn = document.getElementById('modalPrimaryBtn');
+                const btnContainer = modal.querySelector('.modal-buttons');
+                const titleEl = document.getElementById('modalTitle');
+                const messageEl = document.getElementById('modalMessage');
+                const icon = document.getElementById('modalIcon');
+
+                // Clean up any previous temporary buttons
+                Array.from(btnContainer.querySelectorAll('.temp-btn')).forEach(b=>{ try{ b.remove(); }catch(_){} });
+
+                if (isLocked) {
+                    const ms = Math.max(0, (state && state.lockUntil ? (state.lockUntil - Date.now()) : 0));
+                    icon.className = 'modal-icon error';
+                    icon.textContent = '✕';
+                    titleEl.textContent = 'Account temporarily locked';
+                    messageEl.textContent = `Too many failed attempts. Locked for ${formatDuration(ms)}. You can reset your password now and try again when the lock ends.`;
+                    primaryBtn.textContent = 'OK';
+                    primaryBtn.onclick = closeModal;
+                } else {
+                    const remaining = (state && typeof state.remaining === 'number') ? state.remaining : 0;
+                    const plural = remaining === 1 ? '' : 's';
+                    icon.className = 'modal-icon error';
+                    icon.textContent = '✕';
+                    titleEl.textContent = 'Incorrect password';
+                    messageEl.textContent = `That password doesn\u2019t match this account. ${remaining} attempt${plural} left before a temporary lock. Tip: check Caps Lock or reset your password.`;
+                    primaryBtn.textContent = 'Try again';
+                    primaryBtn.onclick = closeModal;
+                }
+
+                // Add a Reset Password secondary action
+                const resetBtn = document.createElement('button');
+                resetBtn.className = 'modal-btn secondary temp-btn';
+                resetBtn.type = 'button';
+                resetBtn.textContent = 'Reset password';
+                resetBtn.onclick = ()=>{ closeModal(); try{ showResetPasswordModal(); }catch(_){} };
+                btnContainer.appendChild(resetBtn);
+
+                modal.style.display = 'flex';
+            }catch(_){
+                // Fallback to basic modal if customization fails
+                showCustomModal('error', isLocked ? 'Account temporarily locked' : 'Incorrect password', isLocked ? 'Too many failed attempts. Please try again later.' : 'The password is incorrect.');
+            }
         }
 
         async function resendVerificationEmail(){
