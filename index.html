@@ -4609,6 +4609,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
           try{
             var bar = el && el.querySelector('.loader-progress-bar');
             var track = el && el.querySelector('.loader-progress');
+            var pctEl = el && el.querySelector('.loader-percentage');
             if (!bar || !track) return;
             var pct = Number(track.getAttribute('aria-valuenow')||'0') || 0;
             progressTick = setInterval(function(){
