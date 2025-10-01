@@ -1197,6 +1197,60 @@
         }
     </script>
 
+    <!-- Inline SVG icon sprite + runtime replacer (fallback if external icon fonts break) -->
+    <script>
+    (function(){
+      // SVG sprite containing small, accessible icons used on this page
+      const sprite = '\n<svg id="__inline_svg_icons" xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true" focusable="false">\n  <symbol id="icon-envelope-open-text" viewBox="0 0 24 24">\n    <path d="M2 7.5V18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7.5l-10 6-10-6z" fill="currentColor"/>\n    <path d="M22 6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v.5l10 6 10-6V6z" fill="currentColor"/>\n  </symbol>\n  <symbol id="icon-paper-plane" viewBox="0 0 24 24">\n    <path d="M2 21l20-9L2 3v7l15 2-15 2v6z" fill="currentColor"/>\n  </symbol>\n  <symbol id="icon-check" viewBox="0 0 24 24">\n    <path d="M20.285 6.708l-11.39 11.39L3.715 13.918l1.414-1.414 3.766 3.766 9.976-9.976z" fill="currentColor"/>\n  </symbol>\n  <symbol id="icon-eye" viewBox="0 0 24 24">\n    <path d="M12 5c-7 0-11 6.5-11 7s4 7 11 7 11-6.5 11-7-4-7-11-7zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z" fill="currentColor"/>\n  </symbol>\n  <symbol id="icon-eye-slash" viewBox="0 0 24 24">\n    <path d="M2 2l20 20-1.5 1.5L17 17.5C15.7 18.1 14.4 18.5 13 18.5 6 18.5 2 12 2 12c.9-1.4 2.4-3.1 4.3-4.6L.5 3.5 2 2z" fill="currentColor"/>\n  </symbol>\n</svg>\n';
+
+      const classToSymbol = {
+        'fa-envelope-open-text': '#icon-envelope-open-text',
+        'fa-paper-plane': '#icon-paper-plane',
+        'fa-check': '#icon-check',
+        'fa-eye': '#icon-eye',
+        'fa-eye-slash': '#icon-eye-slash'
+      };
+
+      function insertSprite(){
+        if (!document.getElementById('__inline_svg_icons')){
+          try{ document.body.insertAdjacentHTML('afterbegin', sprite); }catch(e){
+            const d = document.createElement('div'); d.innerHTML = sprite; document.body.insertBefore(d, document.body.firstChild);
+          }
+        }
+      }
+
+      function replaceIcons(){
+        try{
+          document.querySelectorAll('i.fas').forEach(i=>{
+            const classes = Array.from(i.classList || []);
+            const fa = classes.find(c=>c.startsWith('fa-') && c !== 'fas');
+            if(!fa) return;
+            const symbol = classToSymbol[fa];
+            if(!symbol) return;
+            const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+            svg.setAttribute('class', 'inline-icon '+fa.replace('fa-','icon-'));
+            svg.setAttribute('aria-hidden','true');
+            svg.setAttribute('focusable','false');
+            svg.setAttribute('width','1em'); svg.setAttribute('height','1em');
+            svg.setAttribute('viewBox','0 0 24 24');
+            // Preserve id if present (used by password toggle)
+            if(i.id) svg.id = i.id;
+            // Create use element (both href and xlink:href for broad compatibility)
+            const use = document.createElementNS('http://www.w3.org/2000/svg','use');
+            use.setAttribute('href', symbol);
+            use.setAttributeNS('http://www.w3.org/1999/xlink','xlink:href', symbol);
+            svg.appendChild(use);
+            i.replaceWith(svg);
+          });
+        }catch(e){ console.warn('Icon replacement failed', e); }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function(){ insertSprite(); replaceIcons(); });
+      } else { insertSprite(); replaceIcons(); }
+    })();
+    </script>
+
     <!-- Firebase SDK -->
     <script type="module">
         // Import Firebase modules
@@ -2970,6 +3024,29 @@
             });
 
         });
+    </script>
+    <!-- Patch togglePassword to support SVG icons injected at runtime -->
+    <script>
+    (function(){
+      const orig = window.togglePassword;
+      function updateSvgIcon(){
+        try{
+          const icon = document.getElementById('passwordToggleIcon');
+          const input = document.getElementById('password');
+          if(!icon || !input) return;
+          if(icon.tagName.toLowerCase() !== 'svg') return;
+          const use = icon.querySelector('use'); if(!use) return;
+          const target = input.type === 'password' ? '#icon-eye' : '#icon-eye-slash';
+          use.setAttribute('href', target);
+          use.setAttributeNS('http://www.w3.org/1999/xlink','xlink:href', target);
+        }catch(e){/* silent */}
+      }
+      window.togglePassword = function(){
+        try{ if (typeof orig === 'function') orig(); }catch(e){}
+        updateSvgIcon();
+      };
+      document.addEventListener('DOMContentLoaded', updateSvgIcon);
+    })();
     </script>
 </body>
 </html>
