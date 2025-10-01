@@ -1930,6 +1930,42 @@
             }
         }
 
+        // --- New: Real-time feed listener for all posts ---
+        function listenForAllPosts() {
+            try {
+                const postsRef = collection(db, 'artifacts', appId, 'public', 'data', 'posts');
+                const q = query(postsRef, orderBy('createdAt', 'desc'), limit(200));
+                onSnapshot(q, (snapshot) => {
+                    const tbody = document.getElementById('postsTableBody');
+                    if (!tbody) return;
+                    tbody.innerHTML = '';
+                    if (snapshot.empty) {
+                        tbody.innerHTML = '<tr><td colspan="6" class="no-data-message">No posts to display.</td></tr>';
+                        return;
+                    }
+                    snapshot.forEach(docSnap => {
+                        const post = docSnap.data();
+                        const postId = docSnap.id;
+                        const row = document.createElement('tr');
+                        const created = formatTimestamp(post.createdAt || post.timestamp || null);
+                        row.innerHTML = `
+                            <td class="mono">${postId}</td>
+                            <td><a href="/profile.html?userId=${post.authorId}" style="color: var(--accent-color);">${post.authorUsername || post.authorId}</a></td>
+                            <td class="moderation-item-content">${excerpt(post.content || '')}</td>
+                            <td><span class="status-badge">${post.visibility || 'public'}</span></td>
+                            <td>${created}</td>
+                            <td class="action-buttons-cell">
+                                <button class="button" onclick="handleViewPost('${postId}')">View</button>
+                                <button class="button secondary" onclick="handleFlagPost('${postId}')">Flag</button>
+                                <button class="button danger" onclick="handleDeletePost('${postId}')">Delete</button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                }, (err) => { console.error('Posts listener error:', err); showMessageBox('Failed to listen to posts.', 'error'); });
+            } catch (e) { console.warn('Real-time posts listener not available', e); const tbody = document.getElementById('postsTableBody'); if (tbody) tbody.innerHTML = '<tr><td colspan="6" class="no-data-message">No posts to display.</td></tr>'; }
+        }
+
         // --- Event Listeners ---
         window.addEventListener('storage', (event) => {
             if (event.key === 'jchat-theme') {
