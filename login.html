@@ -1725,39 +1725,39 @@
 
             } catch (error) {
                 hideSmartLoader();
-                // Better handle network/fetch failures which sometimes don't provide error.code
                 let errorMessage = 'Invalid email or password.';
-
-                // Detect raw fetch/TypeError failures
+                const code = (error && error.code) || '';
+                const rawMsg = (error && (error.message || '')).toString();
+                const isWrong = code === 'auth/wrong-password' || /INVALID_PASSWORD|INVALID_LOGIN_CREDENTIALS|invalid[_\s-]*credential/i.test(rawMsg);
+                const isNotFound = code === 'auth/user-not-found' || /EMAIL_NOT_FOUND/i.test(rawMsg);
+                if (isWrong) {
+                    errorMessage = 'Incorrect password. Please check your password and try again, or use "Forgot password" to reset it.';
+                    try { applyThrottleFailure(); } catch(_) {}
+                    showErrorModal(errorMessage);
+                    return;
+                }
+                // Only do network diagnostics if not a known auth error
                 try {
-                    const msg = (error && (error.message || '')).toString();
-                    if (msg.includes('Failed to fetch') || error.name === 'TypeError') {
-                        // perform a small network check; if it fails, surface network error and exit
-                        try {
-                            const controller = new AbortController();
-                            const timeout = setTimeout(() => controller.abort(), 3000);
-                            await fetch('https://www.gstatic.com/generate_204', { method: 'GET', mode: 'no-cors', signal: controller.signal }).catch(()=>{});
-                            clearTimeout(timeout);
-                        } catch (netErr) {
-                            console.warn('Network check failed:', netErr);
-                            errorMessage = 'Network error: Unable to reach authentication server. Check your internet connection or browser extensions (adblockers/proxies) and try again.';
-                            showErrorModal(errorMessage);
-                            return;
-                        }
-                        // If network check passed, continue to map auth errors instead of showing a network error
+                    if (rawMsg.includes('Failed to fetch') || (error && error.name === 'TypeError')) {
+                        const controller = new AbortController();
+                        const timeout = setTimeout(() => controller.abort(), 3000);
+                        await fetch('https://www.gstatic.com/generate_204', { method: 'GET', mode: 'no-cors', signal: controller.signal }).catch(()=>{});
+                        clearTimeout(timeout);
                     }
-
-                    // Map common REST messages when error.code is missing
-                    if (/INVALID_LOGIN_CREDENTIALS/i.test(msg) || /invalid[_\s-]*credential/i.test(msg)) {
-                        errorMessage = 'Invalid login credentials. Please check your email and password.';
-                    } else if (/EMAIL_NOT_FOUND/i.test(msg)) {
+                } catch (netErr) {
+                    console.warn('Network check failed:', netErr);
+                    errorMessage = 'Network error: Unable to reach authentication server. Check your internet connection or browser extensions (adblockers/proxies) and try again.';
+                    showErrorModal(errorMessage);
+                    return;
+                }
+                // Map common REST messages when error.code is missing (non-network cases)
+                try {
+                    if (isNotFound) {
                         errorMessage = 'No account found with this email.';
-                    } else if (/INVALID_PASSWORD/i.test(msg)) {
-                        errorMessage = 'Incorrect password. Please try again or reset your password.';
-                    } else if (/USER_DISABLED/i.test(msg)) {
+                    } else if (/USER_DISABLED/i.test(rawMsg)) {
                         errorMessage = 'This account has been disabled. Please contact support.';
                     }
-                } catch (_) {}
+                } catch(_) {}
 
                 // If firebase provided an error code, map to friendly messages
                 if (error && error.code) {
