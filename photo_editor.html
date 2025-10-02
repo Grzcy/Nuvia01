@@ -32,11 +32,11 @@
     .file-input input{ position:absolute; inset:0; opacity:0; cursor:pointer; }
 
     .editor-wrap{ display:grid; grid-template-columns: 1fr 340px; align-items:stretch; gap:0; height: calc(100% - 58px); }
-    .canvas-pane{ display:flex; align-items:center; justify-content:center; background: rgba(255,255,255,0.03); border-right: 1px solid var(--border-light, rgba(255,255,255,0.12)); }
+    .canvas-pane{ display:flex; align-items:center; justify-content:center; background: rgba(255,255,255,0.03); border-right: 1px solid var(--border-light, rgba(255,255,255,0.12)); min-height: 0; }
     .canvas-box{ padding:16px; width:100%; display:flex; flex-direction:column; align-items:center; }
-    canvas{ max-width: calc(92vw - 360px); max-height: 80vh; background: rgba(0,0,0,0.2); border: 1px solid var(--border-light, rgba(255,255,255,0.12)); border-radius: 10px; display:block; }
+    canvas{ max-width: calc(92vw - 360px); max-height: 72vh; background: rgba(0,0,0,0.2); border: 1px solid var(--border-light, rgba(255,255,255,0.12)); border-radius: 10px; display:block; }
 
-    .controls-pane{ padding:14px; overflow:auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+    .controls-pane{ padding:14px; overflow:auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; min-height: 0; }
     .divider{ height:1px; background: var(--border-light, rgba(255,255,255,0.12)); margin:12px 0; }
 
     .value-indicator{ color: var(--text-light, rgba(255,255,255,0.8)); font-variant-numeric: tabular-nums; }
@@ -70,9 +70,15 @@
     .drop-hint{ text-align:center; color: var(--text-light, rgba(255,255,255,0.8)); font-size:.9rem; margin-top:8px; }
 
     @media (max-width: 920px){
-      .editor-wrap{ grid-template-columns: 1fr; }
-      .canvas-pane{ border-right:none; border-bottom: 1px solid var(--border-light, rgba(255,255,255,0.12)); }
-      canvas{ max-width: 94vw; }
+      .editor-wrap{ grid-template-columns: 1fr; grid-template-rows: minmax(42vh, 52vh) 1fr; }
+      .canvas-pane{ border-right:none; border-bottom: 1px solid var(--border-light, rgba(255,255,255,0.12)); overflow:auto; }
+      canvas{ max-width: 94vw; max-height: 46vh; }
+      .controls-pane{ display:block; }
+      #controlsToggle{ position: fixed; right: 16px; bottom: 16px; z-index: 5; display:inline-block; }
+      .controls-sheet{ position: fixed; left:0; right:0; bottom:0; background: var(--card-background, #121321); border-top-left-radius: 14px; border-top-right-radius: 14px; box-shadow: 0 -10px 30px rgba(0,0,0,0.4); max-height: 72vh; transform: translateY(100%); transition: transform .25s ease; border: 1px solid var(--border-light, rgba(255,255,255,0.12)); padding: 12px 14px; overflow:auto; -webkit-overflow-scrolling: touch; }
+      body.show-controls .controls-sheet{ transform: translateY(0); }
+      body.show-controls{ overflow: hidden; }
+      .controls-sheet .sheet-handle{ width: 48px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; margin: 6px auto 10px; }
     }
   </style>
 </head>
@@ -282,8 +288,37 @@
     </aside>
   </main>
 
+  <button id="controlsToggle" class="btn" aria-label="Show Controls"><i class="fas fa-sliders-h"></i> Controls</button>
+  <div id="controlsSheet" class="controls-sheet" aria-hidden="true" aria-label="Editor Controls Sheet" style="display:block;">
+    <div class="sheet-handle"></div>
+    <div id="controlsSheetContent"></div>
+  </div>
+
   <script>
   (function(){
+    const pane = document.querySelector('.controls-pane');
+    const sheet = document.getElementById('controlsSheet');
+    const sheetContent = document.getElementById('controlsSheetContent');
+    const toggle = document.getElementById('controlsToggle');
+    let placeholder = null;
+    let isInSheet = false;
+    function ensurePlaceholder(){ try{ if(!placeholder && pane && pane.parentNode){ placeholder = document.createComment('controls-placeholder'); pane.parentNode.insertBefore(placeholder, pane); } }catch(_){ }
+    }
+    function moveToSheet(){ if(!pane || !sheetContent || isInSheet) return; ensurePlaceholder(); try{ sheetContent.appendChild(pane); isInSheet = true; }catch(_){ }
+    }
+    function restoreToGrid(){ if(!pane || !placeholder || !isInSheet) return; try{ if(placeholder.parentNode){ placeholder.parentNode.insertBefore(pane, placeholder); isInSheet = false; } }catch(_){ }
+    }
+    const mq = window.matchMedia('(max-width: 920px)');
+    function applyLayout(){ if(mq.matches) moveToSheet(); else { document.body.classList.remove('show-controls'); restoreToGrid(); } }
+    applyLayout();
+    if(mq.addEventListener) mq.addEventListener('change', applyLayout); else window.addEventListener('resize', applyLayout);
+
+    (function(){
+      function show(){ if(!window.matchMedia('(max-width: 920px)').matches) return; document.body.classList.add('show-controls'); if(sheet) sheet.setAttribute('aria-hidden','false'); if(toggle) toggle.setAttribute('aria-label','Hide Controls'); }
+      function hide(){ document.body.classList.remove('show-controls'); if(sheet) sheet.setAttribute('aria-hidden','true'); if(toggle) toggle.setAttribute('aria-label','Show Controls'); }
+      if(toggle){ toggle.addEventListener('click', ()=>{ if(document.body.classList.contains('show-controls')) hide(); else show(); }); }
+      window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') hide(); });
+    })();
     function initAccordion(){
       const sections = document.querySelectorAll('.accordion-section');
       const updateBody = (body, sec)=>{ if(sec.getAttribute('aria-expanded')==='true'){ body.style.maxHeight = body.scrollHeight + 'px'; } };

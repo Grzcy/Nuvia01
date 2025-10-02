@@ -145,7 +145,7 @@
 
     <div id="emptyState" class="empty" style="display:none">
       <div class="empty-title">You're all caught up</div>
-      <div class="empty-desc">We’ll show new activity here. Try adjusting filters or preferences for more results.</div>
+      <div class="empty-desc">We��ll show new activity here. Try adjusting filters or preferences for more results.</div>
     </div>
 
     <div class="bottom-space"></div>
@@ -163,7 +163,7 @@
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js';
-    import { getFirestore, collection, query, orderBy, limit, onSnapshot, doc, updateDoc, deleteDoc, getDoc } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js';
+    import { getFirestore, collection, query, orderBy, limit, onSnapshot, doc, updateDoc, deleteDoc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js';
     import { getCloudinaryImageUrl, displayProfilePicture } from './assets/js/avatar-utils.js';
 
     const firebaseConfig = typeof window.__firebase_config !== 'undefined' ? JSON.parse(window.__firebase_config) : {
@@ -176,6 +176,60 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+
+    // Initialize Firebase Messaging support (optional VAPID key provided via global)
+    import('https://www.gstatic.com/firebasejs/11.8.0/firebase-messaging.js').then(({ getMessaging, getToken, onMessage })=>{
+      // Expose an async initializer that will be called after auth is ready and service worker registered
+      window.__nuviaInitFCM = async function(currentUser){
+        try{
+          if (!('serviceWorker' in navigator)) return;
+          const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+          const messaging = getMessaging(app);
+
+          // Request notification permission if not already granted
+          if (Notification.permission !== 'granted') {
+            try { await Notification.requestPermission(); } catch(_){}
+          }
+          if (Notification.permission !== 'granted') {
+            console.warn('Nuvia: Notifications permission not granted');
+            return;
+          }
+
+          // Attempt to get token. VAPID key can be provided at runtime via window.__firebase_messaging_vapid_key
+          const vapidKey = window.__firebase_messaging_vapid_key || null;
+          const getOptions = vapidKey ? { vapidKey } : {};
+
+          let fcmToken = null;
+          try {
+            fcmToken = await getToken(messaging, { serviceWorkerRegistration: swReg, vapidKey: vapidKey || undefined });
+          } catch (e) {
+            console.warn('Nuvia: getToken failed', e);
+          }
+
+          if (fcmToken) {
+            try {
+              if (currentUser && currentUser.uid) {
+                const tokenRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'fcmTokens', fcmToken);
+                await setDoc(tokenRef, { token: fcmToken, ts: serverTimestamp(), userAgent: navigator.userAgent });
+              }
+            } catch (e) { console.warn('Nuvia: Failed saving FCM token', e); }
+          }
+
+          // Handle incoming foreground messages
+          try{
+            onMessage(messaging, (payload)=>{
+              try{
+                const title = (payload && (payload.notification && payload.notification.title)) || (payload && payload.data && payload.data.title) || 'Nuvia Notification';
+                const body = (payload && (payload.notification && payload.notification.body)) || (payload && payload.data && payload.data.body) || '';
+                // Show a native notification if permitted
+                try{ new Notification(title, { body }); } catch(e){ /* fallback to in-app toast */ notify(body,'info'); }
+              }catch(e){ console.warn('FCM onMessage handler error', e); }
+            });
+          }catch(e){ /* ignore */ }
+
+        }catch(e){ console.error('Nuvia: FCM init error', e); }
+      };
+    }).catch(e=>{ console.warn('Nuvia: Failed to load firebase-messaging.js', e); });
 
     (function(){
       const feedEl = document.getElementById('feed');
@@ -239,6 +293,10 @@
           return loadCachedAndRender();
         }
         try{ await fetchAndDisplayHeaderProfile(currentUser); }catch(_){ }
+
+        // Initialize FCM for this authenticated user (if messaging SDK loaded)
+        try{ if (typeof window.__nuviaInitFCM === 'function') { window.__nuviaInitFCM(currentUser).catch(()=>{}); } }catch(_){}
+
         const col = collection(db,'artifacts', appId, 'users', currentUser.uid, 'notifications');
         const q = query(col, orderBy('timestamp','desc'), limit(400));
         let __notifInitialized = false;

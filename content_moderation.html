@@ -1,2070 +1,515 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Last updated: 2025-08-21T18:19:29Z -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JCHAT - Admin Panel - Content Moderation</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        const savedTheme = localStorage.getItem('jchat-theme');
-        const themes = ['theme-dark-mode'];
-        if (savedTheme && themes.includes(savedTheme)) {
-            document.body.classList.remove(...themes);
-            document.body.classList.add(savedTheme);
-        } else {
-            document.body.classList.add('theme-dark-mode'); // Default to dark mode if no theme is saved
-        }
-      });
-    </script>
-
-    <style>
-        /* Universal box-sizing for consistent layout */
-        *, *::before, *::after {
-            box-sizing: border-box;
-        }
-
-        /* Global CSS Variables for easy theme switching (copied from Admin.html) */
-        :root {
-            /* Theme Original Default */
-            --background-color-primary: #1a1a2e;
-            --background-color-secondary: #0f0f1f;
-            --header-background-color: #2a2a4a;
-            --footer-background-color: #2a2a4a;
-            --content-background-color: #20203a;
-            --card-background-color: #2a2a4a;
-            --text-color-primary: #e0e0e0;
-            --text-color-secondary: #b0b0d0;
-            --text-color-light: #f5f5f5;
-            --accent-color: #00d5ff; /* A bright cyan */
-            --accent-color-dark: #00aaff;
-            --border-color: #3a3a5a;
-            --input-background-color: #3a3a5a;
-            --button-background: #3a3a5a;
-            --button-hover-background: #4a4a6a;
-            --active-item-background: rgba(0, 213, 255, 0.2); /* Accent with transparency */
-            --notification-badge-color: #ff2e92; /* Pinkish-red */
-            --status-online: #4CAF50;
-            --status-offline: #6c757d;
-            --status-away: #FFC107;
-            --delete-button-color: #dc3545; /* Red for delete actions */
-            --warning-color: #ffc107; /* Orange for warnings */
-            --success-color: #28a745; /* Green for success */
-
-            /* Variables for original gradient background */
-            --pink: #ff2e92;
-            --blue: #00d5ff;
-            --glass-black: rgba(10, 10, 10, .75);
-            --glass-blue: rgba(0, 213, 255, .15);
-            --radius: 20px;
-            --transition: .3s ease;
-            --white: #fff; /* This will be overridden by theme classes */
-            --text-light: rgba(255, 255, 255, .7);
-            --background-main: rgba(10, 10, 10, .75);
-            --background-gradient-1: #00d5ff;
-            --background-gradient-2: #ff2e92;
-            --card-background: linear-gradient(145deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01));
-            --header-background: linear-gradient(135deg, rgba(10, 10, 10, .85), rgba(10, 10, 10, .75));
-            --border-light: rgba(255, 255, 255, .05);
-            --input-background: rgba(255, 255, 255, 0.05);
-            --button-background-gradient: linear-gradient(90deg, var(--blue), var(--pink));
-            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
-        }
-
-        /* --- Theme Definitions (Light and Dark Mode from Admin.html) --- */
-        /* Light Mode */
-        body.theme-light-mode {
-            --background-color-primary: #f0f2f5;
-            --background-color-secondary: #e0e2e5;
-            --header-background-color: #ffffff;
-            --footer-background-color: #ffffff;
-            --content-background-color: #f7f9fb;
-            --card-background-color: #ffffff;
-            --text-color-primary: #333333;
-            --text-color-secondary: #666666;
-            --text-color-light: #999999;
-            --accent-color: #007bff; /* A standard blue */
-            --accent-color-dark: #0056b3;
-            --border-color: #e0e0e0;
-            --input-background-color: #f0f0f0;
-            --button-background: #e9ecef;
-            --button-hover-background: #dee2e6;
-            --active-item-background: rgba(0, 123, 255, 0.1);
-            --notification-badge-color: #dc3545;
-            --status-online: #28a745;
-            --status-offline: #6c757d;
-            --status-away: #ffc107;
-            --delete-button-color: #dc3545;
-            --warning-color: #ffc107;
-            --success-color: #28a745;
-
-            /* Override for original gradient background in light mode */
-            --background-main: #f0f2f5;
-            background-image: none !important; /* Remove gradient for light mode */
-            --white: #333;
-            --text-light: #666;
-            --card-background: rgba(255, 255, 255, 0.95);
-            --header-background: rgba(255, 255, 255, 0.98);
-            --border-light: rgba(0, 0, 0, 0.1);
-            --input-background: rgba(0, 0, 0, 0.05);
-            --button-background-gradient: linear-gradient(90deg, #6dd5ed, #2193b0);
-            --button-shadow: 0 4px 15px rgba(109, 213, 237, 0.4), 0 4px 15px rgba(33, 147, 176, 0.4);
-        }
-
-        /* Dark Mode */
-        body.theme-dark-mode {
-            --background-color-primary: #121212;
-            --background-color-secondary: #1e1e1e;
-            --header-background-color: #2c2c2c;
-            --footer-background-color: #2c2c2c;
-            --content-background-color: #242424;
-            --card-background-color: #2c2c2c;
-            --text-color-primary: #ffffff;
-            --text-color-secondary: #bbbbbb;
-            --accent-color: #bb86fc; /* Purple accent */
-            --accent-color-dark: #9a67ea;
-            --border-color: #444444;
-            --input-background-color: #383838;
-            --button-background: #383838;
-            --button-hover-background: #505050;
-            --active-item-background: rgba(187, 134, 252, 0.2);
-            --notification-badge-color: #cf6679;
-            --delete-button-color: #f44336;
-            --warning-color: #ffeb3b;
-            --success-color: #8bc34a;
-
-            /* Override for original gradient background in dark mode */
-            --background-main: #1a1a2e;
-            background-image: radial-gradient(circle at top left, #16213e, transparent 100px),
-                              radial-gradient(circle at bottom right, #0f3460, transparent 150px) !important;
-            --white: #e0e0e0;
-            --text-light: #a0a0a0;
-            --card-background: rgba(25, 25, 40, 0.7);
-            --header-background: linear-gradient(135deg, rgba(10, 10, 20, .85), rgba(10, 10, 20, .75));
-            --border-light: rgba(255, 255, 255, 0.08);
-            --input-background: rgba(255, 255, 255, 0.08);
-            --button-background-gradient: linear-gradient(90deg, #e94560, #ba2f49);
-            --button-shadow: 0 4px 15px rgba(233, 69, 96, 0.4), 0 4px 15px rgba(186, 47, 73, 0.4);
-        }
-
-        /* Glass Mode specific variables (copied from Admin.html) */
-        body.theme-glass-mode {
-            --background-main: rgba(10, 10, 10, 0.75);
-            background-image: url('https://source.unsplash.com/random/1920x1080?abstract,blur') !important; /* Override background */
-            background-size: cover;
-            background-attachment: fixed;
-            background-position: center;
-            backdrop-filter: blur(10px);
-            --card-background: rgba(25, 25, 40, 0.7);
-            --white: #e0e0e0; /* text-color */
-            --text-light: rgba(255, 255, 255, 0.7);
-            --input-background: rgba(255, 255, 255, 0.05);
-            --border-light: rgba(255, 255, 255, 0.1); /* glass-border-color */
-            --button-background-gradient: linear-gradient(90deg, var(--pink), var(--blue));
-            --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
-            box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.5); /* Inner shadow for glass effect */
-
-            /* Ensure main theme vars are consistent with glass */
-            --background-color-primary: rgba(10, 10, 10, 0.75);
-            --background-color-secondary: rgba(10, 10, 10, 0.6);
-            --header-background-color: rgba(10, 10, 10, 0.85);
-            --footer-background-color: rgba(10, 10, 10, 0.85);
-            --content-background-color: rgba(10, 10, 10, 0.75);
-            --card-background-color: rgba(25, 25, 40, 0.7);
-            --text-color-primary: #e0e0e0;
-            --text-color-secondary: #b0b0d0;
-            --accent-color: #00d5ff;
-            --accent-color-dark: #00aaff;
-            --border-color: rgba(255, 255, 255, 0.1);
-            --input-background-color: rgba(255, 255, 255, 0.05);
-            --button-background: rgba(0, 213, 255, 0.15); /* Glassy button */
-            --button-hover-background: rgba(0, 213, 255, 0.25);
-            --active-item-background: rgba(0, 213, 255, 0.1);
-            --success-color: #00d5ff; /* Use accent for success in glass */
-        }
-
-        /* Sunset Theme (copied from Admin.html) */
-        body.theme-sunset-mode {
-            background: linear-gradient(to top, #ff7e5f, #feb47b) !important; /* Override background */
-            --background-main: linear-gradient(to top, #ff7e5f, #feb47b);
-            --card-background: rgba(255, 255, 255, 0.15); /* Slightly transparent white for contrast */
-            --white: #fff; /* White text for readability */
-            --text-light: rgba(255, 255, 255, 0.8);
-            --input-background: rgba(255, 255, 255, 0.1);
-            --border-light: rgba(255, 255, 255, 0.3);
-            --button-background-gradient: linear-gradient(90deg, #fd746c, #ff9068); /* Sunset gradient */
-            --button-shadow: 0 4px 15px rgba(253, 116, 108, 0.4), 0 4px 15px rgba(255, 144, 104, 0.4);
-
-            /* Ensure main theme vars are consistent with sunset */
-            --background-color-primary: #ff7e5f;
-            --background-color-secondary: #feb47b;
-            --header-background-color: rgba(255, 126, 95, 0.9);
-            --footer-background-color: rgba(255, 126, 95, 0.9);
-            --content-background-color: rgba(255, 126, 95, 0.85);
-            --card-background-color: rgba(255, 255, 255, 0.15);
-            --text-color-primary: #fff;
-            --text-color-secondary: rgba(255, 255, 255, 0.8);
-            --accent-color: #ffd700; /* Gold accent */
-            --accent-color-dark: #ccaa00;
-            --border-color: rgba(255, 255, 255, 0.3);
-            --input-background-color: rgba(255, 255, 255, 0.1);
-            --button-background: rgba(255, 255, 255, 0.2);
-            --button-hover-background: rgba(255, 255, 255, 0.3);
-            --active-item-background: rgba(255, 215, 0, 0.1);
-            --success-color: #ffd700; /* Use accent for success in sunset */
-        }
-
-        /* Always show scrollbar to prevent layout shifts */
-        html {
-            overflow-y: scroll;
-        }
-
-        body {
-            min-height: 100vh;
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow-x: hidden; /* Prevent horizontal scroll */
-            padding-bottom: 120px; /* Space for nav bar (60px) + toggle button (60px) */
-            background-color: var(--background-main);
-            background-image: radial-gradient(circle at top left, var(--background-gradient-1), transparent 100px),
-                              radial-gradient(circle at bottom right, var(--background-gradient-2), transparent 150px);
-            color: var(--white);
-            transition: background-color 0.5s ease, color 0.5s ease; /* Smooth theme transition */
-        }
-
-        /* Header Styling (copied from Admin.html) */
-        header {
-            background: var(--header-background);
-            border-bottom: 1px solid var(--border-light);
-            padding: 10px 0;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 55px;
-            z-index: 10;
-            display: flex;
-            justify-content: center;
-        }
-
-        header .header-content-wrapper {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            max-width: 1200px;
-            padding: 0 30px;
-        }
-
-        .logo {
-            font-family: 'Poppins', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 800;
-            background-clip: text;
-            color: transparent;
-            background-image: linear-gradient(90deg, var(--blue), var(--pink));
-            letter-spacing: -0.03em;
-            text-decoration: none;
-        }
-
-        /* Header Navigation */
-        header nav ul {
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            gap: 25px;
-        }
-
-        header nav ul li a {
-            color: var(--white);
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1.1rem;
-            padding: 5px 0;
-            position: relative;
-            transition: color var(--transition);
-        }
-
-        header nav ul li a::after {
-            content: '';
-            position: absolute;
-            left: 0;
-            bottom: 0;
-            width: 0;
-            height: 3px;
-            background: var(--blue);
-            border-radius: 2px;
-            transition: width var(--transition);
-        }
-
-        header nav ul li a:hover {
-            color: var(--blue);
-        }
-
-        header nav ul li a:hover::after,
-        header nav ul li a.active::after { /* Added active state for nav */
-            width: 100%;
-        }
-        header nav ul li a.active { /* Added active state for nav */
-            color: var(--blue);
-        }
-
-        /* User Profile Header Styling */
-        .user-profile-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* Notification Icon Styling */
-        .notification-icon-wrapper {
-            position: relative;
-            margin-right: 15px; /* Space between notification and profile */
-        }
-
-        .notification-icon-wrapper a {
-            text-decoration: none; /* Remove underline from link */
-            color: inherit; /* Inherit color from parent */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .notification-icon-wrapper i {
-            font-size: 1.5rem; /* Adjust size as needed */
-            color: var(--text-light);
-            cursor: pointer;
-            transition: color 0.2s ease;
-        }
-
-        .notification-icon-wrapper i:hover {
-            color: var(--white);
-        }
-
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background-color: var(--notification-badge-color); /* Use pink for notifications */
-            color: var(--white);
-            border-radius: 50%;
-            padding: 3px 7px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            min-width: 20px;
-            text-align: center;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            /* Hide if no notifications */
-            display: none;
-        }
-
-        .user-profile-header #profileLink {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-            color: var(--white);
-            transition: opacity 0.3s ease, background-color 0.3s ease;
-            padding: 5px 10px;
-            border-radius: var(--radius);
-        }
-
-        .user-profile-header #profileLink:hover {
-            opacity: 0.8;
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .user-profile-header img {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--accent-color); /* Used accent-color for consistency */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: opacity 0.3s ease;
-        }
-
-        .user-profile-header i {
-            font-size: 30px;
-            color: var(--text-light);
-        }
-
-        .user-profile-header span {
-            font-weight: 600;
-            font-size: 1rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 120px;
-        }
-
-        /* Logout Button Styling */
-        #logoutButton {
-            background: var(--button-background-gradient); /* Use gradient variable */
-            border: none;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.3s ease;
-            opacity: 0.8;
-            margin-left: 10px;
-        }
-
-        #logoutButton:hover {
-            transform: scale(1.1);
-            box-shadow: var(--button-shadow); /* Use button shadow variable */
-            opacity: 1;
-        }
-
-        #logoutButton i {
-            color: var(--white);
-            font-size: 0.9rem;
-        }
-
-        /* Main Content Area (copied from Admin.html) */
-        main {
-            flex-grow: 1;
-            padding: 40px 0;
-            padding-top: 85px; /* Adjust for fixed header and some top margin */
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start; /* Align content to top */
-            text-align: center;
-        }
-
-        .content-wrapper {
-            width: 100%;
-            max-width: 1000px; /* Adjusted for better table layout */
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            align-items: center;
-        }
-
-        /* General Section Styling (copied from Admin.html) */
-        .section-card {
-            background: var(--card-background);
-            border: 1px solid var(--border-color); /* Used border-color from root */
-            backdrop-filter: blur(10px) saturate(180%);
-            border-radius: var(--radius);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, .3);
-            padding: 2rem;
-            width: 100%; /* Full width within content-wrapper */
-            margin: 0 auto; /* Removed top/bottom margin as it's within content-wrapper */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-            text-align: left; /* Changed to left align for form */
-        }
-
-        .section-card h1, .section-card h2 {
-            font-family: 'Poppins', sans-serif;
-            font-weight: 800;
-            background-clip: text;
-            color: transparent;
-            background-image: linear-gradient(90deg, var(--blue), var(--pink));
-            margin-bottom: 1.5rem;
-            text-align: center; /* Center these titles */
-            width: 100%;
-        }
-        .section-card h1 { font-size: 2.5rem; }
-        .section-card h2 { font-size: 1.8rem; margin-bottom: 1rem; }
-
-        /* Form specific styles */
-        .form-section {
-            background: var(--input-background); /* Using input-background for subsections */
-            border: 1px solid var(--border-light);
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 25px;
-            width: 100%;
-            text-align: left; /* Ensure text inside is left-aligned */
-        }
-
-        .form-section h2, .form-section h3 {
-            color: var(--text-color-primary); /* Use primary text color for headers */
-            font-family: 'Poppins', sans-serif;
-            margin-top: 0;
-            margin-bottom: 15px;
-            text-align: left; /* Align section headers left */
-            background-image: none; /* No gradient for inner headers */
-            -webkit-background-clip: unset;
-            -webkit-text-fill-color: unset;
-        }
-        .form-section h2 { font-size: 1.6rem; border-bottom: 1px solid var(--border-light); padding-bottom: 10px; }
-        .form-section h3 { font-size: 1.3rem; margin-top: 25px; }
-
-        .form-group {
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px dashed var(--border-color); /* Light dashed border */
-        }
-        .form-group:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--text-color-light); /* Lighter text for labels */
-        }
-
-        input[type="text"],
-        input[type="password"],
-        input[type="number"],
-        input[type="email"],
-        input[type="time"],
-        textarea,
-        select {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 1em;
-            background-color: var(--input-background-color); /* Input background */
-            color: var(--text-color-primary); /* Input text color */
-            transition: border-color 0.3s ease;
-        }
-        input[type="text"]:focus,
-        input[type="password"]:focus,
-        input[type="number"]:focus,
-        input[type="email"]:focus,
-        input[type="time"]:focus,
-        textarea:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 3px rgba(0, 213, 255, 0.2); /* Accent color glow */
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-            vertical-align: middle;
-            margin-right: 10px;
-        }
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: var(--border-color); /* Use border color for off state */
-            transition: .4s;
-            border-radius: 34px;
-        }
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: var(--text-color-primary); /* Knob color */
-            transition: .4s;
-            border-radius: 50%;
-        }
-        input:checked + .slider {
-            background-color: var(--accent-color); /* Accent color for ON state */
-        }
-        input:focus + .slider {
-            box-shadow: 0 0 1px var(--accent-color);
-        }
-        input:checked + .slider:before {
-            transform: translateX(26px);
-        }
-
-        .checkbox-group label,
-        .radio-group label {
-            display: inline-flex; /* Use flex to align checkbox/radio with text */
-            align-items: center;
-            margin-right: 20px;
-            margin-bottom: 10px;
-            font-weight: normal;
-            color: var(--text-color-secondary);
-        }
-        .checkbox-group input[type="checkbox"],
-        .radio-group input[type="radio"] {
-            width: auto;
-            margin-right: 8px;
-            vertical-align: middle;
-            accent-color: var(--accent-color); /* Style the checkbox/radio itself */
-            height: 1.1em; /* Make them a bit bigger */
-            width: 1.1em;
-            cursor: pointer;
-        }
-
-        .form-group p {
-            font-size: 0.9rem;
-            color: var(--text-color-secondary); /* Secondary text color for descriptions */
-            margin-top: 8px;
-            margin-bottom: 10px;
-        }
-
-        .form-group a {
-            color: var(--accent-color);
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-        .form-group a:hover {
-            color: var(--accent-color-dark);
-            text-decoration: underline;
-        }
-
-        .button-group {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: flex-end; /* Align buttons to the right */
-            gap: 15px; /* Space between buttons */
-            width: 100%;
-        }
-
-        .button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 600;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            color: var(--white); /* Default to white text on buttons */
-        }
-
-        .button.primary {
-            background-image: var(--button-background-gradient); /* Use gradient for primary */
-            box-shadow: var(--button-shadow);
-        }
-        .button.primary:hover {
-            transform: translateY(-2px);
-            opacity: 0.9;
-        }
-
-        .button.secondary {
-            background-color: var(--button-background); /* Use a solid color for secondary */
-            color: var(--text-color-primary);
-        }
-        .button.secondary:hover {
-            background-color: var(--button-hover-background);
-            transform: translateY(-2px);
-        }
-
-        .button.info {
-            background-color: #17a2b8; /* Bootstrap info blue */
-            color: white;
-        }
-        .button.info:hover {
-            background-color: #117a8b;
-        }
-
-        .button.warning {
-            background-color: var(--warning-color); /* Use warning color from theme */
-            color: var(--text-color-primary); /* Dark text for warning */
-        }
-        .button.warning:hover {
-            background-color: #e0a800;
-        }
-
-        .button.danger {
-            background-color: var(--delete-button-color); /* Red for dangerous actions */
-            color: white;
-        }
-        .button.danger:hover {
-            background-color: #c82333;
-        }
-
-        code {
-            background-color: var(--input-background-color);
-            padding: 2px 5px;
-            border-radius: 5px;
-            font-family: 'Inter', monospace;
-            color: var(--accent-color);
-        }
-
-        /* --- Custom Message Box Styles (copied from Admin.html) --- */
-        #messageBox {
-            position: fixed;
-            top: 50%; /* Center vertically */
-            left: 50%;
-            transform: translate(-50%, -50%); /* Center both horizontally and vertically */
-            background-color: var(--card-background-color); /* Default background, will be overridden for success */
-            color: var(--text-color-primary); /* Default text color */
-            padding: 20px 30px; /* Increased padding for a more substantial box */
-            border-radius: 15px; /* More rounded corners, slightly squarer */
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4); /* Enhanced shadow */
-            z-index: 1000;
-            display: none;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-            min-width: 280px; /* Ensure a decent minimum width */
-            max-width: 90%;
-            text-align: center;
-            flex-direction: column; /* Stack icon and text vertically */
-            align-items: center;
-            gap: 15px; /* Space between icon and text */
-        }
-        #messageBox.show {
-            opacity: 1;
-            display: flex;
-        }
-        /* Success message box specific styling */
-        #messageBox.success {
-            background-image: linear-gradient(45deg, var(--pink), var(--blue)); /* Pink and blue gradient */
-            color: var(--white); /* White text for contrast on gradient */
-            border: none; /* No border for gradient background */
-            box-shadow: 0 8px 30px rgba(0, 213, 255, 0.5), 0 8px 30px rgba(255, 46, 146, 0.5); /* Glowing shadow */
-        }
-        #messageBox.error { border-left: 5px solid var(--delete-button-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
-        #messageBox.info { border-left: 5px solid var(--accent-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
-        #messageBox.warning { border-left: 5px solid var(--warning-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
-
-        #messageBox i {
-            font-size: 2.5rem; /* Larger icon for prominence */
-            margin-bottom: 5px; /* Space between icon and text */
-        }
-        #messageBox.success i { color: var(--white); } /* White icon for success */
-        #messageBox.error i { color: var(--delete-button-color); }
-        #messageBox.info i { color: var(--accent-color); }
-        #messageBox.warning i { color: var(--warning-color); }
-
-        #messageBox span {
-            font-size: 1.1rem; /* Slightly larger text */
-            font-weight: 600;
-        }
-
-        @keyframes pulse-bg {
-            0% { background-color: var(--accent-color); }
-            50% { background-color: rgba(0, 213, 255, 0.7); }
-            100% { background-color: var(--accent-color); }
-        }
-        #messageBox.loading-pulse { animation: pulse-bg 1.5s infinite ease-in-out; }
-
-
-        /* --- Bottom Navigation Bar (copied from Admin.html) --- */
-        #bottomNavBar {
-            position: fixed;
-            left: 0;
-            width: 100%;
-            height: 60px;
-            background: var(--header-background);
-            border-top: 1px solid var(--border-light);
-            box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.2);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 0 10px;
-            z-index: 50;
-            bottom: 60px; /* Positioned above the toggle button */
-            transition: bottom 0.3s ease-out; /* Smooth slide transition */
-        }
-
-        #bottomNavBar.nav-bar-hidden-full {
-            bottom: -60px; /* Move it completely off-screen below */
-        }
-
-        .nav-icon-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-decoration: none;
-            color: var(--text-light);
-            font-size: 0.75rem;
-            font-weight: 600;
-            transition: color 0.2s ease;
-            flex: 1;
-            max-width: 80px;
-        }
-
-        .nav-icon-item:hover {
-            color: var(--white);
-        }
-
-        .nav-icon-circle {
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            background: var(--button-background-gradient); /* Use gradient variable */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 5px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .nav-icon-item:hover .nav-icon-circle {
-            transform: translateY(-3px);
-            box-shadow: var(--button-shadow); /* Use button shadow variable */
-        }
-
-        .nav-icon-item.active .nav-icon-circle {
-            background: var(--button-background-gradient); /* Active state also uses gradient */
-            box-shadow: var(--button-shadow);
-        }
-        .nav-icon-item.active {
-            color: var(--white);
-        }
-
-        /* New Toggle Button (copied from Admin.html) */
-        #navToggleBtn {
-            position: fixed;
-            bottom: 0px; /* Position at the very bottom */
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px; /* Slightly larger button */
-            height: 60px;
-            border-radius: 50%;
-            background: var(--button-background-gradient); /* Use gradient variable */
-            color: var(--white);
-            border: none;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem; /* Larger icon */
-            cursor: pointer;
-            z-index: 60; /* Higher than nav bar */
-            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
-        }
-
-        #navToggleBtn:hover {
-            transform: translateX(-50%) scale(1.05);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-            background: linear-gradient(45deg, var(--blue), var(--pink)); /* Reverse gradient on hover */
-        }
-
-        #navToggleBtn i {
-            transition: transform 0.3s ease; /* Smooth icon rotation */
-        }
-
-        #navToggleBtn.rotated i {
-            transform: rotate(180deg); /* Rotate icon when nav is hidden */
-        }
-
-        /* Loader styles for buttons (reused from other pages) */
-        .button-loader {
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-top: 3px solid var(--white);
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            display: none;
-        }
-        .button-loader.active { display: block; }
-        .button-text { display: block; }
-        .loading .button-text { display: none; }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        /* Disabled link style */
-        .disabled-link {
-            opacity: 0.6;
-            cursor: not-allowed;
-            pointer-events: none; /* Disables click events */
-        }
-        .disabled-link:hover {
-            transform: none;
-            box-shadow: none;
-        }
-
-        /* --- Moderation Specific Styles --- */
-        .tabs {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 25px;
-            width: 100%;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .tab-button {
-            background-color: transparent;
-            border: none;
-            padding: 12px 25px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--text-color-secondary);
-            cursor: pointer;
-            transition: color 0.3s ease, border-bottom 0.3s ease;
-            border-bottom: 3px solid transparent;
-            margin: 0 10px;
-            flex-grow: 1; /* Allow tabs to grow and fill space */
-            text-align: center;
-            max-width: 250px; /* Limit tab width */
-        }
-
-        .tab-button.active {
-            color: var(--accent-color);
-            border-bottom-color: var(--accent-color);
-        }
-
-        .tab-button:hover:not(.active) {
-            color: var(--text-color-primary);
-        }
-
-        .tab-content {
-            display: none;
-            width: 100%;
-            padding: 15px 0;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* Table Styling for Reported Items */
-        .moderation-table-container {
-            width: 100%;
-            overflow-x: auto; /* Enable horizontal scrolling for narrow screens */
-            margin-top: 20px;
-        }
-
-        .moderation-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        .moderation-table th, .moderation-table td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-            white-space: nowrap; /* Prevent content wrapping in table cells */
-        }
-
-        .moderation-table th {
-            background-color: var(--header-background-color);
-            color: var(--text-color-primary);
-            font-weight: 700;
-            font-size: 0.95rem;
-            text-transform: uppercase;
-        }
-
-        .moderation-table td {
-            background-color: var(--input-background-color);
-            color: var(--text-color-light);
-            font-size: 0.9rem;
-        }
-
-        .moderation-table tbody tr:hover td {
-            background-color: var(--button-hover-background);
-        }
-
-        .moderation-item-content {
-            max-width: 300px;
-            white-space: normal; /* Allow content to wrap within the cell */
-            word-wrap: break-word; /* Break long words */
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: capitalize;
-        }
-        .status-badge.pending { background-color: var(--warning-color); color: var(--text-color-primary); }
-        .status-badge.reviewed { background-color: var(--accent-color); color: var(--white); }
-        .status-badge.approved { background-color: var(--success-color); color: var(--white); }
-        .status-badge.rejected { background-color: var(--delete-button-color); color: var(--white); }
-
-        .action-buttons-cell {
-            display: flex;
-            gap: 8px;
-            justify-content: flex-start;
-        }
-        .action-buttons-cell .button {
-            padding: 8px 12px;
-            font-size: 0.85rem;
-            border-radius: 5px;
-        }
-
-        /* Moderation Logs table specific */
-        .log-timestamp, .log-action-type {
-            font-weight: 600;
-        }
-        .log-details {
-            font-style: italic;
-            color: var(--text-color-secondary);
-            max-width: 400px;
-            white-space: normal;
-        }
-
-        /* No data message */
-        .no-data-message {
-            color: var(--text-color-secondary);
-            font-style: italic;
-            padding: 20px;
-            text-align: center;
-        }
-
-
-        /* Responsive Adjustments (copied from Admin.html and adapted) */
-        @media (max-width: 768px) {
-            .content-wrapper {
-                padding: 15px;
-                max-width: 100%;
-            }
-            .section-card {
-                padding: 1.5rem;
-                gap: 1rem;
-            }
-            .section-card h1 { font-size: 2rem; margin-bottom: 1rem;}
-            .section-card h2 { font-size: 1.5rem; margin-bottom: 0.8rem;}
-            .form-section { padding: 15px; }
-            .form-section h2 { font-size: 1.4rem; }
-            .form-section h3 { font-size: 1.2rem; margin-top: 20px;}
-            input[type="text"], input[type="password"], input[type="number"], input[type="email"], input[type="time"], textarea, select {
-                padding: 10px;
-            }
-            .button-group {
-                flex-direction: column; /* Stack buttons on small screens */
-                gap: 10px;
-                align-items: stretch; /* Stretch buttons to full width */
-            }
-            .button {
-                width: 100%;
-            }
-            .form-group p { font-size: 0.85rem; }
-            .checkbox-group label, .radio-group label {
-                margin-right: 10px;
-            }
-            .tab-button {
-                padding: 10px 15px;
-                font-size: 1rem;
-                margin: 0 5px;
-            }
-            .moderation-table th, .moderation-table td {
-                padding: 10px;
-                font-size: 0.85rem;
-            }
-            .action-buttons-cell {
-                flex-wrap: wrap; /* Allow buttons to wrap */
-                gap: 5px;
-            }
-            .action-buttons-cell .button {
-                padding: 6px 10px;
-                font-size: 0.8rem;
-            }
-            .moderation-item-content {
-                max-width: 200px; /* Reduce max-width for content on smaller screens */
-            }
-        }
-
-        @media (max-width: 600px) {
-            header .header-content-wrapper {
-                padding: 0 20px;
-            }
-            .logo {
-                font-size: 1.6rem;
-            }
-            header nav ul {
-                gap: 15px;
-            }
-            header nav ul li a {
-                font-size: 1.1rem;
-            }
-            .user-profile-header #profileLink {
-                padding: 5px;
-            }
-            .user-profile-header span {
-                max-width: 90px;
-            }
-            .user-profile-header img {
-                width: 30px;
-                height: 30px;
-            }
-            .user-profile-header i {
-                font-size: 25px;
-            }
-            #logoutButton {
-                width: 25px;
-                height: 25px;
-                font-size: 0.8rem;
-                margin-left: 8px;
-            }
-            #logoutButton i {
-                font-size: 0.8rem;
-            }
-            #bottomNavBar {
-                height: 55px;
-                padding: 0 5px;
-                bottom: 55px; /* Adjust for smaller button height on mobile */
-            }
-            #bottomNavBar.nav-bar-hidden-full {
-                bottom: -55px; /* Adjust for smaller button height on mobile */
-            }
-            #navToggleBtn {
-                width: 55px;
-                height: 55px;
-                font-size: 1.5rem;
-            }
-            .nav-icon-circle {
-                width: 40px;
-                height: 40px;
-            }
-            .nav-icon-circle i {
-                font-size: 1.2rem;
-            }
-            .nav-icon-item {
-                font-size: 0.7rem;
-            }
-            body {
-                padding-bottom: 110px; /* 55px (nav) + 55px (toggle) */
-            }
-            .tabs {
-                flex-wrap: wrap;
-                justify-content: flex-start;
-                gap: 10px;
-            }
-            .tab-button {
-                flex-grow: unset;
-                width: auto;
-            }
-        }
-    </style>
-<style id="header-overflow-fix">/*header-overflow-fix*/header .header-content-wrapper{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:nowrap}header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 auto;min-width:0;justify-content:flex-end}#profileLink{display:inline-flex;align-items:center;column-gap:8px;row-gap:2px;flex-wrap:wrap;max-width:100%;min-width:0}#profileLink #headerDisplayName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;flex:0 1 auto}#headerProfilePic,#headerAvatarIcon{flex:0 0 auto}@media (max-width:600px){header .header-content-wrapper{gap:8px}#profileLink{column-gap:6px}}</style></head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nuvia - Content Moderation</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://*.firebaseio.com" crossorigin>
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" onload="this.rel='stylesheet'" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /></noscript>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" defer crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    :root {
+      --pink: #ff2e92;
+      --blue: #00d5ff;
+      --radius: 20px;
+      --transition: .3s ease;
+      --white: #fff;
+      --text-light: rgba(255, 255, 255, .7);
+      --background-main: rgba(10, 10, 10, .75);
+      --background-gradient-1: #00d5ff;
+      --background-gradient-2: #ff2e92;
+      --card-background: linear-gradient(145deg, rgba(255, 255, 255, .03), rgba(255, 255, 255, .01));
+      --header-background: linear-gradient(135deg, rgba(10, 10, 10, .85), rgba(10, 10, 10, .75));
+      --border-light: rgba(255, 255, 255, .05);
+      --input-background: rgba(255, 255, 255, 0.05);
+      --button-background: linear-gradient(90deg, var(--blue), var(--pink));
+      --button-shadow: 0 4px 15px var(--blue), 0 4px 15px var(--pink);
+
+      --background-color-primary: #1a1a2e;
+      --background-color-secondary: #0f0f1f;
+      --header-background-color: #2a2a4a;
+      --footer-background-color: #2a2a4a;
+      --content-background-color: #20203a;
+      --card-background-color: #2a2a4a;
+      --text-color-primary: #e0e0e0;
+      --text-color-secondary: #b0b0d0;
+      --accent-color: #00d5ff;
+      --accent-color-dark: #00aaff;
+      --border-color: #3a3a5a;
+      --notification-badge-color: #ff2e92;
+      --delete-button-color: #dc3545;
+      --warning-color: #ffc107;
+    }
+
+    body {
+      min-height: 100vh; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center;
+      background-color: var(--background-main);
+      background-image: radial-gradient(circle at top left, var(--background-gradient-1), transparent 100px),
+                        radial-gradient(circle at bottom right, var(--background-gradient-2), transparent 150px);
+      color: var(--white); font-family: 'Inter', sans-serif; overflow-x: hidden;
+    }
+
+    header { background: var(--header-background); border-bottom: 1px solid var(--border-light); padding: 10px 0; box-shadow: 0 4px 15px rgba(0,0,0,.2); position: fixed; top: 0; left: 0; width: 100%; height: 55px; z-index: 10; display: flex; justify-content: center; }
+    header .header-content-wrapper { display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: 1200px; padding: 0 30px; }
+    .logo { font-family: 'Poppins', sans-serif; font-size: 1.8rem; font-weight: 800; background-clip: text; color: transparent; background-image: linear-gradient(90deg, var(--blue), var(--pink)); letter-spacing: -0.03em; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; }
+    .user-profile-header { display: flex; align-items: center; gap: 10px; }
+    #logoutButton { background: var(--button-background); border: none; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: transform .2s ease, box-shadow .2s ease, opacity .3s ease; opacity: .8; margin-left: 10px; }
+    #logoutButton:hover { transform: scale(1.1); box-shadow: var(--button-shadow); opacity: 1; }
+    #logoutButton i { color: var(--white); font-size: .9rem; }
+    #headerProfilePic { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-color); box-shadow: 0 2px 5px rgba(0,0,0,0.2); display: none; }
+    #headerAvatarIcon { font-size: 30px; color: var(--text-light); }
+    #headerDisplayName { font-weight: 600; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
+
+    main { flex-grow: 1; padding: 40px 0; padding-top: 80px; width: 100%; display: flex; flex-direction: column; align-items: center; }
+    .content-wrapper { width: 100%; max-width: 1100px; padding: 20px; display: flex; flex-direction: column; gap: 24px; align-items: center; }
+
+    .section-card { background: var(--card-background); border: 1px solid var(--border-color); backdrop-filter: blur(10px) saturate(180%); border-radius: var(--radius); box-shadow: 0 8px 25px rgba(0,0,0,.3); padding: 2rem; width: 100%; max-width: 1000px; display: flex; flex-direction: column; gap: 16px; }
+    .section-title { font-family: 'Poppins', sans-serif; font-weight: 800; background-clip: text; color: transparent; background-image: linear-gradient(90deg, var(--blue), var(--pink)); font-size: 2.2rem; margin: 0; }
+    .section-subtitle { color: var(--text-light); margin: 0; font-weight: 600; }
+
+    .filters-toolbar { display: grid; grid-template-columns: repeat(12, 1fr); gap: 12px; align-items: end; }
+    .filter-field { display: flex; flex-direction: column; gap: 6px; }
+    .filter-field label { color: var(--text-light); font-size: .85rem; font-weight: 700; }
+    .select-input, .text-input { background: var(--input-background); border: 1px solid var(--border-light); color: var(--white); border-radius: 10px; padding: 10px 12px; width: 100%; }
+    .select-input:focus, .text-input:focus { outline: none; box-shadow: 0 0 0 2px rgba(0,213,255,.2); border-color: rgba(255,255,255,.2); }
+
+    .bulk-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border-light); color: var(--white); background: var(--input-background); border-radius: 999px; padding: 8px 12px; cursor: pointer; font-weight: 700; text-decoration: none; }
+    .btn:hover { background: rgba(255,255,255,.06); }
+    .btn-primary { background: var(--button-background); border: none; box-shadow: var(--button-shadow); }
+    .btn-danger { background: linear-gradient(90deg, #f44336, #b71c1c); border: none; }
+    .btn-warning { background: linear-gradient(90deg, #ff9800, #ef6c00); border: none; }
+    .btn-success { background: linear-gradient(90deg, #4caf50, #2e7d32); border: none; }
+
+    .reports-list { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .report-card { background: var(--input-background); border: 1px solid var(--border-light); border-radius: 14px; padding: 14px; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; }
+    .report-select { display: flex; align-items: center; justify-content: center; }
+    .report-meta { display: grid; gap: 6px; }
+    .report-title { margin: 0; font-size: 1rem; font-weight: 800; color: var(--white); }
+    .report-details { margin: 0; color: var(--text-light); font-size: .9rem; }
+    .report-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid var(--border-light); font-size: .75rem; color: var(--white); }
+    .report-actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+
+    .empty-state { text-align: center; color: var(--text-light); padding: 20px; border: 1px dashed var(--border-light); border-radius: 12px; }
+
+    .toolbar-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .left-tools, .right-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .counter-badge { background: linear-gradient(135deg, var(--pink), var(--blue)); color: #fff; border-radius: 999px; padding: 6px 10px; font-weight: 800; }
+
+    .message-box { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: var(--card-background-color); color: var(--text-color-primary); padding: 20px 30px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,.4); z-index: 1000; display: none; opacity: 0; transition: opacity .3s ease-in-out, transform .3s ease-in-out; min-width: 280px; max-width: 90%; text-align: center; flex-direction: column; align-items: center; gap: 15px; }
+    .message-box.show { opacity: 1; display: flex; }
+    .message-box.success { background-image: linear-gradient(45deg, var(--pink), var(--blue)); color: var(--white); border: none; box-shadow: 0 8px 30px rgba(0,213,255,.5), 0 8px 30px rgba(255,46,146,.5); }
+    .message-box.error { border-left: 5px solid var(--delete-button-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+    .message-box.info { border-left: 5px solid var(--accent-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+    .message-box.warning { border-left: 5px solid var(--warning-color); background-color: var(--card-background-color); color: var(--text-color-primary); }
+    .message-box i { font-size: 2.5rem; margin-bottom: 5px; background-image: linear-gradient(90deg, var(--blue), var(--pink)); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+
+    @media (max-width: 860px) { .filters-toolbar { grid-template-columns: 1fr 1fr; } .report-card { grid-template-columns: auto 1fr; } .report-actions { justify-content: flex-start; } }
+  </style>
+</head>
 <body class="theme-dark-mode">
+  <header>
+    <div class="header-content-wrapper">
+      <a href="/index.html" class="logo"><img src="assets/security.png" alt="JCHAT Security" style="height:24px;width:auto" onerror="this.style.display='none'"><span>Nuvia</span></a>
+      <div class="user-profile-header">
+        <button id="logoutButton" aria-label="Logout" disabled><i class="fas fa-sign-out-alt"></i></button>
+        <a href="/profile.html" id="profileLink">
+          <img id="headerProfilePic" src="" alt="Profile Picture">
+          <i id="headerAvatarIcon" class="fas fa-user-circle"></i>
+          <span id="headerDisplayName">Loading...</span>
+        </a>
+      </div>
+    </div>
+  </header>
 
-    <header>
-        <div class="header-content-wrapper">
-            <a href="/index.html" class="logo" style="display:flex;align-items:center;gap:10px"><img src="assets/security.png" alt="JCHAT Security" style="height:24px;width:auto" onerror="this.style.display='none'"><span>Nuvia</span></a>
-            <nav>
-                <ul>
-                    <li><a href="/admin.html">Admin Dashboard</a></li>
-                    <li><a href="/content_moderation.html" class="active">Content Moderation</a></li>
-                </ul>
-            </nav>
-            <div class="user-profile-header">
-                <div class="notification-icon-wrapper">
-                    <a href="/notifications.html" aria-label="Notifications">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-badge" id="notificationCount" style="display: none;">0</span>
-                    </a>
-                </div>
-                <button id="logoutButton" aria-label="Logout" disabled>
-                    <i class="fas fa-sign-out-alt"></i>
-                </button>
-                <a href="/profile.html" id="profileLink">
-                    <img id="headerProfilePic" src="" alt="Profile Picture" style="display: none;">
-                    <i id="headerAvatarIcon" class="fas fa-user-circle"></i>
-                    <span id="headerDisplayName">Loading...</span>
-                </a>
-            </div>
+  <main>
+    <div class="content-wrapper">
+      <div class="section-card">
+        <h1 class="section-title">Content Moderation Center</h1>
+        <p class="section-subtitle"><i class="fas fa-shield-alt"></i> Review, act on, and resolve reported content in real time.</p>
+
+        <div class="toolbar-row">
+          <div class="left-tools">
+            <span class="counter-badge" id="reportsCounter">0 Reports</span>
+            <label class="btn" title="Select/Deselect all">
+              <input type="checkbox" id="selectAllCheckbox" style="margin-right:8px"> Select All
+            </label>
+          </div>
+          <div class="right-tools bulk-actions">
+            <button class="btn btn-success" id="bulkResolveBtn"><i class="fas fa-check"></i> Resolve</button>
+            <button class="btn btn-warning" id="bulkIgnoreBtn"><i class="fas fa-ban"></i> Ignore</button>
+            <button class="btn btn-danger" id="bulkDeleteBtn"><i class="fas fa-trash"></i> Delete Content</button>
+          </div>
         </div>
-    </header>
 
-    <main>
-        <div class="content-wrapper">
-            <div class="section-card">
-                <h1>JCHAT Content Moderation 🛡️</h1>
-                <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 1.5rem;">
-                    Review and manage user-generated content, reports, and moderation logs to maintain a safe community.
-                </p>
-
-                <div class="tabs">
-                    <button class="tab-button active" data-tab="reported-content">Reported Content</button>
-                    <button class="tab-button" data-tab="user-violations">User Violations</button>
-                    <button class="tab-button" data-tab="moderation-logs">Moderation Logs</button>
-                    <button class="tab-button" data-tab="settings">Moderation Settings</button>
-                </div>
-
-                <div id="reported-content" class="tab-content active">
-                    <h2>Pending Reports</h2>
-                    <p style="color: var(--text-color-secondary);">Review content reported by users.</p>
-                    <div class="moderation-table-container">
-                        <table class="moderation-table">
-                            <thead>
-                                <tr>
-                                    <th>Report ID</th>
-                                    <th>Content Type</th>
-                                    <th>Reported By</th>
-                                    <th>Content Preview</th>
-                                    <th>Reason</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="reportedContentTableBody">
-                                <tr>
-                                    <td colspan="7" class="no-data-message">No new reported content.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div id="user-violations" class="tab-content">
-                    <h2>User Violation History</h2>
-                    <p style="color: var(--text-color-secondary);">Track user violations and apply disciplinary actions.</p>
-                    <div class="moderation-table-container">
-                        <table class="moderation-table">
-                            <thead>
-                                <tr>
-                                    <th>User ID</th>
-                                    <th>Username</th>
-                                    <th>Total Violations</th>
-                                    <th>Last Violation Date</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="userViolationsTableBody">
-                                <tr>
-                                    <td colspan="6" class="no-data-message">No user violations to display.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div id="moderation-logs" class="tab-content">
-                    <h2>Moderation Action Logs</h2>
-                    <p style="color: var(--text-color-secondary);">View a history of all moderation actions taken.</p>
-                    <div class="moderation-table-container">
-                        <table class="moderation-table">
-                            <thead>
-                                <tr>
-                                    <th>Timestamp</th>
-                                    <th>Moderator</th>
-                                    <th>Action Type</th>
-                                    <th>Target (User/Content ID)</th>
-                                    <th>Details</th>
-                                </tr>
-                            </thead>
-                            <tbody id="moderationLogsTableBody">
-                                <tr>
-                                    <td colspan="5" class="no-data-message">No moderation logs to display.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div id="settings" class="tab-content">
-                    <h2>Moderation Settings</h2>
-                    <p style="color: var(--text-color-secondary);">Configure automated moderation rules and thresholds.</p>
-                    <form action="/admin/save_moderation_settings" method="POST" style="width: 100%;">
-                        <div class="form-section">
-                            <h3>Automated Content Filtering</h3>
-                            <div class="form-group">
-                                <label for="keyword_filter_enable">Enable Keyword Filtering:</label>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="keyword_filter_enable" name="keyword_filter_enable" checked>
-                                    <span class="slider round"></span>
-                                </label>
-                                <p>Automatically flag or hide content containing blacklisted keywords.</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="blacklisted_keywords">Blacklisted Keywords (comma-separated):</label>
-                                <textarea id="blacklisted_keywords" name="blacklisted_keywords" placeholder="e.g., swearword, adult_term, harmful_phrase"></textarea>
-                                <p>Words or phrases that will trigger an automatic flag.</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="ai_moderation_enable">Enable AI Content Moderation:</label>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="ai_moderation_enable" name="ai_moderation_enable">
-                                    <span class="slider round"></span>
-                                </label>
-                                <p>Utilize AI services to detect and flag inappropriate content.</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="ai_threshold">AI Moderation Confidence Threshold (%):</label>
-                                <input type="number" id="ai_threshold" name="ai_threshold" value="80" min="50" max="100">
-                                <p>Content with an AI confidence score above this threshold will be flagged.</p>
-                            </div>
-                        </div>
-
-                        <div class="form-section">
-                            <h3>User Reporting & Penalties</h3>
-                            <div class="form-group">
-                                <label for="report_threshold_auto_review">Reports to Trigger Auto-Review:</label>
-                                <input type="number" id="report_threshold_auto_review" name="report_threshold_auto_review" value="3" min="1">
-                                <p>Number of unique reports on a single piece of content to automatically send it to human review.</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="strike_system_enable">Enable Strike System:</label>
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="strike_system_enable" name="strike_system_enable" checked>
-                                    <span class="slider round"></span>
-                                </label>
-                                <p>Assign strikes to users for violations, leading to escalating penalties.</p>
-                            </div>
-                            <div class="form-group">
-                                <label for="strike1_action">1st Strike Action:</label>
-                                <select id="strike1_action" name="strike1_action">
-                                    <option value="warning" selected>Warning</option>
-                                    <option value="temp_mute">Temporary Mute (1 hr)</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="strike3_action">3rd Strike Action:</label>
-                                <select id="strike3_action" name="strike3_action">
-                                    <option value="temp_ban">Temporary Ban (24 hrs)</option>
-                                    <option value="perm_mute">Permanent Mute</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="strike5_action">5th Strike Action:</label>
-                                <select id="strike5_action" name="strike5_action">
-                                    <option value="perm_ban" selected>Permanent Ban</option>
-                                    <option value="account_deletion">Account Deletion</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="button-group">
-                            <p style="color: var(--text-color-secondary); font-size: 0.9rem; margin-right: auto;">
-                                <strong>Important:</strong> Changes here affect system-wide moderation.
-                            </p>
-                            <button type="submit" class="button primary">Save Moderation Settings</button>
-                            <button type="reset" class="button secondary">Discard Changes</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+        <div class="filters-toolbar" role="region" aria-label="Moderation filters">
+          <div class="filter-field" style="grid-column: span 3;">
+            <label for="statusFilter">Status</label>
+            <select id="statusFilter" class="select-input">
+              <option value="pending" selected>Pending</option>
+              <option value="open">Open</option>
+              <option value="warned">Warned</option>
+              <option value="content_deleted">Content Deleted</option>
+              <option value="resolved">Resolved</option>
+              <option value="ignored">Ignored</option>
+            </select>
+          </div>
+          <div class="filter-field" style="grid-column: span 3;">
+            <label for="typeFilter">Type</label>
+            <select id="typeFilter" class="select-input">
+              <option value="">All types</option>
+              <option value="post">Post</option>
+              <option value="comment">Comment</option>
+              <option value="profile">Profile</option>
+              <option value="message">Message</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="filter-field" style="grid-column: span 6;">
+            <label for="searchInput">Search</label>
+            <input id="searchInput" class="text-input" type="search" placeholder="Search reason, content, user IDs, content IDs">
+          </div>
         </div>
-    </main>
 
-    <div id="messageBox"></div>
+        <div class="reports-list" id="reportsList" aria-live="polite"></div>
+        <div class="empty-state" id="emptyState" style="display:none">No reports found for the selected filters.</div>
+      </div>
+    </div>
+  </main>
 
-    <nav id="bottomNavBar" class="nav-bar-hidden-full">
-        <a href="/index.html" class="nav-icon-item">
-            <div class="nav-icon-circle"><i class="fas fa-home"></i></div>
-            <span>Home</span>
-        </a>
-        <a href="/chat.html" class="nav-icon-item">
-            <div class="nav-icon-circle"><i class="fas fa-comment-dots"></i></div>
-            <span>Chat</span>
-        </a>
-        <a href="/find_friends.html" class="nav-icon-item">
-            <div class="nav-icon-circle"><i class="fas fa-users"></i></div>
-            <span>Users</span>
-        </a>
-        <a href="/friends.html" class="nav-icon-item">
-            <div class="nav-icon-circle"><i class="fas fa-user-friends"></i></div>
-            <span>Friends</span>
-        </a>
-        <a href="/jcoin_shop.html" class="nav-icon-item">
-            <div class="nav-icon-circle"><i class="fas fa-store"></i></div>
-            <span>Shop</span>
-        </a>
-        <a href="/settings.html" class="nav-icon-item">
-            <div class="nav-icon-circle"><i class="fas fa-cog"></i></div>
-            <span>Settings</span>
-        </a>
-    </nav>
+  <div id="messageBox" class="message-box" role="alert" aria-live="assertive"></div>
 
-    <button id="navToggleBtn" aria-label="Toggle Navigation">
-        <i class="fas fa-chevron-up"></i>
-    </button>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc, collection, query, where, orderBy, onSnapshot, addDoc, updateDoc, serverTimestamp, writeBatch, limit, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    <script type="module">
-        // Import Firebase modules
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, collection, query, where, onSnapshot, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+      apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
+      authDomain: "jchat-1.firebaseapp.com",
+      databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
+      projectId: "jchat-1",
+      storageBucket: "jchat-1.firebasestorage.app",
+      messagingSenderId: "328479683167",
+      appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
+      measurementId: "G-S6Z9GG0R9P"
+    };
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-        // --- Firebase & Canvas Environment Configuration ---
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
-            authDomain: "jchat-1.firebaseapp.com",
-            databaseURL: "https://jchat-1-default-rtdb.firebaseio.com",
-            projectId: "jchat-1",
-            storageBucket: "jchat-1.firebasestorage.app",
-            messagingSenderId: "328479683167",
-            appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea",
-            measurementId: "G-S6Z9GG0R9P"
-        };
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-        // Cloudinary Configuration (needed for header profile pic)
-        const cloudinaryConfig = {
-            cloudName: "dxld01rcp", // Your Cloudinary Cloud Name
-            uploadPreset: "Storage_preset" // Your Cloudinary Upload Preset
-        };
+    const headerProfilePic = document.getElementById('headerProfilePic');
+    const headerAvatarIcon = document.getElementById('headerAvatarIcon');
+    const headerDisplayName = document.getElementById('headerDisplayName');
+    const logoutButton = document.getElementById('logoutButton');
+    const messageBox = document.getElementById('messageBox');
+    const profileLink = document.getElementById('profileLink');
 
-        // Initialize Firebase services
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+    const reportsList = document.getElementById('reportsList');
+    const emptyState = document.getElementById('emptyState');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const bulkResolveBtn = document.getElementById('bulkResolveBtn');
+    const bulkIgnoreBtn = document.getElementById('bulkIgnoreBtn');
+    const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+    const statusFilter = document.getElementById('statusFilter');
+    const typeFilter = document.getElementById('typeFilter');
+    const searchInput = document.getElementById('searchInput');
+    const reportsCounter = document.getElementById('reportsCounter');
 
-        // --- DOM Elements ---
-        const headerProfilePic = document.getElementById('headerProfilePic');
-        const headerAvatarIcon = document.getElementById('headerAvatarIcon');
-        const headerDisplayName = document.getElementById('headerDisplayName');
-        const logoutButton = document.getElementById('logoutButton');
-        const notificationCountElement = document.getElementById('notificationCount');
-        const messageBox = document.getElementById('messageBox');
-        const headerNavLinkProfile = document.getElementById('profileLink');
+    const ADMIN_UID = (typeof window !== 'undefined' && window.ADMIN_UID) ? window.ADMIN_UID : 'RJZ8xhsjEsdKBGFYveWO0Rsq1Zz1';
 
-        // Table body elements for dynamic content
-        const reportedContentTableBody = document.getElementById('reportedContentTableBody');
-        const userViolationsTableBody = document.getElementById('userViolationsTableBody');
-        const moderationLogsTableBody = document.getElementById('moderationLogsTableBody');
+    const successSynth = new Tone.Synth().toDestination();
+    const errorSynth = new Tone.Synth().toDestination();
+    const infoSynth = new Tone.Synth().toDestination();
+    successSynth.oscillator.type = "sine"; successSynth.envelope.attack = 0.01; successSynth.envelope.decay = 0.2; successSynth.envelope.sustain = 0.0; successSynth.envelope.release = 0.5;
+    errorSynth.oscillator.type = "sawtooth"; errorSynth.envelope.attack = 0.01; errorSynth.envelope.decay = 0.3; errorSynth.envelope.sustain = 0.0; errorSynth.envelope.release = 0.5;
+    infoSynth.oscillator.type = "triangle"; infoSynth.envelope.attack = 0.01; infoSynth.envelope.decay = 0.1; infoSynth.envelope.sustain = 0.0; infoSynth.envelope.release = 0.3;
+    function playNotificationSound(type){ Tone.start(); if(type==='success') successSynth.triggerAttackRelease('C5','8n'); else if(type==='error') errorSynth.triggerAttackRelease('C3','8n'); else infoSynth.triggerAttackRelease('E4','16n'); }
 
+    function showMessageBox(message, type='info', durationMs=3000, isPersistent=false){
+      if(messageBox.timeoutId){ clearTimeout(messageBox.timeoutId); messageBox.timeoutId = null; }
+      messageBox.innerHTML = `<i id="messageBoxIcon"></i><span id="messageBoxText"></span>`;
+      const messageBoxIcon = document.getElementById('messageBoxIcon');
+      const messageBoxText = document.getElementById('messageBoxText');
+      messageBoxText.textContent = message; messageBox.className = 'message-box show ' + type;
+      messageBoxIcon.className = '';
+      if (type === 'success') { messageBoxIcon.classList.add('fas','fa-check-circle'); playNotificationSound('success'); }
+      else if (type === 'error') { messageBoxIcon.classList.add('fas','fa-times-circle'); playNotificationSound('error'); }
+      else if (type === 'warning') { messageBoxIcon.classList.add('fas','fa-exclamation-triangle'); playNotificationSound('info'); }
+      else if (type === 'info') { messageBoxIcon.classList.add('fas','fa-info-circle'); playNotificationSound('info'); }
+      else if (type === 'loading') { messageBoxIcon.classList.add('fas','fa-spinner','fa-spin'); }
+      messageBox.style.display = 'flex'; messageBox.style.opacity = '1';
+      if (!isPersistent) { messageBox.timeoutId = setTimeout(()=>{ messageBox.style.opacity = '0'; messageBox.addEventListener('transitionend', function handler(){ messageBox.style.display='none'; messageBox.removeEventListener('transitionend', handler); }, { once:true }); }, durationMs); }
+    }
+    window.showMessageBox = showMessageBox;
 
-        // --- Global State ---
-        let isAuthReady = false; // Flag to indicate if auth state has been checked
-        let currentUser = null; // The currently authenticated user (Firebase Auth object)
+    function getCloudinaryImageUrl(urlOrPublicId, transformations = "w_auto,f_auto,q_auto"){
+      if(!urlOrPublicId) return null; if(urlOrPublicId.startsWith('http://') || urlOrPublicId.startsWith('https://')) return urlOrPublicId;
+      const cloudName = 'dxld01rcp'; return `https://res.cloudinary.com/${cloudName}/image/upload/${transformations}/${urlOrPublicId}`;
+    }
+    function displayProfilePicture(imgEl, iconEl, profilePicId, usernameInitial, transformations){
+      if(!imgEl) return; if(profilePicId){ const url = getCloudinaryImageUrl(profilePicId, transformations); imgEl.src = url; imgEl.style.display='block'; if(iconEl) iconEl.style.display='none'; imgEl.onerror = ()=>{ imgEl.style.display='none'; if(iconEl) iconEl.style.display='block'; }; } else { imgEl.style.display='none'; if(iconEl) iconEl.style.display='block'; }
+    }
 
-        // --- Admin Specific ID ---
-        const ADMIN_UID = 'RJZ8xhsjEsdKBGFYveWO0Rsq1Zz1'; // Hardcoded admin ID - **IMPORTANT: REPLACE WITH YOUR ACTUAL ADMIN UID IN PRODUCTION**
-
-        // --- Utility Functions ---
-
-        /**
-         * Plays a short notification sound.
-         */
-        function playNotificationSound() {
-            const audio = new Audio('/assets/sounds/success_notification.mp3'); // Ensure this path is correct
-            audio.play().catch(e => console.error("Error playing sound:", e));
+    async function fetchAndDisplayHeaderProfile(user){
+      try{
+        const privateProfileDocRef = doc(db, "artifacts", appId, "users", user.uid, "profiles", "user_profile");
+        const publicProfileDocRef = doc(db, "artifacts", appId, "public", "data", "users", user.uid);
+        const privateSnap = await getDoc(privateProfileDocRef);
+        let profileData = null;
+        if (privateSnap.exists()) { profileData = privateSnap.data(); }
+        else {
+          profileData = { username: user.displayName || `User_${user.uid.substring(0,8)}`, email: user.email || "", profilePicId: user.photoURL || null, createdAt: serverTimestamp(), updatedAt: serverTimestamp(), totalPosts: 0, jCoins: 0, gas: 0, level: 1, banned: false };
+          await setDoc(privateProfileDocRef, profileData);
         }
+        await setDoc(publicProfileDocRef, { username: profileData.username, profilePicId: profileData.profilePicId, userId: user.uid, email: profileData.email, totalPosts: profileData.totalPosts, level: profileData.level, jCoins: profileData.jCoins, banned: profileData.banned }, { merge: true });
+        const usernameInitial = (profileData.username || 'U').charAt(0).toUpperCase();
+        displayProfilePicture(headerProfilePic, headerAvatarIcon, profileData?.profilePicId, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
+        headerDisplayName.textContent = profileData.username || 'Nuvia User';
+        if (profileLink) profileLink.href = `/profile.html?userId=${user.uid}`;
+        logoutButton.disabled = false;
+      }catch(err){
+        console.error('Header profile error', err);
+        headerDisplayName.textContent = user.displayName || 'Nuvia User';
+        logoutButton.disabled = false;
+      }
+    }
 
-        /**
-         * Displays a temporary message box with a given message and type.
-         * @param {string} message - The message to display.
-         * @param {string} type - The type of message ('success', 'error', 'info', 'loading', 'warning').
-         * @param {number} [durationMs=3000] - Duration in milliseconds for the message to display.
-         * @param {boolean} [isPersistent=false] - If true, message stays until explicitly cleared or replaced.
-         */
-        function showMessageBox(message, type, durationMs = 3000, isPersistent = false) {
-            if (messageBox.timeoutId) {
-                clearTimeout(messageBox.timeoutId);
-                messageBox.timeoutId = null;
-            }
+    async function logAdminAction(adminUid, actionType, details={}){
+      try{ await addDoc(collection(db, "artifacts", appId, "public", "data", "admin_logs"), { adminUid, actionType, details, timestamp: serverTimestamp() }); }catch(e){ console.error('logAdminAction', e); }
+    }
 
-            messageBox.innerHTML = `<i id="messageBoxIcon"></i><span id="messageBoxText"></span>`;
-            const messageBoxIcon = document.getElementById('messageBoxIcon');
-            const messageBoxText = document.getElementById('messageBoxText');
+    let currentUser = null; let reportsUnsub = null; let reportsCache = new Map();
 
-            messageBoxText.textContent = message;
-            messageBox.className = 'message-box show ' + type;
-
-            if (type === 'success') {
-                messageBoxIcon.classList.add('fas', 'fa-check-circle');
-                playNotificationSound();
-            } else if (type === 'error') {
-                messageBoxIcon.classList.add('fas', 'fa-times-circle');
-            } else if (type === 'info') {
-                messageBoxIcon.classList.add('fas', 'fa-info-circle');
-            } else if (type === 'warning') {
-                messageBoxIcon.classList.add('fas', 'fa-exclamation-triangle');
-            } else {
-                messageBoxIcon.className = '';
-            }
-
-            if (type === 'loading') {
-                messageBox.classList.add('loading-pulse');
-            } else {
-                messageBox.classList.remove('loading-pulse');
-            }
-
-            messageBox.style.display = 'flex';
-            messageBox.style.opacity = '1';
-
-            if (!isPersistent) {
-                messageBox.timeoutId = setTimeout(() => {
-                    messageBox.style.opacity = '0';
-                    messageBox.addEventListener('transitionend', function handler() {
-                        messageBox.style.display = 'none';
-                        messageBox.removeEventListener('transitionend', handler);
-                        messageBox.classList.remove('loading-pulse');
-                    }, { once: true });
-                }, durationMs);
-            }
-        }
-
-        /**
-         * Toggles loading state for a button.
-         * @param {HTMLElement} buttonElement - The button to toggle.
-         * @param {boolean} isLoading - True to show loading, false to hide.
-         */
-        function toggleButtonLoading(buttonElement, isLoading) {
-            if (!buttonElement) return;
-            const loader = buttonElement.querySelector('.button-loader');
-            const text = buttonElement.querySelector('.button-text');
-
-            if (isLoading) {
-                buttonElement.disabled = true;
-                buttonElement.classList.add('loading');
-                if (loader) loader.classList.add('active');
-                if (text) text.style.display = 'none';
-            } else {
-                buttonElement.disabled = false;
-                buttonElement.classList.remove('loading');
-                if (loader) loader.classList.remove('active');
-                if (text) text.style.display = 'block';
-            }
-        }
-
-        /**
-         * Constructs a Cloudinary URL for an image/video.
-         * @param {string} urlOrPublicId - The full Cloudinary URL or the public ID of the image on Cloudinary.
-         * @param {string} transformations - Optional Cloudinary transformations.
-         * @returns {string|null} The full Cloudinary URL or null if urlOrPublicId is not provided.
-         */
-        function getCloudinaryImageUrl(urlOrPublicId, transformations = "w_auto,f_auto,q_auto") {
-            if (!urlOrPublicId) return null;
-            if (urlOrPublicId.startsWith('http://') || urlOrPublicId.startsWith('https://')) {
-                return urlOrPublicId;
-            }
-            return `https://res.cloudinary.com/${cloudinaryConfig.cloudName}/image/upload/${transformations}/${urlOrPublicId}`;
-        }
-
-        /**
-         * Displays the profile picture or a default icon.
-         * @param {HTMLElement} imgElement - The <img> element to update.
-         * @param {HTMLElement} iconElement - The <i> element to display if no image.
-         * @param {string|null} profilePicId - The Cloudinary public ID or URL, or null.
-         * @param {string} usernameInitial - Initial for placeholder.
-         * @param {string} transformations - Cloudinary transformations.
-         */
-        function displayProfilePicture(imgElement, iconElement, profilePicId, usernameInitial, transformations) {
-            if (profilePicId) {
-                const imageUrl = getCloudinaryImageUrl(profilePicId, transformations);
-                imgElement.src = imageUrl;
-                imgElement.style.display = 'block';
-                if (iconElement) iconElement.style.display = 'none';
-                imgElement.onerror = () => {
-                    console.error(`Failed to load profile picture: ${profilePicId}. Using placeholder.`);
-                    // Fallback to a generic placeholder image if Cloudinary URL fails
-                    imgElement.src = `https://placehold.co/120x120/CCCCCC/000000?text=${usernameInitial}`;
-                    imgElement.style.display = 'block';
-                    if (iconElement) iconElement.style.display = 'none';
-                };
-            } else {
-                imgElement.src = '';
-                imgElement.style.display = 'none';
-                if (iconElement) iconElement.style.display = 'block';
-            }
-        }
-
-        /**
-         * Fetches and displays the current user's profile data for the header.
-         * This function runs on every page to ensure header is consistent.
-         * Also updates the public profile summary.
-         * @param {firebase.User} user - The authenticated Firebase user object.
-         */
-        async function fetchAndDisplayHeaderProfile(user) {
-            try {
-                const privateProfileDocRef = doc(db, "artifacts", appId, "users", user.uid, "profiles", "user_profile");
-                const publicProfileDocRef = doc(db, "artifacts", appId, "public", "data", "users", user.uid);
-
-                const privateDocSnap = await getDoc(privateProfileDocRef);
-                let profileData = null;
-
-                if (privateDocSnap.exists()) {
-                    profileData = privateDocSnap.data();
-                } else {
-                    // Create a basic profile if it doesn't exist
-                    profileData = {
-                        username: user.displayName || `User_${user.uid.substring(0, 8)}`,
-                        email: user.email || "",
-                        profilePicId: user.photoURL || null,
-                        bio: "",
-                        location: "",
-                        friendsCount: 0,
-                        followersCount: 0,
-                        followingCount: 0,
-                        createdAt: Date.now(),
-                        updatedAt: Date.now(),
-                        inspirationType: "motivational",
-                        visibility: {
-                            displayName: true, profilePic: true, bio: false, location: false,
-                            emailPublic: false, lastOnline: false, allowFriendRequests: true, allowMessages: true,
-                        },
-                        totalPosts: 0,
-                        jCoins: 0,
-                        level: 1,
-                        currentXp: 0,
-                        xpToNextLevel: 100
-                    };
-                    await setDoc(privateProfileDocRef, profileData);
-                }
-
-                // Update public profile summary
-                const publicProfileSummary = {
-                    username: profileData.username,
-                    profilePicId: profileData.profilePicId,
-                    jCoins: profileData.jCoins,
-                    level: profileData.level,
-                    userId: user.uid,
-                    email: profileData.email
-                };
-                await setDoc(publicProfileDocRef, publicProfileSummary, { merge: true });
-
-                // Update header UI
-                const usernameInitial = (profileData.username || "J").charAt(0).toUpperCase();
-                displayProfilePicture(headerProfilePic, headerAvatarIcon, profileData?.profilePicId, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
-                headerDisplayName.textContent = profileData.username || "JCHAT User";
-                headerNavLinkProfile.href = `/profile.html?userId=${user.uid}`;
-
-                logoutButton.disabled = false;
-            } catch (error) {
-                console.error("Error fetching or creating profile for header:", error);
-                const usernameInitial = (user.displayName || "J").charAt(0).toUpperCase();
-                displayProfilePicture(headerProfilePic, headerAvatarIcon, user.photoURL, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
-                headerDisplayName.textContent = user.displayName || "JCHAT User";
-                showMessageBox(`Error loading header profile: ${error.message}`, 'error');
-                logoutButton.disabled = false;
-            }
-        }
-
-        /**
-         * Fetches and displays the notification count for the current user.
-         * @param {string} userId - The UID of the current user.
-         */
-        async function fetchNotificationCount(userId) {
-            // This is currently set to 'none' as per Admin.html snippet,
-            // but would be implemented with real-time listeners for notifications.
-            // Example:
-            // const notificationsRef = collection(db, "artifacts", appId, "users", userId, "notifications");
-            // const q = query(notificationsRef, where("read", "==", false));
-            // onSnapshot(q, (snapshot) => {
-            //     const unreadCount = snapshot.size;
-            //     if (unreadCount > 0) {
-            //         notificationCountElement.textContent = unreadCount;
-            //         notificationCountElement.style.display = 'flex';
-            //     } else {
-            //         notificationCountElement.style.display = 'none';
-            //     }
-            // });
-            notificationCountElement.style.display = 'none'; // Keeps it hidden as per original logic if not implemented
-        }
-
-        /**
-         * Logs an admin action to Firestore.
-         * @param {string} adminUid - The UID of the admin performing the action.
-         * @param {string} actionType - The type of action (e.g., 'approve_coin_request', 'ban_user').
-         * @param {object} [details={}] - Optional additional details for the log entry.
-         */
-        async function logAdminAction(adminUid, actionType, details = {}) {
-            try {
-                const logsCollectionRef = collection(db, "artifacts", appId, "admin_logs");
-                await addDoc(logsCollectionRef, {
-                    adminUid: adminUid,
-                    actionType: actionType,
-                    details: details,
-                    timestamp: serverTimestamp()
-                });
-            } catch (error) {
-                console.error("Error logging admin action:", error);
-            }
-        }
-
-        // --- Authentication State Listener ---
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUser = user;
-                // --- ADMIN AUTHORIZATION CHECK ---
-                if (currentUser.uid !== ADMIN_UID) {
-                    showMessageBox("Unauthorized access. Redirecting to home page.", 'error', 2000, true);
-                    isAuthReady = false;
-                    document.querySelectorAll('a, button').forEach(el => {
-                        if (el.id !== 'logoutButton') {
-                            el.classList.add('disabled-link');
-                            el.style.pointerEvents = 'none';
-                        }
-                    });
-                    logoutButton.disabled = true;
-                    setTimeout(() => {
-                        window.location.href = '/index.html';
-                    }, 2000);
-                    return;
-                }
-                // --- END ADMIN AUTHORIZATION CHECK ---
-
-                isAuthReady = true;
-                await fetchAndDisplayHeaderProfile(user);
-                fetchNotificationCount(user.uid);
-
-                // Initial message for admin on this page
-                showMessageBox("Content Moderation panel loaded.", 'info', 3000);
-
-                // Load initial settings and moderation data
-                loadModerationSettings();
-                listenForReportedContent();
-                listenForUserViolations();
-                listenForModerationLogs();
-
-            } else {
-                isAuthReady = false;
-                logoutButton.disabled = true;
-                headerDisplayName.textContent = "Guest";
-                headerProfilePic.style.display = 'none';
-                headerAvatarIcon.style.display = 'block';
-                document.querySelector('.content-wrapper').innerHTML = `
-                    <div class="section-card">
-                        <h1>Access Denied</h1>
-                        <p style="color: var(--pink); font-weight: 600;">
-                            <i class="fas fa-exclamation-triangle"></i> Please log in to access admin tools.
-                        </p>
-                        <p style="color: var(--text-light);">Redirecting to login page...</p>
-                    </div>
-                `;
-                showMessageBox("You must be logged in to access the Admin Dashboard.", 'error', 2000, true);
-                setTimeout(() => {
-                    window.location.href = '/login.html';
-                }, 2000);
-            }
+    function applyClientFilters(raw){
+      const t = (typeFilter.value || '').trim();
+      const qText = (searchInput.value || '').trim().toLowerCase();
+      let r = raw;
+      if (t) r = r.filter(x => (x.type || x.contentType || '').toLowerCase() === t);
+      if (qText){
+        r = r.filter(x => {
+          const fields = [x.reason, x.content, x.contentId, x.reportedId, x.reporterId, x.reportedUsername, x.reporterUsername, x.location];
+          return fields.filter(Boolean).some(v => String(v).toLowerCase().includes(qText));
         });
+      }
+      return r;
+    }
 
-        // --- Data Loading and Display Functions ---
+    function fmtTs(ts){ try{ const d = ts?.toDate ? ts.toDate() : (typeof ts === 'number' ? new Date(ts) : null); return d ? d.toLocaleString() : 'N/A'; }catch(_){ return 'N/A'; } }
 
-        /**
-         * Loads moderation settings from Firestore and populates the form.
-         */
-        async function loadModerationSettings() {
-            try {
-                const settingsDocRef = doc(db, "artifacts", appId, "settings", "moderation_settings");
-                const docSnap = await getDoc(settingsDocRef);
+    function renderReports(){
+      const all = Array.from(reportsCache.values());
+      const filtered = applyClientFilters(all).sort((a,b)=>{
+        const ta = a.timestamp?.toDate ? a.timestamp.toDate().getTime() : 0;
+        const tb = b.timestamp?.toDate ? b.timestamp.toDate().getTime() : 0;
+        return tb - ta;
+      });
+      reportsCounter.textContent = `${filtered.length} Reports`;
+      reportsList.innerHTML = '';
+      if (!filtered.length){ emptyState.style.display='block'; return; } else { emptyState.style.display='none'; }
+      for (const r of filtered){
+        const item = document.createElement('div');
+        item.className = 'report-card';
+        item.dataset.reportId = r.id;
+        const contentSnippet = (r.content || r.contentText || '').toString();
+        const snippet = contentSnippet.length > 180 ? contentSnippet.slice(0,177) + '…' : contentSnippet;
+        const typeLabel = (r.type || r.contentType || 'other').toString();
+        const statusLabel = (r.status || 'pending').toString();
+        item.innerHTML = `
+          <div class="report-select"><input type="checkbox" class="row-select" aria-label="Select report"></div>
+          <div class="report-meta">
+            <h3 class="report-title">${r.reason || 'Reported content'} <span class="tag" title="Type"><i class="fas fa-tag"></i> ${typeLabel}</span> <span class="tag" title="Status"><i class="fas fa-info-circle"></i> ${statusLabel}</span></h3>
+            <p class="report-details">Content: ${snippet || 'N/A'}</p>
+            <div class="report-tags">
+              <span class="tag" title="Reported User"><i class="fas fa-user-slash"></i> ${r.reportedUsername || (r.reportedId ? r.reportedId.slice(0,8)+'…' : 'Unknown')}</span>
+              <span class="tag" title="Reporter"><i class="fas fa-user"></i> ${r.reporterUsername || (r.reporterId ? r.reporterId.slice(0,8)+'…' : 'Unknown')}</span>
+              <span class="tag" title="Content ID"><i class="fas fa-hashtag"></i> ${(r.contentId || 'N/A').toString()}</span>
+              <span class="tag" title="When"><i class="fas fa-clock"></i> ${fmtTs(r.timestamp)}</span>
+              ${r.location ? `<span class="tag" title="Location"><i class="fas fa-link"></i> ${r.location}</span>` : ''}
+            </div>
+          </div>
+          <div class="report-actions">
+            <button class="btn btn-success" data-action="resolve"><i class="fas fa-check"></i> Resolve</button>
+            <button class="btn btn-warning" data-action="ignore"><i class="fas fa-ban"></i> Ignore</button>
+            <button class="btn" data-action="warn"><i class="fas fa-exclamation-circle"></i> Warn</button>
+            <button class="btn btn-danger" data-action="delete_content"><i class="fas fa-trash"></i> Delete</button>
+            <button class="btn" data-action="ban"><i class="fas fa-user-lock"></i> Ban</button>
+          </div>
+        `;
+        reportsList.appendChild(item);
+      }
+    }
 
-                if (docSnap.exists()) {
-                    const settings = docSnap.data();
-                    document.getElementById('keyword_filter_enable').checked = settings.keyword_filter_enable || false;
-                    document.getElementById('blacklisted_keywords').value = settings.blacklisted_keywords ? settings.blacklisted_keywords.join(', ') : '';
-                    document.getElementById('ai_moderation_enable').checked = settings.ai_moderation_enable || false;
-                    document.getElementById('ai_threshold').value = settings.ai_threshold || 80;
-                    document.getElementById('report_threshold_auto_review').value = settings.report_threshold_auto_review || 3;
-                    document.getElementById('strike_system_enable').checked = settings.strike_system_enable || false;
-                    document.getElementById('strike1_action').value = settings.strike1_action || 'warning';
-                    document.getElementById('strike3_action').value = settings.strike3_action || 'temp_ban';
-                    document.getElementById('strike5_action').value = settings.strike5_action || 'perm_ban';
-                } else {
-                    console.log("No moderation settings found in Firestore. Using default form values.");
-                }
-            } catch (error) {
-                console.error("Error loading moderation settings:", error);
-                showMessageBox("Failed to load moderation settings.", 'error');
-            }
-        }
-
-        /**
-         * Listens for real-time updates to reported content and populates the table.
-         */
-        function listenForReportedContent() {
-            // This is a placeholder for actual data fetching from your backend/Firestore
-            // Example:
-            // const reportsRef = collection(db, "artifacts", appId, "reported_content");
-            // const q = query(reportsRef, where("status", "==", "pending"));
-            // onSnapshot(q, (snapshot) => {
-            //     reportedContentTableBody.innerHTML = ''; // Clear existing rows
-            //     if (snapshot.empty) {
-            //         reportedContentTableBody.innerHTML = '<tr><td colspan="7" class="no-data-message">No new reported content.</td></tr>';
-            //         return;
-            //     }
-            //     snapshot.forEach(doc => {
-            //         const report = doc.data();
-            //         const reportId = doc.id;
-            //         const row = `
-            //             <tr>
-            //                 <td>${reportId.substring(0, 8)}</td>
-            //                 <td>${report.contentType}</td>
-            //                 <td><a href="/profile.html?userId=${report.reportedByUid}" style="color: var(--accent-color);">${report.reportedByUsername || 'N/A'}</a></td>
-            //                 <td class="moderation-item-content">${report.contentPreview || 'No preview'}</td>
-            //                 <td>${report.reason}</td>
-            //                 <td><span class="status-badge pending">${report.status}</span></td>
-            //                 <td class="action-buttons-cell">
-            //                     <button class="button primary" onclick="handleReview('${reportId}')">Review</button>
-            //                     <button class="button danger" onclick="handleRemove('${reportId}')">Remove</button>
-            //                 </td>
-            //             </tr>
-            //         `;
-            //         reportedContentTableBody.insertAdjacentHTML('beforeend', row);
-            //     });
-            // }, (error) => {
-            //     console.error("Error listening to reported content:", error);
-            //     showMessageBox("Failed to load reported content.", 'error');
-            // });
-
-            // Default to 'no data' message until actual implementation
-            reportedContentTableBody.innerHTML = '<tr><td colspan="7" class="no-data-message">No new reported content.</td></tr>';
-        }
-
-        /**
-         * Listens for real-time updates to user violations and populates the table.
-         */
-        function listenForUserViolations() {
-            // This is a placeholder for actual data fetching from your backend/Firestore
-            // Example:
-            // const violationsRef = collection(db, "artifacts", appId, "users");
-            // const q = query(violationsRef, where("violationsCount", ">", 0)); // Or filter by users with active bans/mutes
-            // onSnapshot(q, (snapshot) => {
-            //     userViolationsTableBody.innerHTML = ''; // Clear existing rows
-            //     if (snapshot.empty) {
-            //         userViolationsTableBody.innerHTML = '<tr><td colspan="6" class="no-data-message">No user violations to display.</td></tr>';
-            //         return;
-            //     }
-            //     snapshot.forEach(doc => {
-            //         const user = doc.data();
-            //         const userId = doc.id;
-            //         const row = `
-            //             <tr>
-            //                 <td>${userId.substring(0, 8)}</td>
-            //                 <td><a href="/profile.html?userId=${userId}" style="color: var(--accent-color);">${user.username || 'N/A'}</a></td>
-            //                 <td>${user.violationsCount || 0}</td>
-            //                 <td>${user.lastViolationDate ? new Date(user.lastViolationDate).toLocaleDateString() : 'N/A'}</td>
-            //                 <td><span class="status-badge ${user.status || 'active'}">${user.status || 'Active'}</span></td>
-            //                 <td class="action-buttons-cell">
-            //                     <button class="button secondary" onclick="viewUserHistory('${userId}')">View History</button>
-            //                     <button class="button danger" onclick="suspendUser('${userId}')">Suspend</button>
-            //                 </td>
-            //             </tr>
-            //         `;
-            //         userViolationsTableBody.insertAdjacentHTML('beforeend', row);
-            //     });
-            // }, (error) => {
-            //     console.error("Error listening to user violations:", error);
-            //     showMessageBox("Failed to load user violations.", 'error');
-            // });
-
-            // Default to 'no data' message until actual implementation
-            userViolationsTableBody.innerHTML = '<tr><td colspan="6" class="no-data-message">No user violations to display.</td></tr>';
-        }
-
-        /**
-         * Listens for real-time updates to moderation logs and populates the table.
-         */
-        function listenForModerationLogs() {
-            // This is a placeholder for actual data fetching from your backend/Firestore
-            // Example:
-            // const logsRef = collection(db, "artifacts", appId, "admin_logs");
-            // const q = query(logsRef, orderBy("timestamp", "desc"), limit(50)); // Get last 50 logs
-            // onSnapshot(q, (snapshot) => {
-            //     moderationLogsTableBody.innerHTML = ''; // Clear existing rows
-            //     if (snapshot.empty) {
-            //         moderationLogsTableBody.innerHTML = '<tr><td colspan="5" class="no-data-message">No moderation logs to display.</td></tr>';
-            //         return;
-            //     }
-            //     snapshot.forEach(doc => {
-            //         const log = doc.data();
-            //         const timestamp = log.timestamp ? new Date(log.timestamp.toDate()).toLocaleString() : 'N/A';
-            //         const row = `
-            //             <tr>
-            //                 <td class="log-timestamp">${timestamp}</td>
-            //                 <td><a href="/profile.html?userId=${log.adminUid}" style="color: var(--accent-color);">${log.adminUsername || 'Moderator'}</a></td>
-            //                 <td class="log-action-type">${log.actionType}</td>
-            //                 <td>${log.targetId || 'N/A'}</td>
-            //                 <td class="log-details">${log.details ? JSON.stringify(log.details) : 'No details'}</td>
-            //             </tr>
-            //         `;
-            //         moderationLogsTableBody.insertAdjacentHTML('beforeend', row);
-            //     });
-            // }, (error) => {
-            //     console.error("Error listening to moderation logs:", error);
-            //     showMessageBox("Failed to load moderation logs.", 'error');
-            // });
-
-            // Default to 'no data' message until actual implementation
-            moderationLogsTableBody.innerHTML = '<tr><td colspan="5" class="no-data-message">No moderation logs to display.</td></tr>';
-        }
-
-        // --- Event Listeners ---
-        window.addEventListener('storage', (event) => {
-            if (event.key === 'jchat-theme') {
-                const newTheme = event.newValue || 'theme-dark-mode';
-                const themes = ['theme-dark-mode'];
-                if (themes.includes(newTheme)) {
-                    document.body.classList.remove(...themes);
-                    document.body.classList.add(newTheme);
-                }
-            }
+    function attachReportsListener(){
+      if (reportsUnsub) { try{ reportsUnsub(); }catch(_){ } reportsUnsub = null; }
+      reportsCache.clear(); reportsList.innerHTML=''; emptyState.style.display='none'; reportsCounter.textContent = '0 Reports';
+      const st = (statusFilter.value || 'pending').trim();
+      let qRef = query(collection(db, 'artifacts', appId, 'public', 'data', 'reports'), where('status','==', st), orderBy('timestamp','desc'), limit(100));
+      reportsUnsub = onSnapshot(qRef, (snap)=>{
+        snap.docChanges().forEach(ch => {
+          const d = { id: ch.doc.id, ...ch.doc.data() };
+          if (ch.type === 'removed') { reportsCache.delete(ch.doc.id); }
+          else { reportsCache.set(ch.doc.id, d); }
         });
+        renderReports();
+      }, (err)=>{
+        console.error('reports listener error', err);
+        showMessageBox(`Error loading reports: ${err.message}`, 'error');
+      });
+    }
 
-        logoutButton.addEventListener('click', async () => {
-            if (!isAuthReady) return;
-            toggleButtonLoading(logoutButton, true);
-            try {
-                await signOut(auth);
-                showMessageBox("Logged out successfully! 👋", 'success');
-                // Ensure currentUser is not null before trying to log action
-                if (currentUser && currentUser.uid === ADMIN_UID) {
-                     await logAdminAction(currentUser.uid, 'admin_logout');
-                }
-                setTimeout(() => {
-                    window.location.href = '/login.html';
-                }, 1500);
-            } catch (error) {
-                console.error("Error logging out:", error);
-                showMessageBox("Failed to log out. Please try again.", 'error');
-                toggleButtonLoading(logoutButton, false);
-            }
-        });
+    async function updateReportStatus(reportId, newStatus){
+      const ref = doc(db, 'artifacts', appId, 'public', 'data', 'reports', reportId);
+      await updateDoc(ref, { status: newStatus, resolvedAt: serverTimestamp(), resolvedBy: currentUser.uid });
+    }
 
-        // --- Tab Switching Logic ---
-        document.querySelectorAll('.tab-button').forEach(button => {
-            button.addEventListener('click', () => {
-                // Deactivate all tab buttons and content
-                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    async function warnUserFromReport(report){
+      if (!report?.reportedId) throw new Error('Missing reported user');
+      const batch = writeBatch(db);
+      const notifRef = doc(collection(db, 'artifacts', appId, 'users', report.reportedId, 'notifications'));
+      batch.set(notifRef, { type: 'warning', message: `Warning regarding your recent activity: "${(report.content||'').toString().slice(0,120)}". Please follow community guidelines.`, timestamp: serverTimestamp(), read: false, issuedByAdminId: currentUser.uid, recipientId: report.reportedId, relatedReportId: report.id });
+      const profileRef = doc(db, 'artifacts', appId, 'users', report.reportedId, 'profiles', 'user_profile');
+      batch.set(profileRef, { warnings: 1, updatedAt: serverTimestamp() }, { merge: true });
+      const reportRef = doc(db, 'artifacts', appId, 'public', 'data', 'reports', report.id);
+      batch.update(reportRef, { status: 'warned', resolvedAt: serverTimestamp(), resolvedBy: currentUser.uid });
+      await batch.commit();
+    }
 
-                // Activate the clicked tab button and its corresponding content
-                button.classList.add('active');
-                document.getElementById(button.dataset.tab).classList.add('active');
-            });
-        });
+    async function deleteReportedContent(report){
+      const type = (report.contentType || report.type || '').toLowerCase();
+      if (type === 'post' && report.contentId){
+        const postRef = doc(db, 'artifacts', appId, 'public', 'data', 'posts', report.contentId);
+        try{
+          const snap = await getDoc(postRef);
+          if (snap.exists()){
+            const data = snap.data();
+            const archiveRef = doc(db, 'artifacts', appId, 'public', 'data', 'archived_posts', report.contentId);
+            await setDoc(archiveRef, { ...data, archivedBy: currentUser.uid, archivedAt: serverTimestamp(), originalId: report.contentId });
+            await deleteDoc(postRef);
+            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', report.id), { status: 'content_deleted', resolvedAt: serverTimestamp(), resolvedBy: currentUser.uid });
+            window.__last_archived = { type:'post', id: report.contentId };
+            showUndoToast('Post deleted.', async ()=>{ const aRef = doc(db, 'artifacts', appId, 'public', 'data', 'archived_posts', report.contentId); const aSnap = await getDoc(aRef); if(aSnap.exists()){ await setDoc(postRef, aSnap.data()); await deleteDoc(aRef); showMessageBox('Post restored.', 'success'); } });
+          }
+          return;
+        }catch(e){ console.error('deleteReportedContent(post)', e); throw e; }
+      }
+      if (type === 'message' && report.contentId && report.chatRoomId){
+        const msgRef = doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', report.chatRoomId, 'messages', report.contentId);
+        try{
+          const snap = await getDoc(msgRef);
+          if (snap.exists()){
+            const data = snap.data();
+            const archiveRef = doc(db, 'artifacts', appId, 'public', 'data', 'archived_messages', report.contentId);
+            await setDoc(archiveRef, { ...data, archivedBy: currentUser.uid, archivedAt: serverTimestamp(), originalId: report.contentId, chatRoomId: report.chatRoomId });
+            await deleteDoc(msgRef);
+            await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'reports', report.id), { status: 'content_deleted', resolvedAt: serverTimestamp(), resolvedBy: currentUser.uid });
+            window.__last_archived = { type:'message', id: report.contentId, chatRoomId: report.chatRoomId };
+            showUndoToast('Message deleted.', async ()=>{ const aRef = doc(db, 'artifacts', appId, 'public', 'data', 'archived_messages', report.contentId); const aSnap = await getDoc(aRef); if(aSnap.exists()){ const d = aSnap.data(); const restoreRef = doc(db, 'artifacts', appId, 'public', 'data', 'chat_rooms', d.chatRoomId, 'messages', report.contentId); await setDoc(restoreRef, d); await deleteDoc(aRef); showMessageBox('Message restored.', 'success'); } });
+          }
+          return;
+        }catch(e){ console.error('deleteReportedContent(message)', e); throw e; }
+      }
+      throw new Error('Unsupported content type or missing IDs');
+    }
 
-        // --- Form Submission Handler for Moderation Settings ---
-        document.querySelector('#settings form').addEventListener('submit', async (event) => {
-            event.preventDefault(); // Prevent default form submission
+    function showUndoToast(message, undoCb){
+      showMessageBox(message + ' <button id="undoActionBtn" style="margin-left:12px;padding:6px 10px;border-radius:6px;font-weight:700;">Undo</button>', 'info', 10000);
+      setTimeout(()=>{
+        const btn = document.getElementById('undoActionBtn');
+        if (btn) btn.addEventListener('click', ()=>{ try{ undoCb(); }catch(e){ console.error(e); } });
+      }, 50);
+    }
 
-            if (!isAuthReady || currentUser.uid !== ADMIN_UID) {
-                showMessageBox("Unauthorized action.", 'error');
-                return;
-            }
+    async function banUserFromReport(report){
+      if (!report?.reportedId) throw new Error('Missing reported user');
+      const profileRef = doc(db, 'artifacts', appId, 'users', report.reportedId, 'profiles', 'user_profile');
+      await setDoc(profileRef, { banned: true, bannedAt: serverTimestamp(), bannedBy: currentUser.uid }, { merge: true });
+    }
 
-            const saveButton = event.submitter; // The button that was clicked to submit
-            toggleButtonLoading(saveButton, true);
-            showMessageBox("Saving moderation settings...", 'loading', 0, true); // Persistent loading message
+    function getSelectedReportIds(){ return Array.from(reportsList.querySelectorAll('.report-card')).filter(el => el.querySelector('.row-select')?.checked).map(el => el.dataset.reportId); }
 
-            try {
-                const formData = new FormData(event.target);
-                const settings = {};
-                for (const [key, value] of formData.entries()) {
-                    if (event.target.querySelector(`#${key}`).type === 'checkbox') {
-                        settings[key] = event.target.querySelector(`#${key}`).checked;
-                    } else if (key === 'blacklisted_keywords') {
-                        settings[key] = value.split(',').map(kw => kw.trim()).filter(kw => kw.length > 0);
-                    } else if (key === 'ai_threshold' || key === 'report_threshold_auto_review') {
-                        settings[key] = parseInt(value, 10);
-                    } else {
-                        settings[key] = value;
-                    }
-                }
+    async function handleRowAction(reportId, action){
+      const report = reportsCache.get(reportId);
+      if (!report){ showMessageBox('Report not found in view. Please refresh.', 'error'); return; }
+      try{
+        if (action === 'resolve'){ await updateReportStatus(reportId, 'resolved'); await logAdminAction(currentUser.uid, 'resolve_report', { reportId }); showMessageBox('Report resolved.', 'success'); }
+        else if (action === 'ignore'){ await updateReportStatus(reportId, 'ignored'); await logAdminAction(currentUser.uid, 'ignore_report', { reportId }); showMessageBox('Report ignored.', 'info'); }
+        else if (action === 'warn'){ await warnUserFromReport(report); await logAdminAction(currentUser.uid, 'warn_user', { reportId, userId: report.reportedId }); showMessageBox('User warned.', 'success'); }
+        else if (action === 'delete_content'){ await deleteReportedContent(report); await logAdminAction(currentUser.uid, 'delete_reported_content', { reportId, contentId: report.contentId, type: report.contentType||report.type }); showMessageBox('Content deleted.', 'success'); }
+        else if (action === 'ban'){ await banUserFromReport(report); await logAdminAction(currentUser.uid, 'ban_user', { userId: report.reportedId, reportId }); showMessageBox('User banned.', 'warning'); }
+      }catch(err){ console.error('Action error', err); showMessageBox(`Action failed: ${err.message}`, 'error'); }
+    }
 
-                // Save to Firestore
-                const settingsDocRef = doc(db, "artifacts", appId, "settings", "moderation_settings");
-                await setDoc(settingsDocRef, settings, { merge: true });
-
-                await logAdminAction(currentUser.uid, 'save_moderation_settings', settings);
-                showMessageBox("Moderation settings saved successfully!", 'success');
-
-            } catch (error) {
-                console.error("Error saving moderation settings:", error);
-                showMessageBox(`Failed to save settings: ${error.message}`, 'error');
-            } finally {
-                toggleButtonLoading(saveButton, false);
-            }
-        });
-
-
-        // --- Bottom Navigation Bar Toggle Logic (reused from Admin.html) ---
-        const bottomNavBar = document.getElementById('bottomNavBar');
-        const navToggleBtn = document.getElementById('navToggleBtn');
-
-        function toggleNavBarVisibility() {
-            const toggleIcon = navToggleBtn.querySelector('i');
-            const isHidden = bottomNavBar.classList.toggle('nav-bar-hidden-full');
-
-            if (isHidden) {
-                toggleIcon.classList.remove('fa-chevron-down');
-                toggleIcon.classList.add('fa-chevron-up');
-            } else {
-                toggleIcon.classList.remove('fa-chevron-up');
-                toggleIcon.classList.add('fa-chevron-down');
-            }
+    async function handleBulk(action){
+      const ids = getSelectedReportIds(); if (!ids.length){ showMessageBox('No reports selected.', 'info'); return; }
+      try{
+        if (action === 'resolve' || action === 'ignore'){
+          const batch = writeBatch(db);
+          ids.forEach(id => { batch.update(doc(db, 'artifacts', appId, 'public', 'data', 'reports', id), { status: action === 'resolve' ? 'resolved' : 'ignored', resolvedAt: serverTimestamp(), resolvedBy: currentUser.uid }); });
+          await batch.commit();
+          await logAdminAction(currentUser.uid, `bulk_${action}_reports`, { ids });
+          showMessageBox(`Bulk ${action} complete.`, 'success');
+        } else if (action === 'delete_content'){
+          for (const id of ids){ const r = reportsCache.get(id); if (r){ await deleteReportedContent(r); } }
+          await logAdminAction(currentUser.uid, 'bulk_delete_reported_content', { ids });
+          showMessageBox('Bulk delete complete.', 'success');
         }
+      }catch(err){ console.error('Bulk error', err); showMessageBox(`Bulk action failed: ${err.message}`, 'error'); }
+    }
 
-        // Set initial state: nav bar is HIDDEN by default in admin page, icon points UP
-        bottomNavBar.classList.add('nav-bar-hidden-full');
-        navToggleBtn.querySelector('i').classList.remove('fa-chevron-down');
-        navToggleBtn.querySelector('i').classList.add('fa-chevron-up');
-        navToggleBtn.addEventListener('click', toggleNavBarVisibility);
-
-        // --- Placeholder functions for moderation actions (to be implemented with backend logic) ---
-        // These functions would interact with your Firebase/backend to process actions
-        function handleReview(reportId) {
-            showMessageBox(`Reviewing report: ${reportId}`, 'info');
-            // Implement logic to mark report as reviewed, update content, etc.
-            // Example:
-            // await db.collection('artifacts').doc(appId).collection('reported_content').doc(reportId).update({ status: 'reviewed' });
-            // await logAdminAction(currentUser.uid, 'review_content_report', { reportId });
+    onAuthStateChanged(auth, async (user)=>{
+      if (user){
+        currentUser = user;
+        if (currentUser.uid !== ADMIN_UID){
+          showMessageBox('Unauthorized access. Redirecting…', 'error', 2000, true);
+          document.querySelectorAll('a, button, input, select').forEach(el => { if (el.id !== 'logoutButton') { el.disabled = true; el.classList.add('disabled-link'); } });
+          setTimeout(()=>{ window.location.href = '/index.html'; }, 1500);
+          return;
         }
+        await fetchAndDisplayHeaderProfile(user);
+        attachReportsListener();
+        showMessageBox('Welcome Admin.', 'success');
+      } else {
+        logoutButton.disabled = true; headerDisplayName.textContent = 'Guest'; headerAvatarIcon.style.display='block'; headerProfilePic.style.display='none';
+        showMessageBox('Please log in. Redirecting…', 'error', 2000, true);
+        setTimeout(()=>{
+          if (initialAuthToken) { signInWithCustomToken(auth, initialAuthToken).catch(()=> window.location.href='/login.html'); }
+          else { signInAnonymously(auth).catch(()=> window.location.href='/login.html'); }
+        }, 1200);
+      }
+    });
 
-        function handleRemove(reportId) {
-            showMessageBox(`Removing content for report: ${reportId}`, 'warning', 0, true);
-            // Implement logic to delete content, mark report as rejected, possibly issue a user violation
-            // Example:
-            // await db.collection('artifacts').doc(appId).collection('reported_content').doc(reportId).delete(); // Or update content status
-            // await logAdminAction(currentUser.uid, 'remove_content', { reportId, reason: 'Violated TOS' });
-            setTimeout(() => showMessageBox('Content removed.', 'success'), 1500); // Simulate action
-        }
+    logoutButton.addEventListener('click', async ()=>{ try{ if(currentUser){ await logAdminAction(currentUser.uid, 'admin_logout'); } await signOut(auth); showMessageBox('Logged out.', 'success'); setTimeout(()=>{ window.location.href='/login.html'; }, 1200); }catch(e){ showMessageBox('Logout failed.', 'error'); }});
 
-        function viewUserHistory(userId) {
-            showMessageBox(`Viewing history for user: ${userId}`, 'info');
-            // Redirect to a user-specific detail page or open a modal
-            // window.location.href = `/admin_user_details.html?userId=${userId}`;
-        }
+    statusFilter.addEventListener('change', attachReportsListener);
+    typeFilter.addEventListener('change', renderReports);
+    searchInput.addEventListener('input', renderReports);
+    selectAllCheckbox.addEventListener('change', ()=>{ const checked = selectAllCheckbox.checked; reportsList.querySelectorAll('.row-select').forEach(cb => { cb.checked = checked; }); });
 
-        function suspendUser(userId) {
-            showMessageBox(`Suspending user: ${userId}`, 'warning', 0, true);
-            // Implement logic to apply ban/suspension
-            // await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('users').doc(userId).update({ status: 'suspended', suspendedUntil: Date.now() + (7 * 24 * 60 * 60 * 1000) });
-            // await logAdminAction(currentUser.uid, 'suspend_user', { userId, duration: '7 days' });
-            setTimeout(() => showMessageBox('User suspended.', 'success'), 1500);
-        }
+    reportsList.addEventListener('click', (e)=>{
+      const btn = e.target.closest('button[data-action]'); if(!btn) return; const card = btn.closest('.report-card'); if(!card) return; const id = card.dataset.reportId; const action = btn.dataset.action; handleRowAction(id, action);
+    });
 
-        function unbanUser(userId) {
-            showMessageBox(`Unbanning user: ${userId}`, 'info', 0, true);
-            // Implement logic to remove ban/suspension
-            // await db.collection('artifacts').doc(appId).collection('public').doc('data').collection('users').doc(userId).update({ status: 'active', suspendedUntil: null });
-            // await logAdminAction(currentUser.uid, 'unban_user', { userId });
-            setTimeout(() => showMessageBox('User unbanned.', 'success'), 1500);
-        }
+    bulkResolveBtn.addEventListener('click', ()=> handleBulk('resolve'));
+    bulkIgnoreBtn.addEventListener('click', ()=> handleBulk('ignore'));
+    bulkDeleteBtn.addEventListener('click', ()=> handleBulk('delete_content'));
+  </script>
 
-        // Expose functions to global scope if used directly in HTML onclick attributes
-        // (Consider refactoring to event listeners for better practice)
-        window.handleReview = handleReview;
-        window.handleRemove = handleRemove;
-        window.viewUserHistory = viewUserHistory;
-        window.suspendUser = suspendUser;
-        window.unbanUser = unbanUser;
-    </script>
-	
+  <script src="assets/js/lazy-images.js" defer></script>
 </body>
 </html>

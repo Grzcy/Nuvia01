@@ -165,7 +165,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, onSnapshot, addDoc, runTransaction, writeBatch, serverTimestamp, enableMultiTabIndexedDbPersistence, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, onSnapshot, addDoc, runTransaction, writeBatch, serverTimestamp, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
 
     const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
       apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w",
@@ -183,7 +183,10 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-    (async ()=>{ try{ await enableMultiTabIndexedDbPersistence(db); } catch(e){ try{ await enableIndexedDbPersistence(db); }catch(_){} } })();
+    (async ()=>{
+      try { await enableIndexedDbPersistence(db); }
+      catch (e) { console.warn('Nuvia_WARN: Approvals persistence disabled; continuing online-only.', e); }
+    })();
 
     const ADMIN_UID = 'RJZ8xhsjEsdKBGFYveWO0Rsq1Zz1';
     const SYSTEM_SETTINGS_DOC_REF = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'system_settings');

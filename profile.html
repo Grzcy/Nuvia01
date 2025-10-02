@@ -28,9 +28,10 @@
     <link rel="dns-prefetch" href="//fonts.googleapis.com">
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
 
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" onload="this.rel='stylesheet'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" /></noscript>
     <!-- Font Awesome for icons (non-blocking preload) -->
-    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" onload="this.rel='stylesheet'" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" /></noscript>
     <!-- Audio support for success notifications -->
 
@@ -3615,12 +3616,12 @@
             right: -400px; /* Start hidden off-screen */
             transform: translateY(-50%);
             width: 380px;
-            background: linear-gradient(135deg, 
-                rgba(76, 175, 80, 0.98), 
-                rgba(139, 195, 74, 0.98), 
+            background: linear-gradient(135deg,
+                rgba(76, 175, 80, 0.98),
+                rgba(139, 195, 74, 0.98),
                 rgba(76, 175, 80, 0.98));
             border-radius: 20px 0 0 20px;
-            box-shadow: 
+            box-shadow:
                 -10px 0 30px rgba(76, 175, 80, 0.3),
                 -5px 0 15px rgba(139, 195, 74, 0.2),
                 inset 1px 0 0 rgba(255, 255, 255, 0.2);
@@ -3630,16 +3631,25 @@
             z-index: 99999;
             transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
         }
 
         .smart-success-panel.show {
             right: 0;
             transform: translateY(-50%) scale(1);
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
         }
 
         .smart-success-panel.hide {
             right: -400px;
             transform: translateY(-50%) scale(0.95);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
         }
 
         .smart-success-panel::before {
@@ -5116,6 +5126,19 @@
   @media (max-width:768px){.profile-avatar-badge{width:26px;height:26px}.profile-avatar-badge i{font-size:14px}.profile-avatar-badge.verified{right:8px;bottom:8px}.profile-avatar-anchor{margin-top:-80px}}
 </style>
 <style id="nuvia-brand-style">.logo span,.brand-link span{background:linear-gradient(90deg,var(--pink),#ffd400);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}.logo{background-image:linear-gradient(90deg,var(--pink),#ffd400) !important;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent}</style><script src="assets/js/lazy-images.js" defer></script>
+    <link rel="modulepreload" href="./assets/js/avatar-utils.js">
+    <style>
+      .profile-section,
+      .unlocked-rewards-section,
+      .recent-activity-section,
+      .customization-section,
+      .help-support-section,
+      .premium-features-section,
+      .user-info-section {
+        content-visibility: auto;
+        contain-intrinsic-size: 800px 1000px;
+      }
+    </style>
 </head>
 <body class="theme-dark-mode">
     <!-- Nuvia Pink & Blue Glowing Loader -->
@@ -5196,7 +5219,7 @@
         <div class="smart-success-content">
             <div class="smart-success-header">
                 <div class="smart-success-icon">
-                    <i class="fas fa-check-circle"></i>
+                    <i class="fa-solid fa-circle-check"></i>
                 </div>
                 <button class="smart-success-close" aria-label="Close success message">×</button>
             </div>
@@ -5419,10 +5442,6 @@
                     
 
 
-                    <!-- NEW: Report User Button (only visible for other users) -->
-                    <button id="reportUserButton" class="profile-action-button danger" style="display: none;">
-                        <i class="fas fa-flag"></i> Report User
-                    </button>
 
                     <!-- Removed Add Friend and Message buttons as requested -->
                 </div>
@@ -5929,12 +5948,18 @@
         </div>
     </div>
     <script type="module">
-        // Import Firebase modules (Updated to v11.8.0 - Latest Stable)
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, updateProfile, updateEmail, reauthenticateWithCredential, EmailAuthProvider, updatePassword, signOut, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
-        import { getFirestore, initializeFirestore, enableNetwork, disableNetwork, doc, getDoc, updateDoc, setDoc, deleteDoc, collection, query, where, getDocs, runTransaction, writeBatch, serverTimestamp, orderBy, addDoc, arrayUnion, documentId, onSnapshot, enableMultiTabIndexedDbPersistence, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js";
-        import { Timestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+        // Import Firebase modules (dynamically after first paint for performance)
+        await new Promise(r => (window.requestIdleCallback ? requestIdleCallback(() => r()) : setTimeout(r, 0)));
+        const [appMod, authMod, firestoreMod, storageMod] = await Promise.all([
+          import("https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js"),
+          import("https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js"),
+          import("https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js"),
+          import("https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js")
+        ]);
+        const { initializeApp } = appMod;
+        const { getAuth, onAuthStateChanged, updateProfile, updateEmail, reauthenticateWithCredential, EmailAuthProvider, updatePassword, signOut, signInWithCustomToken, signInAnonymously } = authMod;
+        const { getFirestore, initializeFirestore, enableNetwork, disableNetwork, doc, getDoc, updateDoc, setDoc, deleteDoc, collection, query, where, getDocs, runTransaction, writeBatch, serverTimestamp, orderBy, addDoc, arrayUnion, documentId, onSnapshot, enableIndexedDbPersistence, Timestamp } = firestoreMod;
+        const { getStorage, ref, uploadBytes, getDownloadURL } = storageMod;
 import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verification-utils.js';
 
         // --- Firebase & Canvas Environment Configuration ---
@@ -5960,11 +5985,12 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
         // Initialize Firebase services
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = initializeFirestore(app, { experimentalForceLongPolling: true, useFetchStreams: false });
+        const firestoreOptions = { useFetchStreams: false, experimentalAutoDetectLongPolling: true };
+        const db = initializeFirestore(app, firestoreOptions);
         (async ()=>{
-            try { await enableMultiTabIndexedDbPersistence(db); }
+            try { await enableIndexedDbPersistence(db); }
             catch (e) {
-                try { await enableIndexedDbPersistence(db); } catch(_) {}
+                console.warn('Nuvia_WARN: Profile persistence disabled; continuing online-only.', e);
             }
         })();
         const storage = getStorage(app);
@@ -6255,7 +6281,7 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
 
         const claimDailyBonusButton = document.getElementById('claimDailyBonusButton'); // NEW
         const dailyBonusCountdown = document.getElementById('dailyBonusCountdown'); // NEW
-        const reportUserButton = document.getElementById('reportUserButton'); // NEW
+        const reportUserButton = null; // Report button removed from DOM
 
         // Inline Edit Fields
         const displayNameInput = document.getElementById('displayName'); // Input for display name
@@ -6485,7 +6511,7 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
         let displayedUserId = null; // The ID of the user whose profile is currently being displayed (from URL or current user)
         let displayedUserProfileData = null; // The profile data of the user currently being displayed (could be current user or another user)
         let isAuthReady = false; // Flag to indicate if auth state has been checked
-        const ADMIN_UID = 'RJZ8xhsjEsdKBGFYveWO0Rsq1Zz1'; // Admin's User ID
+        const ADMIN_UID = (typeof window !== 'undefined' && window.ADMIN_UID) ? window.ADMIN_UID : 'RJZ8xhsjEsdKBGFYveWO0Rsq1Zz1'; // Admin's User ID (respects global override)
         let currentSystemSettings = {}; // To store system settings (like exchange rates)
         let isProfileOwner = false; // True if the displayed profile belongs to the current user
 
@@ -7218,7 +7244,7 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
                 const originalIcon = copyUserIdBtn.querySelector('i');
                 originalIcon.className = 'fas fa-check';
                 
-                showEnhancedSmartSuccess("User ID copied to clipboard! ���", 'achievement');
+                showEnhancedSmartSuccess("User ID copied to clipboard! 📋", 'achievement');
                 
                 // Reset button after 2 seconds
                 setTimeout(() => {
@@ -7509,14 +7535,14 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
                 const div = document.createElement('div');
                 div.className = `notification-item ${notification.type}`;
                 div.innerHTML = `
-                    <i class="fas ${this.getNotificationIcon(notification.type)} notification-icon"></i>
+                    <i class="fa-solid ${this.getNotificationIcon(notification.type)} notification-icon"></i>
                     <div class="notification-content">
                         <div class="notification-title">${notification.title}</div>
                         <div class="notification-message">${notification.message}</div>
                         <div class="notification-time">${this.formatTime(notification.timestamp)}</div>
                     </div>
                     <button class="clear-notifications-btn" onclick="profileNotifications.removeNotification(${notification.id})">
-                        <i class="fas fa-times"></i>
+                        <i class="fa-solid fa-xmark"></i>
                     </button>
                 `;
                 return div;
@@ -7524,10 +7550,10 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
 
             getNotificationIcon(type) {
                 const icons = {
-                    'info': 'fa-info-circle',
-                    'warning': 'fa-exclamation-triangle',
-                    'success': 'fa-check-circle',
-                    'error': 'fa-times-circle'
+                    'info': 'fa-circle-info',
+                    'warning': 'fa-triangle-exclamation',
+                    'success': 'fa-circle-check',
+                    'error': 'fa-circle-xmark'
                 };
                 return icons[type] || 'fa-bell';
             }
@@ -8471,12 +8497,18 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
          * Shows the report user modal for the displayed user.
          */
         function showReportUserModal() {
-            if (!currentUser || displayedUserId === currentUser.uid) {
-                console.warn("You cannot report yourself.");
+            if (!currentUser) {
+                try { showEnhancedSmartSuccess('Please log in to report users.', 'error'); } catch(_) { /* fallback */ }
+                setTimeout(() => { window.location.href = '/login.html'; }, 900);
+                return;
+            }
+            if (displayedUserId === currentUser.uid) {
+                try { showEnhancedSmartSuccess('You cannot report yourself.', 'warning'); } catch(_) { /* fallback */ }
                 return;
             }
             if (!displayedUserProfileData) {
                 console.error("Could not load user data to report.");
+                try { showEnhancedSmartSuccess('Unable to load user data for reporting.', 'error'); } catch(_) {}
                 return;
             }
             if (reportUserModal) reportUserModal.classList.add('active');
@@ -8948,7 +8980,10 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
             // Hide all action buttons initially
             if (claimDailyBonusButton) claimDailyBonusButton.style.display = 'none'; // NEW: Hide claim daily bonus button
             if (dailyBonusCountdown) dailyBonusCountdown.style.display = 'none'; // NEW: Hide daily bonus countdown
-            if (reportUserButton) reportUserButton.style.display = 'none'; // NEW: Hide report user button
+            if (reportUserButton) {
+                reportUserButton.style.display = 'none'; // NEW: Hide report user button
+                try { reportUserButton.disabled = true; reportUserButton.setAttribute('aria-disabled','true'); reportUserButton.style.opacity = '0.5'; reportUserButton.style.cursor = 'default'; } catch(_){}
+            }
             // Hide inline edit fields and account settings by default
             const localProfileDetailsSection = displayNameInput ? displayNameInput.closest('.profile-details-section') : null; // Null check for displayNameInput
             if (localProfileDetailsSection) {
@@ -9430,7 +9465,10 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
                         if (dailyBonusCountdown) dailyBonusCountdown.style.display = 'none'; // Hide daily bonus countdown for others
                         
                         // Show Report User Button
-                        if (reportUserButton) reportUserButton.style.display = 'inline-flex';
+                        if (reportUserButton) {
+                            reportUserButton.style.display = 'inline-flex';
+                            try { reportUserButton.disabled = false; reportUserButton.removeAttribute('aria-disabled'); reportUserButton.style.opacity = '1'; reportUserButton.style.cursor = 'pointer'; reportUserButton.tabIndex = 0; } catch(_){}
+                        }
 
                         // Hide inline edit fields and account settings
                         const profileDetailsSection = displayNameInput ? displayNameInput.closest('.profile-details-section') : null; // Null check
@@ -9469,7 +9507,10 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
 
                         if (claimDailyBonusButton) claimDailyBonusButton.style.display = 'none'; // Hide daily bonus button
                         if (dailyBonusCountdown) dailyBonusCountdown.style.display = 'none'; // Hide daily bonus countdown
-                        if (reportUserButton) reportUserButton.style.display = 'none'; // Hide report user button
+                        if (reportUserButton) {
+                            reportUserButton.style.display = 'none'; // Hide report user button
+                            try { reportUserButton.disabled = true; reportUserButton.setAttribute('aria-disabled','true'); reportUserButton.style.opacity = '0.5'; reportUserButton.style.cursor = 'default'; } catch(_){}
+                        }
                         // Hide inline edit fields and account settings
                         const profileDetailsSection = displayNameInput ? displayNameInput.closest('.profile-details-section') : null; // Null check
                         if (profileDetailsSection) {
@@ -9680,16 +9721,16 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
                     if (initialAuthToken) {
                         await signInWithCustomToken(auth, initialAuthToken);
                         console.log("JCHAT_DEBUG: Signed in with custom token.");
+                        // onAuthStateChanged will be triggered again with the new user
                     } else {
-                        await signInAnonymously(auth);
-                        console.log("JCHAT_DEBUG: Signed in anonymously.");
+                        // DO NOT auto sign-in anonymously on the profile page. Keep visitors unauthenticated so
+                        // actions that require authentication (like reporting) remain hidden. This prevents
+                        // visitors from seeing or interacting with authenticated-only buttons.
+                        console.log("JCHAT_DEBUG: No initial auth token; staying as guest (no anonymous sign-in).");
                     }
-                    // onAuthStateChanged will be triggered again with the new user
                 } catch (error) {
-                    console.error("JCHAT_ERROR: Error during anonymous sign-in or custom token sign-in:", error);
-                    if (!auth.currentUser) {
-                        window.location.href = '/login.html';
-                    }
+                    console.error("JCHAT_ERROR: Error during custom token sign-in:", error);
+                    // Don't force navigation to login here; leave the page as guest view
                 }
                 isAuthReady = false;
                 if (logoutButtonAccount) logoutButtonAccount.disabled = true; // Account settings logout button, null check
@@ -10363,7 +10404,24 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
             if (claimDailyBonusButton) claimDailyBonusButton.addEventListener('click', claimDailyBonus);
 
             // NEW: Report User button and modal listeners
-            if (reportUserButton) reportUserButton.addEventListener('click', showReportUserModal);
+            if (reportUserButton) {
+                try { reportUserButton.style.cursor = 'pointer'; reportUserButton.style.zIndex = '1000'; } catch(_){}
+                reportUserButton.addEventListener('click', (e) => {
+                    console.log('Nuvia_DEBUG: reportUserButton clicked', { displayedUserId, currentUser });
+                    try {
+                        if (!currentUser) {
+                            // Redirect to login when not authenticated
+                            showEnhancedSmartSuccess('Please log in to report users.', 'error');
+                            setTimeout(() => { window.location.href = '/login.html'; }, 800);
+                            return;
+                        }
+                        // Navigate to central reports page with prefilled params (Report.html handles prefill)
+                        const username = (displayedUserProfileData && displayedUserProfileData.username) ? displayedUserProfileData.username : '';
+                        const params = new URLSearchParams({ reportedUserId: displayedUserId || '', reportedAuthorId: username || '', type: 'user' });
+                        window.location.href = '/report.html?' + params.toString();
+                    } catch (err) { console.error('Nuvia_ERROR: navigate to report page failed', err); }
+                });
+            }
             if (cancelReportButton) cancelReportButton.addEventListener('click', hideReportUserModal);
             if (submitReportButton) submitReportButton.addEventListener('click', submitReport);
 
@@ -10483,29 +10541,6 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
   if (overlay) overlay.addEventListener('click', (e)=>{ if(e.target===overlay) close(); });
   document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && overlay && overlay.classList.contains('show')) close(); });
 })();
-</script>
-<script type="module">
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
-import { getFirestore, doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
-const APP_ID = 'jchat_1_0_0';
-function startPagePresence(){
-  try{
-    onAuthStateChanged(getAuth(), (user) => {
-      if (!user || !user.uid) return;
-      const db = getFirestore();
-      const userDoc = doc(db, 'artifacts', APP_ID, 'public', 'data', 'users', user.uid);
-      const post = () => setDoc(userDoc, { online: navigator.onLine, lastActive: serverTimestamp(), currentPage: window.location.pathname }, { merge: true }).catch(()=>{});
-      post();
-      const tid = setInterval(post, 15000);
-      const debounced = () => post();
-      window.addEventListener('online', debounced);
-      window.addEventListener('offline', debounced);
-      document.addEventListener('visibilitychange', debounced);
-      window.addEventListener('beforeunload', () => { try{ post(); } catch(_){} });
-    });
-  }catch(e){console.error('JCHAT_ERROR startPagePresence', e);}
-}
-startPagePresence();
 </script>
 <script type="module" src="nuvia-global-call-service.js" defer></script>
 </body>

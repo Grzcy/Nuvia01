@@ -159,7 +159,7 @@
       measurementId: "G-S6Z9GG0R9P"
     };
     const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-    const ADMIN_UID = 'RJZ8xhsjEsdKBGFYveWO0Rsq1Zz1';
+    const ADMIN_UID = (typeof window !== 'undefined' && window.ADMIN_UID) ? window.ADMIN_UID : 'RJZ8xhsjEsdKBGFYveWO0Rsq1Zz1';
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
