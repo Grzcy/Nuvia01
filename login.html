@@ -2169,7 +2169,6 @@
             window.__smartProgressValue = initial;
             window.__smartManualProgressValue = initial;
             window.__smartLoaderShownAt = performance.now();
-            window.__smartLoaderForceHide = false;
             applySmartLoaderProgress(initial);
 
             clearTimeout(window.loaderTimeout);
@@ -2238,7 +2237,6 @@
             const startedAt = window.__smartLoaderShownAt || performance.now();
             const elapsed = performance.now() - startedAt;
             if (elapsed < SMART_LOADER_MIN_DURATION) {
-                window.__smartLoaderForceHide = true;
                 clearTimeout(window.__smartLoaderDeferredHide);
                 window.__smartLoaderDeferredHide = setTimeout(() => {
                     applySmartLoaderProgress(100);
