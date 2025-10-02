@@ -5958,7 +5958,7 @@
         ]);
         const { initializeApp } = appMod;
         const { getAuth, onAuthStateChanged, updateProfile, updateEmail, reauthenticateWithCredential, EmailAuthProvider, updatePassword, signOut, signInWithCustomToken, signInAnonymously } = authMod;
-        const { getFirestore, initializeFirestore, enableNetwork, disableNetwork, doc, getDoc, updateDoc, setDoc, deleteDoc, collection, query, where, getDocs, runTransaction, writeBatch, serverTimestamp, orderBy, addDoc, arrayUnion, documentId, onSnapshot, enableMultiTabIndexedDbPersistence, enableIndexedDbPersistence, Timestamp } = firestoreMod;
+        const { getFirestore, initializeFirestore, enableNetwork, disableNetwork, doc, getDoc, updateDoc, setDoc, deleteDoc, collection, query, where, getDocs, runTransaction, writeBatch, serverTimestamp, orderBy, addDoc, arrayUnion, documentId, onSnapshot, enableIndexedDbPersistence, Timestamp } = firestoreMod;
         const { getStorage, ref, uploadBytes, getDownloadURL } = storageMod;
 import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verification-utils.js';
 
@@ -5985,11 +5985,12 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
         // Initialize Firebase services
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const db = initializeFirestore(app, { experimentalForceLongPolling: true, useFetchStreams: false });
+        const firestoreOptions = { useFetchStreams: false, experimentalAutoDetectLongPolling: true };
+        const db = initializeFirestore(app, firestoreOptions);
         (async ()=>{
-            try { await enableMultiTabIndexedDbPersistence(db); }
+            try { await enableIndexedDbPersistence(db); }
             catch (e) {
-                try { await enableIndexedDbPersistence(db); } catch(_) {}
+                console.warn('Nuvia_WARN: Profile persistence disabled; continuing online-only.', e);
             }
         })();
         const storage = getStorage(app);
