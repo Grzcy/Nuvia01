@@ -5591,16 +5591,18 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             const elapsed = performance.now() - loaderStartTs;
             const wait = Math.max(0, LOADER_MIN_MS - elapsed);
             const doHide = () => {
-                nuviaLoader.classList.add('hidden');
+                if (nuviaLoader) { nuviaLoader.classList.add('hidden'); nuviaLoader.style.display = 'none'; }
+                const smart = document.getElementById('smartLoader');
+                if (smart) {
+                    smart.style.display = 'none';
+                    smart.setAttribute('aria-hidden','true');
+                    const sb = document.getElementById('smartProgressBar'); if (sb) sb.style.width = '0%';
+                    const sp = document.getElementById('smartPercent'); if (sp) sp.textContent = '0%';
+                }
                 // remove loading class to reveal main UI
                 try { document.documentElement.classList.remove('nuvia-loading'); } catch(_){}
                 document.body.style.overflow = 'auto';
                 console.log('Nuvia_DEBUG: Loader hidden');
-                setTimeout(() => {
-                    if (nuviaLoader.classList.contains('hidden')) {
-                        nuviaLoader.style.display = 'none';
-                    }
-                }, 500);
             };
             if (wait > 0) setTimeout(doHide, wait); else doHide();
         }
