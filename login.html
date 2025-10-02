@@ -1305,16 +1305,17 @@
         };
 
         // Initialize Firebase (allow runtime domain switch)
+        const firestoreOptions = { useFetchStreams: false, experimentalAutoDetectLongPolling: true };
         let app = initializeApp(firebaseConfig);
         let auth = getAuth(app);
-        let db = initializeFirestore(app, { experimentalForceLongPolling: true, useFetchStreams: false });
+        let db = initializeFirestore(app, firestoreOptions);
         window.__auth_domain = firebaseConfig.authDomain;
         async function switchAuthDomain(newDomain) {
             try { await deleteApp(app); } catch (e) {}
             const cfg = { ...firebaseConfig, authDomain: newDomain };
             app = initializeApp(cfg);
             auth = getAuth(app);
-            db = initializeFirestore(app, { experimentalForceLongPolling: true, useFetchStreams: false });
+            db = initializeFirestore(app, firestoreOptions);
             window.__auth_domain = newDomain;
         }
 
