@@ -5335,7 +5335,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         <div class="smart-success-content">
             <div class="smart-success-header">
                 <div class="smart-success-icon"><i class="fa-solid fa-circle-check"></i></div>
-                <button class="smart-success-close" aria-label="Close success message">✕</button>
+                <button class="smart-success-close" aria-label="Close success message">���</button>
             </div>
             <div class="smart-success-title" id="smartSuccessTitle">Success!</div>
             <div class="smart-success-message" id="smartSuccessMessage">Operation completed successfully.</div>
@@ -5716,7 +5716,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         // Import Firebase modules (Updated to v11.8.0 - Latest Stable)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js";
-        import { initializeFirestore, enableNetwork, disableNetwork, enableIndexedDbPersistence, enableMultiTabIndexedDbPersistence, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, collectionGroup, query, orderBy, where, getDocs, addDoc, runTransaction, writeBatch, serverTimestamp, arrayUnion, arrayRemove, onSnapshot, documentId, limit } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+        import { initializeFirestore, enableNetwork, disableNetwork, enableIndexedDbPersistence, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, collectionGroup, query, orderBy, where, getDocs, addDoc, runTransaction, writeBatch, serverTimestamp, arrayUnion, arrayRemove, onSnapshot, documentId, limit } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
     import { registerSession, unregisterSession } from './assets/js/session-manager.js';
 
         // --- Firebase & Canvas Environment Configuration ---
@@ -5826,11 +5826,12 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         const auth = getAuth(app);
         // Ensure auth sessions persist across reloads by default
         try { setPersistence(auth, browserLocalPersistence).catch(()=>{}); } catch(_) {}
-        const db = initializeFirestore(app, { experimentalForceLongPolling: true, useFetchStreams: false });
+        const firestoreSettings = { useFetchStreams: false, experimentalAutoDetectLongPolling: true };
+        const db = initializeFirestore(app, firestoreSettings);
         try {
-          await enableMultiTabIndexedDbPersistence(db);
+          await enableIndexedDbPersistence(db);
         } catch (e) {
-          try { await enableIndexedDbPersistence(db); } catch(_) {}
+          console.warn('Nuvia_WARN: IndexedDB persistence unavailable; continuing without offline cache.', e);
         }
         // Respect offline status to avoid fetch errors in instrumented environments
         try { if (!navigator.onLine) { disableNetwork(db).catch(()=>{}); } } catch(_) {}
