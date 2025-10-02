@@ -2162,6 +2162,9 @@
             const form = document.getElementById('loginForm');
             if (form) form.style.pointerEvents = 'none';
 
+            clearTimeout(window.__smartLoaderDeferredHide);
+            window.__smartLoaderDeferredHide = null;
+
             const initial = Math.max(0, Math.min(100, Number(startAt ?? 8)));
             window.__smartProgressValue = initial;
             window.__smartManualProgressValue = initial;
@@ -2221,6 +2224,7 @@
 
                 if (window.loaderTimeout) { clearTimeout(window.loaderTimeout); window.loaderTimeout = null; }
                 if (window.__smartProgressTimer) { clearInterval(window.__smartProgressTimer); window.__smartProgressTimer = null; }
+                if (window.__smartLoaderDeferredHide) { clearTimeout(window.__smartLoaderDeferredHide); window.__smartLoaderDeferredHide = null; }
 
                 const form = document.getElementById('loginForm');
                 if (form) form.style.pointerEvents = 'auto';
