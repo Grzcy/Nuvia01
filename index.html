@@ -1145,7 +1145,7 @@
             100% { transform: scale(1) rotate(0deg); }
         }
 
-        /* 5. �������������� Temporal Paradox - Premium Time Manipulation Interface */
+        /* 5. ������������ Temporal Paradox - Premium Time Manipulation Interface */
         body.theme-temporal-paradox {
             background: 
                 conic-gradient(from 0deg at 50% 50%, 
@@ -4132,7 +4132,7 @@
         .post-skeleton-line { height:10px; }
         .post-skeleton-media { width:100%; height:150px; border-radius: 10px; }
         .post-visibility-badge { align-self:center; margin-left:auto; padding:4px 8px; border:1px solid var(--border-light); border-radius: 999px; color: var(--white); font-size: 0.75rem; background: rgba(255,255,255,0.05); }
-        /* ���� SMART SUCCESS MESSAGE PANEL - Edge Slide System */
+        /* 🚀 SMART SUCCESS MESSAGE PANEL - Edge Slide System */
         .smart-success-panel { position: fixed; top: 50%; right: -100vw; transform: translateY(-50%); width: clamp(260px, 90vw, 380px); background: linear-gradient(135deg, rgba(76, 175, 80, 0.98), rgba(139, 195, 74, 0.98), rgba(76, 175, 80, 0.98)); border-radius: 20px 0 0 20px; box-shadow: -10px 0 30px rgba(76, 175, 80, 0.3), -5px 0 15px rgba(139, 195, 74, 0.2), inset 1px 0 0 rgba(255, 255, 255, 0.2); border: 2px solid rgba(76, 175, 80, 0.3); border-right: none; backdrop-filter: blur(20px); z-index: 99999; transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .smart-success-panel.show { right: max(env(safe-area-inset-right, 0px), 0px); transform: translateY(-50%) scale(1); }
         .smart-success-panel.hide { right: -100vw; transform: translateY(-50%) scale(0.95); }
@@ -5576,9 +5576,9 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             // add class to hide main UI until loader hides to prevent guest/content flash
             try { document.documentElement.classList.add('nuvia-loading'); } catch(_){}
             loaderStartTs = performance.now();
-            nuviaLoader.style.display = 'flex';
-            nuviaLoader.classList.remove('hidden');
-            try { const bar = nuviaLoader.querySelector('.loader-progress-bar'); if (bar) { bar.classList.remove('auto-animate'); void bar.offsetWidth; bar.classList.add('auto-animate'); } } catch(_) {}
+            if (nuviaLoader) { nuviaLoader.style.display = 'none'; nuviaLoader.classList.add('hidden'); }
+            const smart = document.getElementById('smartLoader');
+            if (smart) { smart.style.display = 'flex'; smart.setAttribute('aria-hidden','false'); }
             document.body.style.overflow = 'hidden';
             renderLoaderMessage();
             startProgressTimer();
