@@ -73,10 +73,11 @@
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js';
 
     const firebaseConfig = typeof window.__firebase_config !== 'undefined' ? JSON.parse(window.__firebase_config) : null;
+    const firestoreOptions = { useFetchStreams: false, experimentalAutoDetectLongPolling: true };
     let app=null, db=null, auth=null, user=null, appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'default-app-id';
     if (firebaseConfig) {
       app = initializeApp(firebaseConfig);
-      db = initializeFirestore(app, { experimentalForceLongPolling: true, useFetchStreams: false });
+      db = initializeFirestore(app, firestoreOptions);
       auth = getAuth(app);
       onAuthStateChanged(auth, u=>{ user=u||null; });
     }
