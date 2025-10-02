@@ -2133,14 +2133,26 @@
             errorDiv.setAttribute('aria-hidden','true');
         }
 
-        // Enhanced Smart Loader with progress bar and protected timeout
+        const SMART_LOADER_MIN_DURATION = 5000;
+        const SMART_LOADER_FAILSAFE = 60000;
+
+        function applySmartLoaderProgress(v){
+            try{
+                const value = Math.max(0, Math.min(100, Number(v)));
+                const bar = document.getElementById('smartProgressBar');
+                const track = document.querySelector('#smartLoader .smart-progress');
+                const percentEl = document.getElementById('smartPercent');
+                if (bar) bar.style.width = value + '%';
+                if (track) track.setAttribute('aria-valuenow', String(Math.round(value)));
+                if (percentEl) percentEl.textContent = Math.round(value) + '%';
+            }catch(_){ }
+        }
+
+        // Enhanced Smart Loader with timed progress and protected timeout
         function showSmartLoader(title, subtitle, startAt){
             const loader = document.getElementById('smartLoader');
             const loaderText = document.getElementById('loaderText');
             const loaderSubtext = document.getElementById('loaderSubtext');
-            const bar = document.getElementById('smartProgressBar');
-            const percentEl = document.getElementById('smartPercent');
-            const track = loader ? loader.querySelector('.smart-progress') : null;
 
             loaderText.textContent = title || 'Processing';
             loaderSubtext.textContent = subtitle || 'Please wait';
@@ -2150,57 +2162,88 @@
             const form = document.getElementById('loginForm');
             if (form) form.style.pointerEvents = 'none';
 
-            // Initialize progress
-            window.__smartProgressValue = Math.max(0, Math.min(100, Number(startAt ?? 8)));
-            if (bar) bar.style.width = window.__smartProgressValue + '%';
-            if (track) track.setAttribute('aria-valuenow', String(Math.round(window.__smartProgressValue)));
-            if (percentEl) percentEl.textContent = Math.round(window.__smartProgressValue) + '%';
+            const initial = Math.max(0, Math.min(100, Number(startAt ?? 8)));
+            window.__smartProgressValue = initial;
+            window.__smartManualProgressValue = initial;
+            window.__smartLoaderShownAt = performance.now();
+            window.__smartLoaderForceHide = false;
+            applySmartLoaderProgress(initial);
 
-            // Failsafe auto-hide after 60s
             clearTimeout(window.loaderTimeout);
             window.loaderTimeout = setTimeout(() => {
-                hideSmartLoader();
+                hideSmartLoader(true);
                 showErrorModal('Request took too long. Please try again.');
-            }, 60000);
+            }, SMART_LOADER_FAILSAFE);
 
-            // Gentle creep toward 90% until completion
             clearInterval(window.__smartProgressTimer);
             window.__smartProgressTimer = setInterval(() => {
                 try{
-                    let v = Number(window.__smartProgressValue || 0);
-                    if (v < 90) v = Math.min(90, v + 1);
-                    window.__smartProgressValue = v;
-                    if (bar) bar.style.width = v + '%';
-                    if (track) track.setAttribute('aria-valuenow', String(Math.round(v)));
-                    if (percentEl) percentEl.textContent = Math.round(v) + '%';
+                    const now = performance.now();
+                    const elapsed = now - (window.__smartLoaderShownAt || now);
+                    const base = window.__smartManualProgressValue || 0;
+                    const projected = base + (100 - base) * Math.min(1, elapsed / SMART_LOADER_MIN_DURATION);
+                    const value = Math.max(window.__smartProgressValue || 0, projected);
+                    window.__smartProgressValue = value;
+                    applySmartLoaderProgress(value);
+                    if (value >= 100) {
+                        clearInterval(window.__smartProgressTimer);
+                        window.__smartProgressTimer = null;
+                    }
                 }catch(_){ }
-            }, 250);
+            }, 50);
         }
 
         function updateSmartLoaderProgress(p){
             try{
-                let v = Math.max(0, Math.min(100, Number(p)));
-                if (v < (window.__smartProgressValue || 0)) v = window.__smartProgressValue;
-                window.__smartProgressValue = v;
-                const bar = document.getElementById('smartProgressBar');
-                const track = document.querySelector('#smartLoader .smart-progress');
-                const percentEl = document.getElementById('smartPercent');
-                if (bar) bar.style.width = v + '%';
-                if (track) track.setAttribute('aria-valuenow', String(Math.round(v)));
-                if (percentEl) percentEl.textContent = Math.round(v) + '%';
+                const v = Math.max(0, Math.min(100, Number(p)));
+                if (v >= (window.__smartProgressValue || 0)) {
+                    window.__smartProgressValue = v;
+                    window.__smartManualProgressValue = v;
+                    applySmartLoaderProgress(v);
+                    if (v >= 100) {
+                        hideSmartLoader();
+                    }
+                }
             }catch(_){ }
         }
 
-        function hideSmartLoader(){
+        function hideSmartLoader(force){
             const loader = document.getElementById('smartLoader');
-            loader.style.display = 'none';
-            loader.setAttribute('aria-hidden','true');
+            if (!loader) return;
 
-            if (window.loaderTimeout) { clearTimeout(window.loaderTimeout); window.loaderTimeout = null; }
-            clearInterval(window.__smartProgressTimer); window.__smartProgressTimer = null;
+            const finalizeHide = () => {
+                loader.style.display = 'none';
+                loader.setAttribute('aria-hidden','true');
+                applySmartLoaderProgress(0);
+                window.__smartProgressValue = 0;
+                window.__smartManualProgressValue = 0;
+                window.__smartLoaderShownAt = null;
 
-            const form = document.getElementById('loginForm');
-            if (form) form.style.pointerEvents = 'auto';
+                if (window.loaderTimeout) { clearTimeout(window.loaderTimeout); window.loaderTimeout = null; }
+                if (window.__smartProgressTimer) { clearInterval(window.__smartProgressTimer); window.__smartProgressTimer = null; }
+
+                const form = document.getElementById('loginForm');
+                if (form) form.style.pointerEvents = 'auto';
+            };
+
+            if (force) {
+                finalizeHide();
+                return;
+            }
+
+            const startedAt = window.__smartLoaderShownAt || performance.now();
+            const elapsed = performance.now() - startedAt;
+            if (elapsed < SMART_LOADER_MIN_DURATION) {
+                window.__smartLoaderForceHide = true;
+                clearTimeout(window.__smartLoaderDeferredHide);
+                window.__smartLoaderDeferredHide = setTimeout(() => {
+                    applySmartLoaderProgress(100);
+                    finalizeHide();
+                }, SMART_LOADER_MIN_DURATION - elapsed);
+            } else {
+                applySmartLoaderProgress(100);
+                finalizeHide();
+            }
         }
         try { window.hideLoader = hideSmartLoader; window.updateSmartLoaderProgress = updateSmartLoaderProgress; } catch(_){ }
 
