@@ -266,6 +266,17 @@
             text-decoration: none;
         }
 
+        .header-brand-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-brand-logo {
+            height: 24px;
+            width: auto;
+        }
+
         /* User Profile Header Styling (Copied from Home.html) */
         .user-profile-header {
             display: flex;
@@ -346,6 +357,10 @@
             transition: opacity 0.3s ease;
         }
 
+        .header-profile-picture {
+            display: none;
+        }
+
         .user-profile-header i {
             font-size: 30px;
             background-image: linear-gradient(90deg, var(--blue), var(--pink));
@@ -379,6 +394,10 @@
             color: transparent;
             font-size: 1.5rem;
             transition: transform 0.2s ease;
+        }
+
+        .admin-header-link {
+            display: none;
         }
 
         #adminIconLink:hover {
@@ -432,6 +451,18 @@
             background-image: linear-gradient(90deg, var(--blue), var(--pink));
             margin: 0 0 1rem 0;
             text-align: center;
+        }
+
+        .solution-intro-text {
+            text-align: center;
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+        }
+
+        .support-guidance-note {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-top: 10px;
         }
 
         .search-bar {
@@ -840,20 +871,23 @@
             <button id="sidebarToggleFab" aria-label="Toggle Navigation">
                 <i class="fas fa-bars"></i>
             </button>
-            <a href="/index.html" class="logo" style="display:flex;align-items:center;gap:10px"><img src="assets/security.png" alt="JCHAT Security" style="height:24px;width:auto" onerror="this.style.display='none'"><span>Nuvia</span></a>
+            <a href="index.html" class="logo header-brand-link">
+                <img src="assets/security.png" alt="JCHAT Security" class="header-brand-logo" onerror="this.style.display='none'">
+                <span>Nuvia</span>
+            </a>
             <div class="user-profile-header">
                 <!-- Admin Icon Link (visible only to admin) -->
-                <a href="/admin.html" id="adminIconLink" aria-label="Admin Dashboard" style="display: none;">
+                <a href="admin.html" id="adminIconLink" class="admin-header-link" aria-label="Admin Dashboard">
                     <i class="fas fa-user-cog"></i>
                 </a>
                 <div class="notification-icon-wrapper">
-                    <a href="/notifications.html" aria-label="Notifications">
+                    <a href="notifications.html" aria-label="Notifications">
                         <i class="fas fa-bell"></i>
-                        <span class="notification-badge" id="notificationCount" style="display: none;">0</span>
+                        <span class="notification-badge" id="notificationCount">0</span>
                     </a>
                 </div>
-                <a href="/profile.html" id="profileLink">
-                    <img id="headerProfilePic" src="" alt="Profile Picture" style="display: none;">
+                <a href="profile.html" id="profileLink">
+                    <img id="headerProfilePic" src="" alt="Profile Picture" class="header-profile-picture">
                     <i id="headerAvatarIcon" class="fas fa-user-circle"></i>
                     <span id="headerDisplayName">Loading...</span>
                 </a>
@@ -865,7 +899,7 @@
         <div class="content-wrapper">
             <div class="solution-section">
                 <h2>JCHAT Solution Center</h2>
-                <p style="text-align: center; color: var(--text-light); margin-bottom: 1.5rem;">
+                <p class="solution-intro-text">
                     Find answers to common questions and troubleshoot issues with JCHAT.
                 </p>
 
@@ -1056,7 +1090,7 @@
                     <p><i class="fas fa-envelope"></i> Email: <a href="mailto:jchatguide@gmail.com">jchatguide@gmail.com</a></p>
                     <p><i class="fab fa-whatsapp"></i> WhatsApp: <a href="https://wa.me/2348111609765">+2348111609765</a></p>
                     <p><i class="fab fa-whatsapp"></i> WhatsApp: <a href="https://wa.me/2348111609765">+2348111609765</a></p>
-                    <p style="font-size: 0.9rem; color: var(--text-light); margin-top: 10px;"><i class="fas fa-info-circle"></i> For urgent issues, please include your User ID and a detailed description of the problem.</p>
+                    <p class="support-guidance-note"><i class="fas fa-info-circle"></i> For urgent issues, please include your User ID and a detailed description of the problem.</p>
                 </div>
             </div>
         </div>
