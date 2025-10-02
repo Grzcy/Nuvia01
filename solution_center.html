@@ -1448,7 +1448,7 @@
                     displayProfilePicture(headerProfilePic, headerAvatarIcon, profileData?.profilePicId, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
                     headerDisplayName.textContent = profileData.username || "JCHAT User";
                 }
-                if (profileLink) profileLink.href = `/profile.html?userId=${user.uid}`;
+                if (profileLink) profileLink.href = `profile.html?userId=${user.uid}`;
 
                 // Admin icon visibility
                 if (adminIconLink) {
