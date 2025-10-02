@@ -10987,8 +10987,8 @@ async function fetchAndDisplayPosts() {
                 if (!currentSystemSettings.enablePublicChat && currentUser.uid !== ADMIN_UID) { showMessageBox("Commenting is currently disabled by administrators.", 'warning'); return; }
                 const postId = button.dataset.postId;
                 const commentInput = button.closest('.comment-input-area').querySelector('.comment-input');
-                addComment(postId, commentInput.value);
-                commentInput.value = ''; // Clear comment input after submission.
+                const text = commentInput.value;
+                addComment(postId, text).then((ok)=>{ if(ok){ commentInput.value=''; } }).catch(()=>{});
             }
             // Handle Post Options Buttons (ellipsis menu)
             else if (event.target.closest('.post-options-button')) {
