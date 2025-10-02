@@ -10067,10 +10067,12 @@ const lex = inspirationLexicon[type];
                     showEnhancedSmartSuccess('Comment added! Your reward is on the way.', 'update');
                 }
                 playNotificationSound('success');
+                return true;
             } catch (error) {
                 console.error("Nuvia_ERROR: Error adding comment:", error);
                 showMessageBox(`Failed to add comment: ${error.message}`, 'error');
                 playNotificationSound('error');
+                return false;
             }
         }
 
