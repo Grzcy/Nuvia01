@@ -1380,7 +1380,7 @@
                 await signOut(auth);
                 showMessageBox("Logged out successfully! 👋", 'success');
                 setTimeout(() => {
-                    window.location.href = '/login.html';
+                    window.location.href = 'login.html';
                 }, 1500);
 
             } catch (error) {
@@ -1531,7 +1531,7 @@
                     console.error("JCHAT_ERROR: Error during anonymous sign-in or custom token sign-in:", error);
                     // If anonymous sign-in fails and no user is authenticated, redirect to login
                     if (!auth.currentUser) {
-                        window.location.href = '/login.html';
+                        window.location.href = 'login.html';
                         return; // Stop further execution
                     }
                 }
