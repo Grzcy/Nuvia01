@@ -2557,15 +2557,8 @@
         // Check authentication state with enhanced loading
         onAuthStateChanged(auth, async (user) => {
             if (!user) return;
-            if (user.emailVerified) {
-                showSmartLoader('Welcome Back!', 'Taking you to your account...');
-                setTimeout(() => { window.location.href = 'index.html'; }, 1000);
-            } else {
-                // Show banner and immediately sign out to block access until verified
-                try { localStorage.setItem('unverified_email', user.email || ''); } catch(_) {}
-                try { showUnverifiedBanner(user.email || ''); } catch(_) {}
-                try { await signOut(auth); } catch(_) {}
-            }
+            showSmartLoader('Welcome Back!', 'Taking you to your account...');
+            setTimeout(() => { window.location.href = 'index.html'; }, 1000);
         });
 
         // Username availability checking (robust, case-insensitive check against stored usernames)
