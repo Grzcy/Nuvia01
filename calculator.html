@@ -347,6 +347,101 @@
             line-height: 1.4;
         }
 
+        .graph-card {
+            background: var(--card-background);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-soft);
+            padding: clamp(16px, 3vw, 28px);
+            backdrop-filter: blur(12px);
+            display: grid;
+            gap: 20px;
+        }
+
+        .graph-intro {
+            display: grid;
+            gap: 8px;
+        }
+
+        .graph-form {
+            display: grid;
+            gap: 16px;
+        }
+
+        .graph-fields {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+        }
+
+        .graph-field {
+            display: grid;
+            gap: 8px;
+        }
+
+        .graph-label {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .graph-input {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(10, 10, 32, 0.6);
+            color: var(--text-primary);
+            font: inherit;
+        }
+
+        .graph-input:focus {
+            outline: none;
+            border-color: rgba(0, 213, 255, 0.45);
+            box-shadow: 0 0 0 3px rgba(0, 213, 255, 0.2);
+        }
+
+        .graph-actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .graph-actions .keypad-button {
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .graph-message {
+            margin-left: auto;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .graph-message[data-status="error"] {
+            color: var(--pink);
+        }
+
+        .graph-message[data-status="success"] {
+            color: var(--blue);
+        }
+
+        .graph-canvas-wrapper {
+            position: relative;
+            width: 100%;
+            min-height: 300px;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(10, 10, 32, 0.55);
+            padding: 16px;
+        }
+
+        .graph-canvas-wrapper canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
         .footer-note {
             text-align: center;
             margin: 32px 0 12px;
