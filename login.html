@@ -1827,23 +1827,12 @@
                 // Referral rewards (inviter: +20 gas/+5 JCoin, new user: +20 gas/+10 JCoin)
                 await processReferralReward(user.uid);
 
-                try { await sendEmailVerification(user, { url: `${window.location.origin}/login.html?mode=verifyEmail`, handleCodeInApp: true }); } catch(_) {}
-                try { await signOut(auth); } catch(_) {}
                 hideSmartLoader();
-                try { localStorage.setItem('unverified_email', user.email || email); } catch(_) {}
-                showSuccessModal('Account created! We emailed your confirmation link. Copy the link or code, paste it here, and tap Verify to finish.', () => {
-                    try { showUnverifiedBanner(user.email || email); } catch(_) {}
-                    try {
-                        const container = document.querySelector('.login-container');
-                        if (container && container.classList.contains('signup-mode')) {
-                            toggleSignupMode();
-                        }
-                    } catch (_) {}
-                    try {
-                        const manualInput = document.getElementById('manualVerifyInput');
-                        if (manualInput) manualInput.focus();
-                    } catch (_) {}
-                });
+                try {
+                    localStorage.setItem('nuvia_auth_user', JSON.stringify({ uid: user.uid, email: user.email || email, displayName: user.displayName || null, ts: Date.now() }));
+                    localStorage.setItem('nuvia_auth_status', 'authenticated');
+                } catch(_) {}
+                showSuccessModal('Account created! You are signed in.', () => { window.location.href = 'index.html'; });
 
             } catch (error) {
                 hideSmartLoader();
@@ -1894,16 +1883,6 @@
                 await setPersistence(auth, browserLocalPersistence);
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
-                if (!user.emailVerified) {
-                    hideSmartLoader();
-                    try { localStorage.setItem('unverified_email', user.email || email); } catch(_) {}
-                    try { showUnverifiedBanner(user.email || email); } catch(_) {}
-                    // Send verification email, then sign out to prevent access until verified
-                    try { await sendEmailVerification(user, { url: `${window.location.origin}/login.html?mode=verifyEmail`, handleCodeInApp: true }); } catch(_) {}
-                    showCustomModal('info', 'Verify your email', 'We sent a verification email. Copy the confirmation link or code, paste it into the box here, and tap "Verify code" to finish.');
-                    try { await signOut(auth); } catch(_) {}
-                    return;
-                }
 
                 // Update last login
                 await saveUserData(user, 'email');
