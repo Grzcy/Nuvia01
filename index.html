@@ -1145,7 +1145,7 @@
             100% { transform: scale(1) rotate(0deg); }
         }
 
-        /* 5. ������������ Temporal Paradox - Premium Time Manipulation Interface */
+        /* 5. ������������� Temporal Paradox - Premium Time Manipulation Interface */
         body.theme-temporal-paradox {
             background: 
                 conic-gradient(from 0deg at 50% 50%, 
@@ -7687,7 +7687,7 @@ const simpleQuranQuotes = [
     { text: "Allah does not burden a soul beyond its capacity.", ref: "Al‑Baqarah 2:286" },
     { text: "In the remembrance of Allah hearts find rest.", ref: "Ar‑Ra'd 13:28" },
     { text: "Seek help through patience and prayer.", ref: "Al‑Baqarah 2:45" },
-    { text: "God loves those who do good.", ref: "Al���Baqarah 2:195" },
+    { text: "God loves those who do good.", ref: "Al‑Baqarah 2:195" },
     { text: "Indeed, with hardship comes ease.", ref: "Ash‑Sharh 94:6" },
     { text: "Tell My servants to speak kindly.", ref: "Al‑Isra 17:53" },
     { text: "If you are grateful, I will surely increase you.", ref: "Ibrahim 14:7" },
@@ -11481,6 +11481,54 @@ async function fetchAndDisplayPosts() {
                 if (dropdown) dropdown.classList.remove('active'); // Close dropdown after selecting delete.
             }
             // Handle Share Post Button
+            else if (event.target.closest('.toggle-comments-button')) {
+                const button = event.target.closest('.toggle-comments-button');
+                if (!isAuthReady) { showMessageBox("Please log in to manage comments.", 'error'); return; }
+                const authorId = button.dataset.authorId;
+                if (!currentUser || (currentUser.uid !== authorId && currentUser.uid !== ADMIN_UID)) {
+                    showMessageBox("Only the post owner can change comment settings.", 'warning');
+                    return;
+                }
+                const postId = button.dataset.postId;
+                const enableComments = button.dataset.commentsEnabled === 'false';
+                button.disabled = true;
+                (async () => {
+                    try {
+                        await setPostCommentsEnabled(postId, enableComments);
+                        const nextState = enableComments ? 'true' : 'false';
+                        button.dataset.commentsEnabled = nextState;
+                        button.classList.toggle('disable-comments-option', enableComments);
+                        button.classList.toggle('enable-comments-option', !enableComments);
+                        button.innerHTML = `<i class='fas ${enableComments ? 'fa-comment-slash' : 'fa-comment'}'></i> ${enableComments ? 'Turn Off Comments' : 'Turn On Comments'}`;
+                        button.setAttribute('aria-label', enableComments ? 'Turn off comments for this post' : 'Turn on comments for this post');
+                        const postCard = document.querySelector(`.post-card[data-post-id='${postId}']`);
+                        if (postCard) {
+                            postCard.dataset.commentsEnabled = nextState;
+                            const disableForPost = nextState === 'false';
+                            const commentInput = postCard.querySelector('.comment-input');
+                            const submitCommentButton = postCard.querySelector('.submit-comment-button');
+                            if (commentInput) commentInput.disabled = disableForPost || !isAuthReady || (!currentSystemSettings.enablePublicChat && currentUser.uid !== ADMIN_UID);
+                            if (submitCommentButton) submitCommentButton.disabled = disableForPost || !isAuthReady || (!currentSystemSettings.enablePublicChat && currentUser.uid !== ADMIN_UID);
+                            const commentInputArea = postCard.querySelector('.comment-input-area');
+                            if (commentInputArea) commentInputArea.classList.toggle('comment-input-area-hidden', disableForPost);
+                            const commentsNotice = postCard.querySelector('.comments-disabled-notice');
+                            if (commentsNotice) commentsNotice.classList.toggle('comments-disabled-notice-hidden', !disableForPost);
+                            const commentToggle = postCard.querySelector('.comment-toggle-button');
+                            if (commentToggle) {
+                                commentToggle.dataset.commentsState = disableForPost ? 'disabled' : 'enabled';
+                                commentToggle.innerHTML = `<i class='fas ${disableForPost ? 'fa-comment-slash' : 'fa-comment'}'></i> ${disableForPost ? 'Comments Off' : 'Comment'}`;
+                                commentToggle.setAttribute('aria-label', disableForPost ? 'Comments are turned off' : 'Show or hide comments');
+                            }
+                        }
+                        const dropdown = document.getElementById(`dropdown-${postId}`);
+                        if (dropdown) dropdown.classList.remove('active');
+                    } catch (e) {
+                        console.error('Failed to toggle post comments', e);
+                    } finally {
+                        button.disabled = false;
+                    }
+                })();
+            }
             else if (event.target.closest('.share-post-button')) {
                 const button = event.target.closest('.share-post-button');
                 if (!isAuthReady) { showMessageBox("Please log in to share posts.", 'error'); return; }
