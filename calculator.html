@@ -1048,6 +1048,161 @@
             }
         }
 
+        function showGraphMessage(text, status = 'info') {
+            if (!graphMessage) {
+                return;
+            }
+            graphMessage.textContent = text;
+            graphMessage.dataset.status = status;
+        }
+
+        function renderGraph(expressionText, domainStart, domainEnd, sampleCount) {
+            if (!graphCanvas || typeof window.Chart === 'undefined') {
+                showGraphMessage('Graph tool is unavailable. Please reload the page.', 'error');
+                return;
+            }
+            if (graphChart) {
+                graphChart.destroy();
+                graphChart = null;
+            }
+            const labels = [];
+            const dataset = [];
+            const step = (domainEnd - domainStart) / (sampleCount - 1);
+            for (let index = 0; index < sampleCount; index += 1) {
+                const xValue = domainStart + step * index;
+                labels.push(Number.parseFloat(xValue.toFixed(6)));
+                try {
+                    const yValue = evaluateExpression(expressionText, { x: xValue });
+                    dataset.push(Number.isFinite(yValue) ? yValue : null);
+                } catch (error) {
+                    dataset.push(null);
+                }
+            }
+            const hasValidPoint = dataset.some(value => value !== null);
+            if (!hasValidPoint) {
+                showGraphMessage('Unable to plot this function over the selected domain.', 'error');
+                return;
+            }
+            graphChart = new window.Chart(graphCanvas, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [
+                        {
+                            label: `f(x) = ${expressionText}`,
+                            data: dataset,
+                            borderColor: 'rgba(0, 213, 255, 0.9)',
+                            backgroundColor: 'rgba(0, 213, 255, 0.22)',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            spanGaps: false,
+                            tension: 0.25
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.85)'
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: context => {
+                                    const yValue = context.parsed.y;
+                                    if (typeof yValue === 'number' && Number.isFinite(yValue)) {
+                                        return `y = ${formatNumber(yValue)}`;
+                                    }
+                                    return 'No value';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.68)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.08)'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.68)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.08)'
+                            }
+                        }
+                    }
+                }
+            });
+            showGraphMessage('Graph updated successfully.', 'success');
+        }
+
+        if (graphMessage) {
+            showGraphMessage('', 'info');
+        }
+
+        if (graphForm && graphExpressionInput && graphDomainStartInput && graphDomainEndInput && graphSampleCountInput) {
+            graphForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const expressionText = graphExpressionInput.value.trim();
+                if (!expressionText) {
+                    showGraphMessage('Enter a function of x to plot.', 'error');
+                    return;
+                }
+                const domainStart = Number.parseFloat(graphDomainStartInput.value);
+                const domainEnd = Number.parseFloat(graphDomainEndInput.value);
+                const sampleCount = Number.parseInt(graphSampleCountInput.value, 10);
+                if (!Number.isFinite(domainStart) || !Number.isFinite(domainEnd) || !Number.isFinite(sampleCount)) {
+                    showGraphMessage('Enter valid numeric inputs.', 'error');
+                    return;
+                }
+                if (domainStart >= domainEnd) {
+                    showGraphMessage('Domain start must be less than domain end.', 'error');
+                    return;
+                }
+                if (sampleCount < 25 || sampleCount > 400) {
+                    showGraphMessage('Samples must stay between 25 and 400.', 'error');
+                    return;
+                }
+                renderGraph(expressionText, domainStart, domainEnd, sampleCount);
+            });
+        }
+
+        if (graphResetButton && graphExpressionInput && graphDomainStartInput && graphDomainEndInput && graphSampleCountInput) {
+            graphResetButton.addEventListener('click', () => {
+                graphExpressionInput.value = 'sin(x)';
+                graphDomainStartInput.value = -10;
+                graphDomainEndInput.value = 10;
+                graphSampleCountInput.value = 120;
+                if (graphChart) {
+                    graphChart.destroy();
+                    graphChart = null;
+                }
+                showGraphMessage('Graph cleared. Enter a new function to plot.', 'info');
+            });
+        }
+
+        if (graphForm && graphExpressionInput && graphDomainStartInput && graphDomainEndInput && graphSampleCountInput) {
+            const defaultExpression = graphExpressionInput.value.trim();
+            const defaultStart = Number.parseFloat(graphDomainStartInput.value);
+            const defaultEnd = Number.parseFloat(graphDomainEndInput.value);
+            const defaultSamples = Number.parseInt(graphSampleCountInput.value, 10);
+            if (defaultExpression && Number.isFinite(defaultStart) && Number.isFinite(defaultEnd) && Number.isFinite(defaultSamples) && defaultStart < defaultEnd) {
+                renderGraph(defaultExpression, defaultStart, defaultEnd, defaultSamples);
+            }
+        }
+
         keypad.addEventListener('click', (event) => {
             const target = event.target.closest('button');
             if (!target) {
