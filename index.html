@@ -2458,6 +2458,8 @@
             overflow-y: auto;
             overscroll-behavior: contain;
             -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+            pointer-events: auto;
             scrollbar-width: thin;
             scrollbar-color: var(--glass-blue) transparent;
         }
@@ -11400,6 +11402,16 @@ async function fetchAndDisplayPosts() {
 
         // --- Event Delegation for Dynamic Elements ---
         // Attaches a single click listener to the document and delegates events to dynamically created elements.
+        const keepFeedScrollSeparation = (event) => {
+            const dropdown = event.target.closest('.post-options-dropdown.active');
+            if (!dropdown) return;
+            if (dropdown.scrollHeight <= dropdown.clientHeight) return;
+            event.stopPropagation();
+        };
+
+        document.addEventListener('wheel', keepFeedScrollSeparation, { capture: true });
+        document.addEventListener('touchmove', keepFeedScrollSeparation, { capture: true, passive: false });
+
         document.addEventListener('click', (event) => {
             // Handle React Buttons
             if (event.target.closest('.react-button')) {
