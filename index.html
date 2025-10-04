@@ -10746,11 +10746,13 @@ const lex = inspirationLexicon[type];
          */
         function renderPost(post, postId) {
             const isAuthor = currentUser && currentUser.uid === post.authorId;
+            const commentsEnabled = post.commentsEnabled !== false;
             const authorInitial = (post.username || 'J').charAt(0).toUpperCase();
 
             const postElement = document.createElement('div');
             postElement.classList.add('post-card');
             postElement.setAttribute('data-post-id', postId);
+            postElement.dataset.commentsEnabled = commentsEnabled ? 'true' : 'false';
 
             // Construct the inner HTML for the post card.
             postElement.innerHTML = `
@@ -10781,6 +10783,9 @@ const lex = inspirationLexicon[type];
                         </button>
                         <button class="share-post-button" data-post-id="${postId}" data-content="${post.content}" ${!isAuthReady ? 'disabled' : ''} aria-label="Share Post">
                             <i class="fas fa-share"></i> Share
+                        </button>
+                        <button class="toggle-comments-button ${commentsEnabled ? 'disable-comments-option' : 'enable-comments-option'}" data-post-id="${postId}" data-author-id="${post.authorId}" data-comments-enabled="${commentsEnabled ? 'true' : 'false'}" ${!isAuthReady ? 'disabled' : ''} aria-label="${commentsEnabled ? 'Turn off comments for this post' : 'Turn on comments for this post'}">
+                            <i class="fas ${commentsEnabled ? 'fa-comment-slash' : 'fa-comment'}"></i> ${commentsEnabled ? 'Turn Off Comments' : 'Turn On Comments'}
                         </button>
                         <button class="add-to-highlights-button" data-post-id="${postId}" ${!isAuthReady ? 'disabled' : ''} aria-label="Add to Highlights">
                             <i class="fas fa-bookmark"></i> Add to Highlights
@@ -10831,18 +10836,19 @@ const lex = inspirationLexicon[type];
                     <button class="post-action-button react-button" data-post-id="${postId}" data-reaction-type="haha" ${!isAuthReady || (!currentSystemSettings.enablePublicChat && currentUser.uid !== ADMIN_UID) ? 'disabled' : ''} aria-label="Haha Post">
                         <i class="fas fa-face-laugh"></i> Haha
                     </button>
-                    <button class="post-action-button comment-toggle-button" data-post-id="${postId}" ${!isAuthReady || (!currentSystemSettings.enablePublicChat && currentUser.uid !== ADMIN_UID) ? 'disabled' : ''} aria-label="Toggle Comments">
-                        <i class="fas fa-comment"></i> Comment
+                    <button class="post-action-button comment-toggle-button" data-post-id="${postId}" data-comments-state="${commentsEnabled ? 'enabled' : 'disabled'}" ${!isAuthReady || (!currentSystemSettings.enablePublicChat && currentUser.uid !== ADMIN_UID) ? 'disabled' : ''} aria-label="${commentsEnabled ? 'Show or hide comments' : 'Comments are turned off'}">
+                        <i class="fas ${commentsEnabled ? 'fa-comment' : 'fa-comment-slash'}"></i> ${commentsEnabled ? 'Comment' : 'Comments Off'}
                     </button>
                 </div>
                 <div class="comments-section" style="display:none;">
                     <div class="comments-list" id="comments-list-${postId}">
                         <p style="font-size:0.85rem; color:var(--text-light); text-align:left; margin-left:10px;" class="no-comments-message">No comments yet.</p>
                     </div>
-                    <div class="comment-input-area">
-                        <textarea placeholder="Write a comment..." class="comment-input" data-post-id="${postId}" ${!isAuthReady || (!currentSystemSettings.enablePublicChat && currentUser.uid !== ADMIN_UID) ? 'disabled' : ''} aria-label="Write a comment"></textarea>
-                        <button class="submit-comment-button" data-post-id="${postId}" ${!isAuthReady || (!currentSystemSettings.enablePublicChat && currentUser.uid !== ADMIN_UID) ? 'disabled' : ''} aria-label="Post Comment">Post</button>
+                    <div class="comment-input-area${commentsEnabled ? '' : ' comment-input-area-hidden'}">
+                        <textarea placeholder="Write a comment..." class="comment-input" data-post-id="${postId}" ${!commentsEnabled || !isAuthReady || (!currentSystemSettings.enablePublicChat && currentUser.uid !== ADMIN_UID) ? 'disabled' : ''} aria-label="Write a comment"></textarea>
+                        <button class="submit-comment-button" data-post-id="${postId}" ${!commentsEnabled || !isAuthReady || (!currentSystemSettings.enablePublicChat && currentUser.uid !== ADMIN_UID) ? 'disabled' : ''} aria-label="Post Comment">Post</button>
                     </div>
+                    <p class="comments-disabled-notice${commentsEnabled ? ' comments-disabled-notice-hidden' : ''}">Comments are turned off for this post.</p>
                 </div>
             `;
             return postElement;
