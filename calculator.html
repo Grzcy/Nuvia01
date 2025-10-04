@@ -987,8 +987,8 @@
             return stack[0];
         }
 
-        function evaluateExpression(expr) {
-            const tokens = tokenize(expr);
+        function evaluateExpression(expr, variableContext = null) {
+            const tokens = tokenize(expr, variableContext);
             const rpn = toRpn(tokens);
             return evaluateRpn(rpn);
         }
