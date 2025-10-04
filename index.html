@@ -10278,6 +10278,9 @@ const lex = inspirationLexicon[type];
                     }
 
                     const pData = postDoc.data();
+                    if (pData && pData.commentsEnabled === false) {
+                        throw new Error("Comments are turned off for this post.");
+                    }
                     // Determine if this will be the first comment on the post
                     wasFirstComment = (postDoc.data().commentsCount || 0) === 0;
                     postOwnerId = pData.authorId || null;
