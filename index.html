@@ -2450,33 +2450,38 @@
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             min-width: 150px;
-            max-height: min(360px, calc(100vh - 96px));
             z-index: 20;
             display: none;
             flex-direction: column;
-            overflow-x: hidden;
-            overflow-y: auto;
-            overscroll-behavior: contain;
-            -webkit-overflow-scrolling: touch;
-            touch-action: pan-y;
-            pointer-events: auto;
-            scrollbar-width: thin;
-            scrollbar-color: var(--glass-blue) transparent;
+            overflow: hidden;
         }
 
         .post-options-dropdown.active {
             display: flex;
         }
 
-        .post-options-dropdown::-webkit-scrollbar {
+        .post-options-dropdown .post-options-scroll {
+            display: flex;
+            flex-direction: column;
+            max-height: min(360px, calc(100vh - 96px));
+            overflow-x: hidden;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
+            scrollbar-width: thin;
+            scrollbar-color: var(--glass-blue) transparent;
+        }
+
+        .post-options-dropdown .post-options-scroll::-webkit-scrollbar {
             width: 6px;
         }
 
-        .post-options-dropdown::-webkit-scrollbar-track {
+        .post-options-dropdown .post-options-scroll::-webkit-scrollbar-track {
             background: transparent;
         }
 
-        .post-options-dropdown::-webkit-scrollbar-thumb {
+        .post-options-dropdown .post-options-scroll::-webkit-scrollbar-thumb {
             background: var(--glass-blue);
             border-radius: 999px;
         }
