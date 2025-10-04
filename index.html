@@ -6141,7 +6141,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
               if (stopped) return;
               try {
                 // Use a very small read to detect reachability. The 'meta/ping' path is non-destructive and may not exist.
-                const pingDocRef = doc(db, 'artifacts', appId, 'public', 'meta', 'ping');
+                const pingDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'meta', 'ping');
                 await getDoc(pingDocRef);
                 // If successful, ensure network is enabled and reset attempts counter.
                 try { await enableNetwork(db); } catch(_){}
