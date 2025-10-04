@@ -10916,31 +10916,33 @@ const lex = inspirationLexicon[type];
                         <i class="fas fa-ellipsis-h"></i>
                     </button>
                     <div class="post-options-dropdown" id="dropdown-${postId}">
-                        ${isAuthor ? `
-                        <button class="edit-post-button" data-post-id="${postId}" data-author-id="${post.authorId}" data-content="${post.content}" data-media-url="${post.mediaUrl || ''}" data-media-type="${post.mediaType || 'text'}" data-visibility="${post.visibility || 'public'}" ${!isAuthReady || (!currentSystemSettings.enablePostCreation) ? 'disabled' : ''} aria-label="Edit Post">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                        <button class="delete-post-button" data-post-id="${postId}" data-author-id="${post.authorId}" style="display:none;" aria-label="Delete Post">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
-                        <button class="share-post-button" data-post-id="${postId}" data-content="${post.content}" ${!isAuthReady ? 'disabled' : ''} aria-label="Share Post">
-                            <i class="fas fa-share"></i> Share
-                        </button>
-                        <button class="toggle-comments-button ${commentsEnabled ? 'disable-comments-option' : 'enable-comments-option'}" data-post-id="${postId}" data-author-id="${post.authorId}" data-comments-enabled="${commentsEnabled ? 'true' : 'false'}" ${!isAuthReady ? 'disabled' : ''} aria-label="${commentsEnabled ? 'Turn off comments for this post' : 'Turn on comments for this post'}">
-                            <i class="fas ${commentsEnabled ? 'fa-comment-slash' : 'fa-comment'}"></i> ${commentsEnabled ? 'Turn Off Comments' : 'Turn On Comments'}
-                        </button>
-                        <button class="add-to-highlights-button" data-post-id="${postId}" ${!isAuthReady ? 'disabled' : ''} aria-label="Add to Highlights">
-                            <i class="fas fa-bookmark"></i> Add to Highlights
-                        </button>
-                        ` : ''}
-                        ${currentUser && currentUser.uid === ADMIN_UID ? `
-                        <button class="admin-takedown-button btn btn-danger" data-post-id="${postId}" data-author-id="${post.authorId}" aria-label="Take down Post">
-                            <i class="fas fa-gavel"></i> Take Down
-                        </button>
-                        ` : ''}
-                        <a class="report-post-link" href="/Report.html?reportedUserId=${encodeURIComponent(postId)}&reportedAuthorId=${encodeURIComponent(post.authorId)}&type=post" aria-label="Report Post">
-                            <i class="fas fa-flag"></i> Report
-                        </a>
+                        <div class="post-options-scroll">
+                            ${isAuthor ? `
+                            <button class="edit-post-button" data-post-id="${postId}" data-author-id="${post.authorId}" data-content="${post.content}" data-media-url="${post.mediaUrl || ''}" data-media-type="${post.mediaType || 'text'}" data-visibility="${post.visibility || 'public'}" ${!isAuthReady || (!currentSystemSettings.enablePostCreation) ? 'disabled' : ''} aria-label="Edit Post">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="delete-post-button" data-post-id="${postId}" data-author-id="${post.authorId}" style="display:none;" aria-label="Delete Post">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                            <button class="share-post-button" data-post-id="${postId}" data-content="${post.content}" ${!isAuthReady ? 'disabled' : ''} aria-label="Share Post">
+                                <i class="fas fa-share"></i> Share
+                            </button>
+                            <button class="toggle-comments-button ${commentsEnabled ? 'disable-comments-option' : 'enable-comments-option'}" data-post-id="${postId}" data-author-id="${post.authorId}" data-comments-enabled="${commentsEnabled ? 'true' : 'false'}" ${!isAuthReady ? 'disabled' : ''} aria-label="${commentsEnabled ? 'Turn off comments for this post' : 'Turn on comments for this post'}">
+                                <i class="fas ${commentsEnabled ? 'fa-comment-slash' : 'fa-comment'}"></i> ${commentsEnabled ? 'Turn Off Comments' : 'Turn On Comments'}
+                            </button>
+                            <button class="add-to-highlights-button" data-post-id="${postId}" ${!isAuthReady ? 'disabled' : ''} aria-label="Add to Highlights">
+                                <i class="fas fa-bookmark"></i> Add to Highlights
+                            </button>
+                            ` : ''}
+                            ${currentUser && currentUser.uid === ADMIN_UID ? `
+                            <button class="admin-takedown-button btn btn-danger" data-post-id="${postId}" data-author-id="${post.authorId}" aria-label="Take down Post">
+                                <i class="fas fa-gavel"></i> Take Down
+                            </button>
+                            ` : ''}
+                            <a class="report-post-link" href="/Report.html?reportedUserId=${encodeURIComponent(postId)}&reportedAuthorId=${encodeURIComponent(post.authorId)}&type=post" aria-label="Report Post">
+                                <i class="fas fa-flag"></i> Report
+                            </a>
+                        </div>
                     </div>
                 </div>
                 <div class="post-content-text">
