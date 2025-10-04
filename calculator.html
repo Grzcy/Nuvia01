@@ -676,11 +676,20 @@
         const historyEmptyMessage = document.getElementById('historyEmptyMessage');
         const angleButtons = document.querySelectorAll('[data-angle-mode]');
         const memoryStatus = document.getElementById('memoryStatus');
+        const graphForm = document.getElementById('graphForm');
+        const graphExpressionInput = document.getElementById('graphExpression');
+        const graphDomainStartInput = document.getElementById('graphDomainStart');
+        const graphDomainEndInput = document.getElementById('graphDomainEnd');
+        const graphSampleCountInput = document.getElementById('graphSampleCount');
+        const graphMessage = document.getElementById('graphMessage');
+        const graphCanvas = document.getElementById('graphCanvas');
+        const graphResetButton = document.getElementById('graphResetButton');
 
         let expression = '';
         let lastAnswer = 0;
         let memoryValue = 0;
         let angleMode = 'deg';
+        let graphChart = null;
         const history = [];
 
         function updateDisplay(resultText) {
