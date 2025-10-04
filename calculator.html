@@ -769,7 +769,7 @@
             return angleMode === 'deg' ? (value * 180) / Math.PI : value;
         }
 
-        function tokenize(expr) {
+        function tokenize(expr, variableContext = null) {
             const tokens = [];
             let i = 0;
             let prevType = 'start';
@@ -811,12 +811,17 @@
                         tokens.push({ type: 'number', value: lastAnswer });
                         prevType = 'number';
                     } else if (lower === 'x' || lower === 'y') {
-                        const variableValue = prompt('Enter value for ' + lower.toUpperCase() + ':');
-                        const parsed = Number(variableValue);
-                        if (Number.isNaN(parsed)) {
-                            throw new Error('Invalid variable input');
+                        const hasContext = variableContext && typeof variableContext[lower] === 'number' && Number.isFinite(variableContext[lower]);
+                        if (hasContext) {
+                            tokens.push({ type: 'number', value: variableContext[lower] });
+                        } else {
+                            const variableValue = prompt('Enter value for ' + lower.toUpperCase() + ':');
+                            const parsed = Number(variableValue);
+                            if (Number.isNaN(parsed)) {
+                                throw new Error('Invalid variable input');
+                            }
+                            tokens.push({ type: 'number', value: parsed });
                         }
-                        tokens.push({ type: 'number', value: parsed });
                         prevType = 'number';
                     } else {
                         tokens.push({ type: 'function', value: lower });
