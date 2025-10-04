@@ -1016,7 +1016,13 @@
             const entry = document.createElement('button');
             entry.type = 'button';
             entry.className = 'history-entry';
-            entry.innerHTML = '<span class="history-expression">' + exprText + '</span><span class="history-result">' + formatNumber(resultValue) + '</span>';
+            const expressionSpan = document.createElement('span');
+            expressionSpan.className = 'history-expression';
+            expressionSpan.textContent = exprText;
+            const resultSpan = document.createElement('span');
+            resultSpan.className = 'history-result';
+            resultSpan.textContent = formatNumber(resultValue);
+            entry.append(expressionSpan, resultSpan);
             entry.addEventListener('click', () => {
                 expression = exprText;
                 updateDisplay(resultValue);
