@@ -6181,7 +6181,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 const pingDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'meta', 'ping');
                 await getDoc(pingDocRef);
                 // If successful, ensure network is enabled and reset attempts counter.
-                try { await enableNetwork(db); } catch(_){}
+                try { await networkManager.goOnline(); } catch(_){}
                 attempts = 0;
                 // console log for diagnostics
                 console.log('Nuvia_DEBUG: Firestore backend reachable');
