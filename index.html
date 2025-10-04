@@ -4814,45 +4814,64 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                             
         <li><a href="#" class="post-option-button post-disable-comment-button">Disable Comments</a></li>
         <li><a href="#" class="post-option-button post-enable-comment-button hidden">Enable Comments</a></li>
+        <li class="post-visibility">
+            <span class="visibility-label">Visibility:</span>
+            <div class="visibility-options">
+                <button class="visibility-button public">Public</button>
+                <button class="visibility-button friends">Friends</button>
+                <button class="visibility-button only-me">Only Me</button>
+            </div>
+        </li>
     </ul>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const postElements = document.querySelectorAll('.post-card');  // Find all posts
-            postElements.forEach((postElement) => {
-                const disableBtn = postElement.querySelector('.post-disable-comment-button');
-                const enableBtn = postElement.querySelector('.post-enable-comment-button');
-                const commentSection = postElement.querySelector('.comments-section');
-                const postOwnerId = postElement.getAttribute('data-owner-id');  // Assuming data-owner-id is set for each post
-
-                // Check if the current user is the post owner
-                const currentUserId = 'current_user_id';  // Replace this with dynamic current user ID
-
-                // Show comment toggle buttons only for the post owner
-                if (postOwnerId === currentUserId) {
-                    disableBtn.classList.remove('hidden');
-                    enableBtn.classList.remove('hidden');
-                } else {
-                    disableBtn.classList.add('hidden');
-                    enableBtn.classList.add('hidden');
-                }
-
-                // Add event listeners for comment toggle functionality
-                if (disableBtn && enableBtn && commentSection) {
-                    disableBtn.addEventListener('click', () => {
-                        commentSection.style.display = 'none';  // Hide comments
-                        disableBtn.classList.add('hidden');
-                        enableBtn.classList.remove('hidden');
-                    });
-
-                    enableBtn.addEventListener('click', () => {
-                        commentSection.style.display = 'block';  // Show comments
-                        enableBtn.classList.add('hidden');
-                        disableBtn.classList.remove('hidden');
-                    });
-                }
-            });
-        });
-    </script>
+    <style>
+        .post-visibility {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .visibility-label {
+            font-size: 14px;
+            color: #1a1a2e;
+        }
+        .visibility-options {
+            display: flex;
+            gap: 8px;
+        }
+        .visibility-button {
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            border: none;
+            text-transform: capitalize;
+        }
+        .visibility-button:hover {
+            opacity: 0.8;
+        }
+        .public {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .public:hover {
+            background-color: #004085;
+        }
+        .friends {
+            background-color: #ffc107;
+            color: white;
+        }
+        .friends:hover {
+            background-color: #e0a800;
+        }
+        .only-me {
+            background-color: #28a745;
+            color: white;
+        }
+        .only-me:hover {
+            background-color: #1e7e34;
+        }
+    </style>
     
                         </div>
 
@@ -5102,45 +5121,64 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                     
         <li><a href="#" class="post-option-button post-disable-comment-button">Disable Comments</a></li>
         <li><a href="#" class="post-option-button post-enable-comment-button hidden">Enable Comments</a></li>
+        <li class="post-visibility">
+            <span class="visibility-label">Visibility:</span>
+            <div class="visibility-options">
+                <button class="visibility-button public">Public</button>
+                <button class="visibility-button friends">Friends</button>
+                <button class="visibility-button only-me">Only Me</button>
+            </div>
+        </li>
     </ul>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const postElements = document.querySelectorAll('.post-card');  // Find all posts
-            postElements.forEach((postElement) => {
-                const disableBtn = postElement.querySelector('.post-disable-comment-button');
-                const enableBtn = postElement.querySelector('.post-enable-comment-button');
-                const commentSection = postElement.querySelector('.comments-section');
-                const postOwnerId = postElement.getAttribute('data-owner-id');  // Assuming data-owner-id is set for each post
-
-                // Check if the current user is the post owner
-                const currentUserId = 'current_user_id';  // Replace this with dynamic current user ID
-
-                // Show comment toggle buttons only for the post owner
-                if (postOwnerId === currentUserId) {
-                    disableBtn.classList.remove('hidden');
-                    enableBtn.classList.remove('hidden');
-                } else {
-                    disableBtn.classList.add('hidden');
-                    enableBtn.classList.add('hidden');
-                }
-
-                // Add event listeners for comment toggle functionality
-                if (disableBtn && enableBtn && commentSection) {
-                    disableBtn.addEventListener('click', () => {
-                        commentSection.style.display = 'none';  // Hide comments
-                        disableBtn.classList.add('hidden');
-                        enableBtn.classList.remove('hidden');
-                    });
-
-                    enableBtn.addEventListener('click', () => {
-                        commentSection.style.display = 'block';  // Show comments
-                        enableBtn.classList.add('hidden');
-                        disableBtn.classList.remove('hidden');
-                    });
-                }
-            });
-        });
-    </script>
+    <style>
+        .post-visibility {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .visibility-label {
+            font-size: 14px;
+            color: #1a1a2e;
+        }
+        .visibility-options {
+            display: flex;
+            gap: 8px;
+        }
+        .visibility-button {
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            border: none;
+            text-transform: capitalize;
+        }
+        .visibility-button:hover {
+            opacity: 0.8;
+        }
+        .public {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .public:hover {
+            background-color: #004085;
+        }
+        .friends {
+            background-color: #ffc107;
+            color: white;
+        }
+        .friends:hover {
+            background-color: #e0a800;
+        }
+        .only-me {
+            background-color: #28a745;
+            color: white;
+        }
+        .only-me:hover {
+            background-color: #1e7e34;
+        }
+    </style>
     
                     <div class="button-group" style="display:flex;gap:10px;justify-content:flex-end;">
                         <button id="closeWalletLockedBtn" class="modal-button cancel-button">Close</button>
@@ -5282,45 +5320,64 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                             
         <li><a href="#" class="post-option-button post-disable-comment-button">Disable Comments</a></li>
         <li><a href="#" class="post-option-button post-enable-comment-button hidden">Enable Comments</a></li>
+        <li class="post-visibility">
+            <span class="visibility-label">Visibility:</span>
+            <div class="visibility-options">
+                <button class="visibility-button public">Public</button>
+                <button class="visibility-button friends">Friends</button>
+                <button class="visibility-button only-me">Only Me</button>
+            </div>
+        </li>
     </ul>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const postElements = document.querySelectorAll('.post-card');  // Find all posts
-            postElements.forEach((postElement) => {
-                const disableBtn = postElement.querySelector('.post-disable-comment-button');
-                const enableBtn = postElement.querySelector('.post-enable-comment-button');
-                const commentSection = postElement.querySelector('.comments-section');
-                const postOwnerId = postElement.getAttribute('data-owner-id');  // Assuming data-owner-id is set for each post
-
-                // Check if the current user is the post owner
-                const currentUserId = 'current_user_id';  // Replace this with dynamic current user ID
-
-                // Show comment toggle buttons only for the post owner
-                if (postOwnerId === currentUserId) {
-                    disableBtn.classList.remove('hidden');
-                    enableBtn.classList.remove('hidden');
-                } else {
-                    disableBtn.classList.add('hidden');
-                    enableBtn.classList.add('hidden');
-                }
-
-                // Add event listeners for comment toggle functionality
-                if (disableBtn && enableBtn && commentSection) {
-                    disableBtn.addEventListener('click', () => {
-                        commentSection.style.display = 'none';  // Hide comments
-                        disableBtn.classList.add('hidden');
-                        enableBtn.classList.remove('hidden');
-                    });
-
-                    enableBtn.addEventListener('click', () => {
-                        commentSection.style.display = 'block';  // Show comments
-                        enableBtn.classList.add('hidden');
-                        disableBtn.classList.remove('hidden');
-                    });
-                }
-            });
-        });
-    </script>
+    <style>
+        .post-visibility {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .visibility-label {
+            font-size: 14px;
+            color: #1a1a2e;
+        }
+        .visibility-options {
+            display: flex;
+            gap: 8px;
+        }
+        .visibility-button {
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            border: none;
+            text-transform: capitalize;
+        }
+        .visibility-button:hover {
+            opacity: 0.8;
+        }
+        .public {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .public:hover {
+            background-color: #004085;
+        }
+        .friends {
+            background-color: #ffc107;
+            color: white;
+        }
+        .friends:hover {
+            background-color: #e0a800;
+        }
+        .only-me {
+            background-color: #28a745;
+            color: white;
+        }
+        .only-me:hover {
+            background-color: #1e7e34;
+        }
+    </style>
     
                         </div>
                         
@@ -5337,45 +5394,64 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                             
         <li><a href="#" class="post-option-button post-disable-comment-button">Disable Comments</a></li>
         <li><a href="#" class="post-option-button post-enable-comment-button hidden">Enable Comments</a></li>
+        <li class="post-visibility">
+            <span class="visibility-label">Visibility:</span>
+            <div class="visibility-options">
+                <button class="visibility-button public">Public</button>
+                <button class="visibility-button friends">Friends</button>
+                <button class="visibility-button only-me">Only Me</button>
+            </div>
+        </li>
     </ul>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const postElements = document.querySelectorAll('.post-card');  // Find all posts
-            postElements.forEach((postElement) => {
-                const disableBtn = postElement.querySelector('.post-disable-comment-button');
-                const enableBtn = postElement.querySelector('.post-enable-comment-button');
-                const commentSection = postElement.querySelector('.comments-section');
-                const postOwnerId = postElement.getAttribute('data-owner-id');  // Assuming data-owner-id is set for each post
-
-                // Check if the current user is the post owner
-                const currentUserId = 'current_user_id';  // Replace this with dynamic current user ID
-
-                // Show comment toggle buttons only for the post owner
-                if (postOwnerId === currentUserId) {
-                    disableBtn.classList.remove('hidden');
-                    enableBtn.classList.remove('hidden');
-                } else {
-                    disableBtn.classList.add('hidden');
-                    enableBtn.classList.add('hidden');
-                }
-
-                // Add event listeners for comment toggle functionality
-                if (disableBtn && enableBtn && commentSection) {
-                    disableBtn.addEventListener('click', () => {
-                        commentSection.style.display = 'none';  // Hide comments
-                        disableBtn.classList.add('hidden');
-                        enableBtn.classList.remove('hidden');
-                    });
-
-                    enableBtn.addEventListener('click', () => {
-                        commentSection.style.display = 'block';  // Show comments
-                        enableBtn.classList.add('hidden');
-                        disableBtn.classList.remove('hidden');
-                    });
-                }
-            });
-        });
-    </script>
+    <style>
+        .post-visibility {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .visibility-label {
+            font-size: 14px;
+            color: #1a1a2e;
+        }
+        .visibility-options {
+            display: flex;
+            gap: 8px;
+        }
+        .visibility-button {
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            border: none;
+            text-transform: capitalize;
+        }
+        .visibility-button:hover {
+            opacity: 0.8;
+        }
+        .public {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .public:hover {
+            background-color: #004085;
+        }
+        .friends {
+            background-color: #ffc107;
+            color: white;
+        }
+        .friends:hover {
+            background-color: #e0a800;
+        }
+        .only-me {
+            background-color: #28a745;
+            color: white;
+        }
+        .only-me:hover {
+            background-color: #1e7e34;
+        }
+    </style>
     
                         </div>
                         
@@ -5392,45 +5468,64 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                             
         <li><a href="#" class="post-option-button post-disable-comment-button">Disable Comments</a></li>
         <li><a href="#" class="post-option-button post-enable-comment-button hidden">Enable Comments</a></li>
+        <li class="post-visibility">
+            <span class="visibility-label">Visibility:</span>
+            <div class="visibility-options">
+                <button class="visibility-button public">Public</button>
+                <button class="visibility-button friends">Friends</button>
+                <button class="visibility-button only-me">Only Me</button>
+            </div>
+        </li>
     </ul>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const postElements = document.querySelectorAll('.post-card');  // Find all posts
-            postElements.forEach((postElement) => {
-                const disableBtn = postElement.querySelector('.post-disable-comment-button');
-                const enableBtn = postElement.querySelector('.post-enable-comment-button');
-                const commentSection = postElement.querySelector('.comments-section');
-                const postOwnerId = postElement.getAttribute('data-owner-id');  // Assuming data-owner-id is set for each post
-
-                // Check if the current user is the post owner
-                const currentUserId = 'current_user_id';  // Replace this with dynamic current user ID
-
-                // Show comment toggle buttons only for the post owner
-                if (postOwnerId === currentUserId) {
-                    disableBtn.classList.remove('hidden');
-                    enableBtn.classList.remove('hidden');
-                } else {
-                    disableBtn.classList.add('hidden');
-                    enableBtn.classList.add('hidden');
-                }
-
-                // Add event listeners for comment toggle functionality
-                if (disableBtn && enableBtn && commentSection) {
-                    disableBtn.addEventListener('click', () => {
-                        commentSection.style.display = 'none';  // Hide comments
-                        disableBtn.classList.add('hidden');
-                        enableBtn.classList.remove('hidden');
-                    });
-
-                    enableBtn.addEventListener('click', () => {
-                        commentSection.style.display = 'block';  // Show comments
-                        enableBtn.classList.add('hidden');
-                        disableBtn.classList.remove('hidden');
-                    });
-                }
-            });
-        });
-    </script>
+    <style>
+        .post-visibility {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Poppins', sans-serif;
+        }
+        .visibility-label {
+            font-size: 14px;
+            color: #1a1a2e;
+        }
+        .visibility-options {
+            display: flex;
+            gap: 8px;
+        }
+        .visibility-button {
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            border: none;
+            text-transform: capitalize;
+        }
+        .visibility-button:hover {
+            opacity: 0.8;
+        }
+        .public {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .public:hover {
+            background-color: #004085;
+        }
+        .friends {
+            background-color: #ffc107;
+            color: white;
+        }
+        .friends:hover {
+            background-color: #e0a800;
+        }
+        .only-me {
+            background-color: #28a745;
+            color: white;
+        }
+        .only-me:hover {
+            background-color: #1e7e34;
+        }
+    </style>
     
                         </div>
                     </div>
