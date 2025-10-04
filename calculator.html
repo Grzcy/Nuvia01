@@ -265,6 +265,19 @@
             gap: 18px;
         }
 
+        .history-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .history-clear-button {
+            align-self: center;
+            padding: 10px 14px;
+        }
+
         .history-list {
             display: grid;
             gap: 12px;
@@ -466,12 +479,12 @@
         </section>
 
         <section class="history-card" aria-labelledby="historyHeading">
-            <div class="mode-indicators">
+            <div class="history-controls">
                 <div>
                     <h2 class="card-title" id="historyHeading">Solution History</h2>
                     <p class="card-subtitle">Tap any line to reuse it instantly.</p>
                 </div>
-                <button class="keypad-button" data-role="command" data-action="clear-history" style="padding: 10px 14px;">Clear</button>
+                <button class="keypad-button history-clear-button" data-role="command" data-action="clear-history">Clear</button>
             </div>
             <div class="history-list" id="historyList" role="list" aria-live="polite">
                 <p class="history-expression" id="historyEmptyMessage">Start calculating to build your study journal.</p>
