@@ -10245,6 +10245,11 @@ const lex = inspirationLexicon[type];
                 showMessageBox("Comment cannot be empty.", 'info');
                 return;
             }
+            const owningPostCard = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+            if (owningPostCard && owningPostCard.dataset.commentsEnabled === 'false') {
+                showMessageBox("Comments are turned off for this post.", 'info');
+                return;
+            }
             // Cooldown and quality checks
             const nowTs = Date.now();
             const lastCmtKey = `last-comment-ts-${currentUser.uid}`;
