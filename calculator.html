@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Nuvia - Scholar Calculator</title>
+    <link rel="canonical" href="https://nuvia.app/calculator.html">
+    <meta name="description" content="Nuvia scientific and study calculator with history, memory, and formula helpers for students.">
+    <meta name="theme-color" content="#1a1a2e">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <style>
+        :root {
+            --pink: #ff2e92;
+            --blue: #00d5ff;
+            --glass-black: rgba(10, 10, 10, 0.75);
+            --glass-blue: rgba(0, 213, 255, 0.15);
+            --background-color-primary: #1a1a2e;
+            --background-color-secondary: #101020;
+            --card-background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+            --border-light: rgba(255, 255, 255, 0.08);
+            --text-primary: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.72);
+            --radius: 18px;
+            --shadow-strong: 0 24px 45px rgba(0, 0, 0, 0.35);
+            --shadow-soft: 0 12px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Inter", system-ui, sans-serif;
+            background: radial-gradient(circle at top left, rgba(0, 213, 255, 0.12), transparent 45%),
+                        radial-gradient(circle at bottom right, rgba(255, 46, 146, 0.12), transparent 50%),
+                        var(--background-color-primary);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            padding: 18px clamp(16px, 5vw, 48px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .brand-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+            font-family: "Poppins", sans-serif;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+        }
+
+        .brand-badge {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--blue), var(--pink));
+            font-weight: 700;
+        }
+
+        .brand-link span:last-child {
+            opacity: 0.8;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .page-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .page-actions a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 999px;
+            border: 1px solid var(--glass-blue);
+            background: rgba(10, 10, 32, 0.45);
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+
+        .page-actions a:hover {
+            transform: translateY(-1px);
+            border-color: rgba(255, 255, 255, 0.35);
+            box-shadow: 0 12px 22px rgba(0, 213, 255, 0.25);
+        }
+
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: minmax(0, 680px);
+            justify-content: center;
+            padding: clamp(20px, 4vw, 40px);
+        }
+
+        .calculator-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 28px;
+            width: min(1100px, 100%);
+        }
+
+        .calculator-card {
+            background: var(--card-background);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-strong);
+            padding: clamp(16px, 3vw, 32px);
+            backdrop-filter: blur(14px);
+        }
+
+        .card-title {
+            margin: 0 0 12px;
+            font-family: "Poppins", sans-serif;
+            font-size: clamp(1.4rem, 3vw, 1.8rem);
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .card-subtitle {
+            margin: 0 0 20px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .display-surface {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 20px 24px;
+            box-shadow: inset 0 6px 14px rgba(0, 0, 0, 0.35);
+            margin-bottom: 22px;
+            min-height: 132px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .display-expression {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            color: rgba(255, 255, 255, 0.68);
+            word-break: break-all;
+            min-height: 1.6em;
+        }
+
+        .display-result {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 700;
+            font-family: "Poppins", sans-serif;
+            color: var(--text-primary);
+            text-align: right;
+            word-break: break-all;
+        }
+
+        .mode-indicators {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .angle-mode-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            font-weight: 600;
+        }
+
+        .angle-mode-toggle button {
+            background: transparent;
+            border: none;
+            color: inherit;
+            font: inherit;
+            padding: 4px 10px;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: background 0.25s ease, color 0.25s ease;
+        }
+
+        .angle-mode-toggle button[aria-pressed="true"] {
+            background: linear-gradient(135deg, var(--blue), var(--pink));
+            color: #0b0b13;
+        }
+
+        .memory-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .keypad-grid {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .keypad-button {
+            border: none;
+            border-radius: 14px;
+            padding: 14px 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            background: rgba(17, 22, 45, 0.75);
+            color: var(--text-primary);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+        }
+
+        .keypad-button:hover {
+            transform: translateY(-2px);
+            background: rgba(26, 32, 68, 0.9);
+            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
+        }
+
+        .keypad-button[data-role="command"] {
+            background: linear-gradient(135deg, rgba(0, 213, 255, 0.35), rgba(255, 46, 146, 0.35));
+        }
+
+        .keypad-button[data-role="primary"] {
+            background: linear-gradient(135deg, var(--blue), var(--pink));
+            color: #0b0b13;
+            font-size: 1.1rem;
+        }
+
+        .keypad-button[data-role="operator"] {
+            background: rgba(255, 46, 146, 0.25);
+        }
+
+        .history-card {
+            background: var(--card-background);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-soft);
+            padding: clamp(16px, 3vw, 28px);
+            backdrop-filter: blur(12px);
+            display: grid;
+            gap: 18px;
+        }
+
+        .history-list {
+            display: grid;
+            gap: 12px;
+            max-height: 280px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .history-entry {
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: grid;
+            gap: 6px;
+        }
+
+        .history-expression {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            word-break: break-all;
+        }
+
+        .history-result {
+            font-weight: 600;
+            font-size: 1.05rem;
+            word-break: break-all;
+        }
+
+        .helper-card {
+            background: var(--card-background);
+            border-radius: var(--radius);
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-soft);
+            padding: clamp(16px, 3vw, 28px);
+            backdrop-filter: blur(12px);
+            display: grid;
+            gap: 16px;
+        }
+
+        .helper-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .helper-item {
+            border-radius: 14px;
+            padding: 14px 16px;
+            background: rgba(15, 20, 45, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: grid;
+            gap: 6px;
+        }
+
+        .helper-item h4 {
+            margin: 0;
+            font-size: 1rem;
+            font-family: "Poppins", sans-serif;
+        }
+
+        .helper-item p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .footer-note {
+            text-align: center;
+            margin: 32px 0 12px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 960px) {
+            .keypad-grid {
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+            }
+
+            .page-actions {
+                display: none;
+            }
+        }
+
+        @media (max-width: 720px) {
+            main {
+                padding: 20px;
+            }
+
+            .calculator-layout {
+                gap: 22px;
+            }
+
+            .display-surface {
+                padding: 16px 18px;
+            }
+        }
+
+        @media (max-width: 540px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .keypad-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+<header>
+    <a class="brand-link" href="/index.html">
+        <span class="brand-badge">N</span>
+        <span>Nuvia Scholar Suite</span>
+    </a>
+    <div class="page-actions">
+        <a href="/index.html"><i class="fas fa-house"></i> Home</a>
+        <a href="/guide.html"><i class="fas fa-book-open"></i> Study Guide</a>
+    </div>
+</header>
+<main>
+    <div class="calculator-layout">
+        <section class="calculator-card" aria-labelledby="calculatorHeading">
+            <h1 class="card-title" id="calculatorHeading">Advanced Calculator</h1>
+            <p class="card-subtitle">Built for Nuvia students &mdash; solve algebra, trigonometry, and everyday calculations with history, memory, and study helpers.</p>
+            <div class="display-surface" aria-live="polite">
+                <div class="display-expression" id="displayExpression"></div>
+                <div class="display-result" id="displayResult">0</div>
+            </div>
+            <div class="mode-indicators">
+                <div class="angle-mode-toggle" role="group" aria-label="Angle mode">
+                    <span><i class="fas fa-chart-line"></i> Angle:</span>
+                    <button type="button" data-angle-mode="deg" aria-pressed="true">Degrees</button>
+                    <button type="button" data-angle-mode="rad" aria-pressed="false">Radians</button>
+                </div>
+                <div class="memory-status" id="memoryStatus" aria-live="polite">
+                    <i class="fas fa-memory"></i>
+                    <span>No values in memory</span>
+                </div>
+            </div>
+            <div class="keypad-grid" role="group" aria-label="Calculator keypad">
+                <button class="keypad-button" data-action="memory-clear">MC</button>
+                <button class="keypad-button" data-action="memory-recall">MR</button>
+                <button class="keypad-button" data-action="memory-plus">M+</button>
+                <button class="keypad-button" data-action="memory-minus">M-</button>
+                <button class="keypad-button" data-action="clear-entry" data-role="command">CE</button>
+                <button class="keypad-button" data-action="clear-all" data-role="command">AC</button>
+
+                <button class="keypad-button" data-insert="sin(" data-role="operator">sin</button>
+                <button class="keypad-button" data-insert="cos(" data-role="operator">cos</button>
+                <button class="keypad-button" data-insert="tan(" data-role="operator">tan</button>
+                <button class="keypad-button" data-insert="ln(" data-role="operator">ln</button>
+                <button class="keypad-button" data-insert="log(" data-role="operator">log</button>
+                <button class="keypad-button" data-insert="sqrt(" data-role="operator">√</button>
+
+                <button class="keypad-button" data-insert="asin(" data-role="operator">sin⁻¹</button>
+                <button class="keypad-button" data-insert="acos(" data-role="operator">cos⁻¹</button>
+                <button class="keypad-button" data-insert="atan(" data-role="operator">tan⁻¹</button>
+                <button class="keypad-button" data-insert="abs(" data-role="operator">|x|</button>
+                <button class="keypad-button" data-insert="(" data-role="operator">(</button>
+                <button class="keypad-button" data-insert=")" data-role="operator">)</button>
+
+                <button class="keypad-button" data-insert="7">7</button>
+                <button class="keypad-button" data-insert="8">8</button>
+                <button class="keypad-button" data-insert="9">9</button>
+                <button class="keypad-button" data-insert="/" data-role="operator">÷</button>
+                <button class="keypad-button" data-action="square">x²</button>
+                <button class="keypad-button" data-action="power">xʸ</button>
+
+                <button class="keypad-button" data-insert="4">4</button>
+                <button class="keypad-button" data-insert="5">5</button>
+                <button class="keypad-button" data-insert="6">6</button>
+                <button class="keypad-button" data-insert="*" data-role="operator">×</button>
+                <button class="keypad-button" data-action="reciprocal">1/x</button>
+                <button class="keypad-button" data-action="factorial">n!</button>
+
+                <button class="keypad-button" data-insert="1">1</button>
+                <button class="keypad-button" data-insert="2">2</button>
+                <button class="keypad-button" data-insert="3">3</button>
+                <button class="keypad-button" data-insert="-" data-role="operator">−</button>
+                <button class="keypad-button" data-insert="pi" data-role="operator">π</button>
+                <button class="keypad-button" data-insert="e" data-role="operator">e</button>
+
+                <button class="keypad-button" data-insert="0">0</button>
+                <button class="keypad-button" data-action="toggle-sign">±</button>
+                <button class="keypad-button" data-insert="." aria-label="Decimal">.</button>
+                <button class="keypad-button" data-insert="+" data-role="operator">+</button>
+                <button class="keypad-button" data-action="percentage">%</button>
+                <button class="keypad-button" data-action="backspace" aria-label="Backspace"><i class="fas fa-delete-left"></i></button>
+
+                <button class="keypad-button" data-action="insert-variable" data-value="x">x</button>
+                <button class="keypad-button" data-action="insert-variable" data-value="y">y</button>
+                <button class="keypad-button" data-action="insert-variable" data-value="ans">Ans</button>
+                <button class="keypad-button" data-action="evaluate" data-role="primary" aria-label="Equals">=</button>
+            </div>
+        </section>
+
+        <section class="history-card" aria-labelledby="historyHeading">
+            <div class="mode-indicators">
+                <div>
+                    <h2 class="card-title" id="historyHeading">Solution History</h2>
+                    <p class="card-subtitle">Tap any line to reuse it instantly.</p>
+                </div>
+                <button class="keypad-button" data-role="command" data-action="clear-history" style="padding: 10px 14px;">Clear</button>
+            </div>
+            <div class="history-list" id="historyList" role="list" aria-live="polite">
+                <p class="history-expression" id="historyEmptyMessage">Start calculating to build your study journal.</p>
+            </div>
+        </section>
+
+        <section class="helper-card" aria-labelledby="helperHeading">
+            <h2 class="card-title" id="helperHeading">Study Helpers</h2>
+            <p class="card-subtitle">Reference essentials while you calculate. Review formulas, conversions, and quick problem strategies.</p>
+            <div class="helper-grid">
+                <article class="helper-item">
+                    <h4>Quadratic Formula</h4>
+                    <p>x = (−b ± √(b² − 4ac)) / (2a). Use Ans to store intermediate results while solving.</p>
+                </article>
+                <article class="helper-item">
+                    <h4>Right Triangle</h4>
+                    <p>sin θ = opposite/hypotenuse<br>cos θ = adjacent/hypotenuse<br>tan θ = opposite/adjacent.</p>
+                </article>
+                <article class="helper-item">
+                    <h4>Unit Conversions</h4>
+                    <p>1 inch = 2.54 cm<br>1 lb = 0.4536 kg<br>1 L = 1000 mL. Keep answers consistent with assignment units.</p>
+                </article>
+                <article class="helper-item">
+                    <h4>Study Tip</h4>
+                    <p>Always write the question, key formula, substituted values, and the final answer with units for full credit.</p>
+                </article>
+            </div>
+        </section>
+    </div>
+</main>
+<p class="footer-note">Made with Nuvia for focused learning. Remember to cross-check answers with class notes.</p>
+<script>
+    (function(){
+        const displayExpression = document.getElementById('displayExpression');
+        const displayResult = document.getElementById('displayResult');
+        const keypad = document.querySelector('.keypad-grid');
+        const historyList = document.getElementById('historyList');
+        const historyEmptyMessage = document.getElementById('historyEmptyMessage');
+        const angleButtons = document.querySelectorAll('[data-angle-mode]');
+        const memoryStatus = document.getElementById('memoryStatus');
+
+        let expression = '';
+        let lastAnswer = 0;
+        let memoryValue = 0;
+        let angleMode = 'deg';
+        const history = [];
+
+        function updateDisplay(resultText) {
+            displayExpression.textContent = expression || '\u00A0';
+            if (typeof resultText !== 'undefined') {
+                displayResult.textContent = formatNumber(resultText);
+            }
+        }
+
+        function formatNumber(value) {
+            if (value === Infinity || value === -Infinity || Number.isNaN(value)) {
+                return 'Error';
+            }
+            const absValue = Math.abs(value);
+            if ((absValue !== 0 && (absValue >= 1e10 || absValue <= 1e-6))) {
+                return value.toExponential(8).replace(/\.0+e/, 'e');
+            }
+            const fixed = Number.parseFloat(value.toPrecision(12));
+            return fixed.toString();
+        }
+
+        function setAngleMode(mode) {
+            angleMode = mode;
+            angleButtons.forEach(btn => {
+                btn.setAttribute('aria-pressed', btn.dataset.angleMode === mode ? 'true' : 'false');
+            });
+        }
+
+        function updateMemoryStatus() {
+            if (memoryValue === 0) {
+                memoryStatus.innerHTML = '<i class="fas fa-memory"></i><span>No values in memory</span>';
+            } else {
+                memoryStatus.innerHTML = '<i class="fas fa-memory"></i><span>Memory: ' + formatNumber(memoryValue) + '</span>';
+            }
+        }
+
+        function appendToExpression(value) {
+            expression += value;
+            updateDisplay();
+        }
+
+        function clearEntry() {
+            expression = expression.slice(0, -1);
+            updateDisplay();
+        }
+
+        function clearAll() {
+            expression = '';
+            updateDisplay(0);
+        }
+
+        function insertPower(basePower) {
+            if (!expression) {
+                expression = basePower;
+            } else {
+                expression += basePower;
+            }
+            updateDisplay();
+        }
+
+        function factorial(n) {
+            if (n < 0 || !Number.isInteger(n)) {
+                throw new Error('Invalid factorial');
+            }
+            let result = 1;
+            for (let i = 2; i <= n; i += 1) {
+                result *= i;
+            }
+            return result;
+        }
+
+        function toRadians(value) {
+            return angleMode === 'deg' ? (value * Math.PI) / 180 : value;
+        }
+
+        function fromRadians(value) {
+            return angleMode === 'deg' ? (value * 180) / Math.PI : value;
+        }
+
+        function tokenize(expr) {
+            const tokens = [];
+            let i = 0;
+            let prevType = 'start';
+            while (i < expr.length) {
+                const char = expr[i];
+                if (char === ' ') {
+                    i += 1;
+                    continue;
+                }
+                if (/[0-9.]/.test(char)) {
+                    let numStr = char;
+                    i += 1;
+                    while (i < expr.length && /[0-9.]/.test(expr[i])) {
+                        numStr += expr[i];
+                        i += 1;
+                    }
+                    if (numStr.split('.').length > 2) {
+                        throw new Error('Malformed number');
+                    }
+                    tokens.push({ type: 'number', value: Number(numStr) });
+                    prevType = 'number';
+                    continue;
+                }
+                if (/[a-z]/i.test(char)) {
+                    let name = char;
+                    i += 1;
+                    while (i < expr.length && /[a-z0-9_]/i.test(expr[i])) {
+                        name += expr[i];
+                        i += 1;
+                    }
+                    const lower = name.toLowerCase();
+                    if (lower === 'pi') {
+                        tokens.push({ type: 'number', value: Math.PI });
+                        prevType = 'number';
+                    } else if (lower === 'e') {
+                        tokens.push({ type: 'number', value: Math.E });
+                        prevType = 'number';
+                    } else if (lower === 'ans') {
+                        tokens.push({ type: 'number', value: lastAnswer });
+                        prevType = 'number';
+                    } else if (lower === 'x' || lower === 'y') {
+                        const variableValue = prompt('Enter value for ' + lower.toUpperCase() + ':');
+                        const parsed = Number(variableValue);
+                        if (Number.isNaN(parsed)) {
+                            throw new Error('Invalid variable input');
+                        }
+                        tokens.push({ type: 'number', value: parsed });
+                        prevType = 'number';
+                    } else {
+                        tokens.push({ type: 'function', value: lower });
+                        prevType = 'function';
+                    }
+                    continue;
+                }
+                if (char === '(' || char === ')') {
+                    tokens.push({ type: 'paren', value: char });
+                    prevType = char === '(' ? 'open' : 'close';
+                    i += 1;
+                    continue;
+                }
+                if ('+-*/^%'.includes(char)) {
+                    if (char === '-' && (prevType === 'operator' || prevType === 'start' || prevType === 'open')) {
+                        tokens.push({ type: 'operator', value: 'neg', unary: true });
+                    } else {
+                        tokens.push({ type: 'operator', value: char });
+                    }
+                    prevType = 'operator';
+                    i += 1;
+                    continue;
+                }
+                throw new Error('Unknown token: ' + char);
+            }
+            return tokens;
+        }
+
+        const precedence = {
+            '+': 2,
+            '-': 2,
+            '*': 3,
+            '/': 3,
+            '%': 3,
+            '^': 4,
+            neg: 5
+        };
+
+        const rightAssociative = new Set(['^', 'neg']);
+
+        const functionMap = {
+            sin: value => Math.sin(toRadians(value)),
+            cos: value => Math.cos(toRadians(value)),
+            tan: value => Math.tan(toRadians(value)),
+            asin: value => fromRadians(Math.asin(value)),
+            acos: value => fromRadians(Math.acos(value)),
+            atan: value => fromRadians(Math.atan(value)),
+            ln: value => Math.log(value),
+            log: value => Math.log10(value),
+            sqrt: value => Math.sqrt(value),
+            abs: value => Math.abs(value)
+        };
+
+        function toRpn(tokens) {
+            const output = [];
+            const stack = [];
+            for (const token of tokens) {
+                if (token.type === 'number') {
+                    output.push(token);
+                } else if (token.type === 'function') {
+                    stack.push(token);
+                } else if (token.type === 'operator') {
+                    while (stack.length) {
+                        const top = stack[stack.length - 1];
+                        if (top.type === 'operator' && ((rightAssociative.has(token.value) && precedence[token.value] < precedence[top.value]) || (!rightAssociative.has(token.value) && precedence[token.value] <= precedence[top.value]))) {
+                            output.push(stack.pop());
+                        } else if (top.type === 'function') {
+                            output.push(stack.pop());
+                        } else {
+                            break;
+                        }
+                    }
+                    stack.push(token);
+                } else if (token.type === 'paren') {
+                    if (token.value === '(') {
+                        stack.push(token);
+                    } else {
+                        let found = false;
+                        while (stack.length) {
+                            const top = stack.pop();
+                            if (top.type === 'paren' && top.value === '(') {
+                                found = true;
+                                break;
+                            }
+                            output.push(top);
+                        }
+                        if (!found) {
+                            throw new Error('Mismatched parentheses');
+                        }
+                        if (stack.length && stack[stack.length - 1].type === 'function') {
+                            output.push(stack.pop());
+                        }
+                    }
+                }
+            }
+            while (stack.length) {
+                const top = stack.pop();
+                if (top.type === 'paren') {
+                    throw new Error('Mismatched parentheses');
+                }
+                output.push(top);
+            }
+            return output;
+        }
+
+        function evaluateRpn(rpn) {
+            const stack = [];
+            for (const token of rpn) {
+                if (token.type === 'number') {
+                    stack.push(token.value);
+                    continue;
+                }
+                if (token.type === 'operator') {
+                    if (token.value === 'neg') {
+                        const value = stack.pop();
+                        stack.push(-value);
+                        continue;
+                    }
+                    const b = stack.pop();
+                    const a = stack.pop();
+                    switch (token.value) {
+                        case '+':
+                            stack.push(a + b);
+                            break;
+                        case '-':
+                            stack.push(a - b);
+                            break;
+                        case '*':
+                            stack.push(a * b);
+                            break;
+                        case '/':
+                            if (b === 0) {
+                                throw new Error('Division by zero');
+                            }
+                            stack.push(a / b);
+                            break;
+                        case '^':
+                            stack.push(a ** b);
+                            break;
+                        case '%':
+                            stack.push((a / 100) * b);
+                            break;
+                        default:
+                            throw new Error('Unknown operator');
+                    }
+                    continue;
+                }
+                if (token.type === 'function') {
+                    const value = stack.pop();
+                    if (!(token.value in functionMap)) {
+                        throw new Error('Unsupported function');
+                    }
+                    const result = functionMap[token.value](value);
+                    if (!Number.isFinite(result)) {
+                        throw new Error('Invalid result');
+                    }
+                    stack.push(result);
+                }
+            }
+            if (stack.length !== 1) {
+                throw new Error('Malformed expression');
+            }
+            return stack[0];
+        }
+
+        function evaluateExpression(expr) {
+            const tokens = tokenize(expr);
+            const rpn = toRpn(tokens);
+            return evaluateRpn(rpn);
+        }
+
+        function handleEvaluate() {
+            if (!expression.trim()) {
+                return;
+            }
+            try {
+                const result = evaluateExpression(expression);
+                lastAnswer = result;
+                expression = result.toString();
+                updateDisplay(result);
+                addToHistory(expression, result);
+            } catch (error) {
+                displayResult.textContent = 'Error';
+            }
+        }
+
+        function addToHistory(exprText, resultValue) {
+            if (historyEmptyMessage) {
+                historyEmptyMessage.remove();
+            }
+            const entry = document.createElement('button');
+            entry.type = 'button';
+            entry.className = 'history-entry';
+            entry.innerHTML = '<span class="history-expression">' + exprText + '</span><span class="history-result">' + formatNumber(resultValue) + '</span>';
+            entry.addEventListener('click', () => {
+                expression = exprText;
+                updateDisplay(resultValue);
+            });
+            historyList.prepend(entry);
+            history.unshift({ expression: exprText, result: resultValue });
+            if (history.length > 30) {
+                history.pop();
+                const last = historyList.lastElementChild;
+                if (last) {
+                    last.remove();
+                }
+            }
+        }
+
+        function percentageOperation() {
+            try {
+                const value = evaluateExpression(expression || '0');
+                expression = (value / 100).toString();
+                updateDisplay(expression);
+            } catch (error) {
+                displayResult.textContent = 'Error';
+            }
+        }
+
+        keypad.addEventListener('click', (event) => {
+            const target = event.target.closest('button');
+            if (!target) {
+                return;
+            }
+            const insertValue = target.dataset.insert;
+            const action = target.dataset.action;
+
+            if (insertValue) {
+                appendToExpression(insertValue);
+                return;
+            }
+
+            if (!action) {
+                return;
+            }
+
+            switch (action) {
+                case 'clear-entry':
+                    clearEntry();
+                    break;
+                case 'clear-all':
+                    clearAll();
+                    break;
+                case 'evaluate':
+                    handleEvaluate();
+                    break;
+                case 'toggle-sign':
+                    if (expression.startsWith('-')) {
+                        expression = expression.slice(1);
+                    } else {
+                        expression = '-' + expression;
+                    }
+                    updateDisplay();
+                    break;
+                case 'backspace':
+                    clearEntry();
+                    break;
+                case 'square':
+                    insertPower(expression ? '^(2)' : '0^(2)');
+                    break;
+                case 'power':
+                    appendToExpression('^');
+                    break;
+                case 'reciprocal':
+                    if (!expression) {
+                        expression = '1/(';
+                    } else {
+                        expression = '1/(' + expression + ')';
+                    }
+                    updateDisplay();
+                    break;
+                case 'factorial':
+                    try {
+                        const value = evaluateExpression(expression || '0');
+                        const fact = factorial(value);
+                        expression = fact.toString();
+                        updateDisplay(fact);
+                    } catch (error) {
+                        displayResult.textContent = 'Error';
+                    }
+                    break;
+                case 'percentage':
+                    percentageOperation();
+                    break;
+                case 'memory-clear':
+                    memoryValue = 0;
+                    updateMemoryStatus();
+                    break;
+                case 'memory-recall':
+                    expression += memoryValue.toString();
+                    updateDisplay();
+                    break;
+                case 'memory-plus':
+                    try {
+                        const value = evaluateExpression(expression || '0');
+                        memoryValue += value;
+                        updateMemoryStatus();
+                    } catch (error) {
+                        displayResult.textContent = 'Error';
+                    }
+                    break;
+                case 'memory-minus':
+                    try {
+                        const value = evaluateExpression(expression || '0');
+                        memoryValue -= value;
+                        updateMemoryStatus();
+                    } catch (error) {
+                        displayResult.textContent = 'Error';
+                    }
+                    break;
+                case 'insert-variable':
+                    appendToExpression(target.dataset.value || 'x');
+                    break;
+                case 'clear-history':
+                    history.length = 0;
+                    historyList.innerHTML = '';
+                    const msg = document.createElement('p');
+                    msg.className = 'history-expression';
+                    msg.id = 'historyEmptyMessage';
+                    msg.textContent = 'History cleared. Start a new calculation.';
+                    historyList.append(msg);
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        angleButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                setAngleMode(button.dataset.angleMode);
+            });
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                handleEvaluate();
+                return;
+            }
+            if (event.key === 'Backspace') {
+                event.preventDefault();
+                clearEntry();
+                return;
+            }
+            if (/^[0-9.+\-*/^()%]$/.test(event.key)) {
+                appendToExpression(event.key);
+            }
+        });
+
+        updateDisplay(0);
+        updateMemoryStatus();
+    })();
+</script>
+</body>
+</html>
