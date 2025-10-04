@@ -6970,7 +6970,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             document.getElementById('annDismissBtn').onclick = () => { dismissAnnouncementById(annId); modal.style.display = 'none'; };
             document.getElementById('annSnooze1h').onclick = () => { snoozeAnnouncementById(annId, 60*60*1000); modal.style.display = 'none'; showMessageBox('Will remind you in 1 hour', 'success'); };
             document.getElementById('annSnooze1d').onclick = () => { snoozeAnnouncementById(annId, 24*60*60*1000); modal.style.display = 'none'; showMessageBox('Will remind you in 24 hours', 'success'); };
-            document.getElementById('annShareBtn').onclick = async () => { try{ await safeCopyText(`${announcementData.message}\n��� JCHAT`); showMessageBox('Announcement copied to clipboard', 'success'); }catch(e){ showMessageBox('Copy failed', 'error'); } };
+            document.getElementById('annShareBtn').onclick = async () => { try{ await safeCopyText(`${announcementData.message}\n����� JCHAT`); showMessageBox('Announcement copied to clipboard', 'success'); }catch(e){ showMessageBox('Copy failed', 'error'); } };
 
             // focus
             setTimeout(()=>{ const btn = document.getElementById('closeAnnModal'); if(btn) btn.focus(); }, 80);
@@ -10780,6 +10780,40 @@ const lex = inspirationLexicon[type];
                 console.error("Nuvia_ERROR: Error deleting post:", error);
                 showMessageBox(`Failed to delete post: ${error.message}`, 'error');
                 playNotificationSound('error');
+            }
+        }
+
+        async function setPostCommentsEnabled(postId, enable) {
+            if (!isAuthReady || !currentUser) {
+                showMessageBox("Please log in to manage comments.", 'error');
+                throw new Error('Authentication required for comment settings.');
+            }
+
+            const postRef = doc(db, "artifacts", appId, "public", "data", "posts", postId);
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const postSnap = await transaction.get(postRef);
+                    if (!postSnap.exists()) {
+                        throw new Error("Post not found.");
+                    }
+                    const postData = postSnap.data();
+                    if (!postData) {
+                        throw new Error("Unable to load post details.");
+                    }
+                    if (currentUser.uid !== postData.authorId && currentUser.uid !== ADMIN_UID) {
+                        throw new Error("Only the post owner can change comment settings.");
+                    }
+                    transaction.update(postRef, {
+                        commentsEnabled: enable,
+                        updatedAt: serverTimestamp()
+                    });
+                });
+                showMessageBox(enable ? "Comments turned on for this post." : "Comments turned off for this post.", 'success');
+            } catch (error) {
+                console.error("Nuvia_ERROR: Failed to update comment settings:", error);
+                showMessageBox(`Failed to update comment settings: ${error.message}`, 'error');
+                throw error;
             }
         }
         /**
