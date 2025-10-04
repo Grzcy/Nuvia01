@@ -4762,7 +4762,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 <span class="chip-title">JCoins</span>
                 <span id="walletChipAmount">0</span>
               </div>
-              <div class="chip-sub">Rate: ��<span id="jcoinRate">0.00</span>/J</div>
+              <div class="chip-sub">Rate: ₦<span id="jcoinRate">0.00</span>/J</div>
             </div>
           </a>
         </div>
@@ -7687,7 +7687,7 @@ const simpleQuranQuotes = [
     { text: "Allah does not burden a soul beyond its capacity.", ref: "Al‑Baqarah 2:286" },
     { text: "In the remembrance of Allah hearts find rest.", ref: "Ar‑Ra'd 13:28" },
     { text: "Seek help through patience and prayer.", ref: "Al‑Baqarah 2:45" },
-    { text: "God loves those who do good.", ref: "Al‑Baqarah 2:195" },
+    { text: "God loves those who do good.", ref: "Al���Baqarah 2:195" },
     { text: "Indeed, with hardship comes ease.", ref: "Ash‑Sharh 94:6" },
     { text: "Tell My servants to speak kindly.", ref: "Al‑Isra 17:53" },
     { text: "If you are grateful, I will surely increase you.", ref: "Ibrahim 14:7" },
@@ -11680,15 +11680,24 @@ async function fetchAndDisplayPosts() {
                 const postAuthorId = postCard.querySelector('.post-options-button')?.dataset.authorId || null; // Get authorId if options button exists.
 
                 // Post actions (reactions, comments, options menu).
-                postCard.querySelectorAll('.react-button, .comment-toggle-button').forEach(button => {
+                const commentsDisabledForPost = postCard.dataset.commentsEnabled === 'false';
+                postCard.querySelectorAll('.react-button').forEach(button => {
                     button.disabled = !isAuthReady || (!settings.enablePublicChat && !isCurrentUserAdmin);
                 });
+                const commentToggleButton = postCard.querySelector('.comment-toggle-button');
+                if (commentToggleButton) {
+                    commentToggleButton.disabled = !isAuthReady || (!settings.enablePublicChat && !isCurrentUserAdmin);
+                }
 
                 // Comment input and submit button.
                 const commentInput = postCard.querySelector('.comment-input');
                 const submitCommentButton = postCard.querySelector('.submit-comment-button');
-                if (commentInput) commentInput.disabled = !isAuthReady || (!settings.enablePublicChat && !isCurrentUserAdmin);
-                if (submitCommentButton) submitCommentButton.disabled = !isAuthReady || (!settings.enablePublicChat && !isCurrentUserAdmin);
+                if (commentInput) commentInput.disabled = commentsDisabledForPost || !isAuthReady || (!settings.enablePublicChat && !isCurrentUserAdmin);
+                if (submitCommentButton) submitCommentButton.disabled = commentsDisabledForPost || !isAuthReady || (!settings.enablePublicChat && !isCurrentUserAdmin);
+                const commentInputArea = postCard.querySelector('.comment-input-area');
+                if (commentInputArea) commentInputArea.classList.toggle('comment-input-area-hidden', commentsDisabledForPost);
+                const commentsNotice = postCard.querySelector('.comments-disabled-notice');
+                if (commentsNotice) commentsNotice.classList.toggle('comments-disabled-notice-hidden', !commentsDisabledForPost);
 
                 // Delete comment buttons (more complex logic: can delete own if enabled, admin can delete any).
                 postCard.querySelectorAll('.delete-comment-button').forEach(button => {
