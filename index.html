@@ -11410,9 +11410,10 @@ async function fetchAndDisplayPosts() {
         // --- Event Delegation for Dynamic Elements ---
         // Attaches a single click listener to the document and delegates events to dynamically created elements.
         const keepFeedScrollSeparation = (event) => {
-            const dropdown = event.target.closest('.post-options-dropdown.active');
-            if (!dropdown) return;
-            if (dropdown.scrollHeight <= dropdown.clientHeight) return;
+            const scrollRegion = event.target.closest('.post-options-scroll');
+            if (!scrollRegion) return;
+            if (!scrollRegion.closest('.post-options-dropdown.active')) return;
+            if (scrollRegion.scrollHeight <= scrollRegion.clientHeight) return;
             event.stopPropagation();
         };
 
