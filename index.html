@@ -4817,24 +4817,27 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
     </ul>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const postElements = document.querySelectorAll('.post-card');  // Get all posts
+            // Ensure proper post targeting by checking the structure of the post-card
+            const postElements = document.querySelectorAll('.post-card');  // Find all post elements
             postElements.forEach((postElement) => {
                 const disableBtn = postElement.querySelector('.post-disable-comment-button');
                 const enableBtn = postElement.querySelector('.post-enable-comment-button');
                 const commentSection = postElement.querySelector('.comments-section');
 
-                // Ensure that event listeners are added to each post dynamically
+                // Add event listeners for toggle functionality
                 if (disableBtn && enableBtn && commentSection) {
+                    // Disable Comments
                     disableBtn.addEventListener('click', () => {
-                        commentSection.style.display = 'none';
-                        disableBtn.classList.add('hidden');
-                        enableBtn.classList.remove('hidden');
+                        commentSection.style.display = 'none';  // Hide the comment section
+                        disableBtn.classList.add('hidden');  // Hide the disable button
+                        enableBtn.classList.remove('hidden');  // Show the enable button
                     });
 
+                    // Enable Comments
                     enableBtn.addEventListener('click', () => {
-                        commentSection.style.display = 'block';
-                        enableBtn.classList.add('hidden');
-                        disableBtn.classList.remove('hidden');
+                        commentSection.style.display = 'block';  // Show the comment section
+                        enableBtn.classList.add('hidden');  // Hide the enable button
+                        disableBtn.classList.remove('hidden');  // Show the disable button
                     });
                 }
             });
@@ -5092,24 +5095,27 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
     </ul>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const postElements = document.querySelectorAll('.post-card');  // Get all posts
+            // Ensure proper post targeting by checking the structure of the post-card
+            const postElements = document.querySelectorAll('.post-card');  // Find all post elements
             postElements.forEach((postElement) => {
                 const disableBtn = postElement.querySelector('.post-disable-comment-button');
                 const enableBtn = postElement.querySelector('.post-enable-comment-button');
                 const commentSection = postElement.querySelector('.comments-section');
 
-                // Ensure that event listeners are added to each post dynamically
+                // Add event listeners for toggle functionality
                 if (disableBtn && enableBtn && commentSection) {
+                    // Disable Comments
                     disableBtn.addEventListener('click', () => {
-                        commentSection.style.display = 'none';
-                        disableBtn.classList.add('hidden');
-                        enableBtn.classList.remove('hidden');
+                        commentSection.style.display = 'none';  // Hide the comment section
+                        disableBtn.classList.add('hidden');  // Hide the disable button
+                        enableBtn.classList.remove('hidden');  // Show the enable button
                     });
 
+                    // Enable Comments
                     enableBtn.addEventListener('click', () => {
-                        commentSection.style.display = 'block';
-                        enableBtn.classList.add('hidden');
-                        disableBtn.classList.remove('hidden');
+                        commentSection.style.display = 'block';  // Show the comment section
+                        enableBtn.classList.add('hidden');  // Hide the enable button
+                        disableBtn.classList.remove('hidden');  // Show the disable button
                     });
                 }
             });
@@ -5259,24 +5265,27 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
     </ul>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const postElements = document.querySelectorAll('.post-card');  // Get all posts
+            // Ensure proper post targeting by checking the structure of the post-card
+            const postElements = document.querySelectorAll('.post-card');  // Find all post elements
             postElements.forEach((postElement) => {
                 const disableBtn = postElement.querySelector('.post-disable-comment-button');
                 const enableBtn = postElement.querySelector('.post-enable-comment-button');
                 const commentSection = postElement.querySelector('.comments-section');
 
-                // Ensure that event listeners are added to each post dynamically
+                // Add event listeners for toggle functionality
                 if (disableBtn && enableBtn && commentSection) {
+                    // Disable Comments
                     disableBtn.addEventListener('click', () => {
-                        commentSection.style.display = 'none';
-                        disableBtn.classList.add('hidden');
-                        enableBtn.classList.remove('hidden');
+                        commentSection.style.display = 'none';  // Hide the comment section
+                        disableBtn.classList.add('hidden');  // Hide the disable button
+                        enableBtn.classList.remove('hidden');  // Show the enable button
                     });
 
+                    // Enable Comments
                     enableBtn.addEventListener('click', () => {
-                        commentSection.style.display = 'block';
-                        enableBtn.classList.add('hidden');
-                        disableBtn.classList.remove('hidden');
+                        commentSection.style.display = 'block';  // Show the comment section
+                        enableBtn.classList.add('hidden');  // Hide the enable button
+                        disableBtn.classList.remove('hidden');  // Show the disable button
                     });
                 }
             });
@@ -5301,24 +5310,27 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
     </ul>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const postElements = document.querySelectorAll('.post-card');  // Get all posts
+            // Ensure proper post targeting by checking the structure of the post-card
+            const postElements = document.querySelectorAll('.post-card');  // Find all post elements
             postElements.forEach((postElement) => {
                 const disableBtn = postElement.querySelector('.post-disable-comment-button');
                 const enableBtn = postElement.querySelector('.post-enable-comment-button');
                 const commentSection = postElement.querySelector('.comments-section');
 
-                // Ensure that event listeners are added to each post dynamically
+                // Add event listeners for toggle functionality
                 if (disableBtn && enableBtn && commentSection) {
+                    // Disable Comments
                     disableBtn.addEventListener('click', () => {
-                        commentSection.style.display = 'none';
-                        disableBtn.classList.add('hidden');
-                        enableBtn.classList.remove('hidden');
+                        commentSection.style.display = 'none';  // Hide the comment section
+                        disableBtn.classList.add('hidden');  // Hide the disable button
+                        enableBtn.classList.remove('hidden');  // Show the enable button
                     });
 
+                    // Enable Comments
                     enableBtn.addEventListener('click', () => {
-                        commentSection.style.display = 'block';
-                        enableBtn.classList.add('hidden');
-                        disableBtn.classList.remove('hidden');
+                        commentSection.style.display = 'block';  // Show the comment section
+                        enableBtn.classList.add('hidden');  // Hide the enable button
+                        disableBtn.classList.remove('hidden');  // Show the disable button
                     });
                 }
             });
@@ -5343,24 +5355,27 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
     </ul>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const postElements = document.querySelectorAll('.post-card');  // Get all posts
+            // Ensure proper post targeting by checking the structure of the post-card
+            const postElements = document.querySelectorAll('.post-card');  // Find all post elements
             postElements.forEach((postElement) => {
                 const disableBtn = postElement.querySelector('.post-disable-comment-button');
                 const enableBtn = postElement.querySelector('.post-enable-comment-button');
                 const commentSection = postElement.querySelector('.comments-section');
 
-                // Ensure that event listeners are added to each post dynamically
+                // Add event listeners for toggle functionality
                 if (disableBtn && enableBtn && commentSection) {
+                    // Disable Comments
                     disableBtn.addEventListener('click', () => {
-                        commentSection.style.display = 'none';
-                        disableBtn.classList.add('hidden');
-                        enableBtn.classList.remove('hidden');
+                        commentSection.style.display = 'none';  // Hide the comment section
+                        disableBtn.classList.add('hidden');  // Hide the disable button
+                        enableBtn.classList.remove('hidden');  // Show the enable button
                     });
 
+                    // Enable Comments
                     enableBtn.addEventListener('click', () => {
-                        commentSection.style.display = 'block';
-                        enableBtn.classList.add('hidden');
-                        disableBtn.classList.remove('hidden');
+                        commentSection.style.display = 'block';  // Show the comment section
+                        enableBtn.classList.add('hidden');  // Hide the enable button
+                        disableBtn.classList.remove('hidden');  // Show the disable button
                     });
                 }
             });
