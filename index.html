@@ -7759,7 +7759,7 @@ const simpleBibleQuotes = [
 const simpleQuranQuotes = [
     { text: "Remember Me, and I will remember you.", ref: "Al‑Baqarah 2:152" },
     { text: "Whoever does good, it is for his own soul.", ref: "Al�����An'am 6:160" },
-    { text: "Allah does not burden a soul beyond its capacity.", ref: "Al��Baqarah 2:286" },
+    { text: "Allah does not burden a soul beyond its capacity.", ref: "Al‑Baqarah 2:286" },
     { text: "In the remembrance of Allah hearts find rest.", ref: "Ar‑Ra'd 13:28" },
     { text: "Seek help through patience and prayer.", ref: "Al‑Baqarah 2:45" },
     { text: "God loves those who do good.", ref: "Al‑Baqarah 2:195" },
@@ -12808,7 +12808,7 @@ async function fetchAndDisplayPosts() {
                         if (!a || !a.href) return;
                         const href = a.getAttribute('href') || '';
                         const hrefLower = href.toLowerCase();
-                        // Allow only links to bible.html, quran.html, login.html, Signup anchor
+                        // Allow only links to bible.html, quran.html, calculator.html, login.html, Signup anchor
                         if (hrefLower.includes('bible.html') || hrefLower.includes('quran.html') || hrefLower.includes('login.html') || hrefLower.includes('calculator.html') || href.includes('#signup')) {
                             return; // allow
                         }
