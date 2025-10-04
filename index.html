@@ -2450,12 +2450,14 @@
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             min-width: 150px;
-            max-height: 320px;
+            max-height: min(360px, calc(100vh - 96px));
             z-index: 20;
             display: none;
             flex-direction: column;
             overflow-x: hidden;
             overflow-y: auto;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
             scrollbar-width: thin;
             scrollbar-color: var(--glass-blue) transparent;
         }
@@ -7746,7 +7748,7 @@ const simpleQuranQuotes = [
     { text: "Indeed, with hardship comes ease.", ref: "Ash‑Sharh 94:6" },
     { text: "Tell My servants to speak kindly.", ref: "Al‑Isra 17:53" },
     { text: "If you are grateful, I will surely increase you.", ref: "Ibrahim 14:7" },
-    { text: "Say, He is God, the One.", ref: "Al‑Ikhlas 112:1" }
+    { text: "Say, He is God, the One.", ref: "Al��Ikhlas 112:1" }
 ];
 
 const simplePrayers = {
