@@ -4817,27 +4817,37 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
     </ul>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Ensuring proper targeting of each post
-            const postElements = document.querySelectorAll('.post-card'); // Each post element
+            const postElements = document.querySelectorAll('.post-card');  // Find all posts
             postElements.forEach((postElement) => {
                 const disableBtn = postElement.querySelector('.post-disable-comment-button');
                 const enableBtn = postElement.querySelector('.post-enable-comment-button');
                 const commentSection = postElement.querySelector('.comments-section');
+                const postOwnerId = postElement.getAttribute('data-owner-id');  // Assuming data-owner-id is set for each post
 
-                // Make sure the buttons are dynamically targeting their respective comment sections
+                // Check if the current user is the post owner
+                const currentUserId = 'current_user_id';  // Replace this with dynamic current user ID
+
+                // Show comment toggle buttons only for the post owner
+                if (postOwnerId === currentUserId) {
+                    disableBtn.classList.remove('hidden');
+                    enableBtn.classList.remove('hidden');
+                } else {
+                    disableBtn.classList.add('hidden');
+                    enableBtn.classList.add('hidden');
+                }
+
+                // Add event listeners for comment toggle functionality
                 if (disableBtn && enableBtn && commentSection) {
-                    // Disable Comments: hide comment section
                     disableBtn.addEventListener('click', () => {
                         commentSection.style.display = 'none';  // Hide comments
-                        disableBtn.classList.add('hidden');  // Hide disable button
-                        enableBtn.classList.remove('hidden');  // Show enable button
+                        disableBtn.classList.add('hidden');
+                        enableBtn.classList.remove('hidden');
                     });
 
-                    // Enable Comments: show comment section
                     enableBtn.addEventListener('click', () => {
                         commentSection.style.display = 'block';  // Show comments
-                        enableBtn.classList.add('hidden');  // Hide enable button
-                        disableBtn.classList.remove('hidden');  // Show disable button
+                        enableBtn.classList.add('hidden');
+                        disableBtn.classList.remove('hidden');
                     });
                 }
             });
@@ -5095,27 +5105,37 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
     </ul>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Ensuring proper targeting of each post
-            const postElements = document.querySelectorAll('.post-card'); // Each post element
+            const postElements = document.querySelectorAll('.post-card');  // Find all posts
             postElements.forEach((postElement) => {
                 const disableBtn = postElement.querySelector('.post-disable-comment-button');
                 const enableBtn = postElement.querySelector('.post-enable-comment-button');
                 const commentSection = postElement.querySelector('.comments-section');
+                const postOwnerId = postElement.getAttribute('data-owner-id');  // Assuming data-owner-id is set for each post
 
-                // Make sure the buttons are dynamically targeting their respective comment sections
+                // Check if the current user is the post owner
+                const currentUserId = 'current_user_id';  // Replace this with dynamic current user ID
+
+                // Show comment toggle buttons only for the post owner
+                if (postOwnerId === currentUserId) {
+                    disableBtn.classList.remove('hidden');
+                    enableBtn.classList.remove('hidden');
+                } else {
+                    disableBtn.classList.add('hidden');
+                    enableBtn.classList.add('hidden');
+                }
+
+                // Add event listeners for comment toggle functionality
                 if (disableBtn && enableBtn && commentSection) {
-                    // Disable Comments: hide comment section
                     disableBtn.addEventListener('click', () => {
                         commentSection.style.display = 'none';  // Hide comments
-                        disableBtn.classList.add('hidden');  // Hide disable button
-                        enableBtn.classList.remove('hidden');  // Show enable button
+                        disableBtn.classList.add('hidden');
+                        enableBtn.classList.remove('hidden');
                     });
 
-                    // Enable Comments: show comment section
                     enableBtn.addEventListener('click', () => {
                         commentSection.style.display = 'block';  // Show comments
-                        enableBtn.classList.add('hidden');  // Hide enable button
-                        disableBtn.classList.remove('hidden');  // Show disable button
+                        enableBtn.classList.add('hidden');
+                        disableBtn.classList.remove('hidden');
                     });
                 }
             });
@@ -5265,27 +5285,37 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
     </ul>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Ensuring proper targeting of each post
-            const postElements = document.querySelectorAll('.post-card'); // Each post element
+            const postElements = document.querySelectorAll('.post-card');  // Find all posts
             postElements.forEach((postElement) => {
                 const disableBtn = postElement.querySelector('.post-disable-comment-button');
                 const enableBtn = postElement.querySelector('.post-enable-comment-button');
                 const commentSection = postElement.querySelector('.comments-section');
+                const postOwnerId = postElement.getAttribute('data-owner-id');  // Assuming data-owner-id is set for each post
 
-                // Make sure the buttons are dynamically targeting their respective comment sections
+                // Check if the current user is the post owner
+                const currentUserId = 'current_user_id';  // Replace this with dynamic current user ID
+
+                // Show comment toggle buttons only for the post owner
+                if (postOwnerId === currentUserId) {
+                    disableBtn.classList.remove('hidden');
+                    enableBtn.classList.remove('hidden');
+                } else {
+                    disableBtn.classList.add('hidden');
+                    enableBtn.classList.add('hidden');
+                }
+
+                // Add event listeners for comment toggle functionality
                 if (disableBtn && enableBtn && commentSection) {
-                    // Disable Comments: hide comment section
                     disableBtn.addEventListener('click', () => {
                         commentSection.style.display = 'none';  // Hide comments
-                        disableBtn.classList.add('hidden');  // Hide disable button
-                        enableBtn.classList.remove('hidden');  // Show enable button
+                        disableBtn.classList.add('hidden');
+                        enableBtn.classList.remove('hidden');
                     });
 
-                    // Enable Comments: show comment section
                     enableBtn.addEventListener('click', () => {
                         commentSection.style.display = 'block';  // Show comments
-                        enableBtn.classList.add('hidden');  // Hide enable button
-                        disableBtn.classList.remove('hidden');  // Show disable button
+                        enableBtn.classList.add('hidden');
+                        disableBtn.classList.remove('hidden');
                     });
                 }
             });
@@ -5310,27 +5340,37 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
     </ul>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Ensuring proper targeting of each post
-            const postElements = document.querySelectorAll('.post-card'); // Each post element
+            const postElements = document.querySelectorAll('.post-card');  // Find all posts
             postElements.forEach((postElement) => {
                 const disableBtn = postElement.querySelector('.post-disable-comment-button');
                 const enableBtn = postElement.querySelector('.post-enable-comment-button');
                 const commentSection = postElement.querySelector('.comments-section');
+                const postOwnerId = postElement.getAttribute('data-owner-id');  // Assuming data-owner-id is set for each post
 
-                // Make sure the buttons are dynamically targeting their respective comment sections
+                // Check if the current user is the post owner
+                const currentUserId = 'current_user_id';  // Replace this with dynamic current user ID
+
+                // Show comment toggle buttons only for the post owner
+                if (postOwnerId === currentUserId) {
+                    disableBtn.classList.remove('hidden');
+                    enableBtn.classList.remove('hidden');
+                } else {
+                    disableBtn.classList.add('hidden');
+                    enableBtn.classList.add('hidden');
+                }
+
+                // Add event listeners for comment toggle functionality
                 if (disableBtn && enableBtn && commentSection) {
-                    // Disable Comments: hide comment section
                     disableBtn.addEventListener('click', () => {
                         commentSection.style.display = 'none';  // Hide comments
-                        disableBtn.classList.add('hidden');  // Hide disable button
-                        enableBtn.classList.remove('hidden');  // Show enable button
+                        disableBtn.classList.add('hidden');
+                        enableBtn.classList.remove('hidden');
                     });
 
-                    // Enable Comments: show comment section
                     enableBtn.addEventListener('click', () => {
                         commentSection.style.display = 'block';  // Show comments
-                        enableBtn.classList.add('hidden');  // Hide enable button
-                        disableBtn.classList.remove('hidden');  // Show disable button
+                        enableBtn.classList.add('hidden');
+                        disableBtn.classList.remove('hidden');
                     });
                 }
             });
@@ -5355,27 +5395,37 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
     </ul>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Ensuring proper targeting of each post
-            const postElements = document.querySelectorAll('.post-card'); // Each post element
+            const postElements = document.querySelectorAll('.post-card');  // Find all posts
             postElements.forEach((postElement) => {
                 const disableBtn = postElement.querySelector('.post-disable-comment-button');
                 const enableBtn = postElement.querySelector('.post-enable-comment-button');
                 const commentSection = postElement.querySelector('.comments-section');
+                const postOwnerId = postElement.getAttribute('data-owner-id');  // Assuming data-owner-id is set for each post
 
-                // Make sure the buttons are dynamically targeting their respective comment sections
+                // Check if the current user is the post owner
+                const currentUserId = 'current_user_id';  // Replace this with dynamic current user ID
+
+                // Show comment toggle buttons only for the post owner
+                if (postOwnerId === currentUserId) {
+                    disableBtn.classList.remove('hidden');
+                    enableBtn.classList.remove('hidden');
+                } else {
+                    disableBtn.classList.add('hidden');
+                    enableBtn.classList.add('hidden');
+                }
+
+                // Add event listeners for comment toggle functionality
                 if (disableBtn && enableBtn && commentSection) {
-                    // Disable Comments: hide comment section
                     disableBtn.addEventListener('click', () => {
                         commentSection.style.display = 'none';  // Hide comments
-                        disableBtn.classList.add('hidden');  // Hide disable button
-                        enableBtn.classList.remove('hidden');  // Show enable button
+                        disableBtn.classList.add('hidden');
+                        enableBtn.classList.remove('hidden');
                     });
 
-                    // Enable Comments: show comment section
                     enableBtn.addEventListener('click', () => {
                         commentSection.style.display = 'block';  // Show comments
-                        enableBtn.classList.add('hidden');  // Hide enable button
-                        disableBtn.classList.remove('hidden');  // Show disable button
+                        enableBtn.classList.add('hidden');
+                        disableBtn.classList.remove('hidden');
                     });
                 }
             });
