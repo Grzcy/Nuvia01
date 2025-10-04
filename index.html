@@ -7535,6 +7535,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 findFriendsLink = document.getElementById('findFriendsLink');
                 friendsLink = document.getElementById('friendsLink');
                 groupsLink = document.getElementById('groupsLink');
+                calculatorLink = document.getElementById('calculatorLink');
                 jcoinShopLink = document.getElementById('jcoinShopLink');
                 maintenanceOverlay = document.getElementById('maintenanceOverlay');
                 maintenanceAnnouncementText = document.getElementById('maintenanceAnnouncementText');
@@ -7564,7 +7565,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
 
         // All DOM elements - will be initialized in initializeDOMElements  
         let sidebarNav, sidebarToggleFab, sidebarCloseBtn, sidebarNavItems, sidebarLogoutLink;
-        let chatLink, findFriendsLink, friendsLink, groupsLink, jcoinShopLink;
+        let chatLink, findFriendsLink, friendsLink, groupsLink, calculatorLink, jcoinShopLink;
         let maintenanceOverlay, maintenanceAnnouncementText, callOverlay, callStatusIcon;
         let callStatusText, callTimerDisplay, callActions, acceptCallBtn, declineCallBtn;
         let endCallBtn, localVideo, remoteVideo, remoteAudio, toggleMuteBtn, toggleVideoBtn;
@@ -7757,7 +7758,7 @@ const simpleBibleQuotes = [
 // Simple Quran quotes with Surah:Ayah references (paraphrased for simple English)
 const simpleQuranQuotes = [
     { text: "Remember Me, and I will remember you.", ref: "Al‑Baqarah 2:152" },
-    { text: "Whoever does good, it is for his own soul.", ref: "Al���An'am 6:160" },
+    { text: "Whoever does good, it is for his own soul.", ref: "Al�����An'am 6:160" },
     { text: "Allah does not burden a soul beyond its capacity.", ref: "Al‑Baqarah 2:286" },
     { text: "In the remembrance of Allah hearts find rest.", ref: "Ar‑Ra'd 13:28" },
     { text: "Seek help through patience and prayer.", ref: "Al‑Baqarah 2:45" },
@@ -9177,6 +9178,10 @@ async function checkAndStartDailyBonusTimer() {
             if (groupsLink) {
                 groupsLink.style.pointerEvents = finalEnableState ? 'auto' : 'none';
                 groupsLink.style.opacity = finalEnableState ? '1' : '0.5';
+            }
+            if (calculatorLink) {
+                calculatorLink.style.pointerEvents = finalEnableState ? 'auto' : 'none';
+                calculatorLink.style.opacity = finalEnableState ? '1' : '0.5';
             }
             if (jcoinShopLink) {
                 jcoinShopLink.style.pointerEvents = finalEnableState ? 'auto' : 'none';
@@ -12804,7 +12809,7 @@ async function fetchAndDisplayPosts() {
                         const href = a.getAttribute('href') || '';
                         const hrefLower = href.toLowerCase();
                         // Allow only links to bible.html, quran.html, login.html, Signup anchor
-                        if (hrefLower.includes('bible.html') || hrefLower.includes('quran.html') || hrefLower.includes('login.html') || href.includes('#signup')) {
+                        if (hrefLower.includes('bible.html') || hrefLower.includes('quran.html') || hrefLower.includes('login.html') || hrefLower.includes('calculator.html') || href.includes('#signup')) {
                             return; // allow
                         }
                         // Allow same-page anchors or javascript links
