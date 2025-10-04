@@ -4762,7 +4762,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 <span class="chip-title">JCoins</span>
                 <span id="walletChipAmount">0</span>
               </div>
-              <div class="chip-sub">Rate: ₦<span id="jcoinRate">0.00</span>/J</div>
+              <div class="chip-sub">Rate: ��<span id="jcoinRate">0.00</span>/J</div>
             </div>
           </a>
         </div>
@@ -11096,7 +11096,11 @@ async function fetchAndDisplayPosts() {
 
                         let postElement = currentPostElements.get(postId);
 
+                        let commentsEnabled = post.commentsEnabled !== false;
+
                         if (postElement) {
+                            postElement.dataset.commentsEnabled = commentsEnabled ? 'true' : 'false';
+
                             // If post already exists in DOM, update its content.
                             const contentP = postElement.querySelector('.post-content-text p');
                             if (contentP) contentP.textContent = post.content;
@@ -11136,17 +11140,40 @@ async function fetchAndDisplayPosts() {
                             const commentsCountElement = postElement.querySelector('.post-reactions-summary .comments-count');
                             if (commentsCountElement) commentsCountElement.textContent = post.commentsCount || 0;
 
+                            const dropdownToggle = postElement.querySelector('.toggle-comments-button');
+                            if (dropdownToggle) {
+                                dropdownToggle.dataset.commentsEnabled = commentsEnabled ? 'true' : 'false';
+                                dropdownToggle.classList.toggle('disable-comments-option', commentsEnabled);
+                                dropdownToggle.classList.toggle('enable-comments-option', !commentsEnabled);
+                                dropdownToggle.innerHTML = `<i class="fas ${commentsEnabled ? 'fa-comment-slash' : 'fa-comment'}"></i> ${commentsEnabled ? 'Turn Off Comments' : 'Turn On Comments'}`;
+                                dropdownToggle.setAttribute('aria-label', commentsEnabled ? 'Turn off comments for this post' : 'Turn on comments for this post');
+                            }
+
+                            const commentToggleButton = postElement.querySelector('.comment-toggle-button');
+                            if (commentToggleButton) {
+                                commentToggleButton.dataset.commentsState = commentsEnabled ? 'enabled' : 'disabled';
+                                commentToggleButton.innerHTML = `<i class="fas ${commentsEnabled ? 'fa-comment' : 'fa-comment-slash'}"></i> ${commentsEnabled ? 'Comment' : 'Comments Off'}`;
+                                commentToggleButton.setAttribute('aria-label', commentsEnabled ? 'Show or hide comments' : 'Comments are turned off');
+                            }
+
                         } else {
                             // If post is new, create and append a new element.
                             postElement = renderPost(post, postId);
                             postsFeed.appendChild(postElement); // Add to DOM.
+                            commentsEnabled = postElement.dataset.commentsEnabled !== 'false';
                         }
 
                         // Always ensure comment inputs and buttons are enabled/disabled based on current auth state and system settings.
                         const commentInput = postElement.querySelector('.comment-input');
                         const submitCommentButton = postElement.querySelector('.submit-comment-button');
-                        if (commentInput) commentInput.disabled = !isAuthReady || (!currentSystemSettings.enablePublicChat && currentUser.uid !== ADMIN_UID);
-                        if (submitCommentButton) submitCommentButton.disabled = !isAuthReady || (!currentSystemSettings.enablePublicChat && currentUser.uid !== ADMIN_UID);
+                        if (commentInput) commentInput.disabled = !commentsEnabled || !isAuthReady || (!currentSystemSettings.enablePublicChat && currentUser.uid !== ADMIN_UID);
+                        if (submitCommentButton) submitCommentButton.disabled = !commentsEnabled || !isAuthReady || (!currentSystemSettings.enablePublicChat && currentUser.uid !== ADMIN_UID);
+
+                        const commentInputArea = postElement.querySelector('.comment-input-area');
+                        if (commentInputArea) commentInputArea.classList.toggle('comment-input-area-hidden', !commentsEnabled);
+
+                        const commentsNotice = postElement.querySelector('.comments-disabled-notice');
+                        if (commentsNotice) commentsNotice.classList.toggle('comments-disabled-notice-hidden', commentsEnabled);
 
                         // Setup onSnapshot for comments for this specific post.
                         const commentsListElement = document.getElementById(`comments-list-${postId}`);
