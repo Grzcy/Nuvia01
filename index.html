@@ -4811,7 +4811,33 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                                 <li><strong>Scripture indexing</strong> ������ fast chapter and verse lookup with offline resume and reading progress persistence.</li>
                                 <li><strong>Privacy-first profiles</strong> �� local-first defaults with optional cloud sync for registered users.</li>
                                 <li><strong>Content safety</strong> ��� layered moderation combining heuristics and community signals.</li>
-                            </ul>
+                            
+        <li><a href="#" class="post-option-button post-disable-comment-button">Disable Comments</a></li>
+        <li><a href="#" class="post-option-button post-enable-comment-button hidden">Enable Comments</a></li>
+    </ul>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const postElements = document.querySelectorAll('.post-card');  // Get all posts
+            postElements.forEach((postElement) => {
+                const disableBtn = postElement.querySelector('.post-disable-comment-button');
+                const enableBtn = postElement.querySelector('.post-enable-comment-button');
+                const commentSection = postElement.querySelector('.comments-section');
+
+                disableBtn.addEventListener('click', () => {
+                    commentSection.style.display = 'none';
+                    disableBtn.classList.add('hidden');
+                    enableBtn.classList.remove('hidden');
+                });
+
+                enableBtn.addEventListener('click', () => {
+                    commentSection.style.display = 'block';
+                    enableBtn.classList.add('hidden');
+                    disableBtn.classList.remove('hidden');
+                });
+            });
+        });
+    </script>
+    
                         </div>
 
                         <div class="about-features" style="margin-top:6px;">
@@ -5057,7 +5083,33 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                         <li>Priority review by a developer</li>
                         <li>Faster access to JCoins and features</li>
                         <li>Secure, one‑time verification fee</li>
-                    </ul>
+                    
+        <li><a href="#" class="post-option-button post-disable-comment-button">Disable Comments</a></li>
+        <li><a href="#" class="post-option-button post-enable-comment-button hidden">Enable Comments</a></li>
+    </ul>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const postElements = document.querySelectorAll('.post-card');  // Get all posts
+            postElements.forEach((postElement) => {
+                const disableBtn = postElement.querySelector('.post-disable-comment-button');
+                const enableBtn = postElement.querySelector('.post-enable-comment-button');
+                const commentSection = postElement.querySelector('.comments-section');
+
+                disableBtn.addEventListener('click', () => {
+                    commentSection.style.display = 'none';
+                    disableBtn.classList.add('hidden');
+                    enableBtn.classList.remove('hidden');
+                });
+
+                enableBtn.addEventListener('click', () => {
+                    commentSection.style.display = 'block';
+                    enableBtn.classList.add('hidden');
+                    disableBtn.classList.remove('hidden');
+                });
+            });
+        });
+    </script>
+    
                     <div class="button-group" style="display:flex;gap:10px;justify-content:flex-end;">
                         <button id="closeWalletLockedBtn" class="modal-button cancel-button">Close</button>
                         <a id="walletPayBtn" href="/developer.html" class="modal-button confirm-button">Pay 5000 JCoins ($10)</a>
@@ -5195,7 +5247,33 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                                 <li>Premium Badge</li>
                                 <li>Custom Themes</li>
                                 <li>Ad-free Experience</li>
-                            </ul>
+                            
+        <li><a href="#" class="post-option-button post-disable-comment-button">Disable Comments</a></li>
+        <li><a href="#" class="post-option-button post-enable-comment-button hidden">Enable Comments</a></li>
+    </ul>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const postElements = document.querySelectorAll('.post-card');  // Get all posts
+            postElements.forEach((postElement) => {
+                const disableBtn = postElement.querySelector('.post-disable-comment-button');
+                const enableBtn = postElement.querySelector('.post-enable-comment-button');
+                const commentSection = postElement.querySelector('.comments-section');
+
+                disableBtn.addEventListener('click', () => {
+                    commentSection.style.display = 'none';
+                    disableBtn.classList.add('hidden');
+                    enableBtn.classList.remove('hidden');
+                });
+
+                enableBtn.addEventListener('click', () => {
+                    commentSection.style.display = 'block';
+                    enableBtn.classList.add('hidden');
+                    disableBtn.classList.remove('hidden');
+                });
+            });
+        });
+    </script>
+    
                         </div>
                         
                         <div class="premium-tier-option" data-tier="vip">
@@ -5208,7 +5286,33 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                                 <li>Priority Support</li>
                                 <li>Advanced Features</li>
                                 <li>All Premium Features</li>
-                            </ul>
+                            
+        <li><a href="#" class="post-option-button post-disable-comment-button">Disable Comments</a></li>
+        <li><a href="#" class="post-option-button post-enable-comment-button hidden">Enable Comments</a></li>
+    </ul>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const postElements = document.querySelectorAll('.post-card');  // Get all posts
+            postElements.forEach((postElement) => {
+                const disableBtn = postElement.querySelector('.post-disable-comment-button');
+                const enableBtn = postElement.querySelector('.post-enable-comment-button');
+                const commentSection = postElement.querySelector('.comments-section');
+
+                disableBtn.addEventListener('click', () => {
+                    commentSection.style.display = 'none';
+                    disableBtn.classList.add('hidden');
+                    enableBtn.classList.remove('hidden');
+                });
+
+                enableBtn.addEventListener('click', () => {
+                    commentSection.style.display = 'block';
+                    enableBtn.classList.add('hidden');
+                    disableBtn.classList.remove('hidden');
+                });
+            });
+        });
+    </script>
+    
                         </div>
                         
                         <div class="premium-tier-option" data-tier="elite">
@@ -5221,7 +5325,33 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                                 <li>Exclusive Content</li>
                                 <li>Custom Features</li>
                                 <li>All VIP Features</li>
-                            </ul>
+                            
+        <li><a href="#" class="post-option-button post-disable-comment-button">Disable Comments</a></li>
+        <li><a href="#" class="post-option-button post-enable-comment-button hidden">Enable Comments</a></li>
+    </ul>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const postElements = document.querySelectorAll('.post-card');  // Get all posts
+            postElements.forEach((postElement) => {
+                const disableBtn = postElement.querySelector('.post-disable-comment-button');
+                const enableBtn = postElement.querySelector('.post-enable-comment-button');
+                const commentSection = postElement.querySelector('.comments-section');
+
+                disableBtn.addEventListener('click', () => {
+                    commentSection.style.display = 'none';
+                    disableBtn.classList.add('hidden');
+                    enableBtn.classList.remove('hidden');
+                });
+
+                enableBtn.addEventListener('click', () => {
+                    commentSection.style.display = 'block';
+                    enableBtn.classList.add('hidden');
+                    disableBtn.classList.remove('hidden');
+                });
+            });
+        });
+    </script>
+    
                         </div>
                     </div>
                     
