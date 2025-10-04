@@ -606,6 +606,42 @@
             </div>
         </section>
 
+        <section class="graph-card" aria-labelledby="graphHeading">
+            <div class="graph-intro">
+                <h2 class="card-title" id="graphHeading">Graphing Lab</h2>
+                <p class="card-subtitle">Visualize functions instantly. Plot f(x) with adjustable domains and sample density.</p>
+            </div>
+            <form id="graphForm" class="graph-form">
+                <div class="graph-fields">
+                    <label class="graph-field" for="graphExpression">
+                        <span class="graph-label">Function f(x) (example: sin(x) + x^2)</span>
+                        <input id="graphExpression" name="graphExpression" class="graph-input" type="text" value="sin(x)" aria-describedby="graphGuidance" required>
+                    </label>
+                    <label class="graph-field" for="graphDomainStart">
+                        <span class="graph-label">Domain start</span>
+                        <input id="graphDomainStart" name="graphDomainStart" class="graph-input" type="number" value="-10" step="0.5" required>
+                    </label>
+                    <label class="graph-field" for="graphDomainEnd">
+                        <span class="graph-label">Domain end</span>
+                        <input id="graphDomainEnd" name="graphDomainEnd" class="graph-input" type="number" value="10" step="0.5" required>
+                    </label>
+                    <label class="graph-field" for="graphSampleCount">
+                        <span class="graph-label">Samples (25-400)</span>
+                        <input id="graphSampleCount" name="graphSampleCount" class="graph-input" type="number" value="120" min="25" max="400" step="5" required>
+                    </label>
+                </div>
+                <div class="graph-actions">
+                    <button type="submit" class="keypad-button" data-role="primary" aria-label="Plot function graph">Plot Graph</button>
+                    <button type="button" id="graphResetButton" class="keypad-button" data-role="command">Reset</button>
+                    <p class="graph-message" id="graphMessage" role="status" aria-live="polite"></p>
+                </div>
+                <p class="graph-label" id="graphGuidance">Use the calculator keys for constants and switch the angle mode to explore trigonometric curves.</p>
+            </form>
+            <div class="graph-canvas-wrapper">
+                <canvas id="graphCanvas" role="img" aria-label="Function graph area"></canvas>
+            </div>
+        </section>
+
         <section class="helper-card" aria-labelledby="helperHeading">
             <h2 class="card-title" id="helperHeading">Study Helpers</h2>
             <p class="card-subtitle">Reference essentials while you calculate. Review formulas, conversions, and quick problem strategies.</p>
