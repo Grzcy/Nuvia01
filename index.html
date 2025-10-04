@@ -6063,8 +6063,8 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         function showOfflineBanner() { const el = ensureOfflineBanner(); el.style.display = 'block'; }
         function hideOfflineBanner() { const el = document.getElementById('offlineStatusBanner'); if (el) el.style.display = 'none'; }
         if (!isOnline) { showOfflineBanner(); }
-        window.addEventListener('online', () => { isOnline = true; hideOfflineBanner(); console.log('Nuvia_DEBUG: Back online'); try { enableNetwork(db).catch(()=>{}); } catch(_) {} try{ if(typeof loadPremiumStatus==='function') loadPremiumStatus(); if(typeof checkPremiumStatus==='function') checkPremiumStatus(); }catch(_){} });
-        window.addEventListener('offline', () => { isOnline = false; showOfflineBanner(); console.log('Nuvia_DEBUG: Gone offline'); try { disableNetwork(db).catch(()=>{}); } catch(_) {} try{ if(typeof deactivatePremiumFeatures==='function') deactivatePremiumFeatures(); }catch(_){} });
+        window.addEventListener('online', () => { isOnline = true; hideOfflineBanner(); console.log('Nuvia_DEBUG: Back online'); try { networkManager.goOnline(); } catch(_) {} try{ if(typeof loadPremiumStatus==='function') loadPremiumStatus(); if(typeof checkPremiumStatus==='function') checkPremiumStatus(); }catch(_){} });
+        window.addEventListener('offline', () => { isOnline = false; showOfflineBanner(); console.log('Nuvia_DEBUG: Gone offline'); try { networkManager.goOffline(); } catch(_) {} try{ if(typeof deactivatePremiumFeatures==='function') deactivatePremiumFeatures(); }catch(_){} });
 
         // Global Error Handling - Temporarily disabled for debugging
         window.addEventListener('error', (event) => {
@@ -6114,13 +6114,40 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         // Ensure auth sessions persist across reloads by default
         try { setPersistence(auth, browserLocalPersistence).catch(()=>{}); } catch(_) {}
         const db = initializeFirestore(app, { experimentalForceLongPolling: true, useFetchStreams: false });
+        const networkManager = (function createFirestoreNetworkManager(){
+            let currentState = null;
+            let sequence = Promise.resolve();
+            function transition(targetState) {
+                sequence = sequence.then(async () => {
+                    if (currentState === targetState) return;
+                    try {
+                        if (targetState) { await enableNetwork(db); }
+                        else { await disableNetwork(db); }
+                        currentState = targetState;
+                    } catch (toggleError) {
+                        console.warn('Nuvia_WARN: Failed to toggle Firestore network state', toggleError);
+                    }
+                }).catch((chainError) => {
+                    console.warn('Nuvia_WARN: Firestore network toggle chain error', chainError);
+                });
+                return sequence;
+            }
+            return {
+                goOnline(){ return transition(true); },
+                goOffline(){ return transition(false); }
+            };
+        })();
         try {
           await enableMultiTabIndexedDbPersistence(db);
         } catch (e) {
           try { await enableIndexedDbPersistence(db); } catch(_) {}
         }
         // Respect offline status to avoid fetch errors in instrumented environments
-        try { if (!navigator.onLine) { disableNetwork(db).catch(()=>{}); } } catch(_) {}
+        if (!navigator.onLine) {
+          networkManager.goOffline();
+        } else {
+          networkManager.goOnline();
+        }
 
         // Probe Firestore connectivity and retry with exponential backoff when SDK reports backend issues.
         (function(){
@@ -6128,8 +6155,18 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
           function ensureBanner(){ if(banner) return banner; banner = document.getElementById('offlineBanner'); if(!banner){ banner = document.createElement('div'); banner.id='offlineBanner'; banner.setAttribute('role','status'); banner.style.cssText='position:fixed;top:0;left:0;right:0;background:linear-gradient(90deg, var(--pink), var(--blue));color:#fff;text-align:center;padding:6px 10px;font-weight:700;z-index:2000;display:none;'; banner.textContent='You are offline. Some features are limited.'; document.body.appendChild(banner);} return banner; }
           function showOffline(){ const b=ensureBanner(); b.style.display='block'; }
           function hideOffline(){ if(ensureBanner()) banner.style.display='none'; }
-          window.addEventListener('offline', ()=>{ try{ disableNetwork(db).catch(()=>{});}catch(_){} showOffline(); });
-          window.addEventListener('online', ()=>{ try{ enableNetwork(db).catch(()=>{});}catch(_){} hideOffline(); try{ if (typeof fetchSystemSettings==='function') fetchSystemSettings().catch(()=>{}); if (typeof checkGlobalAnnouncements==='function') checkGlobalAnnouncements().catch(()=>{});}catch(_){} });
+          window.addEventListener('offline', ()=>{
+            try{ networkManager.goOffline(); }catch(_){ }
+            showOffline();
+          });
+          window.addEventListener('online', ()=>{
+            try{ networkManager.goOnline(); }catch(_){ }
+            hideOffline();
+            try{
+              if (typeof fetchSystemSettings==='function') fetchSystemSettings().catch(()=>{});
+              if (typeof checkGlobalAnnouncements==='function') checkGlobalAnnouncements().catch(()=>{});
+            }catch(_){ }
+          });
           if(!navigator.onLine) showOffline();
 
           // Firestore connectivity probe: periodically attempts a lightweight read to confirm backend availability.
