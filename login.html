@@ -2402,7 +2402,6 @@
                     u = cred.user;
                 }
                 await sendEmailVerification(u);
-                try { await signOut(auth); } catch(_) {}
                 hideSmartLoader();
                 showSuccessModal('Verification email sent. Copy the link or code from that email, paste it here, and tap "Verify code".');
             }catch(e){
