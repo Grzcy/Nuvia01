@@ -998,11 +998,12 @@
                 return;
             }
             try {
+                const sourceExpression = expression;
                 const result = evaluateExpression(expression);
                 lastAnswer = result;
                 expression = result.toString();
                 updateDisplay(result);
-                addToHistory(expression, result);
+                addToHistory(sourceExpression, result);
             } catch (error) {
                 displayResult.textContent = 'Error';
             }
