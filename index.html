@@ -2450,14 +2450,34 @@
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             min-width: 150px;
+            max-height: 320px;
             z-index: 20;
             display: none;
             flex-direction: column;
-            overflow: hidden; /* For rounded corners on children */
+            overflow-x: hidden;
+            overflow-y: auto;
         }
 
         .post-options-dropdown.active {
             display: flex;
+        }
+
+        .post-options-dropdown::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .post-options-dropdown::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .post-options-dropdown::-webkit-scrollbar-thumb {
+            background: var(--glass-blue);
+            border-radius: 999px;
+        }
+
+        .post-options-dropdown {
+            scrollbar-width: thin;
+            scrollbar-color: var(--glass-blue) transparent;
         }
 
         .post-options-dropdown button {
