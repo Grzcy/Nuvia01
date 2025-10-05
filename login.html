@@ -68,7 +68,7 @@
             box-shadow: 0 18px 40px rgba(255,46,99,0.12);
             overflow: visible;
             width: 100%;
-            max-width: 420px;
+            max-width: 560px;
             position: relative;
             transition: all var(--transition);
         }
@@ -169,7 +169,7 @@
         }
 
         .login-form {
-            padding: 40px 30px;
+            padding: 40px 36px;
         }
 
         .form-group {
@@ -193,10 +193,10 @@
 
         .form-group input {
             width: 100%;
-            padding: 16px 56px 16px 20px; /* room for password toggle */
+            padding: 18px 56px 18px 20px; /* room for password toggle */
             border: 1px solid var(--border-light);
             border-radius: var(--radius);
-            font-size: 16px;
+            font-size: 18px;
             font-family: 'Inter', sans-serif;
             transition: all var(--transition);
             background: var(--input-background);
@@ -292,7 +292,7 @@
             background: linear-gradient(90deg, var(--pink) 0%, #ff874d 60%, var(--blue) 100%);
             color: #fff;
             border: 4px solid rgba(255,255,255,0.85);
-            padding: 18px 28px;
+            padding: 20px 32px;
             border-radius: 40px;
             font-size: 18px;
             font-weight: 700;
@@ -989,6 +989,19 @@
     <!-- Floating Particles -->
     <div class="floating-particles" id="floatingParticles"></div>
 
+    <style>
+      /* Auth layout wrapper and spacing improvements */
+      .auth-hero{max-width:1200px;margin:18px auto;padding:0 14px;}
+      @media(min-width:900px){
+        .auth-hero{display:grid;grid-template-columns:560px 1fr;gap:28px;align-items:start;}
+        .login-container{max-width:560px;}
+      }
+      /* Larger form controls for better touch and visual weight */
+      .login-form{padding:40px 36px;}
+      .form-group input{padding:18px 56px 18px 20px;font-size:18px}
+      .login-btn{padding:20px 32px;border-radius:48px;font-size:20px}
+    </style>
+    <div class="auth-hero">
     <div class="login-container">
         <div class="login-header">
             <div class="jchat-title">Nuvia</div>
@@ -1247,6 +1260,7 @@
       </div>
 
     </section>
+    </div>
 
     <!-- Smart Loader -->
     <style>
