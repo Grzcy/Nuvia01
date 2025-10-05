@@ -1477,14 +1477,6 @@
                 return;
             }
 
-            // User is signed in. Check email verification.
-            if (!user.emailVerified) {
-                console.log("JCHAT_DEBUG: User email not verified. Redirecting to auth page for verification.");
-                if (window.location.pathname !== '/login.html' && window.location.pathname !== '/index.html') {
-                    window.location.href = '/login.html?section=verify_email'; // Or '/index.html?section=verify_email'
-                }
-                return;
-            }
 
             // Email is verified. Check onboarding status.
             try {

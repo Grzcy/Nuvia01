@@ -1827,12 +1827,13 @@
                 // Referral rewards (inviter: +20 gas/+5 JCoin, new user: +20 gas/+10 JCoin)
                 await processReferralReward(user.uid);
 
+                try { await sendEmailVerification(user, { url: `${window.location.origin}/login.html?mode=verifyEmail`, handleCodeInApp: true }); } catch(_) {}
                 hideSmartLoader();
                 try {
                     localStorage.setItem('nuvia_auth_user', JSON.stringify({ uid: user.uid, email: user.email || email, displayName: user.displayName || null, ts: Date.now() }));
                     localStorage.setItem('nuvia_auth_status', 'authenticated');
                 } catch(_) {}
-                showSuccessModal('Account created! You are signed in.', () => { window.location.href = 'index.html'; });
+                showSuccessModal('Account created! You are signed in. A verification email was sent to your address.', () => { window.location.href = 'index.html'; });
 
             } catch (error) {
                 hideSmartLoader();

@@ -10408,7 +10408,6 @@ const lex = inspirationLexicon[type];
                     const reward = await computeActivityReward('post_comment', { contentLen: commentText.length, isReply: !!replyingTo, isFirstOnPost: wasFirstComment });
                     let commenterJc = reward.jc;
                     if (withinCooldown) commenterJc = 0; // cooldown: allow comment, no coin
-                    if (!currentUser.emailVerified) commenterJc = 0; // coins only for verified users
                     if (!isLongEnough) commenterJc = 0; // too short for coin
                     if (isDuplicate) commenterJc = 0; // duplicate comment
                     if (!allowedByCap || alreadyPaidOnThisPost) commenterJc = 0; // per-post caps
