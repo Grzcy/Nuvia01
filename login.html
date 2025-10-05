@@ -1908,7 +1908,7 @@
                     localStorage.setItem('nuvia_auth_user', JSON.stringify({ uid: user.uid, email: user.email || email, displayName: user.displayName || null, ts: Date.now() }));
                     localStorage.setItem('nuvia_auth_status', 'authenticated');
                 } catch(_) {}
-                showSuccessModal('Account created! You are signed in.', () => { window.location.href = 'index.html'; });
+                showSuccessModal('Account created! You are signed in.', () => { try{ sessionStorage.setItem('nuvia_last_auth','1'); }catch(_){} window.location.href = 'index.html'; });
 
             } catch (error) {
                 hideSmartLoader();
@@ -1969,7 +1969,7 @@
                     localStorage.setItem('nuvia_auth_user', JSON.stringify({ uid: user.uid, email: user.email || null, displayName: user.displayName || null, ts: Date.now() }));
                     localStorage.setItem('nuvia_auth_status', 'authenticated');
                 } catch (_) {}
-                await showSavePasswordPrompt(email, password, () => { window.location.href = 'index.html'; });
+                await showSavePasswordPrompt(email, password, () => { try{ sessionStorage.setItem('nuvia_last_auth','1'); }catch(_){} window.location.href = 'index.html'; });
 
             } catch (error) {
                 hideSmartLoader();
@@ -2565,7 +2565,7 @@
         onAuthStateChanged(auth, async (user) => {
             if (!user) return;
             showSmartLoader('Welcome Back!', 'Taking you to your account...');
-            setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+            setTimeout(() => { try{ sessionStorage.setItem('nuvia_last_auth','1'); }catch(_){} window.location.href = 'index.html'; }, 1000);
         });
 
         // Username availability checking (robust, case-insensitive check against stored usernames)
@@ -2866,7 +2866,7 @@
                 }
 
                 showSmartLoader('Welcome', 'Signing you in...');
-                setTimeout(()=>{ window.location.href = 'index.html'; }, 600);
+                setTimeout(()=>{ try{ sessionStorage.setItem('nuvia_last_auth','1'); }catch(_){} window.location.href = 'index.html'; }, 600);
             }catch(e){ console.error('handleGoogleAuthResult error', e); showErrorModal('Google sign-in failed. Please try again.'); }
         }
 
@@ -2896,7 +2896,7 @@
                 }
 
                 showSmartLoader('Welcome', 'Signing you in...');
-                setTimeout(()=>{ window.location.href = 'index.html'; }, 600);
+                setTimeout(()=>{ try{ sessionStorage.setItem('nuvia_last_auth','1'); }catch(_){} window.location.href = 'index.html'; }, 600);
             }catch(e){ console.error('handleGithubAuthResult error', e); showErrorModal('GitHub sign-in failed. Please try again.'); }
         }
 
