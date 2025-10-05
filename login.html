@@ -2383,31 +2383,8 @@
         function closeApkModal(){ try{ const m = document.getElementById('apkDownloadModal'); if (m) m.style.display = 'none'; }catch(_){} }
 
         async function resendVerificationEmail() {
-            let u = auth.currentUser;
-            showSmartLoader('Sending email','Resending verification email...');
-            try{
-                if (!u) {
-                    // Attempt a temporary sign-in using entered credentials to send the email, then sign out
-                    const emailEl = document.getElementById('email');
-                    const pwdEl = document.getElementById('password');
-                    const em = (emailEl && emailEl.value || '').trim();
-                    const pw = (pwdEl && pwdEl.value) || '';
-                    if (!em || !pw || !isValidEmail(em)) {
-                        hideSmartLoader();
-                        showCustomModal('info','Sign in required','Enter your email and password, then tap Resend again.');
-                        return;
-                    }
-                    try { await setPersistence(auth, browserSessionPersistence); } catch(_) {}
-                    const cred = await signInWithEmailAndPassword(auth, em, pw);
-                    u = cred.user;
-                }
-                await sendEmailVerification(u);
-                hideSmartLoader();
-                showSuccessModal('Verification email sent. Copy the link or code from that email, paste it here, and tap "Verify code".');
-            }catch(e){
-                hideSmartLoader();
-                showCustomModal('error','Failed to send', (e && e.message) || 'Please try again.');
-            }
+            // Email verification sending has been disabled by the administrator.
+            try { showCustomModal('info', 'Verification disabled', 'Email verification has been disabled. No verification emails will be sent.'); } catch(_) {}
         }
         function showUnverifiedBanner(email){
             const b = document.getElementById('verifyEmailBanner'); const addr = document.getElementById('verifyEmailAddress');
