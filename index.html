@@ -7430,7 +7430,6 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             if (typeof unsubscribe === 'function') {
                 themeEntitlementsUnsubscribe = unsubscribe;
                 themeEntitlementsUserId = userId;
-                unsubscribeListeners.push(unsubscribe);
             }
         }
 
@@ -7439,7 +7438,6 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                 try { themeEntitlementsUnsubscribe(); } catch (err) {
                     console.warn('Nuvia_WARN: Failed to clear theme entitlement listener', err);
                 }
-                unsubscribeListeners = unsubscribeListeners.filter((fn) => fn !== themeEntitlementsUnsubscribe);
             }
             themeEntitlementsUnsubscribe = null;
             themeEntitlementsUserId = null;
