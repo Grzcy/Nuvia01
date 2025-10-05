@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuvia - Login</title>
+    <script>
+      (function(){
+        try{
+          var la = (sessionStorage.getItem('nuvia_last_auth') || '0');
+          var st = (localStorage.getItem('nuvia_auth_status') || '');
+          if (la === '1' || st === 'authenticated') {
+            location.replace('index.html');
+          }
+        }catch(_){ }
+      })();
+    </script>
     
     <!-- Google Fonts: Poppins for headings, Inter for body text -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
