@@ -1094,9 +1094,9 @@
 
 
             <div class="signup-link">
-                <span id="signup-link-text">Don't have an account? <a href="#" onclick="goToSignup()">Sign up here</a></span>
+                <span id="signup-link-text">New here? <a href="#" onclick="goToSignup()">Create a free account</a> — it only takes a minute.</span>
                 <div id="admin-only-notice" style="display: none; font-size: 0.9rem; color: var(--text-light); margin-top: 0.5rem;">
-                    📧 Account creation is currently invite-only. Please contact an administrator.
+                    📧 Account creation may be invite-only. Contact an administrator for access.
                 </div>
             </div>
 
@@ -2611,7 +2611,7 @@
 
                 if (!validPattern.test(username)) {
                     feedback.className = 'username-feedback taken';
-                    feedback.textContent = 'Use 3���20 letters, numbers, dot, underscore or hyphen';
+                    feedback.textContent = 'Use 3����20 letters, numbers, dot, underscore or hyphen';
                     return;
                 }
 
