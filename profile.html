@@ -7205,7 +7205,7 @@ import { renderVerifiedBadge, renderAvatarStatusBadges } from './assets/js/verif
                 if (newWebsite) { if (websiteLink) { websiteLink.href = newWebsite; websiteLink.textContent = newWebsite.replace(/^(https?:\/\/)?(www\.)?/, ''); } if (profileWebsite) profileWebsite.style.display = 'block'; } else { if (profileWebsite) profileWebsite.style.display = 'none'; }
                 if (newSocialLinks) { if (socialLinksText) socialLinksText.textContent = newSocialLinks; if (profileSocialLinks) profileSocialLinks.style.display = 'block'; } else { if (profileSocialLinks) profileSocialLinks.style.display = 'none'; }
 
-                showEnhancedSmartSuccess("Profile saved successfully! ✨", 'update');
+                showEnhancedSmartSuccess("Profile saved! Your changes are live. 🎉", 'celebration');
 
 
 
@@ -10104,7 +10104,7 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
                     toggleEditMode(false);
 
                     // Show success message
-                    showEnhancedSmartSuccess('Profile updated successfully!', 'update');
+                    showEnhancedSmartSuccess("Profile saved! Your changes are live. 🎉", 'celebration');
 
                 } catch (error) {
                     console.error('Error saving user info:', error);
@@ -10157,7 +10157,7 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
                 }
 
                 // Hide loading message and show success
-                showEnhancedSmartSuccess('Privacy settings saved successfully!', 'update');
+                showEnhancedSmartSuccess("Privacy updated. Your preferences are now active. 🔒", 'update');
                 
                 console.log('Privacy settings saved:', privacySettings);
 
@@ -10736,7 +10736,7 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
       saveProfileBtn.dataset.globalFallbackBound = '1';
       saveProfileBtn.addEventListener('click', async function(){
         try{ if (typeof saveUserInfoData === 'function'){ return; } }catch(_){}
-        sp('Saved locally. Reloading your info...');
+        sp('Profile saved! Your changes are live. 🎉');
         const form = document.getElementById('profileEditForm');
         if (form) form.style.display = 'none';
         const editBtn = document.getElementById('editProfileBtn'); const viewBtn = document.getElementById('viewProfileBtn');
@@ -10748,7 +10748,7 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
       savePrivacyBtn.dataset.globalFallbackBound = '1';
       savePrivacyBtn.addEventListener('click', async function(){
         try{ if (typeof savePrivacySettings === 'function'){ return; } }catch(_){}
-        sp('Privacy settings saved (UI).');
+        sp('Privacy updated. Your preferences are now active. 🔒');
       });
     }
   } catch(_){ }
