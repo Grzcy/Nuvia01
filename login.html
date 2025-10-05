@@ -2531,7 +2531,7 @@
 
                 if (reserved.has(username.toLowerCase())) {
                     feedback.className = 'username-feedback taken';
-                    feedback.textContent = 'This name is reserved. Try another ��';
+                    feedback.textContent = 'This name is reserved. Try another ���';
                     return;
                 }
 
@@ -2927,29 +2927,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             (async ()=>{
                 try{
-                    const u = new URL(window.location.href);
-                    const mode = u.searchParams.get('mode') || '';
-                    const oob = u.searchParams.get('oobCode') || '';
-                    if (mode === 'verifyEmail' && oob){
-                        showSmartLoader('Verifying email', 'Completing verification...');
-                        try {
-                            await checkActionCode(auth, oob);
-                            await applyActionCode(auth, oob);
-                            hideSmartLoader();
-                            try { localStorage.removeItem('unverified_email'); } catch(_){ }
-                            showSuccessModal('Your email has been verified! You can now sign in.', ()=>{
-                                const clean = new URL(window.location.href);
-                                ['mode','oobCode','apiKey','continueUrl','lang'].forEach(k=> clean.searchParams.delete(k));
-                                window.location.replace(clean.pathname + (clean.search || '') + (clean.hash || ''));
-                            });
-                        } catch (err) {
-                            hideSmartLoader();
-                            const msg = (err && err.message) || '';
-                            const friendly = /EXPIRED|INVALID_OOB_CODE|invalid/i.test(msg) ? 'This verification link is invalid or expired. Please resend a new verification email.' : 'Verification failed. Please try again.';
-                            showCustomModal('error', 'Verification Failed', friendly);
-                        }
-                        return;
-                    }
                 }catch(_){ }
             })();
             // Performance optimization - preload resources
