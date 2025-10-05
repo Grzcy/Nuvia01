@@ -2653,9 +2653,12 @@
 
         // Check authentication state with enhanced loading
         onAuthStateChanged(auth, async (user) => {
-            if (!user) return;
-            showSmartLoader('Welcome Back!', 'Taking you to your account...');
-            setTimeout(() => { try{ sessionStorage.setItem('nuvia_last_auth','1'); }catch(_){} window.location.href = 'index.html'; }, 1000);
+            if (user) {
+                showSmartLoader('Welcome Back!', 'Taking you to your account...');
+                setTimeout(() => { try{ sessionStorage.setItem('nuvia_last_auth','1'); }catch(_){} window.location.href = 'index.html'; }, 1000);
+                return;
+            }
+            try { document.documentElement.classList.remove('auth-gated'); } catch(_){}
         });
 
         // Username availability checking (robust, case-insensitive check against stored usernames)
