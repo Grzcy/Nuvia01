@@ -8,16 +8,24 @@
       (function(){
         // Hide page until we know auth state to prevent showing login to already-authenticated users
         try { document.documentElement.classList.add('auth-gated'); } catch(_) {}
+        // Fast client-side signals that a Firebase session exists -> redirect immediately without flashing UI
         try{
           var la = (sessionStorage.getItem('nuvia_last_auth') || '0');
           var st = (localStorage.getItem('nuvia_auth_status') || '');
-          if (la === '1' || st === 'authenticated') {
-            location.replace('index.html');
-            return;
+          if (la === '1' || st === 'authenticated') { location.replace('index.html'); return; }
+          // Detect persisted Firebase auth user in localStorage (SDK-managed key)
+          for (var i=0; i<localStorage.length; i++){
+            var k = localStorage.key(i) || '';
+            if (k.indexOf('firebase:authUser:') === 0){
+              var v = localStorage.getItem(k);
+              if (v && v !== 'null'){
+                try{ var obj = JSON.parse(v); if (obj && obj.uid){ location.replace('index.html'); return; } }
+                catch(_){ if (v.indexOf('"uid"') !== -1){ location.replace('index.html'); return; } }
+              }
+            }
           }
         }catch(_){ }
-        // Fallback: if no auth signal, reveal UI shortly so new/unauth users can see the form
-        try { setTimeout(function(){ try{ document.documentElement.classList.remove('auth-gated'); }catch(_){ } }, 1800); } catch(_){ }
+        // Do not unhide yet; module auth listener will reveal UI only if user is not authenticated
       })();
     </script>
     
