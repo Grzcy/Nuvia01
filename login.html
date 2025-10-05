@@ -6,13 +6,18 @@
     <title>Nuvia - Login</title>
     <script>
       (function(){
+        // Hide page until we know auth state to prevent showing login to already-authenticated users
+        try { document.documentElement.classList.add('auth-gated'); } catch(_) {}
         try{
           var la = (sessionStorage.getItem('nuvia_last_auth') || '0');
           var st = (localStorage.getItem('nuvia_auth_status') || '');
           if (la === '1' || st === 'authenticated') {
             location.replace('index.html');
+            return;
           }
         }catch(_){ }
+        // Fallback: if no auth signal, reveal UI shortly so new/unauth users can see the form
+        try { setTimeout(function(){ try{ document.documentElement.classList.remove('auth-gated'); }catch(_){ } }, 1800); } catch(_){ }
       })();
     </script>
     
