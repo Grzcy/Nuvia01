@@ -10751,6 +10751,22 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
         sp('Privacy updated. Your preferences are now active. 🔒');
       });
     }
+    const cancelEditBtn = document.getElementById('cancelProfileEdit');
+    if (cancelEditBtn && cancelEditBtn.dataset.globalFallbackBound !== '1'){
+      cancelEditBtn.dataset.globalFallbackBound = '1';
+      cancelEditBtn.addEventListener('click', function(e){
+        if (window.__UserInfoToggleReady) return;
+        e.preventDefault();
+        const form = document.getElementById('profileEditForm');
+        const editBtn = document.getElementById('editProfileBtn');
+        const viewBtn = document.getElementById('viewProfileBtn');
+        if (form) form.style.display = 'none';
+        if (editBtn) editBtn.style.display = 'inline-flex';
+        if (viewBtn) viewBtn.style.display = 'none';
+        try { if (typeof loadUserInfoData === 'function') loadUserInfoData(); } catch(_){}
+        sp('Edit canceled. No changes were saved. ✖️');
+      }, { capture: true });
+    }
   } catch(_){ }
 })();
 </script>
