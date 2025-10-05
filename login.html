@@ -1882,9 +1882,6 @@
                 try {
                     localStorage.setItem('nuvia_auth_user', JSON.stringify({ uid: user.uid, email: user.email || null, displayName: user.displayName || null, ts: Date.now() }));
                     localStorage.setItem('nuvia_auth_status', 'authenticated');
-                    // User successfully verified and logged in: clear the persistent unverified marker and hide banner
-                    try { localStorage.removeItem('unverified_email'); } catch(_) {}
-                    try { hideUnverifiedBanner(); } catch(_) {}
                 } catch (_) {}
                 await showSavePasswordPrompt(email, password, () => { window.location.href = 'index.html'; });
 
