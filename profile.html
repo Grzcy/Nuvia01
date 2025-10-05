@@ -10660,11 +10660,31 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
       }
       const friendsStatItem = document.getElementById('friendsStatItem');
       const selectFriendModal = document.getElementById('selectFriendModal');
+      const closeFriendModalBtn = document.getElementById('closeFriendModalBtn');
       if (friendsStatItem && selectFriendModal && friendsStatItem.dataset.friendsFallbackBound !== '1'){
         friendsStatItem.dataset.friendsFallbackBound = '1';
         friendsStatItem.addEventListener('click', function(){
           if (window.__UserInfoToggleReady) return;
           selectFriendModal.classList.add('active');
+        }, { capture: true });
+      }
+      if (closeFriendModalBtn && selectFriendModal && closeFriendModalBtn.dataset.friendsCloseFallbackBound !== '1'){
+        closeFriendModalBtn.dataset.friendsCloseFallbackBound = '1';
+        closeFriendModalBtn.addEventListener('click', function(e){
+          if (window.__UserInfoToggleReady) return;
+          e.preventDefault();
+          selectFriendModal.classList.remove('active');
+        }, { capture: true });
+      }
+      if (selectFriendModal && selectFriendModal.dataset.friendsOverlayFallbackBound !== '1'){
+        selectFriendModal.dataset.friendsOverlayFallbackBound = '1';
+        selectFriendModal.addEventListener('click', function(e){
+          if (window.__UserInfoToggleReady) return;
+          if (e.target === selectFriendModal) selectFriendModal.classList.remove('active');
+        }, { capture: true });
+        document.addEventListener('keydown', function(e){
+          if (window.__UserInfoToggleReady) return;
+          if (e.key === 'Escape' && selectFriendModal.classList.contains('active')) selectFriendModal.classList.remove('active');
         }, { capture: true });
       }
     }
