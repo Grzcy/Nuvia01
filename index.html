@@ -22,20 +22,6 @@
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#1a1a2e">
     <script>(function(){try{document.documentElement.classList.add('nuvia-loading');}catch(e){}})();</script>
-    <script>(function(){
-      try{
-        var p = location.pathname || '';
-        var isHome = (p === '/' || /\/?index\.html$/i.test(p));
-        if (isHome) {
-          var lastAuth = '0';
-          try { lastAuth = sessionStorage.getItem('nuvia_last_auth') || '0'; } catch(_){ }
-          if (lastAuth !== '1') {
-            // Redirect immediately before rendering to avoid flashing home for guests
-            location.replace('/login.html');
-          }
-        }
-      }catch(_){ }
-    })();</script>
     <script src="/assets/js/fetch-guard.js"></script>
     <script src="/assets/js/share-utils.js" defer></script>
     <script src="/assets/js/index-persist.js" defer></script>
@@ -1159,7 +1145,7 @@
             100% { transform: scale(1) rotate(0deg); }
         }
 
-        /* 5. ��������������� Temporal Paradox - Premium Time Manipulation Interface */
+        /* 5. ������������� Temporal Paradox - Premium Time Manipulation Interface */
         body.theme-temporal-paradox {
             background: 
                 conic-gradient(from 0deg at 50% 50%, 
@@ -5392,7 +5378,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                     <div class="premium-tiers">
                         <div class="premium-tier-option" data-tier="premium">
                             <div class="tier-header">
-                                <span class="tier-badge">����� Premium</span>
+                                <span class="tier-badge">���� Premium</span>
                                 <span class="tier-price">$9.99/month</span>
                             </div>
                             <ul class="tier-features">
@@ -10422,6 +10408,7 @@ const lex = inspirationLexicon[type];
                     const reward = await computeActivityReward('post_comment', { contentLen: commentText.length, isReply: !!replyingTo, isFirstOnPost: wasFirstComment });
                     let commenterJc = reward.jc;
                     if (withinCooldown) commenterJc = 0; // cooldown: allow comment, no coin
+                    if (!currentUser.emailVerified) commenterJc = 0; // coins only for verified users
                     if (!isLongEnough) commenterJc = 0; // too short for coin
                     if (isDuplicate) commenterJc = 0; // duplicate comment
                     if (!allowedByCap || alreadyPaidOnThisPost) commenterJc = 0; // per-post caps
@@ -12440,15 +12427,7 @@ async function fetchAndDisplayPosts() {
                     }
                 }, (error) => {
                     console.error("Nuvia_ERROR: Error listening to system settings:", error);
-                    try{
-                      const msg = String((error && (error.code || error.message)) || '');
-                      const suppress = /permission|denied|unauth|unavailable|failed-precondition/i.test(msg);
-                      if (!suppress && navigator.onLine && !window.__settingsRealtimeErrorShown){
-                        window.__settingsRealtimeErrorShown = true;
-                        showMessageBox("Failed to get real-time settings updates.", 'error', true);
-                      }
-                    }catch(_){ }
-                    if (navigator.onLine) { try{ fetchSystemSettings().catch(()=>{}); }catch(_){ } }
+                    if (navigator.onLine) showMessageBox("Failed to get real-time settings updates.", 'error', true);
                 });
                 unsubscribeListeners.push(unsubscribeSettings); // Add to list to unsubscribe on unload.
 
@@ -12694,15 +12673,7 @@ async function fetchAndDisplayPosts() {
                     }
                     }, (error) => {
                         console.error("Nuvia_ERROR: Error listening to system settings for anonymous user:", error);
-                        try{
-                          const msg = String((error && (error.code || error.message)) || '');
-                          const suppress = /permission|denied|unauth|unavailable|failed-precondition/i.test(msg);
-                          if (!suppress && navigator.onLine && !window.__settingsRealtimeErrorShown){
-                            window.__settingsRealtimeErrorShown = true;
-                            showMessageBox("Failed to get real-time settings updates.", 'error', true);
-                          }
-                        }catch(_){ }
-                        if (navigator.onLine) { try{ fetchSystemSettings().catch(()=>{}); }catch(_){ } }
+                        if (navigator.onLine) showMessageBox("Failed to get real-time settings updates.", 'error', true);
                     });
                     unsubscribeListeners.push(unsubscribeSettings);
 
