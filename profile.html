@@ -10241,6 +10241,20 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
             // NEW: User ID Copy Button
             if (copyUserIdBtn) copyUserIdBtn.addEventListener('click', handleCopyUserId); // Null check
 
+            // Also allow clicking the user ID text (or its container) to copy immediately — small, quick UX improvement
+            if (userIdText) {
+                try { userIdText.style.cursor = 'pointer'; userIdText.title = 'Click to copy User ID'; } catch(_){}
+                userIdText.addEventListener('click', handleCopyUserId);
+            }
+            if (profileUserId) {
+                profileUserId.addEventListener('click', function(e){
+                    // If the click was on the copy button itself, let its handler run; otherwise copy when tapping the container/text
+                    const target = e.target || e.srcElement;
+                    if (target && (target.id === 'copyUserIdBtn' || target.closest && target.closest('#copyUserIdBtn'))) return;
+                    handleCopyUserId();
+                });
+            }
+
 
 
 
