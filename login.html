@@ -1178,53 +1178,57 @@
 
         <div>
           <div class="info-card">
-            <h3>Learn more about how Nuvia works</h3>
+            <h3>Why Nuvia works</h3>
             <div class="info-accordion" id="infoAccordion">
               <details open>
-                <summary>What you can do on Nuvia</summary>
+                <summary>Get noticed — create content people love</summary>
                 <div class="detail-body">
-                  <p>Read posts on the public feed, create your own content, save favorites, follow other users and join conversations in groups. Use Explore to discover trending topics and Highlights to showcase your best content.</p>
+                  <p>Publish posts that reach the Explore feed, save your favorites, and pin Highlights to your profile. Active contributors rise through levels and gain visibility.</p>
                 </div>
               </details>
 
               <details>
-                <summary>Chat & Calls</summary>
+                <summary>Conversations that feel real</summary>
                 <div class="detail-body">
-                  <p>Nuvia's chat supports private and group messaging, presence indicators (online/away), typing dots, voice notes, and voice/video calls. Conversations are optimized for performance and include search and unread indicators.</p>
+                  <p>From quick voice notes to low-latency calls, Nuvia keeps conversations natural. Presence and typing indicators help you stay in sync with friends.</p>
                 </div>
               </details>
 
               <details>
-                <summary>Profiles, Levels & Wallet</summary>
+                <summary>Rewards & progression</summary>
                 <div class="detail-body">
-                  <p>User profiles include display pictures, levels based on activity, achievements and a wallet balance (JCoins). Levels unlock badges and extra features. You can manage theme preferences and privacy from your profile page.</p>
+                  <p>Earn JCoins for engagement and milestones. Levels unlock badges, perks, and special features — it pays to participate.</p>
                 </div>
               </details>
 
               <details>
-                <summary>Security & Privacy</summary>
+                <summary>Built with safety in mind</summary>
                 <div class="detail-body">
-                  <p>Nuvia emphasizes account security — password reset flows, session monitoring to detect multi-device sign-ins, and moderation tools for community safety. For sensitive actions, two-factor and admin controls may be available depending on settings.</p>
+                  <p>Moderation tools, clear community guidelines, and session protections help keep the space safe and welcoming for everyone.</p>
                 </div>
               </details>
 
               <details>
-                <summary>Frequently Asked Questions</summary>
+                <summary>Quick FAQ</summary>
                 <div class="detail-body">
-                  <p><strong>Can I use Nuvia without signing up?</strong> You can browse limited public content as a guest, but signing in unlocks posting, messaging and wallet features. <br/><strong>How do I get verified or invite-only accounts?</strong> Some areas (like admin or invite-only signup) are managed by administrators.</p>
+                  <p><strong>Can I try before joining?</strong> Yes — browse public posts and Explore as a guest. <br/><strong>Need an invite?</strong> Some features may be invite-only; contact support or an administrator for access.</p>
                 </div>
               </details>
             </div>
 
             <div class="info-cta">
-              <button class="btn btn-primary" onclick="document.getElementById('email').focus();">Sign in or Create account</button>
-              <a class="info-link" href="/index.html">Explore public content</a>
+              <button class="btn btn-primary" onclick="document.getElementById('email').focus();">Create your free account</button>
+              <a class="info-link" href="/index.html">Browse public posts</a>
             </div>
           </div>
 
           <div class="info-card" style="margin-top:14px">
-            <h3>Jump right in</h3>
-            <p>Try these starting points: visit the <a href="/explore.html" style="color:var(--white);font-weight:700">Explore</a> feed to see trending posts, open <a href="/chat.html" style="color:var(--white);font-weight:700">Chat</a> to preview messaging UI, or view a sample profile at <a href="/profile.html" style="color:var(--white);font-weight:700">Profile</a>.</p>
+            <h3>Get started in seconds</h3>
+            <p>New here? Start by exploring trending posts or preview the chat experience. Signing up takes less than a minute and unlocks posting, messaging and wallet features.</p>
+            <div style="margin-top:12px" class="info-cta">
+              <button class="btn btn-primary" onclick="goToSignup()">Create Account</button>
+              <a class="info-link" href="/explore.html">See trending now</a>
+            </div>
           </div>
         </div>
       </div>
@@ -2611,7 +2615,7 @@
 
                 if (!validPattern.test(username)) {
                     feedback.className = 'username-feedback taken';
-                    feedback.textContent = 'Use 3����20 letters, numbers, dot, underscore or hyphen';
+                    feedback.textContent = 'Use 3�����20 letters, numbers, dot, underscore or hyphen';
                     return;
                 }
 
