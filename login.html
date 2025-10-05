@@ -1132,6 +1132,105 @@
         </form>
     </div>
 
+    <!-- Platform Info Section -->
+    <section class="info-section" aria-label="About Nuvia">
+      <style>
+        .info-section{max-width:1100px;margin:28px auto 64px;padding:18px 22px;background:linear-gradient(180deg,rgba(11,18,32,0.85),rgba(10,12,20,0.92));border:1px solid rgba(255,255,255,0.03);border-radius:20px;color:var(--text-light)}
+        .info-grid{display:grid;grid-template-columns:1fr;gap:18px}
+        @media(min-width:900px){.info-grid{grid-template-columns:360px 1fr}}
+        .info-card{background:var(--card-background);border-radius:14px;padding:16px;border:1px solid var(--border-light)}
+        .info-card h3{margin:0 0 8px;font-family:'Poppins',sans-serif;font-size:18px;color:var(--white)}
+        .info-card p{margin:0;color:var(--text-light);line-height:1.45}
+        .info-accordion details{background:transparent;border-radius:12px;padding:10px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.03)}
+        .info-accordion summary{cursor:pointer;font-weight:700;color:var(--white);font-family:'Poppins',sans-serif;padding:4px}
+        .info-accordion summary::-webkit-details-marker{display:none}
+        .info-accordion .detail-body{margin-top:8px;color:var(--text-light)}
+        .info-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+        .info-link{padding:8px 12px;border-radius:999px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);color:var(--text-light);text-decoration:none;font-weight:600}
+        .info-cta{display:flex;gap:10px;align-items:center;margin-top:12px}
+        .info-cta .btn{padding:10px 16px;border-radius:12px;border:0;cursor:pointer;font-weight:700}
+        .btn-primary{background:linear-gradient(90deg,var(--pink),var(--blue));color:#fff;box-shadow:var(--button-shadow)}
+        .btn-secondary{background:transparent;border:1px solid var(--border-light;color:var(--text-light);color:var(--text-light)}
+      </style>
+
+      <div class="info-grid">
+        <aside class="info-card">
+          <h3>Welcome to Nuvia</h3>
+          <p>Nuvia is a community-first social platform where you can post, connect, and grow. Discover trends in Explore, chat privately with friends, join groups, and earn rewards through the built-in JCoin system. Nuvia blends real-time experiences (chat, calls) with social features like highlights, leaderboards and levels.</p>
+
+          <div style="margin-top:12px">
+            <div style="font-weight:700;color:var(--white);margin-bottom:6px">Quick highlights</div>
+            <ul style="margin:0 0 0 18px;color:var(--text-light);line-height:1.6">
+              <li>Private and group chats with presence, typing indicators, voice notes and calls.</li>
+              <li>Profile levels, achievements and a wallet with JCoins.</li>
+              <li>Rich post feed with saved items, highlights and discoverability.</li>
+              <li>Robust moderation tools and community guidelines for safety.</li>
+            </ul>
+          </div>
+
+          <div class="info-links">
+            <a class="info-link" href="/chat.html">See Chat features</a>
+            <a class="info-link" href="/profile.html">Profile & Levels</a>
+            <a class="info-link" href="/community_guidelines.html">Community Guidelines</a>
+            <a class="info-link" href="/explore.html">Explore Feed</a>
+          </div>
+        </aside>
+
+        <div>
+          <div class="info-card">
+            <h3>Learn more about how Nuvia works</h3>
+            <div class="info-accordion" id="infoAccordion">
+              <details open>
+                <summary>What you can do on Nuvia</summary>
+                <div class="detail-body">
+                  <p>Read posts on the public feed, create your own content, save favorites, follow other users and join conversations in groups. Use Explore to discover trending topics and Highlights to showcase your best content.</p>
+                </div>
+              </details>
+
+              <details>
+                <summary>Chat & Calls</summary>
+                <div class="detail-body">
+                  <p>Nuvia's chat supports private and group messaging, presence indicators (online/away), typing dots, voice notes, and voice/video calls. Conversations are optimized for performance and include search and unread indicators.</p>
+                </div>
+              </details>
+
+              <details>
+                <summary>Profiles, Levels & Wallet</summary>
+                <div class="detail-body">
+                  <p>User profiles include display pictures, levels based on activity, achievements and a wallet balance (JCoins). Levels unlock badges and extra features. You can manage theme preferences and privacy from your profile page.</p>
+                </div>
+              </details>
+
+              <details>
+                <summary>Security & Privacy</summary>
+                <div class="detail-body">
+                  <p>Nuvia emphasizes account security — password reset flows, session monitoring to detect multi-device sign-ins, and moderation tools for community safety. For sensitive actions, two-factor and admin controls may be available depending on settings.</p>
+                </div>
+              </details>
+
+              <details>
+                <summary>Frequently Asked Questions</summary>
+                <div class="detail-body">
+                  <p><strong>Can I use Nuvia without signing up?</strong> You can browse limited public content as a guest, but signing in unlocks posting, messaging and wallet features. <br/><strong>How do I get verified or invite-only accounts?</strong> Some areas (like admin or invite-only signup) are managed by administrators.</p>
+                </div>
+              </details>
+            </div>
+
+            <div class="info-cta">
+              <button class="btn btn-primary" onclick="document.getElementById('email').focus();">Sign in or Create account</button>
+              <a class="info-link" href="/index.html">Explore public content</a>
+            </div>
+          </div>
+
+          <div class="info-card" style="margin-top:14px">
+            <h3>Jump right in</h3>
+            <p>Try these starting points: visit the <a href="/explore.html" style="color:var(--white);font-weight:700">Explore</a> feed to see trending posts, open <a href="/chat.html" style="color:var(--white);font-weight:700">Chat</a> to preview messaging UI, or view a sample profile at <a href="/profile.html" style="color:var(--white);font-weight:700">Profile</a>.</p>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
     <!-- Smart Loader -->
     <style>
       .smart-progress{height:8px;background:rgba(255,255,255,0.12);border-radius:999px;overflow:hidden;margin:14px 0 6px;}
