@@ -1010,16 +1010,6 @@
         </div>
         
         <form class="login-form" id="loginForm" role="form" aria-labelledby="loginHeading" aria-describedby="errorMessage">
-            <div id="verifyEmailBanner" class="verify-banner" role="region" aria-live="polite" aria-atomic="true">
-                <div class="verify-banner-title"><i class="fas fa-envelope-open-text"></i> Verify your email</div>
-                <div class="verify-banner-message">We sent a verification link to <span id="verifyEmailAddress">your email</span>. Check your inbox and spam folder. Copy the confirmation link or code from that message and paste it below.</div>
-                <div class="verify-banner-actions">
-                    <button type="button" id="resendVerifyEmailBtn" class="verify-resend-btn"><i class="fas fa-paper-plane"></i> Resend verification email</button>
-                    <input type="text" id="manualVerifyInput" class="verify-code-input" placeholder="Paste verification code or link here" aria-describedby="verifyBannerHint">
-                    <button type="button" id="applyVerifyCodeBtn" class="verify-resend-btn"><i class="fas fa-check"></i> Verify code</button>
-                </div>
-                <p class="verify-banner-hint" id="verifyBannerHint">Open your email, copy the confirmation link or code, paste it here, and press "Verify code" to confirm your account.</p>
-            </div>
             <div id="attemptsBanner" class="attempts-banner" role="status" aria-live="polite" aria-atomic="true" style="display:none">
                 <div class="title">Sign-in protection</div>
                 <div class="desc" id="attemptsBannerText">Please try again.</div>
@@ -2382,48 +2372,6 @@
         }
         function closeApkModal(){ try{ const m = document.getElementById('apkDownloadModal'); if (m) m.style.display = 'none'; }catch(_){} }
 
-        async function resendVerificationEmail() {
-            // Email verification sending has been disabled by the administrator.
-            try { showCustomModal('info', 'Verification disabled', 'Email verification has been disabled. No verification emails will be sent.'); } catch(_) {}
-        }
-        function showUnverifiedBanner(email){
-            const b = document.getElementById('verifyEmailBanner'); const addr = document.getElementById('verifyEmailAddress');
-            if (!b) return; if (addr) addr.textContent = email || 'your email';
-            b.classList.add('show');
-        }
-        function hideUnverifiedBanner(){ const b = document.getElementById('verifyEmailBanner'); if (b) b.classList.remove('show'); }
-
-        function extractOobCodeFromText(text){
-            try{
-                const raw = (text || '').trim();
-                if(!raw) return null;
-                try { const u = new URL(raw); const code = u.searchParams.get('oobCode'); if (code) return code; } catch(_) {}
-                if (/^[A-Za-z0-9_-]{20,}$/.test(raw)) return raw;
-                return null;
-            }catch(_){ return null; }
-        }
-
-        async function applyCodeFromInput(){
-            try{
-                const input = document.getElementById('manualVerifyInput');
-                const v = (input && input.value) || '';
-                const code = extractOobCodeFromText(v);
-                if (!code){ showCustomModal('info','Verification code required','Paste the full link or the code from your email.'); return; }
-                showSmartLoader('Verifying email','Applying verification code...');
-                try{
-                    await checkActionCode(auth, code);
-                    await applyActionCode(auth, code);
-                    hideSmartLoader();
-                    try { localStorage.removeItem('unverified_email'); } catch(_){ }
-                    showSuccessModal('Your email has been verified! You can now sign in.', ()=>{ window.location.href = 'login.html'; });
-                }catch(e){
-                    hideSmartLoader();
-                    const msg = (e && e.message) || '';
-                    const friendly = /EXPIRED|INVALID_OOB_CODE|invalid/i.test(msg) ? 'The code is invalid or expired. Resend the email and try again.' : 'Verification failed. Please try again.';
-                    showCustomModal('error','Verification failed', friendly);
-                }
-            }catch(_){}
-        }
 
         async function showSavePasswordPrompt(email, password, next){
             try{
@@ -3028,12 +2976,6 @@
             
             // Add smart validation
             addSmartValidation();
-            const resendBtn = document.getElementById('resendVerifyEmailBtn'); if (resendBtn) resendBtn.addEventListener('click', resendVerificationEmail);
-            const applyBtn = document.getElementById('applyVerifyCodeBtn'); if (applyBtn) applyBtn.addEventListener('click', applyCodeFromInput);
-            const manualInput = document.getElementById('manualVerifyInput'); if (manualInput) manualInput.addEventListener('keydown', (e)=>{ if (e.key === 'Enter'){ e.preventDefault(); applyCodeFromInput(); } });
-
-            try { const url = new URL(window.location.href); const section = url.searchParams.get('section') || ''; if (section === 'verify_email') { const e = (auth.currentUser && auth.currentUser.email) || localStorage.getItem('unverified_email') || ''; showUnverifiedBanner(e); } } catch(_){ }
-            try { const cached = localStorage.getItem('unverified_email'); if (cached) showUnverifiedBanner(cached); } catch(_){ }
 
             // Password strength live updates
             const pwdInput = document.getElementById('password');
