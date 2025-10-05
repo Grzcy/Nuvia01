@@ -1461,6 +1461,9 @@
         .chat-icon-svg .chat-bubble-body { transition: fill 160ms ease; fill: #007bff !important; }
         .chat-icon-svg .chat-dots { fill: #ffffff !important; }
         #headerChatLink:hover .chat-icon-svg .chat-bubble-body { fill: #005fb5 !important; }
+/* Unread dot over chat icon */
+#headerChatLink .chat-unread-dot{position:absolute;top:2px;right:2px;width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--blue));box-shadow:0 0 10px rgba(255,255,255,0.25),0 0 12px var(--pink);border:2px solid rgba(0,0,0,0.35);display:none;z-index:3}
+@media (max-width:520px){ #headerChatLink .chat-unread-dot{width:8px;height:8px;top:1px;right:1px} }
         /* Ensure leaderboard/trophy icon matches notification bell size */
         #leaderboardLink i, .sidebar-nav-item i.fas.fa-trophy, .icon-wrapper i.fas.fa-trophy {
             font-size: 1.5rem; /* same as .notification-icon-wrapper i */
@@ -4760,6 +4763,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                             </g>
                           </g>
                         </svg>
+                        <span id="chatUnreadDot" class="chat-unread-dot" aria-hidden="true" style="display:none"></span>
                     </a>
                 </div>
 
@@ -7044,7 +7048,7 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
             document.getElementById('annDismissBtn').onclick = () => { dismissAnnouncementById(annId); modal.style.display = 'none'; };
             document.getElementById('annSnooze1h').onclick = () => { snoozeAnnouncementById(annId, 60*60*1000); modal.style.display = 'none'; showMessageBox('Will remind you in 1 hour', 'success'); };
             document.getElementById('annSnooze1d').onclick = () => { snoozeAnnouncementById(annId, 24*60*60*1000); modal.style.display = 'none'; showMessageBox('Will remind you in 24 hours', 'success'); };
-            document.getElementById('annShareBtn').onclick = async () => { try{ await safeCopyText(`${announcementData.message}\n����� JCHAT`); showMessageBox('Announcement copied to clipboard', 'success'); }catch(e){ showMessageBox('Copy failed', 'error'); } };
+            document.getElementById('annShareBtn').onclick = async () => { try{ await safeCopyText(`${announcementData.message}\n������ JCHAT`); showMessageBox('Announcement copied to clipboard', 'success'); }catch(e){ showMessageBox('Copy failed', 'error'); } };
 
             // focus
             setTimeout(()=>{ const btn = document.getElementById('closeAnnModal'); if(btn) btn.focus(); }, 80);
@@ -13170,6 +13174,10 @@ async function fetchAndDisplayPosts() {
             }catch(e){ console.warn('startIncomingMessageBanner failed', e); }
         }
 
+        // Chat unread dot helpers
+        function setChatUnread(flag){ try{ const dot=document.getElementById('chatUnreadDot'); if(dot){ dot.style.display = flag ? 'block' : 'none'; } try{ localStorage.setItem('chat_unread', flag? '1':'0'); }catch(_){ } }catch(_){ } }
+        (function initChatUnread(){ try{ const saved = localStorage.getItem('chat_unread'); if(saved==='1'){ setChatUnread(true); } }catch(_){ } try{ const link=document.getElementById('headerChatLink'); if(link){ link.addEventListener('click', ()=> setChatUnread(false)); } }catch(_){ } })();
+
         // --- Unread chat banner (below People You May Know) ---
         let __unreadBannerUnsub = null;
         let __lastShownByChat = {};
@@ -13224,13 +13232,16 @@ async function fetchAndDisplayPosts() {
                 const notifCol = collection(db, 'artifacts', appId, 'users', currentUser.uid, 'notifications');
                 const qNotif = query(notifCol, where('read','==', false));
                 __unreadBannerUnsub = onSnapshot(qNotif, (snap)=>{
-                    let latest = null;
+                    let latest = null; let hasChatUnread = false;
                     snap.forEach(ds=>{
                         const d = ds.data()||{};
                         const t = d.createdAt?.toMillis?.() || d.timestamp?.toMillis?.() || (typeof d.createdAt==='number'? d.createdAt : 0) || (typeof d.timestamp==='number'? d.timestamp : 0);
+                        const typ = String(d.type||'').toLowerCase();
+                        if (typ==='message' || typ==='messages' || typ==='new_message') { hasChatUnread = true; }
                         if (!latest || t > latest._ts) latest = { id: ds.id, ...d, _ts: t };
                     });
-                    if (!latest) return;
+                    setChatUnread(hasChatUnread);
+                    if (!hasChatUnread) return;
                     const type = String(latest.type||'').toLowerCase();
                     if (type==='message' || type==='messages' || type==='new_message'){
                         const senderId = latest.senderId || latest.fromId || latest.userId || '';
@@ -13242,7 +13253,7 @@ async function fetchAndDisplayPosts() {
                         const lastSeen = Number(__lastShownByChat[chatKey]||0);
                         if (tsMs <= lastSeen) return;
                         __lastShownByChat[chatKey] = tsMs; saveUnreadState();
-                        showUnreadBanner({ senderId, senderName: name, messageId: latest.messageId || latest.id, text });
+                        showUnreadBanner({ senderId, senderName: name, messageId: latest.messageId || latest.id, text }); setChatUnread(true);
                     }
                 }, (err)=>{
                     if (err && err.code === 'permission-denied'){
