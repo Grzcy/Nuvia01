@@ -2338,6 +2338,8 @@
                 if (window.__smartProgressTimer) { clearInterval(window.__smartProgressTimer); window.__smartProgressTimer = null; }
                 if (window.__smartLoaderDeferredHide) { clearTimeout(window.__smartLoaderDeferredHide); window.__smartLoaderDeferredHide = null; }
 
+                try{ document.body.style.overflow = (window.__prevBodyOverflow != null ? window.__prevBodyOverflow : ''); }catch(_){ }
+
                 const form = document.getElementById('loginForm');
                 if (form) form.style.pointerEvents = 'auto';
             };
