@@ -1295,6 +1295,18 @@
         </div>
     </div>
 
+    <!-- Welcome Modal for new users -->
+    <div class="custom-modal" id="welcomeModal" aria-hidden="true">
+        <div class="modal-content">
+            <div class="modal-icon success" aria-hidden="true">🎉</div>
+            <div class="modal-title">Congratulations!</div>
+            <div class="modal-message">Welcome to Nuvia — your adventure starts now. Create, connect, and earn rewards as you join our friendly community. We're excited to have you here!</div>
+            <div class="modal-buttons">
+                <button class="modal-btn primary welcome-ok" id="welcomeOkBtn" type="button">OK, let\u0002s go!</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Reset Password Modal -->
     <div class="custom-modal" id="resetPasswordModal">
         <div class="modal-content">
@@ -1935,11 +1947,9 @@
                 await processReferralReward(user.uid);
 
                 hideSmartLoader();
-                try {
-                    localStorage.setItem('nuvia_auth_user', JSON.stringify({ uid: user.uid, email: user.email || email, displayName: user.displayName || null, ts: Date.now() }));
-                    localStorage.setItem('nuvia_auth_status', 'authenticated');
-                } catch(_) {}
-                showSuccessModal('Account created! You are signed in.', () => { try{ sessionStorage.setItem('nuvia_last_auth','1'); }catch(_){} window.location.href = 'index.html'; });
+                try { localStorage.setItem('nuvia_auth_user', JSON.stringify({ uid: user.uid, email: user.email || email, displayName: user.displayName || null, ts: Date.now() })); localStorage.setItem('nuvia_auth_status', 'authenticated'); } catch(_) {}
+                // Show an upbeat welcome panel for newly registered account and redirect when dismissed
+                showWelcomeModal(user.uid);
 
             } catch (error) {
                 hideSmartLoader();
@@ -2399,6 +2409,38 @@
 
 
         // Enhanced show success with custom modal
+        // Welcome modal helper - shows once for newly registered users and persists dismissal to localStorage
+        function showWelcomeModal(userUid) {
+            try {
+                const uid = userUid || '';
+                const key = 'nuvia_welcome_dismissed_' + (uid || 'global');
+                // If user already dismissed the welcome, go straight to the app
+                if (localStorage.getItem(key)) {
+                    try{ sessionStorage.setItem('nuvia_last_auth','1'); }catch(_){ }
+                    window.location.href = 'index.html';
+                    return;
+                }
+                const modal = document.getElementById('welcomeModal');
+                if (!modal) { try{ sessionStorage.setItem('nuvia_last_auth','1'); }catch(_){ } window.location.href = 'index.html'; return; }
+                // Configure button
+                const btn = modal.querySelector('.welcome-ok');
+                if (btn) {
+                    btn.onclick = function() {
+                        try { localStorage.setItem(key, '1'); }catch(_){ }
+                        closeWelcomeModal();
+                        try{ sessionStorage.setItem('nuvia_last_auth','1'); }catch(_){ }
+                        window.location.href = 'index.html';
+                    };
+                }
+                modal.style.display = 'flex';
+                modal.setAttribute('aria-hidden','false');
+            } catch (e) { try{ sessionStorage.setItem('nuvia_last_auth','1'); }catch(_){ } window.location.href = 'index.html'; }
+        }
+
+        function closeWelcomeModal() {
+            try { const m = document.getElementById('welcomeModal'); if (m) { m.style.display = 'none'; m.setAttribute('aria-hidden','true'); } } catch(_){}
+        }
+
         function showSuccessModal(message, callback = null) {
             showCustomModal('success', 'Success!', message, callback);
         }
@@ -2897,7 +2939,12 @@
                 }
 
                 showSmartLoader('Welcome', 'Signing you in...');
-                setTimeout(()=>{ try{ sessionStorage.setItem('nuvia_last_auth','1'); }catch(_){} window.location.href = 'index.html'; }, 600);
+                if (isNew) {
+                    try { localStorage.setItem('nuvia_auth_user', JSON.stringify({ uid: user.uid, email: user.email || null, displayName: user.displayName || null, ts: Date.now() })); localStorage.setItem('nuvia_auth_status', 'authenticated'); } catch(_) {}
+                    showWelcomeModal(user.uid);
+                } else {
+                    setTimeout(()=>{ try{ sessionStorage.setItem('nuvia_last_auth','1'); }catch(_){} window.location.href = 'index.html'; }, 600);
+                }
             }catch(e){ console.error('handleGoogleAuthResult error', e); showErrorModal('Google sign-in failed. Please try again.'); }
         }
 
@@ -2927,7 +2974,12 @@
                 }
 
                 showSmartLoader('Welcome', 'Signing you in...');
-                setTimeout(()=>{ try{ sessionStorage.setItem('nuvia_last_auth','1'); }catch(_){} window.location.href = 'index.html'; }, 600);
+                if (isNew) {
+                    try { localStorage.setItem('nuvia_auth_user', JSON.stringify({ uid: user.uid, email: user.email || null, displayName: user.displayName || null, ts: Date.now() })); localStorage.setItem('nuvia_auth_status', 'authenticated'); } catch(_) {}
+                    showWelcomeModal(user.uid);
+                } else {
+                    setTimeout(()=>{ try{ sessionStorage.setItem('nuvia_last_auth','1'); }catch(_){} window.location.href = 'index.html'; }, 600);
+                }
             }catch(e){ console.error('handleGithubAuthResult error', e); showErrorModal('GitHub sign-in failed. Please try again.'); }
         }
 
