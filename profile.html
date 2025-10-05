@@ -10303,6 +10303,7 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
 
             // NEW: User Information Toggle Functionality
             initializeUserInfoToggle();
+            window.__UserInfoToggleReady = true;
 
             // Account Settings Toggle
             if (toggleAccountSettingsButton) {
@@ -10583,5 +10584,31 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
 })();
 </script>
 <script type="module" src="nuvia-global-call-service.js" defer></script>
+<script>
+(function(){
+  try {
+    function bind(){
+      const btn = document.getElementById('userInfoToggle');
+      const section = document.getElementById('userInfoSection');
+      if (!btn || !section) return;
+      if (window.__UserInfoToggleReady) return;
+      if (btn.dataset.fallbackBound === '1') return;
+      btn.dataset.fallbackBound = '1';
+      btn.addEventListener('click', function(e){
+        if (window.__UserInfoToggleReady) return;
+        e.preventDefault();
+        const isHidden = section.style.display === 'none' || (!section.style.display && section.offsetParent === null);
+        const show = isHidden;
+        section.style.display = show ? 'flex' : 'none';
+        const icon = show ? '<i class="fas fa-eye-slash"></i>' : '<i class="fas fa-user-circle"></i>';
+        const text = show ? 'Hide User Info' : 'Show User Info';
+        btn.innerHTML = icon + '<span class="toggle-text">' + text + '</span>';
+      }, { capture: true });
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind, { once: true });
+    else bind();
+  } catch(_) {}
+})();
+</script>
 </body>
 </html>
