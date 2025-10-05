@@ -10610,5 +10610,68 @@ if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !
   } catch(_) {}
 })();
 </script>
+<script>
+(function(){
+  try{
+    function bind(){
+      const editBtn = document.getElementById('editProfileBtn');
+      const viewBtn = document.getElementById('viewProfileBtn');
+      const form = document.getElementById('profileEditForm');
+      if (editBtn && form && editBtn.dataset.editFallbackBound !== '1'){
+        editBtn.dataset.editFallbackBound = '1';
+        editBtn.addEventListener('click', function(e){
+          if (window.__UserInfoToggleReady) return;
+          e.preventDefault();
+          form.style.display = 'block';
+          editBtn.style.display = 'none';
+          if (viewBtn) viewBtn.style.display = 'inline-flex';
+        }, { capture: true });
+      }
+      if (viewBtn && form && viewBtn.dataset.viewFallbackBound !== '1'){
+        viewBtn.dataset.viewFallbackBound = '1';
+        viewBtn.addEventListener('click', function(e){
+          if (window.__UserInfoToggleReady) return;
+          e.preventDefault();
+          form.style.display = 'none';
+          if (editBtn) editBtn.style.display = 'inline-flex';
+          viewBtn.style.display = 'none';
+        }, { capture: true });
+      }
+      const privacyBtn = document.getElementById('privacySettingsBtn');
+      const privacySection = document.getElementById('privacySettingsSection');
+      if (privacyBtn && privacySection && privacyBtn.dataset.privacyFallbackBound !== '1'){
+        privacyBtn.dataset.privacyFallbackBound = '1';
+        privacyBtn.addEventListener('click', function(e){
+          if (window.__UserInfoToggleReady) return;
+          e.preventDefault();
+          const isHidden = privacySection.style.display === 'none' || privacySection.style.display === '';
+          privacySection.style.display = isHidden ? 'block' : 'none';
+          privacyBtn.innerHTML = isHidden ? '<i class="fas fa-eye-slash"></i> Hide Privacy Settings' : '<i class="fas fa-shield-alt"></i> Privacy Settings';
+        }, { capture: true });
+      }
+      const saveBtn = document.getElementById('savePrivacySettingsButton');
+      if (saveBtn && saveBtn.dataset.savePrivacyFallbackBound !== '1'){
+        saveBtn.dataset.savePrivacyFallbackBound = '1';
+        saveBtn.addEventListener('click', function(e){
+          if (typeof window.savePrivacySettings === 'function') return; // main module will handle
+          e.preventDefault();
+          try { console.warn('Privacy settings could not be saved because the main script did not finish loading.'); } catch(_){ }
+        }, { capture: true });
+      }
+      const friendsStatItem = document.getElementById('friendsStatItem');
+      const selectFriendModal = document.getElementById('selectFriendModal');
+      if (friendsStatItem && selectFriendModal && friendsStatItem.dataset.friendsFallbackBound !== '1'){
+        friendsStatItem.dataset.friendsFallbackBound = '1';
+        friendsStatItem.addEventListener('click', function(){
+          if (window.__UserInfoToggleReady) return;
+          selectFriendModal.classList.add('active');
+        }, { capture: true });
+      }
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind, { once: true });
+    else bind();
+  }catch(_){ }
+})();
+</script>
 </body>
 </html>
