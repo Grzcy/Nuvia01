@@ -2269,6 +2269,8 @@
             loaderSubtext.textContent = subtitle || 'Please wait';
             loader.style.display = 'flex';
             loader.setAttribute('aria-hidden','false');
+            try{ const content = loader.querySelector('.loader-content'); if(content){ content.setAttribute('aria-modal','true'); if(!content.hasAttribute('tabindex')) content.setAttribute('tabindex','-1'); content.focus({ preventScroll:true }); } }catch(_){ }
+            try{ window.__prevBodyOverflow = document.body.style.overflow || ''; document.body.style.overflow = 'hidden'; }catch(_){ }
 
             const form = document.getElementById('loginForm');
             if (form) form.style.pointerEvents = 'none';
