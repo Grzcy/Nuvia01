@@ -7354,19 +7354,19 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         // Subscribe to real-time theme unlocks from new system
         function subscribeToThemeUnlocks(userId) {
             if (!userId) return;
-            
+
             // Check if Firebase is available
             if (typeof db === 'undefined' || typeof appId === 'undefined') {
                 console.log('Firebase not available for theme unlocks');
                 return;
             }
-            
+
             const userEntitlementsRef = doc(db, 'artifacts', appId, 'users', userId, 'profiles', 'user_entitlements');
-            
+
             return onSnapshot(userEntitlementsRef, (doc) => {
                 if (doc.exists()) {
                     const data = doc.data();
-                    
+
                     // Check if any new themes were unlocked
                     if (data.themes && Array.isArray(data.themes)) {
                         data.themes.forEach(themeKey => {
@@ -7378,12 +7378,12 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                                 }
                             }
                         });
-                        
+
                         // Refresh theme picker if open
                         if (document.querySelector('.theme-picker')) {
                             buildThemePickerList();
                         }
-                        
+
                         // One-time and incremental unlock notifications per user (persisted per user)
                         const premiumThemeKeys = Object.keys(themeCatalog).filter(k => !themeCatalog[k].isFree);
                         const userKeyPrefix = `nuvia_theme_unlocks_${userId}`;
@@ -7412,6 +7412,37 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
                     }
                 }
             });
+        }
+
+        let themeEntitlementsUnsubscribe = null;
+        let themeEntitlementsUserId = null;
+
+        function ensureThemeEntitlementSubscription(userId) {
+            if (!userId) {
+                clearThemeEntitlementSubscription();
+                return;
+            }
+            if (themeEntitlementsUserId === userId && typeof themeEntitlementsUnsubscribe === 'function') {
+                return;
+            }
+            clearThemeEntitlementSubscription();
+            const unsubscribe = subscribeThemeEntitlements(userId);
+            if (typeof unsubscribe === 'function') {
+                themeEntitlementsUnsubscribe = unsubscribe;
+                themeEntitlementsUserId = userId;
+                unsubscribeListeners.push(unsubscribe);
+            }
+        }
+
+        function clearThemeEntitlementSubscription() {
+            if (typeof themeEntitlementsUnsubscribe === 'function') {
+                try { themeEntitlementsUnsubscribe(); } catch (err) {
+                    console.warn('Nuvia_WARN: Failed to clear theme entitlement listener', err);
+                }
+                unsubscribeListeners = unsubscribeListeners.filter((fn) => fn !== themeEntitlementsUnsubscribe);
+            }
+            themeEntitlementsUnsubscribe = null;
+            themeEntitlementsUserId = null;
         }
 
         // Function to initialize all DOM elements safely
