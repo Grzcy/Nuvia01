@@ -367,11 +367,11 @@
         }
 
         @keyframes bounce {
-            0%, 80%, 100% {
+            0%, 80%, 100% { 
                 transform: scale(0.8);
                 opacity: 0.5;
             }
-            40% {
+            40% { 
                 transform: scale(1.2);
                 opacity: 1;
             }
@@ -440,8 +440,7 @@
                 opacity: 1;
             }
         }
-
-
+        
         html, body {
             scroll-behavior: auto !important;
             overflow: auto !important;
@@ -1001,91 +1000,6 @@
             overflow: visible; /* Allow content to overflow for proper display */
         }
 
-        .profile-cover-container {
-            position: relative;
-            /* Full-bleed inside the profile card: extend to edges by compensating for profile padding */
-            width: calc(100% + (var(--profile-padding) * 2));
-            margin-left: calc(var(--profile-padding) * -1);
-            margin-right: calc(var(--profile-padding) * -1);
-            max-width: none; /* Let it expand to card edges */
-            height: 240px;
-            border-radius: 20px;
-            overflow: hidden;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-light);
-            margin-bottom: 16px;
-            transition: box-shadow 0.3s ease;
-        }
-
-        .profile-cover-container:hover {
-            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
-        }
-
-        .profile-cover-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: none;
-        }
-
-        .profile-cover-input {
-            display: none;
-        }
-
-        .profile-cover-edit {
-            position: absolute;
-            right: 16px;
-            bottom: 16px;
-            background: rgba(0, 0, 0, 0.55);
-            padding: 8px 14px;
-            border-radius: 12px;
-            cursor: pointer;
-            display: none;
-            color: var(--white);
-            font-weight: 600;
-            letter-spacing: 0.02em;
-            backdrop-filter: blur(4px);
-        }
-
-        .profile-cover-edit i {
-            margin-right: 6px;
-        }
-
-        @media (max-width: 768px) {
-            .profile-section { --profile-padding: 1.5rem; }
-            .profile-cover-container {
-                width: calc(100% + (var(--profile-padding) * 2));
-                margin-left: calc(var(--profile-padding) * -1);
-                margin-right: calc(var(--profile-padding) * -1);
-                height: 200px;
-                border-radius: 18px;
-            }
-
-            .profile-cover-edit {
-                right: 12px;
-                bottom: 12px;
-                padding: 7px 12px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .profile-section { --profile-padding: 1rem; }
-            .profile-cover-container {
-                width: calc(100% + (var(--profile-padding) * 2));
-                margin-left: calc(var(--profile-padding) * -1);
-                margin-right: calc(var(--profile-padding) * -1);
-                height: 170px;
-                border-radius: 16px;
-            }
-
-            .profile-cover-edit {
-                right: 10px;
-                bottom: 10px;
-                padding: 6px 10px;
-                font-size: 0.9rem;
-            }
-        }
-
         .profile-section::before {
             content: '';
             position: absolute;
@@ -1187,12 +1101,8 @@
             }
 
             .profile-pic-wrapper {
-                width: 320px;
-                height: 320px;
-            }
-
-            .profile-pic-placeholder {
-                font-size: 160px;
+                width: 100px;
+                height: 100px;
             }
 
             .profile-name {
@@ -1493,8 +1403,8 @@
         }
 
         .profile-pic-wrapper {
-            width: 400px;
-            height: 400px;
+            width: 120px;
+            height: 120px;
             border-radius: 50%;
             overflow: hidden;
             border: 4px solid var(--blue);
@@ -1511,7 +1421,7 @@
         }
 
         .profile-pic-placeholder {
-            font-size: 200px;
+            font-size: 100px;
             /* Apply gradient to icons */
             background-image: linear-gradient(90deg, var(--blue), var(--pink));
             background-clip: text;
@@ -4479,12 +4389,8 @@
             }
 
             .profile-pic-wrapper {
-                width: 320px;
-                height: 320px;
-            }
-
-            .profile-pic-placeholder {
-                font-size: 160px;
+                width: 100px;
+                height: 100px;
             }
 
             .profile-name {
@@ -4563,12 +4469,8 @@
             }
 
             .profile-pic-wrapper {
-                width: 240px;
-                height: 240px;
-            }
-
-            .profile-pic-placeholder {
-                font-size: 120px;
+                width: 80px;
+                height: 80px;
             }
 
             .profile-name {
@@ -5157,49 +5059,6 @@
 
 
     </style>
-<style id="avatar-badges-styles">
-  .profile-avatar-anchor { position: relative; display: inline-flex; }
-  .profile-avatar-badge {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    border: 6px solid var(--background-main);
-    box-shadow: 0 8px 18px rgba(0,0,0,0.45);
-    z-index: 2;
-    background: linear-gradient(135deg, var(--blue), var(--pink));
-  }
-  .profile-avatar-badge i {
-    color: var(--white);
-    font-size: 28px;
-    line-height: 1;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.35);
-  }
-  .profile-avatar-badge.verified {
-    right: -20px;
-    bottom: -20px;
-  }
-  .profile-avatar-badge.premium {
-    top: -20px;
-    right: -20px;
-    background: linear-gradient(135deg, #f7b733, #fc4a1a);
-  }
-  @media (max-width: 768px) {
-    .profile-avatar-badge { width: 55px; height: 55px; border-width: 4px; box-shadow: 0 6px 14px rgba(0,0,0,0.4); }
-    .profile-avatar-badge i { font-size: 22px; }
-    .profile-avatar-badge.verified { right: -14px; bottom: -14px; }
-    .profile-avatar-badge.premium { top: -14px; right: -14px; }
-  }
-  @media (max-width: 480px) {
-    .profile-avatar-badge { width: 44px; height: 44px; border-width: 3px; box-shadow: 0 4px 12px rgba(0,0,0,0.35); }
-    .profile-avatar-badge i { font-size: 18px; }
-    .profile-avatar-badge.verified { right: -10px; bottom: -10px; }
-    .profile-avatar-badge.premium { top: -10px; right: -10px; }
-  }
-</style>
 </head>
 <body class="theme-dark-mode">
     <!-- JCHAT Pink & Blue Glowing Loader -->
@@ -5297,14 +5156,14 @@
     <main>
         <div class="content-wrapper">
                             <div class="profile-section">
-                <div id="profileCoverWrapper" class="profile-cover-container">
-                    <img id="profileCoverImg" alt="Cover" class="profile-cover-image">
-                    <input type="file" id="profileCoverUploadInput" accept="image/*" class="profile-cover-input">
-                    <label for="profileCoverUploadInput" id="editCoverOverlay" class="profile-cover-edit"><i class="fas fa-camera"></i> Edit Cover</label>
+                <div id="profileCoverWrapper" style="width:100%;height:180px;border-radius:14px;overflow:hidden;position:relative;margin-bottom:12px;background:rgba(255,255,255,0.05);border:1px solid var(--border-light);">
+                    <img id="profileCoverImg" alt="Cover" style="width:100%;height:100%;object-fit:cover;display:none;">
+                    <input type="file" id="profileCoverUploadInput" accept="image/*" style="display:none;">
+                    <label for="profileCoverUploadInput" id="editCoverOverlay" style="position:absolute;right:10px;bottom:10px;background:rgba(0,0,0,0.5);padding:6px 10px;border-radius:8px;cursor:pointer;display:none;"><i class="fas fa-camera"></i> Edit Cover</label>
                 </div>
 
                 <div class="profile-header-area">
-                    <div class="profile-avatar-anchor"><div class="profile-pic-wrapper" id="profilePicWrapper">
+                    <div class="profile-pic-wrapper" id="profilePicWrapper">
                         <img id="profilePagePic" src="" alt="Profile Picture" class="profile-pic" style="display: none;">
                         <i id="profilePageAvatarIcon" class="fas fa-user-circle profile-pic-placeholder"></i>
                         <input type="file" id="profilePicUploadInput" accept="image/*" style="display: none;">
@@ -5312,7 +5171,7 @@
                             <i class="fas fa-camera"></i> Edit
                         </label>
                          <!-- NEW: Loading spinner for profile pic -->
-                    </div></div>
+                    </div>
                     <h2 id="profileUsername" class="profile-name">Username</h2>
                     <p id="profileBio" class="profile-bio">No bio provided yet.</p>
                     
@@ -5935,7 +5794,6 @@
         import { getFirestore, doc, getDoc, updateDoc, setDoc, deleteDoc, collection, query, where, getDocs, runTransaction, writeBatch, serverTimestamp, orderBy, addDoc, arrayUnion, documentId, onSnapshot } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js";
         import { Timestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
-import { renderAvatarStatusBadges } from './assets/js/verification-utils.js';
 
         // --- Firebase & Canvas Environment Configuration ---
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
@@ -6374,7 +6232,7 @@ import { renderAvatarStatusBadges } from './assets/js/verification-utils.js';
                         });
                         const img = new Image();
                         await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = dataUrl; });
-                        const targetW = 1920, targetH = 600; // 16:5 enhanced resolution
+                        const targetW = 1600, targetH = 500; // 16:5
                         const srcW = img.naturalWidth, srcH = img.naturalHeight;
                         const srcAspect = srcW / srcH, outAspect = targetW / targetH;
                         let drawW, drawH;
@@ -6427,7 +6285,6 @@ import { renderAvatarStatusBadges } from './assets/js/verification-utils.js';
         let currentUserProfileData = null; // The current user's own private profile data (Firestore document)
         let displayedUserId = null; // The ID of the user whose profile is currently being displayed (from URL or current user)
         let displayedUserProfileData = null; // The profile data of the user currently being displayed (could be current user or another user)
-        let unsubscribeProfileListener = null; // Firestore onSnapshot unsubscribe for the displayed profile
         let isAuthReady = false; // Flag to indicate if auth state has been checked
         const ADMIN_UID = 'cc96gdhCRPO72NFZtleRCujHvIq2'; // Admin's User ID
         let currentSystemSettings = {}; // To store system settings (like exchange rates)
@@ -6976,7 +6833,7 @@ import { renderAvatarStatusBadges } from './assets/js/verification-utils.js';
                 updatePostsWithNewProfilePic(currentUser.uid, newProfilePicUrl);
 
                 // 7. Update UI immediately
-                displayProfilePicture(profilePagePic, profilePageAvatarIcon, newProfilePicUrl, (currentUserProfileData?.username || 'U').charAt(0).toUpperCase(), "w_480,h_480,c_fill,g_face,r_max");
+                displayProfilePicture(profilePagePic, profilePageAvatarIcon, newProfilePicUrl, (currentUserProfileData?.username || 'U').charAt(0).toUpperCase(), "w_240,h_240,c_fill,g_face,r_max");
                 displayProfilePicture(headerProfilePic, headerAvatarIcon, newProfilePicUrl, (currentUserProfileData?.username || 'U').charAt(0).toUpperCase(), "w_70,h_70,c_fill,g_face,r_max");
 
                                     showEnhancedSmartSuccess("Profile picture updated successfully! 🎉", 'celebration');
@@ -8910,124 +8767,36 @@ import { renderAvatarStatusBadges } from './assets/js/verification-utils.js';
             }
 
             try {
-                // Clear any existing listener for previously displayed profile
-                if (typeof unsubscribeProfileListener === 'function') {
-                    try { unsubscribeProfileListener(); } catch(_) {}
-                    unsubscribeProfileListener = null;
-                }
+                const docSnap = await getDoc(profileDocRef);
 
-                // Use onSnapshot to subscribe to real-time updates for the profile document
-                unsubscribeProfileListener = onSnapshot(profileDocRef, (docSnap) => {
-                    if (!docSnap.exists()) {
-                        // Profile not found - clear UI
-                        console.warn('Profile document not found for', userIdToDisplay);
-                        displayedUserProfileData = null;
-                        // Clear UI elements that depend on profile
-                        if (profileUsername) profileUsername.textContent = 'User not found';
-                        if (profileBio) profileBio.textContent = '';
-                        if (profilePagePic) profilePagePic.style.display = 'none';
-                        if (profilePageAvatarIcon) profilePageAvatarIcon.style.display = 'block';
-                        if (profileCoverImg) profileCoverImg.style.display = 'none';
-                        return;
-                    }
-
-                    const data = docSnap.data();
-
+                if (docSnap.exists()) {
                     // Store the fetched profile data globally for the currently displayed user
+                    // If it's the current user's profile, store it in currentUserProfileData
                     if (isCurrentUserProfile) {
-                        currentUserProfileData = data;
+                        currentUserProfileData = docSnap.data();
                         displayedUserProfileData = currentUserProfileData; // Both point to the same for owner
                     } else {
-                        displayedUserProfileData = data;
+                        displayedUserProfileData = docSnap.data();
                     }
-
+                    
                     // IMPORTANT: Ensure userId is always part of displayedUserProfileData
                     displayedUserProfileData.userId = userIdToDisplay;
-
+                    
                     // Calculate and update profile completion immediately after loading data
                     calculateAndUpdateProfileCompletion(displayedUserProfileData);
 
-                    console.log(`JCHAT_DEBUG: Real-time profile update for ${userIdToDisplay}:`, displayedUserProfileData);
+                    console.log(`JCHAT_DEBUG: Fetched profile data for ${userIdToDisplay}:`, displayedUserProfileData);
 
                     // Apply visibility settings if it's another user's profile
                     const visibility = displayedUserProfileData.visibility || {};
 
                     // Cover image display (respect visibility if added later)
                     if (profileCoverImg && displayedUserProfileData.coverPicId) {
-                        profileCoverImg.src = getCloudinaryImageUrl(displayedUserProfileData.coverPicId, 'w_1920,h_600,c_fill,q_auto');
-                        profileCoverImg.style.display = 'block';
-                    } else if (profileCoverImg) {
-                        profileCoverImg.style.display = 'none';
-                    }
-
-                    if (editCoverOverlay) {
-                        editCoverOverlay.style.display = (currentUser && isCurrentUserProfile) ? 'flex' : 'none';
-                    }
-
-                    if (profileUsername) profileUsername.textContent = displayedUserProfileData.username || "JCHAT User"; // Null check
-                    const usernameInitial = (displayedUserProfileData.username || "J").charAt(0).toUpperCase();
-
-                    // Profile Picture
-                    if (profilePagePic && profilePageAvatarIcon) { // Null check
-                        if (displayedUserProfileData.profilePicId && (isCurrentUserProfile || visibility.profilePic)) {
-                            displayProfilePicture(profilePagePic, profilePageAvatarIcon, displayedUserProfileData.profilePicId, usernameInitial, "w_480,h_480,c_fill,g_face,r_max");
-                        } else {
-                            profilePagePic.style.display = 'none';
-                            profilePageAvatarIcon.style.display = 'block';
-                        }
-                    }
-
-                    // Avatar badges
-                    try { if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !!displayedUserProfileData.verified }); } catch (e) { console.error(e); }
-
-                    // Bio
-                    if (profileBio) { // Null check
-                        if (displayedUserProfileData.bio && (isCurrentUserProfile || visibility.bio)) {
-                            profileBio.textContent = displayedUserProfileData.bio;
-                        } else {
-                            profileBio.textContent = isCurrentUserProfile ? "No bio provided yet." : "Bio not publicly available.";
-                        }
-                    }
-
-                    // NEW: User ID Display
-                    if (profileUserId && userIdText) { // Null check
-                        if (isCurrentUserProfile || visibility.userId) {
-                            userIdText.textContent = userIdToDisplay;
-                            profileUserId.style.display = 'block';
-                        } else {
-                            profileUserId.style.display = 'none';
-                        }
-                    }
-
-                    // Location
-                    if (profileLocation && locationText) { // Null check
-                        if (displayedUserProfileData.location && (isCurrentUserProfile || visibility.location)) {
-                            locationText.textContent = displayedUserProfileData.location;
-                            profileLocation.style.display = 'block';
-                        } else {
-                            profileLocation.style.display = 'none';
-                        }
-                    }
-
-                    // Email (only for owner or if public)
-                    if (profileEmail && emailText) { // Null check
-                        if (displayedUserProfileData.email && (isCurrentUserProfile || visibility.emailPublic)) {
-                            emailText.textContent = displayedUserProfileData.email;
-                            profileEmail.style.display = 'block';
-                        } else {
-                            profileEmail.style.display = 'none';
-                        }
-                    }
-
-                }, (err) => { console.error('JCHAT_ERROR: profile onSnapshot error', err); });
-
-                    // Cover image display (respect visibility if added later)
-                    if (profileCoverImg && displayedUserProfileData.coverPicId) {
-                        profileCoverImg.src = getCloudinaryImageUrl(displayedUserProfileData.coverPicId, 'w_1920,h_600,c_fill,q_auto');
+                        profileCoverImg.src = getCloudinaryImageUrl(displayedUserProfileData.coverPicId, 'w_1600,h_400,c_fill,q_auto');
                         profileCoverImg.style.display = 'block';
                     }
                     if (editCoverOverlay) {
-                        editCoverOverlay.style.display = (currentUser && isCurrentUserProfile) ? 'flex' : 'none';
+                        editCoverOverlay.style.display = (currentUser && isCurrentUserProfile) ? 'block' : 'none';
                     }
 
                     if (profileUsername) profileUsername.textContent = displayedUserProfileData.username || "JCHAT User"; // Null check
@@ -9038,15 +8807,12 @@ import { renderAvatarStatusBadges } from './assets/js/verification-utils.js';
                     // Profile Picture
                     if (profilePagePic && profilePageAvatarIcon) { // Null check
                         if (displayedUserProfileData.profilePicId && (isCurrentUserProfile || visibility.profilePic)) {
-                            displayProfilePicture(profilePagePic, profilePageAvatarIcon, displayedUserProfileData.profilePicId, usernameInitial, "w_480,h_480,c_fill,g_face,r_max");
+                            displayProfilePicture(profilePagePic, profilePageAvatarIcon, displayedUserProfileData.profilePicId, usernameInitial, "w_240,h_240,c_fill,g_face,r_max");
                         } else {
                             profilePagePic.style.display = 'none';
                             profilePageAvatarIcon.style.display = 'block';
                         }
                     }
-
-                    // Avatar badges
-                    try { if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !!displayedUserProfileData.verified }); } catch (e) { console.error(e); }
 
                     // Bio
                     if (profileBio) { // Null check
