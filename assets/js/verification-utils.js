@@ -30,7 +30,7 @@ export function renderVerifiedBadge(targetEl, isVerified, size = 'md') {
     }
 
     // Update class size if changed
-    badgeEl.classList.remove('sm', 'md');
+    badgeEl.classList.remove('sm', 'md', 'lg');
     if (size) badgeEl.classList.add(size);
 
     // Toggle visibility
