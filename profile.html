@@ -5059,6 +5059,7 @@
 
 
     </style>
+<style id="avatar-badge-styles">.profile-avatar-anchor{position:relative;display:inline-block}.profile-avatar-badge{position:absolute;display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg, var(--blue), var(--pink));color:var(--white);box-shadow:0 4px 12px rgba(0,0,0,0.35);border:2px solid var(--card-background);z-index:2}.profile-avatar-badge i{font-size:16px}.profile-avatar-badge.verified{right:-8px;bottom:-8px}.profile-avatar-badge.premium{right:-8px;top:-8px;background:linear-gradient(135deg,#ffd54f,#ff9800)}@media (max-width:520px){.profile-avatar-badge{width:24px;height:24px}.profile-avatar-badge i{font-size:14px}}</style>
 </head>
 <body class="theme-dark-mode">
     <!-- JCHAT Pink & Blue Glowing Loader -->
@@ -5163,7 +5164,7 @@
                 </div>
 
                 <div class="profile-header-area">
-                    <div class="profile-pic-wrapper" id="profilePicWrapper">
+                    <div class="profile-avatar-anchor"><div class="profile-pic-wrapper" id="profilePicWrapper">
                         <img id="profilePagePic" src="" alt="Profile Picture" class="profile-pic" style="display: none;">
                         <i id="profilePageAvatarIcon" class="fas fa-user-circle profile-pic-placeholder"></i>
                         <input type="file" id="profilePicUploadInput" accept="image/*" style="display: none;">
@@ -5172,6 +5173,7 @@
                         </label>
                          <!-- NEW: Loading spinner for profile pic -->
                     </div>
+                </div>
                     <h2 id="profileUsername" class="profile-name">Username</h2>
                     <p id="profileBio" class="profile-bio">No bio provided yet.</p>
                     
@@ -5794,6 +5796,7 @@
         import { getFirestore, doc, getDoc, updateDoc, setDoc, deleteDoc, collection, query, where, getDocs, runTransaction, writeBatch, serverTimestamp, orderBy, addDoc, arrayUnion, documentId, onSnapshot } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js";
         import { Timestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+        import { renderAvatarStatusBadges } from "./assets/js/verification-utils.js";
 
         // --- Firebase & Canvas Environment Configuration ---
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
@@ -8813,6 +8816,8 @@
                             profilePageAvatarIcon.style.display = 'block';
                         }
                     }
+
+                    try{ renderAvatarStatusBadges(profilePicWrapper, { verified: !!displayedUserProfileData.verified }); }catch(_){ }
 
                     // Bio
                     if (profileBio) { // Null check
