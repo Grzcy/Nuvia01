@@ -1051,9 +1051,11 @@
         }
 
         @media (max-width: 768px) {
+            .profile-section { --profile-padding: 1.5rem; }
             .profile-cover-container {
-                width: 100%;
-                max-width: 900px;
+                width: calc(100% + (var(--profile-padding) * 2));
+                margin-left: calc(var(--profile-padding) * -1);
+                margin-right: calc(var(--profile-padding) * -1);
                 height: 200px;
                 border-radius: 18px;
             }
