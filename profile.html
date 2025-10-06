@@ -8901,28 +8901,116 @@ import { renderAvatarStatusBadges } from './assets/js/verification-utils.js';
             }
 
             try {
-                const docSnap = await getDoc(profileDocRef);
+                // Clear any existing listener for previously displayed profile
+                if (typeof unsubscribeProfileListener === 'function') {
+                    try { unsubscribeProfileListener(); } catch(_) {}
+                    unsubscribeProfileListener = null;
+                }
 
-                if (docSnap.exists()) {
+                // Use onSnapshot to subscribe to real-time updates for the profile document
+                unsubscribeProfileListener = onSnapshot(profileDocRef, (docSnap) => {
+                    if (!docSnap.exists()) {
+                        // Profile not found - clear UI
+                        console.warn('Profile document not found for', userIdToDisplay);
+                        displayedUserProfileData = null;
+                        // Clear UI elements that depend on profile
+                        if (profileUsername) profileUsername.textContent = 'User not found';
+                        if (profileBio) profileBio.textContent = '';
+                        if (profilePagePic) profilePagePic.style.display = 'none';
+                        if (profilePageAvatarIcon) profilePageAvatarIcon.style.display = 'block';
+                        if (profileCoverImg) profileCoverImg.style.display = 'none';
+                        return;
+                    }
+
+                    const data = docSnap.data();
+
                     // Store the fetched profile data globally for the currently displayed user
-                    // If it's the current user's profile, store it in currentUserProfileData
                     if (isCurrentUserProfile) {
-                        currentUserProfileData = docSnap.data();
+                        currentUserProfileData = data;
                         displayedUserProfileData = currentUserProfileData; // Both point to the same for owner
                     } else {
-                        displayedUserProfileData = docSnap.data();
+                        displayedUserProfileData = data;
                     }
-                    
+
                     // IMPORTANT: Ensure userId is always part of displayedUserProfileData
                     displayedUserProfileData.userId = userIdToDisplay;
-                    
+
                     // Calculate and update profile completion immediately after loading data
                     calculateAndUpdateProfileCompletion(displayedUserProfileData);
 
-                    console.log(`JCHAT_DEBUG: Fetched profile data for ${userIdToDisplay}:`, displayedUserProfileData);
+                    console.log(`JCHAT_DEBUG: Real-time profile update for ${userIdToDisplay}:`, displayedUserProfileData);
 
                     // Apply visibility settings if it's another user's profile
                     const visibility = displayedUserProfileData.visibility || {};
+
+                    // Cover image display (respect visibility if added later)
+                    if (profileCoverImg && displayedUserProfileData.coverPicId) {
+                        profileCoverImg.src = getCloudinaryImageUrl(displayedUserProfileData.coverPicId, 'w_1920,h_600,c_fill,q_auto');
+                        profileCoverImg.style.display = 'block';
+                    } else if (profileCoverImg) {
+                        profileCoverImg.style.display = 'none';
+                    }
+
+                    if (editCoverOverlay) {
+                        editCoverOverlay.style.display = (currentUser && isCurrentUserProfile) ? 'flex' : 'none';
+                    }
+
+                    if (profileUsername) profileUsername.textContent = displayedUserProfileData.username || "JCHAT User"; // Null check
+                    const usernameInitial = (displayedUserProfileData.username || "J").charAt(0).toUpperCase();
+
+                    // Profile Picture
+                    if (profilePagePic && profilePageAvatarIcon) { // Null check
+                        if (displayedUserProfileData.profilePicId && (isCurrentUserProfile || visibility.profilePic)) {
+                            displayProfilePicture(profilePagePic, profilePageAvatarIcon, displayedUserProfileData.profilePicId, usernameInitial, "w_480,h_480,c_fill,g_face,r_max");
+                        } else {
+                            profilePagePic.style.display = 'none';
+                            profilePageAvatarIcon.style.display = 'block';
+                        }
+                    }
+
+                    // Avatar badges
+                    try { if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !!displayedUserProfileData.verified }); } catch (e) { console.error(e); }
+
+                    // Bio
+                    if (profileBio) { // Null check
+                        if (displayedUserProfileData.bio && (isCurrentUserProfile || visibility.bio)) {
+                            profileBio.textContent = displayedUserProfileData.bio;
+                        } else {
+                            profileBio.textContent = isCurrentUserProfile ? "No bio provided yet." : "Bio not publicly available.";
+                        }
+                    }
+
+                    // NEW: User ID Display
+                    if (profileUserId && userIdText) { // Null check
+                        if (isCurrentUserProfile || visibility.userId) {
+                            userIdText.textContent = userIdToDisplay;
+                            profileUserId.style.display = 'block';
+                        } else {
+                            profileUserId.style.display = 'none';
+                        }
+                    }
+
+                    // Location
+                    if (profileLocation && locationText) { // Null check
+                        if (displayedUserProfileData.location && (isCurrentUserProfile || visibility.location)) {
+                            locationText.textContent = displayedUserProfileData.location;
+                            profileLocation.style.display = 'block';
+                        } else {
+                            profileLocation.style.display = 'none';
+                        }
+                    }
+
+                    // Email (only for owner or if public)
+                    if (profileEmail && emailText) { // Null check
+                        if (displayedUserProfileData.email && (isCurrentUserProfile || visibility.emailPublic)) {
+                            emailText.textContent = displayedUserProfileData.email;
+                            profileEmail.style.display = 'block';
+                        } else {
+                            profileEmail.style.display = 'none';
+                        }
+                    }
+
+                }, (err) => { console.error('JCHAT_ERROR: profile onSnapshot error', err); });
 
                     // Cover image display (respect visibility if added later)
                     if (profileCoverImg && displayedUserProfileData.coverPicId) {
