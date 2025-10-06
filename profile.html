@@ -1006,8 +1006,6 @@
             border-radius: 20px;
             overflow: hidden;
             background: rgba(255, 255, 255, 0.05);
-            background-size: cover;
-            background-position: center center;
             border: 1px solid var(--border-light);
             margin: 0 auto 16px;
             transition: box-shadow 0.3s ease;
@@ -1021,7 +1019,6 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            object-position: center center;
             display: none;
         }
 
@@ -6388,7 +6385,7 @@ import { renderAvatarStatusBadges } from './assets/js/verification-utils.js';
                         if (!url) throw new Error('Upload failed');
                         const coverUrl = getCloudinaryImageUrl(url, `w_${targetW},h_${targetH},c_fill,q_auto`);
                         const previewEl = document.getElementById('profileCoverImg');
-                        if (previewEl) { previewEl.style.display = 'none'; /* Use container background for reliable centering */ const wrapper = document.getElementById('profileCoverWrapper'); if (wrapper) { wrapper.style.backgroundImage = `url(${coverUrl})`; wrapper.style.backgroundSize = 'cover'; wrapper.style.backgroundPosition = 'center center'; } }
+                        if (previewEl) { previewEl.src = coverUrl; previewEl.style.display = 'block'; }
                         if (currentUser && displayedUserId === currentUser.uid) {
                             await updateDoc(doc(db, 'artifacts', appId, 'users', currentUser.uid, 'profiles', 'user_profile'), { coverPicId: url, updatedAt: serverTimestamp() });
                             await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'users', currentUser.uid), { coverPicId: url, updatedAt: serverTimestamp() });
@@ -8925,17 +8922,8 @@ import { renderAvatarStatusBadges } from './assets/js/verification-utils.js';
 
                     // Cover image display (respect visibility if added later)
                     if (profileCoverImg && displayedUserProfileData.coverPicId) {
-                        const url = getCloudinaryImageUrl(displayedUserProfileData.coverPicId, 'w_1920,h_600,c_fill,q_auto');
-                        // Prefer using container background to ensure consistent centering across devices
-                        const wrapper = document.getElementById('profileCoverWrapper');
-                        if (wrapper) {
-                            wrapper.style.backgroundImage = `url(${url})`;
-                            wrapper.style.backgroundSize = 'cover';
-                            wrapper.style.backgroundPosition = 'center center';
-                        } else {
-                            profileCoverImg.src = url;
-                            profileCoverImg.style.display = 'block';
-                        }
+                        profileCoverImg.src = getCloudinaryImageUrl(displayedUserProfileData.coverPicId, 'w_1920,h_600,c_fill,q_auto');
+                        profileCoverImg.style.display = 'block';
                     }
                     if (editCoverOverlay) {
                         editCoverOverlay.style.display = (currentUser && isCurrentUserProfile) ? 'flex' : 'none';
