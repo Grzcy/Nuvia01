@@ -13,6 +13,45 @@ export function renderVerifiedBadge(targetEl, isVerified, size = 'md') {
   try {
     if (!targetEl) return;
     const doc = targetEl.ownerDocument || document;
+
+    if (!doc.getElementById('verified-badge-global-styles')) {
+      const style = doc.createElement('style');
+      style.id = 'verified-badge-global-styles';
+      style.textContent = `
+        .verified-badge {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          margin-left: 8px;
+          line-height: 1;
+          border-radius: 999px;
+          background: linear-gradient(135deg, var(--blue), var(--pink));
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+          border: 2px solid rgba(255, 255, 255, 0.35);
+          color: var(--white);
+          padding: 0.2rem;
+          vertical-align: middle;
+        }
+        .verified-badge i {
+          font-size: 1.3rem;
+          color: inherit;
+        }
+        .verified-badge.sm {
+          width: 1.9rem;
+          height: 1.9rem;
+        }
+        .verified-badge.md {
+          width: 2.2rem;
+          height: 2.2rem;
+        }
+        .verified-badge.lg {
+          width: 2.5rem;
+          height: 2.5rem;
+        }
+      `;
+      doc.head.appendChild(style);
+    }
+
     const badgeId = `${targetEl.id || 'verified'}__badge`;
     let badgeEl = doc.getElementById(badgeId);
 
