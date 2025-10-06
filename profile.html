@@ -1017,11 +1017,11 @@
         }
 
         /* Cover full-bleed and main content inset controls */
-        .profile-section { --profile-border: 1px; --cover-height: 180px; --main-inset: 12px; }
+        .profile-section { --profile-border: 1px; --cover-height: 180px; --main-inset: 12px; --cover-bleed: 30px; /* increase to push cover wider to match side dots */ }
 
         .profile-cover-wrapper {
-            width: calc(100% + (var(--profile-padding) * 2) + (var(--profile-border) * 2));
-            margin-left: calc((var(--profile-padding) + var(--profile-border)) * -1);
+            width: calc(100% + (var(--profile-padding) * 2) + (var(--profile-border) * 2) + (var(--cover-bleed) * 2));
+            margin-left: calc((var(--profile-padding) + var(--profile-border) + var(--cover-bleed)) * -1);
             height: var(--cover-height);
             border-radius: 14px;
             overflow: hidden;
