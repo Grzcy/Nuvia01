@@ -5058,6 +5058,34 @@
 
 
     </style>
+<style id="avatar-badges-styles">
+  .profile-avatar-badge {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 3px solid var(--background-main);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+    z-index: 2;
+  }
+  .profile-avatar-badge i {
+    color: var(--white);
+    font-size: 14px;
+    line-height: 1;
+  }
+  .profile-avatar-badge.verified {
+    right: -4px;
+    bottom: -4px;
+    background: var(--blue);
+  }
+  @media (max-width: 768px) {
+    .profile-avatar-badge { width: 24px; height: 24px; border-width: 2px; }
+    .profile-avatar-badge i { font-size: 12px; }
+  }
+</style>
 </head>
 <body class="theme-dark-mode">
     <!-- JCHAT Pink & Blue Glowing Loader -->
@@ -5793,6 +5821,7 @@
         import { getFirestore, doc, getDoc, updateDoc, setDoc, deleteDoc, collection, query, where, getDocs, runTransaction, writeBatch, serverTimestamp, orderBy, addDoc, arrayUnion, documentId, onSnapshot } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js";
         import { Timestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
+import { renderAvatarStatusBadges } from './assets/js/verification-utils.js';
 
         // --- Firebase & Canvas Environment Configuration ---
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
@@ -6339,7 +6368,7 @@
 
 
         /**
-         * 🚀 SMART SUCCESS MESSAGE PANEL SYSTEM
+         * ���� SMART SUCCESS MESSAGE PANEL SYSTEM
          * Shows success message panel that slides out from the edge
          */
         function showSmartSuccessPanel(message, title = 'Success!', duration = 4000) {
@@ -8812,6 +8841,9 @@
                             profilePageAvatarIcon.style.display = 'block';
                         }
                     }
+
+                    // Avatar badges
+                    try { if (profilePicWrapper) renderAvatarStatusBadges(profilePicWrapper, { verified: !!displayedUserProfileData.verified }); } catch (e) { console.error(e); }
 
                     // Bio
                     if (profileBio) { // Null check
