@@ -2233,6 +2233,8 @@ import { renderVerifiedBadge } from './assets/js/verification-utils.js';
 
         // --- ADMIN UID ---
         const ADMIN_UID = (typeof window !== 'undefined' && window.ADMIN_UID) ? window.ADMIN_UID : 'RJZ8xhsjEsdKBGFYveWO0Rsq1Zz1'; // Respects global override
+        // Optional: specify developer UIDs that are allowed to verify users. Set window.DEVELOPER_UIDS = ['uid1','uid2'] before loading this page.
+        const DEVELOPER_UIDS = (typeof window !== 'undefined' && Array.isArray(window.DEVELOPER_UIDS)) ? window.DEVELOPER_UIDS : [];
 
         // --- DOM Elements ---
         const headerProfilePic = document.getElementById('headerProfilePic');
