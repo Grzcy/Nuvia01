@@ -1,14 +1,16 @@
 {
   "name": "web-app",
   "version": "1.0.0",
-  "private": true,
+  "type": "module",
+  "main": "mcp-server.mjs",
   "scripts": {
-    "dev": "http-server -p 3000 -c-1 ."
-  },
-  "devDependencies": {
-    "http-server": "^14.1.1"
+    "start": "node mcp-server.mjs"
   },
   "dependencies": {
-    "@vercel/speed-insights": "^1.2.0"
+    "@google/genai": "^1.22.0",
+    "express": "^5.1.0",
+    "cors": "^2.8.5",
+    "body-parser": "^2.2.0",
+    "dotenv": "^16.4.5"
   }
 }
