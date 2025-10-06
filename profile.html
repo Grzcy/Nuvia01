@@ -999,6 +999,81 @@
             overflow: visible; /* Allow content to overflow for proper display */
         }
 
+        .profile-cover-container {
+            position: relative;
+            width: min(100vw - 40px, 1100px);
+            height: 240px;
+            border-radius: 20px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-light);
+            margin: 0 auto 16px;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .profile-cover-container:hover {
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+        }
+
+        .profile-cover-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .profile-cover-input {
+            display: none;
+        }
+
+        .profile-cover-edit {
+            position: absolute;
+            right: 16px;
+            bottom: 16px;
+            background: rgba(0, 0, 0, 0.55);
+            padding: 8px 14px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: none;
+            color: var(--white);
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            backdrop-filter: blur(4px);
+        }
+
+        .profile-cover-edit i {
+            margin-right: 6px;
+        }
+
+        @media (max-width: 768px) {
+            .profile-cover-container {
+                width: min(100vw - 24px, 1000px);
+                height: 200px;
+                border-radius: 18px;
+            }
+
+            .profile-cover-edit {
+                right: 12px;
+                bottom: 12px;
+                padding: 7px 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .profile-cover-container {
+                width: calc(100vw - 16px);
+                height: 170px;
+                border-radius: 16px;
+            }
+
+            .profile-cover-edit {
+                right: 10px;
+                bottom: 10px;
+                padding: 6px 10px;
+                font-size: 0.9rem;
+            }
+        }
+
         .profile-section::before {
             content: '';
             position: absolute;
