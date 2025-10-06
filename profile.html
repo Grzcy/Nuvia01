@@ -946,6 +946,7 @@
             gap: 20px;
             align-items: center;
             overflow: visible; /* Allow content to overflow for proper display */
+            overflow-x: hidden; /* Prevent horizontal scroll when cover bleeds */
         }
         /* Enhanced scrollbar styling for better touch interaction */
         ::-webkit-scrollbar {
@@ -998,6 +999,7 @@
             position: relative;
             transition: all 0.3s ease;
             overflow: visible; /* Allow content to overflow for proper display */
+            box-sizing: border-box;
         }
 
         .profile-section::before {
@@ -1109,6 +1111,9 @@
         }
 
 
+
+        /* Prevent page horizontal overflow caused by cover bleed */
+        body, html { max-width: 100%; overflow-x: hidden; }
 
         /* NEW: Enhanced Mobile Experience Styles */
         @media (max-width: 768px) {
