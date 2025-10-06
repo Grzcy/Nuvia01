@@ -1019,7 +1019,7 @@
         }
 
         /* Cover full-bleed and main content inset controls */
-        .profile-section { --profile-border: 1px; --cover-height: 160px; --main-inset: 12px; --cover-bleed: 8px; /* reduced bleed so cover is less wide */ --profile-padding: 2rem; }
+        .profile-section { --profile-border: 1px; --cover-height: 160px; --main-inset: 12px; --cover-bleed: 4px; /* halved bleed per request */ --profile-padding: 2rem; }
 
         .profile-cover-wrapper {
             /* absolutely position the cover centered within the profile card so bleed is equal */
@@ -5091,7 +5091,7 @@
 
 
     </style>
-<style id="avatar-badge-styles">.profile-avatar-anchor{position:relative;display:inline-block}.profile-avatar-badge{position:absolute;display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg, var(--blue), var(--pink));color:var(--white);box-shadow:0 4px 12px rgba(0,0,0,0.35);border:2px solid var(--card-background);z-index:12}.profile-avatar-badge i{font-size:16px}.profile-avatar-badge.verified{right:-6px;bottom:-6px}.profile-avatar-badge.premium{right:-6px;top:-6px;background:linear-gradient(135deg,#ffd54f,#ff9800)}@media (max-width:520px){.profile-avatar-badge{width:24px;height:24px}.profile-avatar-badge i{font-size:14px}}</style>
+<style id="avatar-badge-styles">.profile-avatar-anchor{position:relative;display:inline-block}.profile-avatar-badge{position:absolute;display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg, var(--blue), var(--pink));color:var(--white);box-shadow:0 4px 12px rgba(0,0,0,0.35);border:2px solid var(--card-background);z-index:20}.profile-avatar-badge i{font-size:16px}.profile-avatar-badge.verified{right:6px;bottom:6px}.profile-avatar-badge.premium{right:6px;top:6px;background:linear-gradient(135deg,#ffd54f,#ff9800)}@media (max-width:520px){.profile-avatar-badge{width:24px;height:24px}.profile-avatar-badge i{font-size:14px}}</style>
 </head>
 <body class="theme-dark-mode">
     <!-- JCHAT Pink & Blue Glowing Loader -->
@@ -6621,7 +6621,7 @@
             
             if (completionTip) {
                 if (completionPercentage === 100) {
-                    completionTip.textContent = '🎉 Profile complete! You\'ve unlocked all features!';
+                    completionTip.textContent = '��� Profile complete! You\'ve unlocked all features!';
                     completionTip.style.color = '#6bcf7f';
                 } else if (completionPercentage >= 80) {
                     completionTip.textContent = 'Almost there! Just a few more details to complete your profile.';
