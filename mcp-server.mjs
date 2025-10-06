@@ -40,7 +40,35 @@ app.get("/", (req, res) => {
 });
 
 // --- Start the server ---
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 MCP server is live on port ${PORT}`);
-});
+async function startServerWithFallback(app, preferredPorts = []) {
+  const ports = Array.from(new Set(preferredPorts.filter(Boolean)));
+  for (const port of ports) {
+    // Try to listen on the port
+    try {
+      await new Promise((resolve, reject) => {
+        const srv = app.listen(port)
+          .once('listening', () => resolve(srv))
+          .once('error', (err) => reject(err));
+      });
+      return port;
+    } catch (err) {
+      // If port is in use, try next
+      if (err && err.code === 'EADDRINUSE') continue;
+      // For other errors, rethrow
+      throw err;
+    }
+  }
+  throw new Error('No available ports in the provided list');
+}
+
+(async () => {
+  try {
+    const envPort = process.env.PORT ? Number(process.env.PORT) : null;
+    const chosenPort = await startServerWithFallback(app, [envPort, 3000, 4000, 5000].filter(Boolean));
+    process.env.PORT = String(chosenPort);
+    console.log(`🚀 MCP server is live on port ${chosenPort}`);
+  } catch (err) {
+    console.error('Failed to start server:', err);
+    process.exit(1);
+  }
+})();
