@@ -6362,7 +6362,7 @@ import { renderAvatarStatusBadges } from './assets/js/verification-utils.js';
                         });
                         const img = new Image();
                         await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = dataUrl; });
-                        const targetW = 1600, targetH = 500; // 16:5
+                        const targetW = 1920, targetH = 600; // 16:5 enhanced resolution
                         const srcW = img.naturalWidth, srcH = img.naturalHeight;
                         const srcAspect = srcW / srcH, outAspect = targetW / targetH;
                         let drawW, drawH;
