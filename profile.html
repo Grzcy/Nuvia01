@@ -1039,7 +1039,7 @@
         }
         .profile-cover-image { width: 100%; height: 100%; object-fit: cover; display: none; }
         .hidden-input { display: none; }
-        .edit-cover-overlay { position: absolute; right: 10px; bottom: 10px; background: rgba(0, 0, 0, 0.5); padding: 6px 10px; border-radius: 8px; cursor: pointer; display: none; }
+        .edit-cover-overlay { position: absolute; right: 12px; bottom: 12px; background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); color: var(--white); padding: 8px 10px; border-radius: 999px; cursor: pointer; display: flex; align-items: center; gap: 8px; z-index: 20; border: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(6px); font-size: 0.95rem; }
 
         /* Apply a slightly narrower inset to main profile content (excluding the full-bleed cover) */
         .profile-section > :not(#profileCoverWrapper) { width: calc(100% - (var(--main-inset) * 2)); margin-left: var(--main-inset); margin-right: var(--main-inset); }
