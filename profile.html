@@ -980,12 +980,13 @@
 
         /* Enhanced Profile Section (adapted from original Profile.html and settings-section) */
         .profile-section {
+            --profile-padding: 2rem; /* used to align full-bleed cover */
             background: var(--card-background);
             border: 1px solid var(--glass-blue); /* Consistent border */
             backdrop-filter: blur(10px) saturate(180%);
             border-radius: var(--radius);
             box-shadow: 0 8px 25px rgba(0, 0, 0, .3);
-            padding: 2rem;
+            padding: var(--profile-padding);
             width: 90%;
             max-width: 600px; /* Max width for consistency */
             margin: 20px auto;
