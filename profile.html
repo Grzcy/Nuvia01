@@ -1019,14 +1019,15 @@
         }
 
         /* Cover full-bleed and main content inset controls */
-        .profile-section { --profile-border: 1px; --cover-height: 180px; --main-inset: 12px; --cover-bleed: 30px; /* increase to push cover wider to match side dots */ }
+        .profile-section { --profile-border: 1px; --cover-height: 180px; --main-inset: 12px; --cover-bleed: 30px; /* increase to push cover wider to match side dots */ --profile-padding: 2rem; }
 
         .profile-cover-wrapper {
-            /* center the cover so bleed is equal on both sides and avoid left overflow */
-            position: relative;
+            /* absolutely position the cover centered within the profile card so bleed is equal */
+            position: absolute;
+            top: calc(var(--profile-padding) * -1);
             left: 50%;
             transform: translateX(-50%);
-            width: calc(100% + (var(--cover-bleed) * 2));
+            width: calc(100% + (var(--profile-padding) * 2) + (var(--cover-bleed) * 2));
             height: var(--cover-height);
             border-radius: 14px;
             overflow: hidden;
@@ -1034,6 +1035,7 @@
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--border-light);
             box-sizing: border-box;
+            z-index: 3;
         }
         .profile-cover-image { width: 100%; height: 100%; object-fit: cover; display: none; }
         .hidden-input { display: none; }
@@ -5186,7 +5188,7 @@
     <main>
         <div class="content-wrapper">
                             <div class="profile-section">
-                <div id="profileCoverWrapper" class="profile-cover-wrapper">
+                <div id="profileCoverWrapper" class="profile-cover-wrapper" aria-hidden="false">
                     <img id="profileCoverImg" alt="Cover" class="profile-cover-image">
                     <input type="file" id="profileCoverUploadInput" accept="image/*" class="hidden-input">
                     <label for="profileCoverUploadInput" id="editCoverOverlay" class="edit-cover-overlay"><i class="fas fa-camera"></i> Edit Cover</label>
