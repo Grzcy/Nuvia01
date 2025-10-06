@@ -9,7 +9,7 @@
  * @param {boolean} isVerified - Whether to show the badge
  * @param {('sm'|'md')} size - Badge size
  */
-export function renderVerifiedBadge(targetEl, isVerified, size = 'sm') {
+export function renderVerifiedBadge(targetEl, isVerified, size = 'md') {
   try {
     if (!targetEl) return;
     const doc = targetEl.ownerDocument || document;
