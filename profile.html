@@ -6418,6 +6418,7 @@ import { renderAvatarStatusBadges } from './assets/js/verification-utils.js';
         let currentUserProfileData = null; // The current user's own private profile data (Firestore document)
         let displayedUserId = null; // The ID of the user whose profile is currently being displayed (from URL or current user)
         let displayedUserProfileData = null; // The profile data of the user currently being displayed (could be current user or another user)
+        let unsubscribeProfileListener = null; // Firestore onSnapshot unsubscribe for the displayed profile
         let isAuthReady = false; // Flag to indicate if auth state has been checked
         const ADMIN_UID = 'cc96gdhCRPO72NFZtleRCujHvIq2'; // Admin's User ID
         let currentSystemSettings = {}; // To store system settings (like exchange rates)
