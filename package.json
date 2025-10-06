@@ -4,7 +4,8 @@
   "type": "module",
   "main": "mcp-server.mjs",
   "scripts": {
-    "start": "node mcp-server.mjs"
+    "start": "node mcp-server.mjs",
+    "dev": "node mcp-server.mjs"
   },
   "dependencies": {
     "@google/genai": "^1.22.0",
