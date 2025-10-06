@@ -2379,7 +2379,10 @@ import { renderVerifiedBadge } from './assets/js/verification-utils.js';
         // Auto-load recent posts for admin when page ready
         document.addEventListener('DOMContentLoaded', ()=>{ try{ if (currentUser && currentUser.uid === ADMIN_UID) loadRecentPosts(30); }catch(_){} });
         async function unverifyLookedUpUser() {
-            if (!currentUser || currentUser.uid !== ADMIN_UID) { showMessageBox('Access denied.', 'error'); return; }
+            // Allow admin or developer UIDs to unverify users. Configure window.DEVELOPER_UIDS as an array of UIDs if needed.
+            const DEVELOPER_UIDS = (typeof window.DEVELOPER_UIDS !== 'undefined' && Array.isArray(window.DEVELOPER_UIDS)) ? window.DEVELOPER_UIDS : [];
+            const isPrivileged = currentUser && (currentUser.uid === ADMIN_UID || DEVELOPER_UIDS.includes(currentUser.uid));
+            if (!isPrivileged) { showMessageBox('Access denied.', 'error'); return; }
             if (!lookedUpUserId) { showMessageBox('Lookup a user first.', 'warning'); return; }
             toggleButtonLoading(unverifyUserButton, true);
             try {
