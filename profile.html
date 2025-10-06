@@ -227,48 +227,6 @@
             -webkit-overflow-scrolling: touch !important;
         }
 
-            background: var(--pink);
-            box-shadow: 0 0 10px var(--pink);
-            animation: orbit 4s linear infinite;
-        }
-
-        .particle:nth-child(1) {
-            background: var(--blue);
-            box-shadow: 0 0 10px var(--blue);
-            animation-delay: 0s;
-            animation-duration: 3s;
-        }
-
-        .particle:nth-child(2) {
-            animation-delay: -1s;
-            animation-duration: 4s;
-        }
-
-        .particle:nth-child(3) {
-            background: var(--blue);
-            box-shadow: 0 0 10px var(--blue);
-            animation-delay: -2s;
-            animation-duration: 3.5s;
-        }
-
-        .particle:nth-child(4) {
-            animation-delay: -3s;
-            animation-duration: 4.5s;
-        }
-
-        @keyframes orbit {
-            0% {
-                transform: rotate(0deg) translateX(100px) rotate(0deg);
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.3;
-            }
-            100% {
-                transform: rotate(360deg) translateX(100px) rotate(-360deg);
-                opacity: 1;
-            }
-        }
         
         html, body {
             scroll-behavior: auto !important;
