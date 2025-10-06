@@ -6880,7 +6880,7 @@ import { renderAvatarStatusBadges } from './assets/js/verification-utils.js';
                 updatePostsWithNewProfilePic(currentUser.uid, newProfilePicUrl);
 
                 // 7. Update UI immediately
-                displayProfilePicture(profilePagePic, profilePageAvatarIcon, newProfilePicUrl, (currentUserProfileData?.username || 'U').charAt(0).toUpperCase(), "w_240,h_240,c_fill,g_face,r_max");
+                displayProfilePicture(profilePagePic, profilePageAvatarIcon, newProfilePicUrl, (currentUserProfileData?.username || 'U').charAt(0).toUpperCase(), "w_480,h_480,c_fill,g_face,r_max");
                 displayProfilePicture(headerProfilePic, headerAvatarIcon, newProfilePicUrl, (currentUserProfileData?.username || 'U').charAt(0).toUpperCase(), "w_70,h_70,c_fill,g_face,r_max");
 
                                     showEnhancedSmartSuccess("Profile picture updated successfully! 🎉", 'celebration');
@@ -8854,7 +8854,7 @@ import { renderAvatarStatusBadges } from './assets/js/verification-utils.js';
                     // Profile Picture
                     if (profilePagePic && profilePageAvatarIcon) { // Null check
                         if (displayedUserProfileData.profilePicId && (isCurrentUserProfile || visibility.profilePic)) {
-                            displayProfilePicture(profilePagePic, profilePageAvatarIcon, displayedUserProfileData.profilePicId, usernameInitial, "w_240,h_240,c_fill,g_face,r_max");
+                            displayProfilePicture(profilePagePic, profilePageAvatarIcon, displayedUserProfileData.profilePicId, usernameInitial, "w_480,h_480,c_fill,g_face,r_max");
                         } else {
                             profilePagePic.style.display = 'none';
                             profilePageAvatarIcon.style.display = 'block';
