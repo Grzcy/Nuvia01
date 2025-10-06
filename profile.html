@@ -8844,7 +8844,11 @@
                         profileCoverImg.style.display = 'block';
                     }
                     if (editCoverOverlay) {
-                        editCoverOverlay.style.display = (currentUser && isCurrentUserProfile) ? 'block' : 'none';
+                        // Show overlay for picking cover (for testing/owner visibility)
+                        editCoverOverlay.style.display = 'flex';
+                        editCoverOverlay.setAttribute('role', 'button');
+                        editCoverOverlay.setAttribute('aria-label', 'Edit cover');
+                        editCoverOverlay.tabIndex = 0;
                     }
 
                     if (profileUsername) profileUsername.textContent = displayedUserProfileData.username || "JCHAT User"; // Null check
