@@ -1002,14 +1002,17 @@
 
         .profile-cover-container {
             position: relative;
-            width: 100%; /* Fill the profile-section width */
-            max-width: 900px; /* Absolute cap to avoid overly wide covers */
+            /* Full-bleed inside the profile card: extend to edges by compensating for profile padding */
+            width: calc(100% + (var(--profile-padding) * 2));
+            margin-left: calc(var(--profile-padding) * -1);
+            margin-right: calc(var(--profile-padding) * -1);
+            max-width: none; /* Let it expand to card edges */
             height: 240px;
             border-radius: 20px;
             overflow: hidden;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--border-light);
-            margin: 0 auto 16px;
+            margin-bottom: 16px;
             transition: box-shadow 0.3s ease;
         }
 
