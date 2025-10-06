@@ -497,10 +497,13 @@
             font-weight: 800;
             background-clip: text;
             color: transparent;
-            background-image: linear-gradient(90deg, var(--blue), var(--pink));
+            /* Use pink -> yellow gradient for Nuvia brand */
+            background-image: linear-gradient(90deg, var(--pink), var(--yellow));
             letter-spacing: -0.03em;
             text-decoration: none;
         }
+
+        .logo-name { background-image: linear-gradient(90deg, var(--pink), var(--yellow)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
 
         /* Header Navigation (from Home.html) */
         header nav ul {
@@ -5143,7 +5146,7 @@
 
     <header>
         <div class="header-content-wrapper">
-            <a href="/Home.html" class="logo">JCHAT</a>
+            <a href="/Home.html" class="logo"><span class="logo-name">Nuvia</span></a>
             <nav>
                 <ul>
                     <!-- Removed Home and Profile links from header navigation -->
