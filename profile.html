@@ -5988,6 +5988,16 @@
         const profilePicUploadInput = document.getElementById('profilePicUploadInput');
         const editProfilePicOverlay = document.getElementById('editProfilePicOverlay');
 
+        // Ensure cover edit overlay triggers file picker when clicked (fallback)
+        const editCoverOverlayEl = document.getElementById('editCoverOverlay');
+        const profileCoverInputEl = document.getElementById('profileCoverUploadInput');
+        if (editCoverOverlayEl && profileCoverInputEl) {
+            editCoverOverlayEl.addEventListener('click', (ev) => {
+                ev.preventDefault();
+                profileCoverInputEl.click();
+            });
+        }
+
         const profileUsername = document.getElementById('profileUsername'); // H2 element for username
         const profileBio = document.getElementById('profileBio');
         
