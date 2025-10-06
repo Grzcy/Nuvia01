@@ -1001,7 +1001,8 @@
 
         .profile-cover-container {
             position: relative;
-            width: min(100vw - 40px, 900px);
+            width: 100%; /* Fill the profile-section width */
+            max-width: 900px; /* Absolute cap to avoid overly wide covers */
             height: 240px;
             border-radius: 20px;
             overflow: hidden;
