@@ -8926,7 +8926,7 @@ import { renderAvatarStatusBadges } from './assets/js/verification-utils.js';
                         profileCoverImg.style.display = 'block';
                     }
                     if (editCoverOverlay) {
-                        editCoverOverlay.style.display = (currentUser && isCurrentUserProfile) ? 'block' : 'none';
+                        editCoverOverlay.style.display = (currentUser && isCurrentUserProfile) ? 'flex' : 'none';
                     }
 
                     if (profileUsername) profileUsername.textContent = displayedUserProfileData.username || "JCHAT User"; // Null check
