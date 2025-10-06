@@ -1020,15 +1020,18 @@
         .profile-section { --profile-border: 1px; --cover-height: 180px; --main-inset: 12px; --cover-bleed: 30px; /* increase to push cover wider to match side dots */ }
 
         .profile-cover-wrapper {
-            width: calc(100% + (var(--profile-padding) * 2) + (var(--profile-border) * 2) + (var(--cover-bleed) * 2));
-            margin-left: calc((var(--profile-padding) + var(--profile-border) + var(--cover-bleed)) * -1);
+            /* center the cover so bleed is equal on both sides and avoid left overflow */
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% + (var(--cover-bleed) * 2));
             height: var(--cover-height);
             border-radius: 14px;
             overflow: hidden;
-            position: relative;
             margin-bottom: 12px;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--border-light);
+            box-sizing: border-box;
         }
         .profile-cover-image { width: 100%; height: 100%; object-fit: cover; display: none; }
         .hidden-input { display: none; }
