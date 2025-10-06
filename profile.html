@@ -5059,31 +5059,38 @@
 
     </style>
 <style id="avatar-badges-styles">
+  .profile-avatar-anchor { position: relative; display: inline-flex; }
   .profile-avatar-badge {
     position: absolute;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    border: 3px solid var(--background-main);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+    border: 4px solid var(--background-main);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     z-index: 2;
   }
   .profile-avatar-badge i {
     color: var(--white);
-    font-size: 14px;
+    font-size: 18px;
     line-height: 1;
   }
   .profile-avatar-badge.verified {
-    right: 0;
-    bottom: 0;
+    right: -12px;
+    bottom: -12px;
     background: var(--blue);
   }
   @media (max-width: 768px) {
-    .profile-avatar-badge { width: 24px; height: 24px; border-width: 2px; }
-    .profile-avatar-badge i { font-size: 12px; }
+    .profile-avatar-badge { width: 34px; height: 34px; border-width: 3px; }
+    .profile-avatar-badge i { font-size: 16px; }
+    .profile-avatar-badge.verified { right: -10px; bottom: -10px; }
+  }
+  @media (max-width: 480px) {
+    .profile-avatar-badge { width: 28px; height: 28px; border-width: 2px; }
+    .profile-avatar-badge i { font-size: 14px; }
+    .profile-avatar-badge.verified { right: -8px; bottom: -8px; }
   }
 </style>
 </head>
@@ -5190,7 +5197,7 @@
                 </div>
 
                 <div class="profile-header-area">
-                    <div class="profile-pic-wrapper" id="profilePicWrapper">
+                    <div class="profile-avatar-anchor"><div class="profile-pic-wrapper" id="profilePicWrapper">
                         <img id="profilePagePic" src="" alt="Profile Picture" class="profile-pic" style="display: none;">
                         <i id="profilePageAvatarIcon" class="fas fa-user-circle profile-pic-placeholder"></i>
                         <input type="file" id="profilePicUploadInput" accept="image/*" style="display: none;">
@@ -5198,7 +5205,7 @@
                             <i class="fas fa-camera"></i> Edit
                         </label>
                          <!-- NEW: Loading spinner for profile pic -->
-                    </div>
+                    </div></div>
                     <h2 id="profileUsername" class="profile-name">Username</h2>
                     <p id="profileBio" class="profile-bio">No bio provided yet.</p>
                     
