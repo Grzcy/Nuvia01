@@ -1050,6 +1050,8 @@
             align-items: center;
             gap: 15px;
             width: 100%;
+            /* ensure header sits clear of the cover and avatar overlap */
+            margin-top: calc(var(--cover-height) / 2 + 1rem);
         }
 
         /* NEW: Profile Completion Progress Bar Styles */
@@ -1504,7 +1506,7 @@
             margin: 0;
             text-align: center;
             transition: all 0.3s ease;
-            margin-top: 0.5rem; /* shifted down by 0.5 */
+            margin-top: 0.75rem; /* slightly more spacing from avatar/cover */
         }
 
         .profile-name:hover {
