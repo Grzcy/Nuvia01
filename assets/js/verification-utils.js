@@ -118,9 +118,12 @@ export function renderAvatarStatusBadges(containerEl, flags = {}) {
     };
 
     const verifiedEl = ensureBadge('verified', 'profile-avatar-badge verified', 'fas fa-circle-check', 'Verified');
+    const unverifiedEl = ensureBadge('unverified', 'profile-avatar-badge unverified', 'fas fa-circle-xmark', 'Unverified');
     const premiumEl = ensureBadge('premium', 'profile-avatar-badge premium', 'fas fa-crown', 'Premium');
 
+    // Show exactly one of verified/unverified
     verifiedEl.style.display = verified ? 'flex' : 'none';
+    unverifiedEl.style.display = verified ? 'none' : 'flex';
     premiumEl.style.display = premium ? 'flex' : 'none';
   } catch (e) {
     console.error('renderAvatarStatusBadges error:', e);
