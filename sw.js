@@ -57,13 +57,9 @@ self.addEventListener('fetch', (event) => {
           return res;
         } catch (_) {
           const cache = await caches.open(CACHE_NAME);
-          // Prefer specific page if cached, else index, else offline
-          if (url.pathname === '/explore.html') {
-            const cachedExplore = await cache.match('/explore.html');
-            if (cachedExplore) return cachedExplore;
-          }
-          const cachedIndex = await cache.match('/index.html');
-          if (cachedIndex) return cachedIndex;
+          // Prefer exact page if cached; otherwise offline page (no generic index fallback)
+          const exact = await cache.match(url.pathname || '/index.html');
+          if (exact) return exact;
           const offline = await cache.match('/offline.html');
           if (offline) return offline;
           return Response.error();
