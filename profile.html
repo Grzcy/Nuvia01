@@ -497,10 +497,18 @@
             font-weight: 800;
             background-clip: text;
             color: transparent;
-            /* Use pink -> yellow gradient for Nuvia brand */
-            background-image: linear-gradient(90deg, var(--pink), var(--yellow));
+            /* Match index: pink -> orange -> yellow gradient */
+            background-image: linear-gradient(90deg, var(--pink), #ff874d, var(--yellow));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
             letter-spacing: -0.03em;
             text-decoration: none;
+        }
+        .logo span, .site-title, .header .brand {
+            background: linear-gradient(90deg, var(--pink), #ff874d, var(--yellow));
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            font-weight: 800;
         }
 
         .logo-name { background-image: linear-gradient(90deg, var(--pink), var(--yellow)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
