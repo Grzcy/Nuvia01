@@ -15,8 +15,11 @@
     if (!navigator.onLine) {
       try{
         if (init && init.mode === 'navigate') {
-          // Try to serve cached index or offline page
-          return caches.open('nuvia-static-v2').then(function(c){ return c.match('/index.html').then(function(r){ return r || c.match('/offline.html'); }); }).then(function(r){ if(r) return r.clone(); return Promise.reject(new TypeError('Offline - no cache match')); });
+          // Serve cached target path if available; otherwise offline page (no generic index fallback)
+          return caches.open('nuvia-static-v2').then(function(c){
+            var p; try { p = parseUrl(input).pathname || '/'; } catch(_) { p = '/'; }
+            return c.match(p).then(function(r){ return r || c.match('/offline.html'); });
+          }).then(function(r){ if(r) return r.clone(); return Promise.reject(new TypeError('Offline - no cache match')); });
         }
       }catch(_){ }
     }
