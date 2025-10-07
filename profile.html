@@ -5105,6 +5105,13 @@
 
 
     </style>
+<style id="back-nav-styles">
+  .header-left-controls{display:flex;align-items:center;gap:10px}
+  .back-nav-button{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:999px;background:var(--button-background);color:var(--white);text-decoration:none;border:1px solid var(--border-light);box-shadow:var(--button-shadow);font-weight:700}
+  .back-nav-button:hover{transform:translateY(-1px);box-shadow:0 6px 20px var(--blue),0 6px 20px var(--pink)}
+  .back-nav-button i{color:var(--white)}
+  @media (max-width:600px){.back-nav-button{padding:6px 10px}.back-nav-button span{display:none}}
+</style>
 <style id="avatar-badge-styles">.profile-avatar-anchor{position:relative;display:inline-block}.profile-avatar-badge{position:absolute;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg, var(--blue), var(--pink));color:var(--white);box-shadow:0 6px 18px rgba(0,0,0,0.4);border:3px solid var(--card-background);z-index:30}.profile-avatar-badge i{font-size:20px}.profile-avatar-badge.verified{right:8px;bottom:8px}.profile-avatar-badge.unverified{right:8px;bottom:8px;background:rgba(255,255,255,0.12);border-color:var(--border-light)}.profile-avatar-badge.premium{right:8px;top:8px;background:linear-gradient(135deg,#ffd54f,#ff9800)}@media (max-width:520px){.profile-avatar-badge{width:32px;height:32px}.profile-avatar-badge i{font-size:16px}}</style>
 <style id="hide-username-verified-badge">#profileUsername__badge{display:none !important;}</style>
 <style id="logo-fallback-styles">
@@ -5163,7 +5170,13 @@
 
     <header>
         <div class="header-content-wrapper">
-            <a href="/index.html" class="logo"><span class="logo-name">Nuvia</span></a>
+            <div class="header-left-controls">
+                <a href="/index.html" class="back-nav-button" id="backNavButton" aria-label="Back to Home">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Home</span>
+                </a>
+                <a href="/index.html" class="logo"><span class="logo-name">Nuvia</span></a>
+            </div>
             <nav>
                 <ul>
                     <!-- Removed Home and Profile links from header navigation -->
