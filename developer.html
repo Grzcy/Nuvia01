@@ -2151,6 +2151,21 @@
               <span class="button-text"><i class="fas fa-user-slash"></i> Remove All Friends</span>
             </button>
           </div>
+
+          <div class="input-group">
+            <label for="adminUsersSearchInput">Search Users</label>
+            <input type="text" id="adminUsersSearchInput" placeholder="Search by username...">
+          </div>
+          <div id="adminAllUsersList" class="users-table-container" style="width:100%;">
+            <div id="adminUsersLoading" class="no-users-message" style="display:none;">Loading users...</div>
+            <div id="adminUsersEmpty" class="no-users-message" style="display:none;">No users found.</div>
+          </div>
+          <div class="button-group">
+            <button id="refreshAdminUsersBtn" class="admin-button secondary">
+              <span class="button-text"><i class="fas fa-sync"></i> Refresh Users</span>
+            </button>
+          </div>
+
           <div id="adminUserFriendsList" class="users-table-container" aria-live="polite" style="width:100%;">
             <div id="adminFriendsLoading" class="no-users-message" style="display:none;">Loading friends...</div>
             <div id="adminFriendsEmpty" class="no-users-message" style="display:none;">No friends found for this user.</div>
@@ -6608,12 +6623,76 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
   const loadingEl = document.getElementById('adminFriendsLoading');
   const emptyEl = document.getElementById('adminFriendsEmpty');
 
+  // All users list elements
+  const adminUsersSearchInput = document.getElementById('adminUsersSearchInput');
+  const adminAllUsersList = document.getElementById('adminAllUsersList');
+  const adminUsersLoading = document.getElementById('adminUsersLoading');
+  const adminUsersEmpty = document.getElementById('adminUsersEmpty');
+  const refreshAdminUsersBtn = document.getElementById('refreshAdminUsersBtn');
+
   let currentAdminTargetUserId = null;
   let currentAdminFriendIds = [];
+  let allUsersCache = [];
 
   function showToast(msg, type='info'){
     try{ if (typeof window.showMessageBox === 'function') window.showMessageBox(msg, type); else console.log(type.toUpperCase()+':', msg); }catch(_){ console.log(type.toUpperCase()+':', msg); }
   }
+
+  // ---- All Users Listing (no UID entry required) ----
+  function renderAllUsersList(users, searchTerm=''){
+    // Clear previous
+    adminAllUsersList.querySelectorAll('.user-row-card').forEach(n=>n.remove());
+    adminUsersLoading.style.display = 'none';
+
+    const filtered = (searchTerm? users.filter(u=> (u.username||'').toLowerCase().includes(searchTerm.toLowerCase())) : users);
+    adminUsersEmpty.style.display = filtered.length ? 'none' : 'block';
+
+    for (const u of filtered){
+      const row = document.createElement('div');
+      row.className = 'user-row-card';
+      row.innerHTML = `
+        <div class="request-header" style="display:flex; align-items:center; gap:12px; justify-content:space-between;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <img class="requester-pic" alt="Avatar" src="${u.profilePicId||''}" onerror="this.onerror=null;this.style.display='none'">
+            <div class="requester-info">
+              <div class="requester-name">${u.username || ('User_'+u.uid.substring(0,8))} <small style="color:var(--text-light)">(${u.uid.substring(0,8)}…)</small></div>
+            </div>
+          </div>
+          <div class="user-actions">
+            <button class="admin-button" data-uid="${u.uid}"><i class="fas fa-user-cog"></i> Manage Friends</button>
+          </div>
+        </div>`;
+      const btn = row.querySelector('button.admin-button');
+      btn.addEventListener('click', ()=>{ userIdInput.value = u.uid; loadFriendsForAdmin(u.uid); });
+      adminAllUsersList.appendChild(row);
+    }
+  }
+
+  async function fetchAllUsers(){
+    const user = auth.currentUser;
+    if (!user || user.uid !== ADMIN_UID) { return; }
+    adminUsersLoading.style.display = 'block';
+    adminUsersEmpty.style.display = 'none';
+    adminAllUsersList.querySelectorAll('.user-row-card').forEach(n=>n.remove());
+    try{
+      const col = collection(db, 'artifacts', appId, 'public', 'data', 'users');
+      const snap = await getDocs(col);
+      const list = [];
+      (snap.docs||[]).forEach(d=>{ const v=d.data()||{}; list.push({ uid: d.id, username: v.username || null, profilePicId: v.profilePicId || '' }); });
+      allUsersCache = list;
+      renderAllUsersList(allUsersCache, adminUsersSearchInput?.value||'');
+    }catch(e){ console.error(e); showToast('Failed to load users: '+(e.message||e), 'error'); adminUsersEmpty.style.display='block'; }
+    finally{ adminUsersLoading.style.display = 'none'; }
+  }
+
+  function startAutoUsersList(){
+    let tries=0; const t=setInterval(()=>{ const u=auth.currentUser; if(u){ clearInterval(t); if(u.uid===ADMIN_UID) fetchAllUsers(); } else if(++tries>20){ clearInterval(t);} }, 300);
+  }
+
+  if (adminUsersSearchInput){ adminUsersSearchInput.addEventListener('input', ()=> renderAllUsersList(allUsersCache, adminUsersSearchInput.value||'')); }
+  if (refreshAdminUsersBtn){ refreshAdminUsersBtn.addEventListener('click', fetchAllUsers); }
+
+  startAutoUsersList();
 
   function getFriendshipId(uid1, uid2){ return uid1 < uid2 ? `${uid1}_${uid2}` : `${uid2}_${uid1}`; }
 
