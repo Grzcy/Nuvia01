@@ -5841,7 +5841,7 @@
         import { getFirestore, doc, getDoc, updateDoc, setDoc, deleteDoc, collection, query, where, getDocs, runTransaction, writeBatch, serverTimestamp, orderBy, addDoc, arrayUnion, documentId, onSnapshot } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js";
         import { Timestamp } from "https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js";
-        import { renderAvatarStatusBadges } from "./assets/js/verification-utils.js";
+        import { renderAvatarStatusBadges, renderVerifiedBadge } from "./assets/js/verification-utils.js";
 
         // --- Firebase & Canvas Environment Configuration ---
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
@@ -7002,6 +7002,8 @@
                 // Update header UI immediately
                 if (headerDisplayName) headerDisplayName.textContent = newDisplayName; // Null check
                 if (profileUsername) profileUsername.textContent = newDisplayName; // Null check
+                try{ renderVerifiedBadge(headerDisplayName, !!(currentUserProfileData?.verified ?? displayedUserProfileData?.verified), 'sm'); }catch(_){}
+                try{ renderVerifiedBadge(profileUsername, !!(currentUserProfileData?.verified ?? displayedUserProfileData?.verified), 'md'); }catch(_){}
                 if (profileBio) profileBio.textContent = newBio || "No bio provided yet."; // Null check
 
                 // Update display for new fields
@@ -7956,6 +7958,7 @@
                 const usernameInitial = (profileData.username || "J").charAt(0).toUpperCase();
                 displayProfilePicture(headerProfilePic, headerAvatarIcon, profileData?.profilePicId, usernameInitial, "w_70,h_70,c_fill,g_face,r_max");
                 headerDisplayName.textContent = profileData.username || "JCHAT User";
+                try{ renderVerifiedBadge(headerDisplayName, !!profileData.verified, 'sm'); }catch(_){}
                 if (headerNavLinkProfile) headerNavLinkProfile.href = `/Profile.html?userId=${user.uid}`; // Ensure header nav link is correct, null check
 
                 // Show Admin Icon if current user is admin
@@ -8862,6 +8865,7 @@
                     }
 
                     if (profileUsername) profileUsername.textContent = displayedUserProfileData.username || "JCHAT User"; // Null check
+                    try{ renderVerifiedBadge(profileUsername, !!displayedUserProfileData.verified, 'md'); }catch(_){}
                     const usernameInitial = (displayedUserProfileData.username || "J").charAt(0).toUpperCase();
 
 
