@@ -145,7 +145,7 @@
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-app.js';
     import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-auth.js';
     import { getFirestore, doc, setDoc, addDoc, collection, serverTimestamp, getDoc, updateDoc, arrayUnion } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-firestore.js';
-    import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js';
+    import { getStorage, ref, uploadBytesResumable, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/11.8.0/firebase-storage.js';
     // bank-details.js exposes window.renderBankDetails and window.BANK_DETAILS; use the global to avoid module export mismatch.
 
     const firebaseConfig = { apiKey: "AIzaSyDz-8N0totzvMCvonF9pKj9RsoH3J8xL0w", authDomain: "jchat-1.firebaseapp.com", databaseURL: "https://jchat-1-default-rtdb.firebaseio.com", projectId: "jchat-1", storageBucket: "jchat-1.firebasestorage.app", messagingSenderId: "328479683167", appId: "1:328479683167:web:276c0b7e8ea44dd2d6a1ea", measurementId: "G-S6Z9GG0R9P" };
@@ -318,6 +318,7 @@
     onAuthStateChanged(auth, (user)=>{ if (!user) { /* read-only browsing allowed */ } });
 
     async function submitPurchase(){
+      let success = false;
       try {
         if (!auth.currentUser) { modalError.textContent = 'Please log in to submit.'; modalError.style.display = 'block'; return; }
         if (!currentOrder) { modalError.textContent = 'Invalid order.'; modalError.style.display = 'block'; return; }
@@ -326,16 +327,37 @@
         submitBtn.disabled = true; submitBtn.textContent = 'Submitting...';
 
         const path = `shop_payments/${auth.currentUser.uid}/${Date.now()}_${encodeURIComponent(f.name)}`;
-        const storageRefRef = ref(storage, path);
-        await uploadBytes(storageRefRef, f);
-        const receiptUrl = await getDownloadURL(storageRefRef);
 
-        const docRef = await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'shop_payment_requests'), buildShopRequest(currentOrder, receiptUrl));
+        async function uploadWithTimeout(file, path, ms){
+          return await Promise.race([
+            new Promise((resolve, reject)=>{
+              const task = uploadBytesResumable(ref(storage, path), file);
+              task.on('state_changed', null, (err)=>reject(err), async ()=>{
+                try { const url = await getDownloadURL(task.snapshot.ref); resolve(url); }
+                catch(e){ reject(e); }
+              });
+            }),
+            new Promise((_, reject)=> setTimeout(()=> reject(new Error('Upload timed out. Please check your connection and try again.')), ms))
+          ]);
+        }
+        async function withTimeout(promise, ms){
+          return await Promise.race([
+            promise,
+            new Promise((_, reject)=> setTimeout(()=> reject(new Error('Request timed out. Please try again.')), ms))
+          ]);
+        }
 
+        const receiptUrl = await uploadWithTimeout(f, path, 60000);
+
+        await withTimeout(addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'shop_payment_requests'), buildShopRequest(currentOrder, receiptUrl)), 20000);
+
+        success = true;
         submitBtn.textContent = 'Submitted';
         setTimeout(()=>{ closeModal(); submitBtn.disabled = false; submitBtn.textContent = 'Submit'; alert('Receipt submitted. We will approve shortly.'); }, 600);
       } catch (e) {
-        console.error(e); modalError.textContent = e?.message || 'Failed to submit receipt'; modalError.style.display = 'block'; submitBtn.disabled = false; submitBtn.textContent = 'Submit';
+        console.error(e); modalError.textContent = e?.message || 'Failed to submit receipt'; modalError.style.display = 'block';
+      } finally {
+        if (!success) { submitBtn.disabled = false; submitBtn.textContent = 'Submit'; }
       }
     }
     submitBtn.addEventListener('click', submitPurchase);
@@ -367,23 +389,44 @@
       const orig = submitPurchase;
       submitBtn.removeEventListener('click', submitPurchase);
       submitBtn.addEventListener('click', async function onVerifySubmit(){
+        let success = false;
         try {
           if (!auth.currentUser) { modalError.textContent = 'Please log in to submit.'; modalError.style.display = 'block'; return; }
           const f = receiptFile.files?.[0]; if (!f) { modalError.textContent = 'Attach a payment receipt image or PDF.'; modalError.style.display = 'block'; return; }
           submitBtn.disabled = true; submitBtn.textContent = 'Submitting...';
           const path = `shop_payments/${auth.currentUser.uid}/${Date.now()}_${encodeURIComponent(f.name)}`;
-          const storageRefRef = ref(storage, path);
-          await uploadBytes(storageRefRef, f);
-          const receiptUrl = await getDownloadURL(storageRefRef);
-          await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'shop_payment_requests'), {
+
+          async function uploadWithTimeout(file, path, ms){
+            return await Promise.race([
+              new Promise((resolve, reject)=>{
+                const task = uploadBytesResumable(ref(storage, path), file);
+                task.on('state_changed', null, (err)=>reject(err), async ()=>{
+                  try { const url = await getDownloadURL(task.snapshot.ref); resolve(url); }
+                  catch(e){ reject(e); }
+                });
+              }),
+              new Promise((_, reject)=> setTimeout(()=> reject(new Error('Upload timed out. Please check your connection and try again.')), ms))
+            ]);
+          }
+          async function withTimeout(promise, ms){
+            return await Promise.race([
+              promise,
+              new Promise((_, reject)=> setTimeout(()=> reject(new Error('Request timed out. Please try again.')), ms))
+            ]);
+          }
+
+          const receiptUrl = await uploadWithTimeout(f, path, 60000);
+          await withTimeout(addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'shop_payment_requests'), {
             userId: auth.currentUser.uid, paymentMethod: 'bank_transfer', receiptUrl, status: 'pending', timestamp: serverTimestamp(), assignedAdminId: ADMIN_UID,
             userCurrencyCode: 'USD', userCurrencyAmount: 9.99,
             verificationBadge: true, items: []
-          });
+          }), 20000);
+
+          success = true;
           submitBtn.textContent = 'Submitted';
           setTimeout(()=>{ closeModal(); submitBtn.disabled = false; submitBtn.textContent = 'Submit'; alert('Receipt submitted. We will approve shortly.'); }, 600);
-        } catch(e){ console.error(e); modalError.textContent = e?.message || 'Failed to submit receipt'; modalError.style.display = 'block'; submitBtn.disabled = false; submitBtn.textContent = 'Submit'; }
-        finally { submitBtn.removeEventListener('click', onVerifySubmit); submitBtn.addEventListener('click', orig); }
+        } catch(e){ console.error(e); modalError.textContent = e?.message || 'Failed to submit receipt'; modalError.style.display = 'block'; }
+        finally { if (!success) { submitBtn.disabled = false; submitBtn.textContent = 'Submit'; } submitBtn.removeEventListener('click', onVerifySubmit); submitBtn.addEventListener('click', orig); }
       }, { once:true });
     });
   </script>
