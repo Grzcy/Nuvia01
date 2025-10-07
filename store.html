@@ -318,7 +318,6 @@
     onAuthStateChanged(auth, (user)=>{ if (!user) { /* read-only browsing allowed */ } });
 
     async function submitPurchase(){
-      let success = false;
       try {
         if (!auth.currentUser) { modalError.textContent = 'Please log in to submit.'; modalError.style.display = 'block'; return; }
         if (!currentOrder) { modalError.textContent = 'Invalid order.'; modalError.style.display = 'block'; return; }
@@ -326,38 +325,31 @@
 
         submitBtn.disabled = true; submitBtn.textContent = 'Submitting...';
 
-        const path = `shop_payments/${auth.currentUser.uid}/${Date.now()}_${encodeURIComponent(f.name)}`;
+        // 1) Create pending request immediately so developer.html can see it
+        const reqCol = collection(db, 'artifacts', appId, 'public', 'data', 'shop_payment_requests');
+        const initialReq = { ...buildShopRequest(currentOrder, null), receiptUploading: true };
+        const reqRef = await addDoc(reqCol, initialReq);
 
-        async function uploadWithTimeout(file, path, ms){
-          return await Promise.race([
-            new Promise((resolve, reject)=>{
-              const task = uploadBytesResumable(ref(storage, path), file);
-              task.on('state_changed', null, (err)=>reject(err), async ()=>{
-                try { const url = await getDownloadURL(task.snapshot.ref); resolve(url); }
-                catch(e){ reject(e); }
-              });
-            }),
-            new Promise((_, reject)=> setTimeout(()=> reject(new Error('Upload timed out. Please check your connection and try again.')), ms))
-          ]);
-        }
-        async function withTimeout(promise, ms){
-          return await Promise.race([
-            promise,
-            new Promise((_, reject)=> setTimeout(()=> reject(new Error('Request timed out. Please try again.')), ms))
-          ]);
-        }
-
-        const receiptUrl = await uploadWithTimeout(f, path, 60000);
-
-        await withTimeout(addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'shop_payment_requests'), buildShopRequest(currentOrder, receiptUrl)), 20000);
-
-        success = true;
+        // 2) Optimistic UI: show success instantly
         submitBtn.textContent = 'Submitted';
-        setTimeout(()=>{ closeModal(); submitBtn.disabled = false; submitBtn.textContent = 'Submit'; alert('Receipt submitted. We will approve shortly.'); }, 600);
+        setTimeout(()=>{ closeModal(); submitBtn.disabled = false; submitBtn.textContent = 'Submit'; alert('Receipt submitted. We will approve shortly.'); }, 400);
+
+        // 3) Upload receipt in background and update the request
+        const path = `shop_payments/${auth.currentUser.uid}/${Date.now()}_${encodeURIComponent(f.name)}`;
+        const task = uploadBytesResumable(ref(storage, path), f);
+        task.on('state_changed', null, async (err)=>{
+          try { await updateDoc(reqRef, { receiptUploading: false, receiptError: String(err && err.message || 'Upload failed') }); } catch(_){}
+        }, async ()=>{
+          try{
+            const url = await getDownloadURL(task.snapshot.ref);
+            await updateDoc(reqRef, { receiptUrl: url, receiptUploading: false, receiptError: null });
+          }catch(updErr){ try{ await updateDoc(reqRef, { receiptUploading:false, receiptError: String(updErr && updErr.message || updErr) }); }catch(_){} }
+        });
       } catch (e) {
-        console.error(e); modalError.textContent = e?.message || 'Failed to submit receipt'; modalError.style.display = 'block';
-      } finally {
-        if (!success) { submitBtn.disabled = false; submitBtn.textContent = 'Submit'; }
+        console.error(e);
+        modalError.textContent = e?.message || 'Failed to submit receipt';
+        modalError.style.display = 'block';
+        submitBtn.disabled = false; submitBtn.textContent = 'Submit';
       }
     }
     submitBtn.addEventListener('click', submitPurchase);
@@ -389,44 +381,41 @@
       const orig = submitPurchase;
       submitBtn.removeEventListener('click', submitPurchase);
       submitBtn.addEventListener('click', async function onVerifySubmit(){
-        let success = false;
         try {
           if (!auth.currentUser) { modalError.textContent = 'Please log in to submit.'; modalError.style.display = 'block'; return; }
           const f = receiptFile.files?.[0]; if (!f) { modalError.textContent = 'Attach a payment receipt image or PDF.'; modalError.style.display = 'block'; return; }
           submitBtn.disabled = true; submitBtn.textContent = 'Submitting...';
-          const path = `shop_payments/${auth.currentUser.uid}/${Date.now()}_${encodeURIComponent(f.name)}`;
 
-          async function uploadWithTimeout(file, path, ms){
-            return await Promise.race([
-              new Promise((resolve, reject)=>{
-                const task = uploadBytesResumable(ref(storage, path), file);
-                task.on('state_changed', null, (err)=>reject(err), async ()=>{
-                  try { const url = await getDownloadURL(task.snapshot.ref); resolve(url); }
-                  catch(e){ reject(e); }
-                });
-              }),
-              new Promise((_, reject)=> setTimeout(()=> reject(new Error('Upload timed out. Please check your connection and try again.')), ms))
-            ]);
-          }
-          async function withTimeout(promise, ms){
-            return await Promise.race([
-              promise,
-              new Promise((_, reject)=> setTimeout(()=> reject(new Error('Request timed out. Please try again.')), ms))
-            ]);
-          }
-
-          const receiptUrl = await uploadWithTimeout(f, path, 60000);
-          await withTimeout(addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'shop_payment_requests'), {
-            userId: auth.currentUser.uid, paymentMethod: 'bank_transfer', receiptUrl, status: 'pending', timestamp: serverTimestamp(), assignedAdminId: ADMIN_UID,
+          // 1) Create request immediately
+          const reqCol = collection(db, 'artifacts', appId, 'public', 'data', 'shop_payment_requests');
+          const initialReq = {
+            userId: auth.currentUser.uid, paymentMethod: 'bank_transfer', receiptUrl: null, status: 'pending', timestamp: serverTimestamp(), assignedAdminId: ADMIN_UID,
             userCurrencyCode: 'USD', userCurrencyAmount: 9.99,
-            verificationBadge: true, items: []
-          }), 20000);
+            verificationBadge: true, items: [], receiptUploading: true
+          };
+          const reqRef = await addDoc(reqCol, initialReq);
 
-          success = true;
+          // 2) Optimistic UI success
           submitBtn.textContent = 'Submitted';
-          setTimeout(()=>{ closeModal(); submitBtn.disabled = false; submitBtn.textContent = 'Submit'; alert('Receipt submitted. We will approve shortly.'); }, 600);
-        } catch(e){ console.error(e); modalError.textContent = e?.message || 'Failed to submit receipt'; modalError.style.display = 'block'; }
-        finally { if (!success) { submitBtn.disabled = false; submitBtn.textContent = 'Submit'; } submitBtn.removeEventListener('click', onVerifySubmit); submitBtn.addEventListener('click', orig); }
+          setTimeout(()=>{ closeModal(); submitBtn.disabled = false; submitBtn.textContent = 'Submit'; alert('Receipt submitted. We will approve shortly.'); }, 400);
+
+          // 3) Upload in background and update
+          const path = `shop_payments/${auth.currentUser.uid}/${Date.now()}_${encodeURIComponent(f.name)}`;
+          const task = uploadBytesResumable(ref(storage, path), f);
+          task.on('state_changed', null, async (err)=>{
+            try { await updateDoc(reqRef, { receiptUploading: false, receiptError: String(err && err.message || 'Upload failed') }); } catch(_){}
+          }, async ()=>{
+            try { const url = await getDownloadURL(task.snapshot.ref); await updateDoc(reqRef, { receiptUrl: url, receiptUploading: false, receiptError: null }); }
+            catch(updErr){ try{ await updateDoc(reqRef, { receiptUploading:false, receiptError: String(updErr && updErr.message || updErr) }); }catch(_){} }
+          });
+        } catch(e){
+          console.error(e);
+          modalError.textContent = e?.message || 'Failed to submit receipt';
+          modalError.style.display = 'block';
+          submitBtn.disabled = false; submitBtn.textContent = 'Submit';
+        } finally {
+          submitBtn.removeEventListener('click', onVerifySubmit); submitBtn.addEventListener('click', orig);
+        }
       }, { once:true });
     });
   </script>
