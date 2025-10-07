@@ -2134,6 +2134,28 @@
                     <small style="color:var(--text-light)">This writes to user_entitlements.packs adding the selected key.</small>
                 </div>
             </div>
+        <!-- Friends Management (Admin) -->
+        <div class="admin-section" id="friendsAdminSection">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+            <h2 style="margin:0;"><i class="fas fa-user-friends"></i> Friends Management</h2>
+          </div>
+          <div class="input-group">
+            <label for="adminManageUserId">User ID</label>
+            <input type="text" id="adminManageUserId" placeholder="Enter user UID">
+          </div>
+          <div class="button-group">
+            <button id="loadAdminUserFriendsBtn" class="admin-button">
+              <span class="button-text"><i class="fas fa-users"></i> Load Friends</span>
+            </button>
+            <button id="removeAllAdminFriendsBtn" class="admin-button danger" disabled>
+              <span class="button-text"><i class="fas fa-user-slash"></i> Remove All Friends</span>
+            </button>
+          </div>
+          <div id="adminUserFriendsList" class="users-table-container" aria-live="polite" style="width:100%;">
+            <div id="adminFriendsLoading" class="no-users-message" style="display:none;">Loading friends...</div>
+            <div id="adminFriendsEmpty" class="no-users-message" style="display:none;">No friends found for this user.</div>
+          </div>
+        </div>
         </div>
     </main>
 
@@ -6570,5 +6592,143 @@ if (headerDisplayName) renderVerifiedBadge(headerDisplayName, !!profileData.veri
 
     </script>
 	
+<script type="module">
+  import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, collection, query, where, getDocs, writeBatch, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const auth = getAuth();
+  const db = getFirestore();
+  const appId = (typeof globalThis !== 'undefined' && typeof globalThis.__app_id !== 'undefined') ? globalThis.__app_id : (typeof window !== 'undefined' && typeof window.__nuviaAppId !== 'undefined' ? window.__nuviaAppId : (typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'));
+  const ADMIN_UID = (typeof window !== 'undefined' && window.ADMIN_UID) ? window.ADMIN_UID : 'RJZ8xhsjEsdKBGFYveWO0Rsq1Zz1';
+
+  const userIdInput = document.getElementById('adminManageUserId');
+  const loadBtn = document.getElementById('loadAdminUserFriendsBtn');
+  const removeAllBtn = document.getElementById('removeAllAdminFriendsBtn');
+  const listContainer = document.getElementById('adminUserFriendsList');
+  const loadingEl = document.getElementById('adminFriendsLoading');
+  const emptyEl = document.getElementById('adminFriendsEmpty');
+
+  let currentAdminTargetUserId = null;
+  let currentAdminFriendIds = [];
+
+  function showToast(msg, type='info'){
+    try{ if (typeof window.showMessageBox === 'function') window.showMessageBox(msg, type); else console.log(type.toUpperCase()+':', msg); }catch(_){ console.log(type.toUpperCase()+':', msg); }
+  }
+
+  function getFriendshipId(uid1, uid2){ return uid1 < uid2 ? `${uid1}_${uid2}` : `${uid2}_${uid1}`; }
+
+  async function fetchUserPublicProfile(uid){
+    try{
+      const ref = doc(db, 'artifacts', appId, 'public', 'data', 'users', uid);
+      const snap = await getDoc(ref);
+      return snap.exists()? (snap.data() || {}) : null;
+    }catch(e){ return null; }
+  }
+
+  function renderFriendsListForAdmin(items){
+    listContainer.querySelectorAll('.user-row-card').forEach(n=>n.remove());
+    loadingEl.style.display = 'none';
+    emptyEl.style.display = items.length ? 'none' : 'block';
+    removeAllBtn.disabled = items.length === 0;
+
+    for (const it of items){
+      const row = document.createElement('div');
+      row.className = 'user-row-card';
+      row.innerHTML = `
+        <div class="request-header" style="align-items:center; gap:12px;">
+          <img class="requester-pic" alt="Avatar" src="${it.avatar || ''}" onerror="this.onerror=null;this.style.display='none'">
+          <div class="requester-info">
+            <div class="requester-name">${(it.username||'Unknown User')} <small style="color:var(--text-light)">(${it.uid.substring(0,8)}…)</small></div>
+            <div class="request-timestamp" style="color:var(--text-light)">Friendship: ${getFriendshipId(currentAdminTargetUserId, it.uid)}</div>
+          </div>
+          <div class="user-actions">
+            <button class="admin-button danger" data-fid="${it.uid}"><i class="fas fa-user-slash"></i> Remove</button>
+          </div>
+        </div>`;
+      const btn = row.querySelector('button.admin-button.danger');
+      btn.addEventListener('click', ()=> unfriendAsAdmin(currentAdminTargetUserId, it.uid, btn));
+      listContainer.appendChild(row);
+    }
+  }
+
+  async function loadFriendsForAdmin(uid){
+    currentAdminTargetUserId = uid;
+    currentAdminFriendIds = [];
+    loadingEl.style.display = 'block';
+    emptyEl.style.display = 'none';
+    listContainer.querySelectorAll('.user-row-card').forEach(n=>n.remove());
+
+    try{
+      const friendsCol = collection(db, 'artifacts', appId, 'public', 'data', 'friends');
+      let f1Snap=null, f2Snap=null;
+      try{ f1Snap = await getDocs(query(friendsCol, where('user1Id','==', uid))); }catch(_){ f1Snap = { docs: [] }; }
+      try{ f2Snap = await getDocs(query(friendsCol, where('user2Id','==', uid))); }catch(_){ f2Snap = { docs: [] }; }
+
+      const friendIds = new Set();
+      (f1Snap.docs||[]).forEach(d=>{ const v=d.data(); if(v && v.user2Id) friendIds.add(v.user2Id); });
+      (f2Snap.docs||[]).forEach(d=>{ const v=d.data(); if(v && v.user1Id) friendIds.add(v.user1Id); });
+
+      const items = [];
+      for (const fid of friendIds){
+        const prof = await fetchUserPublicProfile(fid);
+        items.push({ uid: fid, username: prof?.username || `User_${fid.substring(0,8)}`, avatar: prof?.profilePicId || '' });
+      }
+      currentAdminFriendIds = Array.from(friendIds);
+      renderFriendsListForAdmin(items);
+    }catch(e){
+      console.error(e); showToast('Failed to load friends: '+(e.message||e), 'error');
+      loadingEl.style.display = 'none';
+      emptyEl.style.display = 'block';
+    }
+  }
+
+  async function unfriendAsAdmin(uid, friendId, button){
+    const user = auth.currentUser;
+    if (!user || user.uid !== ADMIN_UID){ showToast('Access denied.', 'error'); return; }
+    try{
+      if (button){ button.disabled = true; }
+      const friendshipId = getFriendshipId(uid, friendId);
+      const batch = writeBatch(db);
+      const publicFriendRef = doc(db, 'artifacts', appId, 'public', 'data', 'friends', friendshipId);
+      batch.delete(publicFriendRef);
+      // Best-effort cleanup: chat metadata both sides
+      batch.delete(doc(db, 'artifacts', appId, 'users', uid, 'chat_metadata', friendId));
+      batch.delete(doc(db, 'artifacts', appId, 'users', friendId, 'chat_metadata', uid));
+      // Best-effort cleanup: per-user friends subcollections (if they exist)
+      batch.delete(doc(db, 'artifacts', appId, 'users', uid, 'friends', friendId));
+      batch.delete(doc(db, 'artifacts', appId, 'users', friendId, 'friends', uid));
+
+      await batch.commit().catch(async(err)=>{
+        // Fallback to direct delete if batch partials are not allowed by rules
+        try{ await deleteDoc(publicFriendRef); }catch(_){ }
+      });
+
+      showToast('Friendship removed.', 'success');
+      // Refresh list
+      await loadFriendsForAdmin(uid);
+    }catch(e){ console.error(e); showToast('Failed to remove friend: '+(e.message||e), 'error'); }
+    finally{ if (button){ button.disabled = false; } }
+  }
+
+  if (loadBtn){
+    loadBtn.addEventListener('click', ()=>{
+      const uid = (userIdInput && userIdInput.value || '').trim();
+      if (!uid){ showToast('Enter a user ID.', 'warning'); return; }
+      loadFriendsForAdmin(uid);
+    });
+  }
+
+  if (removeAllBtn){
+    removeAllBtn.addEventListener('click', async()=>{
+      const uid = currentAdminTargetUserId;
+      if (!uid){ showToast('Load a user first.', 'warning'); return; }
+      if (!currentAdminFriendIds.length){ showToast('No friends to remove.', 'info'); return; }
+      const ok = window.confirm(`Remove all ${currentAdminFriendIds.length} friend(s) for this user?`);
+      if (!ok) return;
+      for (const fid of currentAdminFriendIds){ await unfriendAsAdmin(uid, fid); }
+      await loadFriendsForAdmin(uid);
+    });
+  }
+</script>
 </body>
 </html>
