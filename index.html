@@ -6323,10 +6323,40 @@ header .user-profile-header{display:flex;align-items:center;gap:10px;flex:1 1 au
         let purchasedThemeProductIds = new Set();
         let pendingThemeProductIds = new Set();
 
-        // No premium product mappings (only default theme)
-        const productIdToThemeClass = {};
+        // Product ID mappings for theme purchases
+        const productIdToThemeClass = {
+            'prod_theme_light': 'theme-light-mode',
+            'prod_theme_snow': 'theme-snow',
+            'prod_theme_slate': 'theme-slate',
+            'prod_theme_ocean': 'theme-ocean',
+            'prod_theme_forest': 'theme-forest',
+            'prod_theme_sand': 'theme-sand',
+            'prod_theme_rose': 'theme-rose',
+            'prod_theme_lavender': 'theme-lavender',
+            'prod_theme_sky': 'theme-sky',
+            'prod_theme_mint': 'theme-mint',
+            'prod_theme_coffee': 'theme-coffee',
+            'prod_theme_midnight': 'theme-midnight',
+            'prod_theme_graphite': 'theme-graphite',
+            'prod_theme_gold': 'premium-theme-gold'
+        };
 
-        const themeClassToProductId = {};
+        const themeClassToProductId = {
+            'theme-light-mode': 'prod_theme_light',
+            'theme-snow': 'prod_theme_snow',
+            'theme-slate': 'prod_theme_slate',
+            'theme-ocean': 'prod_theme_ocean',
+            'theme-forest': 'prod_theme_forest',
+            'theme-sand': 'prod_theme_sand',
+            'theme-rose': 'prod_theme_rose',
+            'theme-lavender': 'prod_theme_lavender',
+            'theme-sky': 'prod_theme_sky',
+            'theme-mint': 'prod_theme_mint',
+            'theme-coffee': 'prod_theme_coffee',
+            'theme-midnight': 'prod_theme_midnight',
+            'theme-graphite': 'prod_theme_graphite',
+            'premium-theme-gold': 'prod_theme_gold'
+        };
 
         // Currency configuration
         const CURRENCIES = {
@@ -7948,7 +7978,7 @@ const inspirationLexicon = {
         nouns: ["words","hands","eyes","time","attention","gestures","moments","morning notes","small favors","promises","presence","listening","effort","apologies","boundaries","laughter","memories","choices","gifts","care"],
         verbs: ["make","carry","build","hold","heal","forgive","notice","choose","guard","nourish","protect","restore","light","soften","anchor","celebrate","welcome","strengthen","grow","multiply"],
         objects: ["trust","safety","home","hope","us","tomorrow","each other","the hard days","the quiet moments","the little things","honesty","patience","understanding","respect","friendship","joy","grace","we","our story","the bond"],
-        adverbs: ["daily","in small ways","in the mess","when tired","in public and private","when no one sees","without keeping score","with patience","with time","with presence","with laughter","when it’s hard","with gentleness","with wonder","with gratitude","through storms","through change","with steady hands","with open hearts","forever learning"],
+        adverbs: ["daily","in small ways","in the mess","when tired","in public and private","when no one sees","without keeping score","with patience","with time","with presence","with laughter","when it���s hard","with gentleness","with wonder","with gratitude","through storms","through change","with steady hands","with open hearts","forever learning"],
         closers: ["love is a practice","small care builds big trust","kindness is love’s first language","choose each other again","soft is strong","we grow by giving","together beats perfect","show up and stay","make room for grace","we is greater than me","true love is daily work","attention is affection","patience makes love durable","be quick to listen","forgive often, repair always","speak gently, act clearly","gratitude turns houses into homes","hold hands through seasons","care louder than words","let love lead"]
     }
 };
