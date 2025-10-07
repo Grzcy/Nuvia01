@@ -2,6 +2,11 @@
   try {
     const root = document.documentElement;
     if (!root) return;
+    const csRoot = getComputedStyle(root);
+    // Provide missing theme variables used by header gradients
+    if (!csRoot.getPropertyValue('--yellow').trim()) {
+      root.style.setProperty('--yellow', '#f59e0b'); // amber/dark yellow
+    }
     // Set darker pink and yellow gradient accents used by page backgrounds
     root.style.setProperty('--background-gradient-1', '#ec4899'); // pink (darkish)
     root.style.setProperty('--background-gradient-2', '#f59e0b'); // yellow/amber (darkish)
