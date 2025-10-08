@@ -106,7 +106,7 @@ import { getCloudinaryImageUrl } from './avatar-utils.js';
       const avatar = document.createElement('div'); avatar.className='avatar';
       const img = document.createElement('img');
       img.alt = username;
-      if (profilePicId){ img.src = getCloudinaryImageUrl(profilePicId, 'w_90,h_90,c_fill,g_face,r_max'); }
+      if (profilePicId){ img.src = getCloudinaryImageUrl(profilePicId, 'w_120,h_120,c_fill,g_face,r_max'); }
       else { img.src = 'assets/User.png'; }
       avatar.appendChild(img);
       const nameWrap = document.createElement('div');
@@ -151,7 +151,7 @@ import { getCloudinaryImageUrl } from './avatar-utils.js';
         const item = document.createElement('div'); item.className='podium-item'; item.setAttribute('role','listitem');
         const r = document.createElement('div'); r.className='podium-rank'; r.textContent=String(i+1);
         const user = document.createElement('div'); user.className='podium-user';
-        const av = document.createElement('div'); av.className='podium-avatar'; const img=document.createElement('img'); img.alt=username; img.src = profilePicId ? getCloudinaryImageUrl(profilePicId,'w_80,h_80,c_fill,g_face,r_max') : 'assets/User.png'; av.appendChild(img);
+        const av = document.createElement('div'); av.className='podium-avatar'; const img=document.createElement('img'); img.alt=username; img.src = profilePicId ? getCloudinaryImageUrl(profilePicId,'w_120,h_120,c_fill,g_face,r_max') : 'assets/User.png'; av.appendChild(img);
         const nm = document.createElement('div'); nm.className='podium-name'; nm.textContent=username;
         user.appendChild(av); user.appendChild(nm);
         const val = document.createElement('div'); val.className='podium-value'; const ic=document.createElement('i'); ic.className=`fas ${icon}`; ic.setAttribute('aria-hidden','true'); const sp=document.createElement('span'); sp.textContent=(typeof value==='number'? value.toLocaleString(): String(value)); val.appendChild(ic); val.appendChild(sp);
