@@ -33,7 +33,10 @@ import { getCloudinaryImageUrl } from './avatar-utils.js';
     notifBadge: document.getElementById('notificationCount'),
     headerPic: document.getElementById('headerProfilePic'),
     headerIcon: document.getElementById('headerAvatarIcon'),
-    profileLink: document.getElementById('profileLink')
+    profileLink: document.getElementById('profileLink'),
+    podiumGas: document.getElementById('podiumGas'),
+    podiumJc: document.getElementById('podiumJc'),
+    podiumLevel: document.getElementById('podiumLevel')
   };
 
   const PAGE_SIZE = 25;
@@ -125,6 +128,51 @@ import { getCloudinaryImageUrl } from './avatar-utils.js';
 
   function setLoading(on){ if(on){ hide(els.empty); hide(els.error); show(els.loading); } else { hide(els.loading); } }
 
+  async function fetchTopThree(field){
+    try{
+      const col = collection(db, 'artifacts', appId, 'public', 'data', 'users');
+      const qy = query(col, orderBy(field, 'desc'), limit(3));
+      const snap = await getDocs(qy);
+      const list = [];
+      snap.forEach(d=>{ const v=d.data()||{}; v.userId=v.userId||d.id; list.push(v); });
+      return list;
+    }catch(e){ console.warn('fetchTopThree', field, e); return []; }
+  }
+
+  function renderPodium(container, items, field, icon){
+    try{
+      if (!container) return;
+      container.innerHTML = '';
+      const top = items.slice(0,3);
+      top.forEach((it, i)=>{
+        const username = it.username || ('User_'+(it.userId||'').slice(0,6));
+        const profilePicId = it.profilePicId || null;
+        const value = it[field] ?? 0;
+        const item = document.createElement('div'); item.className='podium-item'; item.setAttribute('role','listitem');
+        const r = document.createElement('div'); r.className='podium-rank'; r.textContent=String(i+1);
+        const user = document.createElement('div'); user.className='podium-user';
+        const av = document.createElement('div'); av.className='podium-avatar'; const img=document.createElement('img'); img.alt=username; img.src = profilePicId ? getCloudinaryImageUrl(profilePicId,'w_80,h_80,c_fill,g_face,r_max') : 'assets/User.png'; av.appendChild(img);
+        const nm = document.createElement('div'); nm.className='podium-name'; nm.textContent=username;
+        user.appendChild(av); user.appendChild(nm);
+        const val = document.createElement('div'); val.className='podium-value'; const ic=document.createElement('i'); ic.className=`fas ${icon}`; ic.setAttribute('aria-hidden','true'); const sp=document.createElement('span'); sp.textContent=(typeof value==='number'? value.toLocaleString(): String(value)); val.appendChild(ic); val.appendChild(sp);
+        item.appendChild(r); item.appendChild(user); item.appendChild(val);
+        container.appendChild(item);
+      });
+      if (!top.length){ const none=document.createElement('div'); none.className='meta'; none.textContent='No data'; container.appendChild(none); }
+    }catch(_){ }
+  }
+
+  async function loadPodium(){
+    const [gasTop, jcTop, lvlTop] = await Promise.all([
+      fetchTopThree('gas'),
+      fetchTopThree('jCoins'),
+      fetchTopThree('level')
+    ]);
+    renderPodium(els.podiumGas, gasTop, 'gas', 'fa-bolt');
+    renderPodium(els.podiumJc, jcTop, 'jCoins', 'fa-coins');
+    renderPodium(els.podiumLevel, lvlTop, 'level', 'fa-signal');
+  }
+
   async function fetchPage(reset=false){
     try{
       setLoading(true);
@@ -197,6 +245,7 @@ import { getCloudinaryImageUrl } from './avatar-utils.js';
     onAuthStateChanged(auth, async (user)=>{
       if (!user){ try{ await signInAnonymously(auth); }catch(_){ /* ignore */ } }
       initHeaderUI(user || auth.currentUser || null);
+      loadPodium();
       fetchPage(true);
     });
   }
