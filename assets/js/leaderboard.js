@@ -36,7 +36,15 @@ import { getCloudinaryImageUrl } from './avatar-utils.js';
     profileLink: document.getElementById('profileLink'),
     podiumGas: document.getElementById('podiumGas'),
     podiumJc: document.getElementById('podiumJc'),
-    podiumLevel: document.getElementById('podiumLevel')
+    podiumLevel: document.getElementById('podiumLevel'),
+    modal: document.getElementById('userDetailModal'),
+    modalClose: document.getElementById('userModalClose'),
+    mAvatar: document.getElementById('userModalAvatar'),
+    mName: document.getElementById('userModalName'),
+    mLevel: document.getElementById('userModalLevel'),
+    mJc: document.getElementById('userModalJc'),
+    mGas: document.getElementById('userModalGas'),
+    mProfileLink: document.getElementById('userModalProfileLink')
   };
 
   const PAGE_SIZE = 25;
@@ -80,6 +88,31 @@ import { getCloudinaryImageUrl } from './avatar-utils.js';
   function hide(el){ if(el) el.style.display='none'; }
   function clearList(){ if(els.list){ els.list.innerHTML=''; } }
 
+  async function openUserDetails(userId, seed){
+    try{
+      const col = collection(db, 'artifacts', appId, 'public', 'data', 'users');
+      let data = seed || null;
+      if (!data){
+        const snap = await getDocs(query(col, orderBy('userId'))); // fallback to get list if direct getDoc path is unknown
+        const found = [];
+        snap.forEach(d=>{ if(d.id===userId || (d.data()&&d.data().userId===userId)) found.push({id:d.id, ...d.data()}); });
+        data = found[0] || null;
+      }
+      if (!data){ return; }
+      els.mName.textContent = data.username || ('User_'+String(userId).slice(0,6));
+      els.mLevel.textContent = `Level ${Number(data.level||0)}`;
+      els.mJc.textContent = Number(data.jCoins||0).toLocaleString();
+      els.mGas.textContent = Number(data.gas||0).toLocaleString();
+      els.mProfileLink.href = `profile.html?userId=${encodeURIComponent(userId)}`;
+      const pic = data.profilePicId || null;
+      els.mAvatar.src = pic ? getCloudinaryImageUrl(pic, 'w_220,h_220,c_fill,g_face,r_max') : 'assets/User.png';
+      els.modal.classList.add('show'); els.modal.setAttribute('aria-hidden','false');
+      document.body.style.overflow='hidden';
+    }catch(_){ }
+  }
+
+  function closeUserDetails(){ try{ els.modal.classList.remove('show'); els.modal.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }catch(_){ }}
+
   function renderRows(items){
     clearList();
     if (!items || items.length===0){ show(els.empty); return; }
@@ -122,6 +155,10 @@ import { getCloudinaryImageUrl } from './avatar-utils.js';
       val.appendChild(i); val.appendChild(span);
 
       row.appendChild(rankEl); row.appendChild(userCell); row.appendChild(val);
+      // Make row clickable for details
+      row.setAttribute('tabindex','0'); row.setAttribute('role','button');
+      row.addEventListener('click', ()=> openUserDetails(it.userId, it));
+      row.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); openUserDetails(it.userId, it); }});
       els.list.appendChild(row);
     });
   }
@@ -156,6 +193,9 @@ import { getCloudinaryImageUrl } from './avatar-utils.js';
         user.appendChild(av); user.appendChild(nm);
         const val = document.createElement('div'); val.className='podium-value'; const ic=document.createElement('i'); ic.className=`fas ${icon}`; ic.setAttribute('aria-hidden','true'); const sp=document.createElement('span'); sp.textContent=(typeof value==='number'? value.toLocaleString(): String(value)); val.appendChild(ic); val.appendChild(sp);
         item.appendChild(r); item.appendChild(user); item.appendChild(val);
+        item.setAttribute('tabindex','0'); item.setAttribute('role','button');
+        item.addEventListener('click', ()=> openUserDetails(it.userId, it));
+        item.addEventListener('keydown', (e)=>{ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); openUserDetails(it.userId, it); }});
         container.appendChild(item);
       });
       if (!top.length){ const none=document.createElement('div'); none.className='meta'; none.textContent='No data'; container.appendChild(none); }
@@ -239,6 +279,10 @@ import { getCloudinaryImageUrl } from './avatar-utils.js';
   }
 
   function boot(){
+    // modal bindings
+    els.modalClose?.addEventListener('click', closeUserDetails);
+    els.modal?.addEventListener('click', (e)=>{ if(e.target===els.modal) closeUserDetails(); });
+    document.addEventListener('keydown', (e)=>{ if(e.key==='Escape' && els.modal?.classList.contains('show')) closeUserDetails(); });
     parseParams();
     bindControls();
     // Start auth; anonymous sign-in helps if Firestore requires auth for reads
