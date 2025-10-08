@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nuvia - Leaderboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://*.firebaseio.com" crossorigin />
+  <link rel="preconnect" href="https://res.cloudinary.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="assets/js/fetch-guard.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box}
+    :root{--pink:#ff2e92;--blue:#00d5ff;--radius:20px;--transition:.3s ease;--white:#fff;--text-light:rgba(255,255,255,.7);--background-main:rgba(10,10,10,.75);--background-gradient-1:#00d5ff;--background-gradient-2:#ff2e92;--card-background:linear-gradient(145deg,rgba(255,255,255,.03),rgba(255,255,255,.01));--header-background:linear-gradient(135deg,rgba(10,10,10,.85),rgba(10,10,10,.75));--border-light:rgba(255,255,255,.05);--input-background:rgba(255,255,255,.05);--button-background:linear-gradient(90deg,var(--blue),var(--pink));--button-shadow:0 4px 15px var(--blue),0 4px 15px var(--pink);--card-background-color:#2a2a4a;--text-color-primary:#e0e0e0;--border-color:#3a3a5a}
+    html{overflow-y:scroll}
+    body{min-height:100vh;font-family:'Inter',sans-serif;margin:0;padding:0;display:flex;flex-direction:column;align-items:center;overflow-x:hidden;background-color:var(--background-main);background-image:radial-gradient(circle at top left,var(--background-gradient-1),transparent 100px),radial-gradient(circle at bottom right,var(--background-gradient-2),transparent 150px);color:var(--white)}
+    header{background:var(--header-background);border-bottom:1px solid var(--border-light);padding:10px 0;box-shadow:0 4px 15px rgba(0,0,0,.2);position:fixed;top:0;left:0;width:100%;height:55px;z-index:10;display:flex;justify-content:center}
+    .header-content-wrapper{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:1200px;padding:0 30px}
+    .brand-link{font-family:'Poppins',sans-serif;font-size:1.8rem;font-weight:800;background-clip:text;color:transparent;background-image:linear-gradient(90deg,var(--blue),var(--pink));letter-spacing:-.03em;text-decoration:none;display:flex;align-items:center;gap:10px}
+    .header-user-controls{display:flex;align-items:center;gap:10px}
+    .notification-icon-wrapper{position:relative}
+    .notification-icon-wrapper a{display:flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,rgba(255,255,255,.12),rgba(255,255,255,.06));border:2px solid rgba(255,255,255,.25)}
+    .notification-badge{position:absolute;top:-6px;right:-6px;background:linear-gradient(135deg,#ff4757,#ff3742);color:#ffffff;border-radius:50%;padding:3px 7px;font-size:.75rem;font-weight:900;min-width:20px;height:20px;text-align:center;display:none}
+
+    main{flex-grow:1;padding-top:70px;width:100%;display:flex;flex-direction:column;align-items:center}
+    .page-wrap{width:100%;max-width:1100px;padding:20px;display:flex;flex-direction:column;gap:18px}
+    .leaderboard-card{background:var(--card-background);border:1px solid var(--border-color);backdrop-filter:blur(10px) saturate(180%);border-radius:var(--radius);box-shadow:0 8px 25px rgba(0,0,0,.3);padding:1.2rem}
+    .title{font-family:'Poppins',sans-serif;font-size:2rem;font-weight:800;background-clip:text;color:transparent;background-image:linear-gradient(90deg,var(--blue),var(--pink));margin:0 0 6px 0}
+    .subtitle{margin:0 0 16px 0;color:var(--text-light)}
+    .controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:12px}
+    .select,.input{width:100%;padding:.8rem 1rem;border:1px solid var(--border-light);border-radius:15px;background:var(--input-background);color:var(--white);font-size:1rem;outline:none}
+    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+    .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--border-light);background:rgba(255,255,255,.04);color:var(--white);text-decoration:none}
+
+    .list{display:flex;flex-direction:column}
+    .row{display:grid;grid-template-columns:64px 1fr auto;align-items:center;gap:10px;padding:10px;border-bottom:1px solid rgba(255,255,255,.06)}
+    .rank-badge{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(90deg,var(--blue),var(--pink));font-weight:800;color:#111}
+    .user-cell{display:flex;align-items:center;gap:10px;min-width:0}
+    .avatar{width:44px;height:44px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,.1);flex:0 0 auto}
+    .avatar img{width:100%;height:100%;object-fit:cover;display:block}
+    .name{font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .meta{font-size:.85rem;color:var(--text-light)}
+    .value-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid var(--border-light);font-weight:700}
+    .highlight{background:rgba(0,213,255,.08)}
+
+    .empty,.error,.loading{padding:16px;color:var(--text-light);text-align:center}
+    .loading-skeleton{display:grid;grid-template-columns:64px 1fr auto;gap:10px;padding:10px}
+    .sk-box{height:44px;border-radius:10px;background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.12),rgba(255,255,255,.06));background-size:200% 100%;animation:sk 1.2s linear infinite}
+    .sk-line{height:14px;border-radius:8px;background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.12),rgba(255,255,255,.06));background-size:200% 100%;animation:sk 1.2s linear infinite}
+    @keyframes sk{0%{background-position:0 0}100%{background-position:-200% 0}}
+
+    .pager{display:flex;gap:10px;justify-content:flex-end;margin-top:10px}
+    .btn{background:var(--button-background);color:#fff;border:none;border-radius:15px;padding:.6rem 1rem;font-weight:800;cursor:pointer;box-shadow:var(--button-shadow)}
+    .btn.secondary{background:rgba(255,255,255,.08);border:1px solid var(--border-light)}
+    .btn[disabled]{opacity:.6;cursor:not-allowed}
+
+    @media (max-width:640px){
+      .row{grid-template-columns:44px 1fr;}
+      .value-badge{justify-self:start;margin-left:54px;margin-top:4px}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content-wrapper">
+      <a href="index.html" class="brand-link"><i class="fas fa-trophy" aria-hidden="true"></i><span>Leaderboard</span></a>
+      <div class="header-user-controls">
+        <div class="notification-icon-wrapper">
+          <a href="notifications.html" aria-label="Notifications"><i class="fas fa-bell"></i><span class="notification-badge" id="notificationCount">0</span></a>
+        </div>
+        <a href="profile.html" id="profileLink" aria-label="Profile"><img id="headerProfilePic" alt="User Profile Picture"><i id="headerAvatarIcon" class="fas fa-user-circle"></i></a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-wrap">
+      <div class="chips">
+        <a class="chip" href="index.html"><i class="fas fa-home"></i><span>Home</span></a>
+        <a class="chip" href="Chat.html"><i class="fas fa-comments"></i><span>Chat</span></a>
+      </div>
+
+      <section class="leaderboard-card">
+        <h1 class="title">Top Leaders</h1>
+        <p class="subtitle">Browse rankings by metric and timeframe. Use search to find a user.</p>
+        <div class="controls">
+          <select id="metricSelect" class="select" aria-label="Metric">
+            <option value="jCoins">JCoins</option>
+            <option value="level">Level</option>
+            <option value="xp">XP</option>
+          </select>
+          <select id="tfSelect" class="select" aria-label="Timeframe">
+            <option value="all">All Time</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+          <input id="searchInput" class="input" type="search" placeholder="Search username" aria-label="Search username" />
+        </div>
+        <div id="stateLoading" class="loading" aria-live="polite" aria-atomic="true" style="display:none">
+          <div class="loading-skeleton">
+            <div class="sk-box"></div>
+            <div>
+              <div class="sk-line" style="width:60%"></div>
+              <div class="sk-line" style="width:30%;margin-top:8px"></div>
+            </div>
+            <div class="sk-box"></div>
+          </div>
+          <div class="loading-skeleton">
+            <div class="sk-box"></div>
+            <div>
+              <div class="sk-line" style="width:50%"></div>
+              <div class="sk-line" style="width:28%;margin-top:8px"></div>
+            </div>
+            <div class="sk-box"></div>
+          </div>
+        </div>
+        <div id="stateEmpty" class="empty" style="display:none">No results.</div>
+        <div id="stateError" class="error" style="display:none">Unable to load leaderboard.</div>
+        <div id="leaderboardList" class="list" role="list"></div>
+        <div class="pager">
+          <button id="prevPageBtn" class="btn secondary" disabled><i class="fas fa-arrow-left"></i><span style="margin-left:6px">Prev</span></button>
+          <button id="nextPageBtn" class="btn"><span>Next</span><i class="fas fa-arrow-right" style="margin-left:6px"></i></button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div id="messageBox" style="display:none"></div>
+
+  <script src="assets/js/lazy-images.js" defer></script>
+  <script type="module" src="assets/js/leaderboard.js"></script>
+</body>
+</html>
