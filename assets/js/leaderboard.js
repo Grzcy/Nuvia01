@@ -90,13 +90,11 @@ import { getCloudinaryImageUrl } from './avatar-utils.js';
 
   async function openUserDetails(userId, seed){
     try{
-      const col = collection(db, 'artifacts', appId, 'public', 'data', 'users');
       let data = seed || null;
       if (!data){
-        const snap = await getDocs(query(col, orderBy('userId'))); // fallback to get list if direct getDoc path is unknown
-        const found = [];
-        snap.forEach(d=>{ if(d.id===userId || (d.data()&&d.data().userId===userId)) found.push({id:d.id, ...d.data()}); });
-        data = found[0] || null;
+        const ref = doc(db, 'artifacts', appId, 'public', 'data', 'users', userId);
+        const snap = await getDoc(ref);
+        data = snap.exists() ? { userId, ...snap.data() } : null;
       }
       if (!data){ return; }
       els.mName.textContent = data.username || ('User_'+String(userId).slice(0,6));
